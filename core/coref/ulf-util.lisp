@@ -207,6 +207,14 @@
 ) ; END noun?
 
 
+(defun existential-there? (ulf)
+; ``````````````````````````````
+; Checks if ULF is an existential 'there'.
+;
+  (and (atom ulf) (equal ulf 'THERE.PRO))
+) ; END existential-there?
+
+
 (defun relative? (ulf)
 ; `````````````````````
 ; Checks if a ULF is a relative pronoun.

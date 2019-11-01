@@ -7,7 +7,8 @@
 ; ````````````````````````````````
 ; Retrieves list of pairs of weights & constraints to apply.
 ;
-'((5.00 exact-match-c)
+'((10.00 existential-there-c)
+  (5.00 exact-match-c)
   (5.00 precise-construct-c)
   (1.00 indefinite-reference-c)
   (0.90 binding-reflexive-c)
@@ -177,3 +178,11 @@
   (let ((proper-names2 (remove-if-not #'proper-name? (mapcar (lambda (ref) (get ref 'ulf)) (get de2 'references)))))
     (if (and (equal (get de1 'cat) 'definite-np) proper-names2) -1 0))
 ) ; END definite-reference-conflict-c
+
+
+(defun existential-there-c (de1 de2 ulf)
+; ```````````````````````````````````````
+; An existential there does not directly refer to any entity
+;
+  (if (or (equal (get de1 'cat) 'existential-there) (equal (get de2 'cat) 'existential-there)) -1 0)
+) ; END existential-there-c

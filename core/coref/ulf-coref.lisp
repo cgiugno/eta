@@ -222,6 +222,7 @@
         ((definite-np? ref) 'definite-np)
         ((indexical-np? ref) 'indexical-np)
         ((indefinite-np? ref) 'indefinite-np)
+        ((existential-there? ref) 'existential-there)
         ((reflexive? ref) 'reflexive)
         ((relative? ref) 'relative)
         ((anaphor? ref) 'anaphor)))
@@ -281,7 +282,7 @@
     results)
 
   ; Return the resolved ulf as well as the discourse entities that were matched
-  (list (resolve-references ulf) results))
+  (list ulf results))
 ) ; END process-ulf
 
 
