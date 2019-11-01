@@ -838,7 +838,7 @@
         ; Get user gist clauses and ulf from bound user action
         ; TODO: modify to use ulf to plan reaction
         (setq user-gist-clauses (get user-action-name 'gist-clauses))
-        (setq user-ulf (get user-action-name 'ulf))
+        (setq user-ulf (resolve-references (get user-action-name 'ulf)))
         (format t "~% user gist clause is ~a ~%" user-gist-clauses) ; DEBUGGING
         (format t "~% user ulf is ~a ~%" user-ulf) ; DEBUGGING
         (setq new-subplan-name (plan-reaction-to {sub}plan-name user-gist-clauses user-ulf))
@@ -949,7 +949,7 @@
       ((setq bindings (bindings-from-ttt-match '(me seek-answer-from.v _! _!1) wff))
         (setq system (get-single-binding bindings))
         (setq bindings (cdr bindings))
-        (setq user-ulf (get-single-binding bindings))
+        (setq user-ulf (resolve-references (get-single-binding bindings)))
         ; Leaving this open in case we want different procedures for different systems
         (cond
           ((null *live*) (write-ulf user-ulf))
