@@ -135,3 +135,38 @@
 
 
 
+(defun to-english-list (ulf)
+; ```````````````````````````
+; Converts the ulfument of a relation, e.g. (set-of (|McDonalds| block.n) (|Starbucks| block.n))
+; to an english output.
+; NOTE: function is messy currently, refactor/improve
+;
+  (cond
+    ; ulf is missing
+    ((null ulf) '(nothing))
+    ; ulf is a set of blocks
+    ((and (listp ulf) (equal (car ulf) 'SET-OF))
+      ; Check if the elements of the set are homogeneous in type
+      (if (every (lambda (b) (and (listp b) (noun? (second b)) (equal (second b) (second (first (cdr ulf)))))) (cdr ulf))
+        ; If they are, we just want to list all the names and specify the type at the end with a -s attached
+        (let ((names (mapcar #'first (cdr ulf))))
+          (append (cons 'the (append (apply #'append (mapcar
+                                                      (lambda (x) (if (> (length (cdr ulf)) 2) `(,x \,) `(,x)))
+                                                      (butlast names)))
+                                     `(and ,(car (last names)))))
+                  (list (intern (concatenate 'string (string (remove-type (second (first (cdr ulf))))) "S")))))
+        ; Otherwise, list each name/type pair seperately
+        (cons 'the (append (apply #'append (mapcar
+                                            (lambda (x) (if (> (length (cdr ulf)) 2) (append (cdr (to-english-list x)) '(\,)) (cdr (to-english-list x))))
+                                            (butlast (cdr ulf))))
+                           (cons 'and (cdr (to-english-list (car (last (cdr ulf))))))))))
+    ; ulf is a single block
+    ((and (listp ulf) (noun? (second ulf)))
+      `(the ,(first ulf) ,(remove-type (second ulf))))
+    ; ulf is the table
+    ((equal ulf 'TABLE.N) '(the table))
+    ; ulf is something else
+    (t `(the ,ulf)))
+) ; END to-english-list
+
+

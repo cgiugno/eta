@@ -51,12 +51,20 @@ class ResponseGenerator(object):
 	'''
 	def generate_response(self, query_object, response_object):
 		# Process the response_object -----------------------------------------
+    # [(["Twitter"], "below", ["Toyota"], 0.8), (["McDonalds"], "below", ["Toyota"], 0.6), (["Chucky's"], "below", ["Toyota"], 0.6)]
+    #
 		arg0_uniform = all(response_object[i][0] == response_object[0][0] for i in range(len(response_object)))
+    # if all arg0 have the same blocks
 		rel_uniform = all(response_object[i][1] == response_object[0][1] for i in range(len(response_object)))
+    # if all responses have the same relation
 		arg1_uniform = all(response_object[i][2] == response_object[0][2] for i in range(len(response_object)))
+    # if all arg1 have the same blocks
 		all_cert = all(response_object[i][3] > self.cert_threashold for i in range(len(response_object)))
+    # if all of the response tuples are above the cert threshold
 		all_uncert = all(response_object[i][3] <= self.cert_threashold for i in range(len(response_object)))
+    # if all are below the cert threshold
 		mixed_cert = (not all_cert) and (not all_uncert)
+
 		singleton_response = (1 == len(response_object))
 
 		subj_adjs = query_object.extract_subject_adj_modifiers()
@@ -85,8 +93,11 @@ class ResponseGenerator(object):
 		# Now handle Confirmation questions
 		if query_object.query_type == QueryFrame.QueryType.CONFIRM:
 			arg0_list = self.entities_to_english_list(respose_object[0][0])
+      # first relation arg0 to list of blocks
 			rel = respose_object[0][1]
+      # first relation
 			arg1_list = self.entities_to_english_list(respose_object[0][2])
+      # first relation arg1 to list of blocks
 			if respose_object[0][3] == 0:
 				if subj_adjs != "":
 					return "No."
