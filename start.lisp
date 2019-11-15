@@ -54,6 +54,13 @@
 (load (truename "ttt/src/load.lisp"))
 
 
+; Load ulf2english
+;```````````````````
+(ql:quickload "ulf2english")
+;; (sys:run-shell-command (format nil "python %s 8080 \"g:g\"" (truename "core/resources/python-repl-server.py")))
+;; python core/resources/python-repl-server.py 8080 "g:g"
+
+
 ; Load core code
 ; (in directory 'core/')
 ;````````````````````````

@@ -125,6 +125,9 @@
   ; history to find possible referents).
   (defparameter *recency-cutoff* 2)
 
+  ; Certainty cutoff used to generate responses given a list of relations+certainties from the blocks world
+  (defparameter *certainty-threshold* 0.7)
+
   ; Another doolittle relic: a list of saved responses,
   ; to be used to revert to an earlier exchange, if 
   ; no better options remained. This idea may still be
@@ -949,7 +952,7 @@
       ((setq bindings (bindings-from-ttt-match '(me seek-answer-from.v _! _!1) wff))
         (setq system (get-single-binding bindings))
         (setq bindings (cdr bindings))
-        (setq user-ulf (resolve-references (get-single-binding bindings)))
+        (setq user-ulf (get-single-binding bindings))
         ; Leaving this open in case we want different procedures for different systems
         (cond
           ((null *live*) (write-ulf user-ulf))
@@ -966,11 +969,11 @@
         (setq expr (get-single-binding bindings))
         ; Leaving this open in case we want different procedures for different systems
         (cond
-          ((null *live*) (setq ans ''((Could not connect with system \: not in live mode \.))))
+          ((null *live*) (setq ans ''()))
           ((eq system '|Spatial-QA-Server|) (setq ans `(quote ,(get-answer))))
           (t (setq ans `(quote ,(get-answer)))))
         ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
+        ; Substitute ans for given variable (e.g. ?ans-relations) in plan
         (nsubst-variable {sub}plan-name ans expr)
         (delete-current-episode {sub}plan-name))
 
@@ -980,15 +983,13 @@
       ; NOTE: Currently just creates a primitive say-to.v subplan directly from the given
       ; answer
       ; TODO: In the future we should change this to use the alternates (if given) somehow
-      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _! _!1) wff))
+        (setq user-ulf (get-single-binding bindings))
+        (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
-        (setq expr (eval-functions expr))
-        ; If poss-ans, append text to answer
-        (if (equal (first expr) 'poss-ans)
-          (setq ans (append
-            '(You are not sure if you understood the question correctly\, but your answer is)
-            (cdr expr)))
-          (setq ans expr))
+        ; Generate response
+        (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
+          (setq ans (generate-response (eval user-ulf) (eval expr))))
         ;; (format t "answer to output: ~a~%" ans) ; DEBUGGING
         ; Create say-to.v subplan from answer
         (setq new-subplan-name
@@ -1582,7 +1583,7 @@
       ; :schema+ulf directive
       ((eq (car choice) :schema+ulf)
         ; TODO: Just a temporary directive to test spatial-question schema. Needs changing.
-        (setq schema-name (cdr choice) args (list `(quote ,user-ulf) nil))
+        (setq schema-name (cdr choice) args (list `(quote ,(resolve-references user-ulf)) nil))
         (setq subplan-name (gensym "SUBPLAN"))
         (init-plan-from-schema subplan-name schema-name args))
       )

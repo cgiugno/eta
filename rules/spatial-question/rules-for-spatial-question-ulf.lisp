@@ -37,6 +37,14 @@
 ; "The furthest one"
 ; "What about the McDonalds block"
 ; etc.
+;
+; "Does the SRI block have a block [on top of][above] it?"
+; "Does a block touch the SRI block"
+; "Does there exist a block on the SRI block"
+; "What is the color of the block ..."
+; "Is there a red block that is on the Twitter block" >> CRASHES
+; ""
+;
 
 ; ====================================================================
 

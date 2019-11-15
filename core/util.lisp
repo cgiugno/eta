@@ -909,12 +909,7 @@
                                                    :if-exists :supersede
                                                    :if-does-not-exist :create)))))
           
-  ;; (parse-chars (if (stringp *next-answer*) (coerce *next-answer* 'list)
-  ;;                                            (coerce (car *next-answer*) 'list)))
-  (cond
-    ((stringp *next-answer*) (list (parse-chars (coerce *next-answer* 'list))))
-    ((listp *next-answer*) (cons (parse-chars (coerce (car *next-answer*) 'list))
-                            (cdr *next-answer*))))
+  *next-answer*
 ) ; END get-answer
 
 
@@ -968,6 +963,29 @@
     ; interned into an atom
     (reverse (mapcar (lambda (x) (intern (coerce x 'string))) chlists))
 )) ; END parse-chars
+
+
+
+(defun str-to-output (str)
+; ``````````````````````````
+; Converts a string to a list of words/punctuation to output
+; 
+  (let ((char-list (coerce str 'list)) word words)
+    (mapcar (lambda (c)
+      (cond
+        ((member c '(#\ ) :test #'char-equal)
+          (if word (setq words (cons (reverse word) words)))
+          (setq word nil))
+        ((member c '(#\. #\, #\' #\"))
+          (setq words (cons (reverse word) words))
+          (setq word nil)
+          (setq words (cons (intern (coerce (list c) 'string)) words)))
+        (t
+          (setq word (cons c word)))))
+      char-list)
+    (reverse (mapcar (lambda (w)
+      (if (listp w) (read-from-string (coerce w 'string)) w)) words)))
+) ; END str-to-output
 
 
 

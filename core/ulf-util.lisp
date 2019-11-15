@@ -207,6 +207,31 @@
 ) ; END noun?
 
 
+(defun verb-untensed? (ulf)
+; ``````````````````````````
+; Checks if a ULF is an untensed verb.
+;
+  (and (atom ulf) (equal (second (sym-split ulf 2)) '.V))
+) ; END verb-untensed?
+
+
+(defun verb-pres? (ulf)
+; ``````````````````````
+; Checks if a ULF is a verb in present tense (no aspect).
+;
+  (and (listp ulf) (equal (first ulf) 'PRES) (verb-untensed? (second ulf)))
+) ; END verb-pres?
+
+
+(defun verb? (ulf)
+; ``````````````````
+; Checks if a ULF is a verb in any tense.
+; NOTE: incomplete
+;
+  (or (verb-untensed? ulf) (verb-pres? ulf))
+) ; END verb?
+
+
 (defun existential-there? (ulf)
 ; ``````````````````````````````
 ; Checks if ULF is an existential 'there'.
@@ -583,19 +608,10 @@
 ) ; END sym-contains
 
 
-(defun explode (s)
-;``````````````````
-; The list of the characters making up symbol s
+(defun remove-type (s)
+;```````````````````````
+; Removes the type extension of a symbol, i.e. (remove-type man.n) => man
 ;
-  (coerce (string s) 'list)
-) ; END explode
-
-
-(defun implode (l)
-;``````````````````
-; (IMPLODE LIST-OF-CHARACTERS) => a symbol
-; The symbol is interned in the current package and has as name a string 
-; with the characters in LIST-OF-CHARACTERS.
-;
-  (intern  (coerce l 'string))
-) ; END implode
+  (let ((has-dot (member #\. (reverse (coerce (string s) 'list)))))
+    (if has-dot (intern (coerce (reverse (cdr has-dot)) 'string)) s))
+) ; END remove-type

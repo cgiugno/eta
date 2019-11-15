@@ -39,3 +39,12 @@
     ((and (listp (eval x))) (car (eval x)))
     ((stringp (eval x)) (eval x)))
 ) ; END main-answer.f
+
+
+
+(defun relevant-answers.f (x y)
+; ```````````````````````````````
+; Given a list of answer relations and a query ulf, we want to get the answers that are needed to generate a response
+; TODO (?)
+
+) ; END relevant-answers.f
