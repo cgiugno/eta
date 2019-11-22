@@ -1,18 +1,32 @@
 ;; *ETA-SCHEMA*: development version 6
 ;;
-;; Dialogue for blocksworld conversation 
-;; (intro + 30 questions +  outro)
+;; Dialogue for blocks world conversation 
 ;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defparameter *eta-schema*
 
-'(Event-schema (((set of me you) have-eta-dialog.v) ** ?e)
+'(Event-schema (((set-of me you) have-eta-dialog.v) ** ?e)
 ;```````````````````````````````````````````````````````````
-; Blocksworld conversation. This consists of one or two "getting
-; to know you" type questions, followed by a series of 10 questions.
+; Blocks world conversation. An expected blocks world dialogue consists of the agent repeatedly asking
+; the user if they have a spatial question to ask, followed by a question from the user, followed by
+; an appropriate response by the agent. This repeats until the user says something interpreted as a goodbye,
+; and is possibly preempted by some "smalltalk" questions (currently disabled).
 ;
+
+:fixed-roles
+?t table.n
+?b1 block.n ; Target
+?b2 block.n ; Starbucks
+?b3 block.n ; Twitter
+?b4 block.n ; Texaco
+?b5 block.n ; McDonalds
+?b6 block.n ; Mercedez
+?b7 block.n ; Toyota
+?b8 block.n ; BurgerKing
+
+
 
 :episodes 
 
