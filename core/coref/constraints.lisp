@@ -142,6 +142,7 @@
 ;
   (if (or
     (equal (get de1 'cat) 'indefinite-np)
+    (equal (get de1 'cat) 'indexical-np)
     (member (get de1 'cat) '(sentence event action)))
   -1 0)
 ) ; END indefinite-reference-c

@@ -1,0 +1,17 @@
+- What were the relations between the blocks X steps ago
+- Which blocks were on top of the Toyota block previously
+- Where was a particular block recently
+- Where was a particular block two turns/steps/actions ago
+- What changed since ...
+- What block did I just move/rotate/pick up
+
+- What did I just ask you [?]
+- Can you repeat that [?]
+- I didn't get it [?]
+- Where is the block that you just mentioned [?]
+
+
+
+* Rigid conditions in schema => store in context
+* Eta looks at context upon any question, if can't answer query BW system?
+* What to do when blocks move - have to recompute everything, because of relations like 'near'

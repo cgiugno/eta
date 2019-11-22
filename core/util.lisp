@@ -34,6 +34,17 @@
 
 
 
+(defun replace-n (n l e)
+; ```````````````````````
+; Replaces the nth element of list l with e
+;
+  (if (< n (length l))
+    (append (butlast l (- (length l) n)) (list e) (last l (- (length l) n 1)))
+    l)
+) ; END replace-n
+
+
+
 (defun explode (s)
 ;``````````````````
 ; The list of the characters making up symbol s

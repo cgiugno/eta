@@ -42,7 +42,7 @@
 ;
   (and (atom ulf) (member ulf '(not plur past pres perf prog pasv k ka ke to that tht fquan nquan nmod amod
                                 *h *s *p set-of n+preds np+preds sub rep 's poss-by adv-a adv-e adv-f adv-s
-                                ? ! = voc voc-O ds ans-to pu cf )))
+                                ? ! = voc voc-O ds ans-to pu cf mod-a mod-n most-n)))
 ) ; END special-op?
 
 

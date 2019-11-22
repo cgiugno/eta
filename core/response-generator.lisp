@@ -4,36 +4,49 @@
 ; "You are not sure if you understood the question correctly\, but your answer is"
 ;
 ; Example queries:
-; '((((THE.D (SRI  BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?))
-; '((((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?))
-; '((((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?))
-; '((((PRES BE.V) THERE.PRO (A.D BLOCK.N) (ON.P (THE.D (|SRI | BLOCK.N)))) ?))
-; '((((PRES BE.V) THERE.PRO (K (PLUR BLOCK.N)) (ON.P (THE.D (|SRI | BLOCK.N)))) ?))
-; '(((DOES.V (SOME.D BLOCK.N) (TOUCH.V (THE.D (|SRI | BLOCK.N)))) ?))
-; '(((SUB (OF.P (WHAT.D COLOR.N)) ((PRES BE.V) (THE.D (MOST-N LEFT.A BLOCK.N)) *H)) ?))
-; '((((HOW_MANY.D (RED.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?))
-; '((((WHAT.D BLOCK.N) ((PRES BE.V) (BETWEEN.P ((THE.D (|SRI | BLOCK.N)) AND.CC (THE.D (|NVidia| BLOCK.N)))))) ?))
-; '(((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (|SRI | BLOCK.N)) *H)) ?))
-; '(((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (MOST-N LEFT.A (GREEN.A BLOCK.N))) *H)) ?))
+; '(((THE.D (SRI  BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
+; '(((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
+; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
+; '(((PRES BE.V) THERE.PRO (A.D BLOCK.N) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
+; '(((PRES BE.V) THERE.PRO (K (PLUR BLOCK.N)) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
+; '((DOES.V (SOME.D BLOCK.N) (TOUCH.V (THE.D (|SRI | BLOCK.N)))) ?)
+; '((SUB (OF.P (WHAT.D COLOR.N)) ((PRES BE.V) (THE.D (MOST-N LEFT.A BLOCK.N)) *H)) ?)
+; '(((HOW_MANY.D (RED.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
+; '(((WHAT.D BLOCK.N) ((PRES BE.V) (BETWEEN.P ((THE.D (|SRI | BLOCK.N)) AND.CC (THE.D (|NVidia| BLOCK.N)))))) ?)
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (|SRI | BLOCK.N)) *H)) ?)
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (MOST-N LEFT.A (GREEN.A BLOCK.N))) *H)) ?)
+; '((WHAT.PRO ((PRES BE.V) (= (THE.D (MOST-N LEFT.A BLOCK.N))))) ?)
 ;
+
 ; Example relations:
 ; 'None
 ; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.6))
 ; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
 ; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
+; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Texaco| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
 ; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.6) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
 ; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.6))
 ; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.6) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.6))
+; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|NVidia| block.n)) near.p (the.d (|Twitter| block.n))) 0.8))
+; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|NVidia| block.n)) on.p (the.d (|Twitter| block.n))) 0.8))
+; '((((the.d (|SRI | block.n)) on.p (the.d (|NVidia| block.n))) 0.8) (((the.d (|SRI | block.n)) on.p (the.d (|Texaco| block.n))) 0.8) (((the.d (|SRI | block.n)) near.p (the.d (|Twitter| block.n))) 0.8))
+; '((((the.d (|SRI | block.n)) on.p (the.d (|NVidia| block.n))) 0.8) (((the.d (|SRI | block.n)) near.p (the.d (|Texaco| block.n))) 0.8) (((the.d (|SRI | block.n)) between.p ((the.d (|Cat | block.n)) and.cc (the.d (|Dog | block.n)))) 0.8) (((the.d (|SRI | block.n)) between.p ((the.d (|Bob | block.n)) and.cc (the.d (|Ben | block.n)))) 0.8))
 ;
+;; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (|SRI | BLOCK.N)) *H)) ?)
+;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  ((ON.P (THE.D (|NVidia| BLOCK.N))) AND.CC (NEAR.P (THE.D (|Twitter| BLOCK.N))))  ))
+;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  ((ON.P (SET-OF (THE.D (|Mercedes| BLOCK.N)) (THE.D (|NVidia| BLOCK.N)) (THE.D (|Texaco| BLOCK.N)))) AND.CC (NEAR.P (THE.D (|Twitter| BLOCK.N))))  ))
+;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  (ON.P (SET-OF (THE.D (|Mercedes| BLOCK.N)) (THE.D (|NVidia| BLOCK.N)) (THE.D (|Texaco| BLOCK.N))))  ))
 ;
 ; Issues with ulf2english:
 ; converting to english: (THERE.PRO ((PRES BE.V) (3.D (N+PREDS (RED.A (PLUR BLOCK.N)) (THAT.REL ((PRES BE.V) (ON.P (THE.D TABLE.N))))))))
 ; => (THERE IS 3 RED BLOCKS THAT BE ON THE TABLE |.|)
+; converting to english: ((SET-OF (THE.D (|NVidia| BLOCK.N)) (THE.D (|Twitter| BLOCK.N)) (THE.D (|Texaco| BLOCK.N))) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))))
+; => (THE NVIDIA BLOCK THE TWITTER BLOCK AND THE TEXACO BLOCK IS ON THE SRI BLOCK |.|)
 ;
   (let ((query-type (get-query-type query-ulf)))
-    (setq query-ulf (caar query-ulf))
+    (setq query-ulf (car query-ulf))
 
-    ;; (format t "Query: ~a~%" query-ulf)
+    (format t "Query: ~a~%" query-ulf)
     ;; (format t "Query type: ~a~%" query-type)
     ;; (format t "Relations: ~a~%" relations)
 
@@ -231,7 +244,28 @@
 ; `````````````````````````````````````````````
 ; TODO
 ;
-  '(Blah.yn)
+  (cond
+    ; If no relations are returned
+    ((relations-empty? relations)
+      (ttt:apply-rules `(
+        (/ (_!1 (at.p (what.d place.n)) ((! verb-pres? verb-untensed?) _! _*))
+          (you.pro ((past can.aux-s) not (figure_out.v (ans-to ((sub where.pq (_! ((pres be.v) *h))) ?))))))
+        ) query-ulf))
+    ; If one or more relations are returned
+    (t (let ((certain-set (get-certain-rels relations)) (uncertain-set (get-uncertain-rels relations)))
+      (cond
+        ; If only uncertain results are given
+        ((null certain-set)
+          (ttt:apply-rules `(
+            (/ (_!1 (at.p (what.d place.n)) ((! verb-pres? verb-untensed?) _! _*))
+              (possibly.adv-s (_! (! ,(conjoin-relations uncertain-set)))))
+            ) query-ulf))
+        ; If any certain results are given
+        (t
+          (ttt:apply-rules `(
+            (/ (_!1 (at.p (what.d place.n)) ((! verb-pres? verb-untensed?) _! _*))
+              (_! (! ,(conjoin-relations certain-set))))
+            ) query-ulf))))))
 ) ; END respond-descr
 
 
@@ -239,8 +273,11 @@
 ; ``````````````````````````
 ; For converting a ulf response to a surface form response via the ulf2english library.
 ;
-
-  ;; (format t "converting to english: ~a~%" ulf)
+  (format t "converting to english: ~a~%" ulf)
+  ;; (format t "~a~%" (ulf2english:ulf2english '(NO.YN
+  ;;                       (THERE.PRO
+  ;;                        ((PRES BE.V) NOT.ADV-S (A.D (RED.A BLOCK.N))
+  ;;                         (ON.P (THE.D (SRI  BLOCK.N))))))))
   (str-to-output (ulf2english:ulf2english ulf))
 ) ; END ulf-to-english
 
@@ -340,6 +377,33 @@
 ) ; END compare-certainty
 
 
+(defun filter-relations (relations filter)
+; ``````````````````````````````````````````
+; Given a list of relations, filter so only the specific relations in filter are kept.
+;
+  (let ((filtered (remove-if-not (lambda (rel) (member (second (first rel)) filter)) relations)))
+    (if filtered filtered 'None))
+) ; END filter-relations
+
+
+(defun get-certain-rels (relations)
+; ````````````````````````````````````
+; Retrieves relations from a list of relations with certainties above the threshold.
+;
+  (remove nil (mapcar (lambda (rel)
+    (if (compare-certainty rel) rel)) relations))
+) ; END get-certain-rels
+
+
+(defun get-uncertain-rels (relations)
+; ````````````````````````````````````
+; Retrieves relations from a list of relations with certainties below the threshold.
+;
+  (remove nil (mapcar (lambda (rel)
+    (if (not (compare-certainty rel)) rel)) relations))
+) ; END get-uncertain-rels
+
+
 (defun get-certain-subjs (relations)
 ; ````````````````````````````````````
 ; Retrieves subjects from a list of relations with certainties above the threshold.
@@ -378,6 +442,56 @@
           (if (not (compare-certainty rel)) (third (first rel)))) relations)) :test #'equal)))
     (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
 ) ; END get-uncertain-subjs
+
+
+(defun group-relations (relations)
+; `````````````````````````````````
+; Groups relations into sublists according to predicate.
+;
+  (when (equal relations 'None) (return-from group-relations 'None))
+  (let ((i -1) preps result)
+    (mapcar (lambda (rel)
+      (let ((prep (car (member rel preps :test (lambda (r p) (equal (second (first rel)) (first p)))))))
+        (cond
+          (prep (let* ((n (second prep)) (prev (nth n result)))
+            (setq result (replace-n n result (cons rel prev)))))
+          (t (setq i (1+ i))
+             (setq preps (cons (list (second (first rel)) i) preps))
+             (setq result (append result (list (list rel))))))))
+      relations)
+  result)
+) ; END group-relations
+
+
+(defun condense-by-subjs (relations)
+; ```````````````````````````````````
+; Given a list of relations (assumed to have the same object and predicate), condense relations into a
+; single relation with a (set-of ...) subject.
+; NOTE: we make an exception for "between" (or any other predicates with more than one subject). Certainties
+; are ignored at this point.
+;
+  (let ((pred (second (first (first relations)))) (subjs (remove-duplicates (mapcar #'third (mapcar #'first relations)))))
+    (if (<= (length subjs) 1) (setq subjs (car subjs)) (setq subjs (cons 'SET-OF subjs)))
+    (if (equal pred 'BETWEEN.P) (mapcar #'first relations)
+      `(,(first (first (first relations))) ,pred ,subjs)))
+) ; END condense-by-subjs
+
+
+(defun conjoin-relations (relations)
+; ```````````````````````````````````
+; Given a list of relations, create a ULF conjunction of predicates and subjects.
+;
+  (when (equal relations 'None) (return-from conjoin-relations 'None))
+  (cdr (mapcan (lambda (group)
+    (if (and (listp group) (>= (length group) 2) (listp (second group)))
+      (cons 'and.cc (cdr (mapcan (lambda (rel) (list 'and.cc (list (second rel) (third rel)))) group)))
+      (list 'and.cc (list (second group) (third group)))
+    )
+
+    ;; (list 'and.cc (list (second group) (third group)))
+    )
+    (mapcar #'condense-by-subjs (group-relations relations))))
+) ; END conjoin-relations
 
 
 ;; (defun get-certain-colors (relations)
