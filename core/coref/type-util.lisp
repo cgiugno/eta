@@ -224,7 +224,7 @@
 ; where the first element is the type, and the subsequent elements are modifiers.
 ; NOTE: This function is really messy! It could use some refactoring at some point.
 ;
-  (cond
+  (remove-if #'special-op? (cond
     ; Pronoun, get type based on pronoun classification
     ((pron? np)
       (cond
@@ -297,7 +297,7 @@
         (cons (car (last np)) (butlast np)))
       ; Nested noun+modifiers with some preceeding mods
       (t (let ((type+mods (get-type+mods (car (last np)))))
-        (cons (car type+mods) (append (butlast np) (cdr type+mods))))))))
+        (cons (car type+mods) (append (butlast np) (cdr type+mods)))))))))
 ) ; END get-type+mods
 
 
