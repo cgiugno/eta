@@ -345,3 +345,37 @@
             (t 4))))))
   'ulf)
 ) ; END get-most-specific-reference
+
+
+(defun reconstruct-ulf (ulf &key verbose)
+; ````````````````````````````````````````
+; Reconstructs original ulf from processed ulf. Supply :verbose t
+; as an argument to print information about each pronoun/reference.
+;
+  (cond
+    ((and (atom ulf) (get ulf 'ulf))
+      (cond (verbose
+        (format t "sk: ~a~% |- ulf: ~a~% |- cat: ~a~% |- type: ~a~% |- mods: ~a~%"
+          ulf (get ulf 'ulf) (get ulf 'cat) (get ulf 'type) (get ulf 'mods))))
+      (reconstruct-ulf (get ulf 'ulf) :verbose verbose))
+    ((and (atom ulf)) ulf)
+    (t (mapcar (lambda (x)
+        (reconstruct-ulf x :verbose verbose))
+      ulf)))
+) ; END reconstruct-ulf
+
+
+(defun resolve-references (ulf)
+; ```````````````````````````````
+; Retrieves the most specific references for each discourse entity and substitutes them
+; in for that discourse entity to obtain a final result.
+;
+  (format t ":~a~%" ulf)
+  (cond
+    ((and (atom ulf) (get ulf 'references))
+      (resolve-references (get-most-specific-reference ulf)))
+    ((and (atom ulf)) ulf)
+    (t (mapcar (lambda (x)
+        (resolve-references x))
+      ulf)))
+) ; END resolve-references
