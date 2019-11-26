@@ -333,6 +333,7 @@
         (let ((cat (get de-ref 'cat)))
           (cond
             ((equal cat 'proper-name) 0)
+            ((equal cat 'relative) 0)
             ((equal cat 'definite-np) 1)
             ((equal cat 'sentence) 1)
             ((equal cat 'event) 1)
@@ -340,7 +341,6 @@
             ((equal cat 'indefinite-np) 2)
             ((equal cat 'indexical-np) 3)
             ((equal cat 'reflexive) 3)
-            ((equal cat 'relative) 3)
             ((equal cat 'anaphor) 3)
             (t 4))))))
   'ulf)
@@ -370,7 +370,6 @@
 ; Retrieves the most specific references for each discourse entity and substitutes them
 ; in for that discourse entity to obtain a final result.
 ;
-  (format t ":~a~%" ulf)
   (cond
     ((and (atom ulf) (get ulf 'references))
       (resolve-references (get-most-specific-reference ulf)))
