@@ -369,12 +369,16 @@
 ; ```````````````````````````````
 ; Retrieves the most specific references for each discourse entity and substitutes them
 ; in for that discourse entity to obtain a final result.
+; Maintain a list of visited references to avoid infinite recursion.
 ;
-  (cond
-    ((and (atom ulf) (get ulf 'references))
-      (resolve-references (get-most-specific-reference ulf)))
-    ((and (atom ulf)) ulf)
-    (t (mapcar (lambda (x)
-        (resolve-references x))
-      ulf)))
+  (labels ((resolve-references-recur (ulf visited)
+      (cond
+        ((and (atom ulf) (not (member ulf visited)) (get ulf 'references))
+          (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
+        ((and (atom ulf) (get ulf 'ulf)) (get ulf 'ulf))
+        ((atom ulf) ulf)
+        (t (mapcar (lambda (x)
+            (resolve-references-recur x visited))
+          ulf)))))
+    (resolve-references-recur ulf nil))
 ) ; END resolve-references
