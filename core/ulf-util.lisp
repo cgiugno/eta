@@ -327,9 +327,19 @@
 ; Checks if a ULF is an indexical noun phrase (e.g. "that block")
 ;
   (and (det-np? ulf) (or
-    (member (first ulf) '(that.d this.d those.d which.d what.d whichever.d whatever.d))
-    (and (equal (first ulf) 'np+preds) (definite-np? (second ulf)))))
-) ; END definite-np?
+    (member (first ulf) '(that.d this.d those.d))
+    (and (equal (first ulf) 'np+preds) (indexical-np? (second ulf)))))
+) ; END indexical-np?
+
+
+(defun wh-np? (ulf)
+; `````````````````````````
+; Checks if a ULF is an wh-question noun phrase (e.g. "what block")
+;
+  (and (det-np? ulf) (or
+    (member (first ulf) '(which.d what.d whichever.d whatever.d))
+    (and (equal (first ulf) 'np+preds) (wh-np? (second ulf)))))
+) ; END wh-np?
 
 
 (defun indefinite-np? (ulf)

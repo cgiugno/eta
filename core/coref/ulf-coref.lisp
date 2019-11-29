@@ -221,6 +221,7 @@
         ((proper-name? ref) 'proper-name)
         ((definite-np? ref) 'definite-np)
         ((indexical-np? ref) 'indexical-np)
+        ((wh-np? ref) 'wh-np)
         ((indefinite-np? ref) 'indefinite-np)
         ((existential-there? ref) 'existential-there)
         ((reflexive? ref) 'reflexive)
@@ -340,6 +341,7 @@
             ((equal cat 'action) 1)
             ((equal cat 'indefinite-np) 2)
             ((equal cat 'indexical-np) 3)
+            ((equal cat 'wh-np) 3)
             ((equal cat 'reflexive) 3)
             ((equal cat 'anaphor) 3)
             (t 4))))))
@@ -366,16 +368,24 @@
 
 
 (defun resolve-references (ulf)
-; ```````````````````````````````
-; Retrieves the most specific references for each discourse entity and substitutes them
-; in for that discourse entity to obtain a final result.
-; Maintain a list of visited references to avoid infinite recursion.
+; ````````````````````````````````
+; Retrieves the references for each discourse entity and substitutes them
+; in for that discourse entity to obtain a final result. This depends on coreference mode parameter:
+; 0 : simply reconstruct the original ulf
+; 1 : substitute most specific references only for anaphors and indexical np's (e.g. that block)
+; 2 : substitute most specific references for all references
+; More may be added in the future
+; NOTE: Maintain a list of visited references to avoid infinite recursion (if accidental cycle with reference links)
 ;
+  (format t "resolving: ~a~%" ulf) ; DEBUGGING
   (labels ((resolve-references-recur (ulf visited)
       (cond
-        ((and (atom ulf) (not (member ulf visited)) (get ulf 'references))
+        ((and (equal *coreference-mode* 1) (atom ulf) (not (member ulf visited)) (get ulf 'references))
+              (member (get ulf 'cat) '(anaphor indexical-np))
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
-        ((and (atom ulf) (get ulf 'ulf)) (get ulf 'ulf))
+        ((and (equal *coreference-mode* 2) (atom ulf) (not (member ulf visited)) (get ulf 'references))
+          (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
+        ((and (atom ulf) (get ulf 'ulf)) (reconstruct-ulf (get ulf 'ulf)))
         ((atom ulf) ulf)
         (t (mapcar (lambda (x)
             (resolve-references-recur x visited))

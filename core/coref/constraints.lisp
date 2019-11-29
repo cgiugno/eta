@@ -100,7 +100,7 @@
 ; If de1 is some r-expression, make sure de1 is not an antecedent to de2, and that de2 does not c-command
 ; de1 in the same sentence.
 ;
-  (if (and (member (get de1 'cat) '(sentence event action proper-name definite-np indexical-np indefinite-np)) (same-sentence? de1 de2 ulf))
+  (if (and (member (get de1 'cat) '(sentence event action proper-name definite-np indexical-np wh-np indefinite-np)) (same-sentence? de1 de2 ulf))
     (let ((phrase1 (reconstruct-ulf (get de1 'ulf))) (phrase2 (reconstruct-ulf (get de2 'ulf))))
       (cond
         ((local? phrase1 phrase2 (reconstruct-ulf ulf)) -1)
@@ -142,7 +142,7 @@
 ;
   (if (or
     (equal (get de1 'cat) 'indefinite-np)
-    (equal (get de1 'cat) 'indexical-np)
+    (equal (get de1 'cat) 'wh-np)
     (member (get de1 'cat) '(sentence event action)))
   -1 0)
 ) ; END indefinite-reference-c
