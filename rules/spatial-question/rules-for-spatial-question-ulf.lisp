@@ -39,7 +39,6 @@
 ; etc.
 ;
 ; "Does the SRI block have a block [on top of][above] it?"
-; "Does a block touch the SRI block"
 ; "Does there exist a block on the SRI block"
 ; "What is the color of the block ..."
 ; "Where is the block on the table that is near a blue block"
