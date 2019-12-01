@@ -468,6 +468,8 @@
     1 (has 2 np-bw 3 adv_ verb-rel 2 np-bw 3 ?); e.g., has the SRI block ever touched the NVidia block ?
        2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (lex-ulf! v- 6) (*np-ulf-tree* 7 8 9) ?)
           ((1 (2 ((past perf) (3 4)))) ?)) (0 :ulf-recur)
+    1 (has 2 np-bw 3 adv_ been 1 adj ?); e.g., has the SRI block ever been (totally) clear ?
+       2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (lex-ulf! adj 8) ?) ((1 (2 ((past perf) (be.v 3)))) ?)) (0 :ulf-recur)
     1 (has 2 np-bw 3 adv_ been between 0 ?); e.g., has the SRI block ever been between the NVidia block and Twitter block ?
        2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (*pp-between-ulf-tree* 7 8) ?)
           ((1 (2 ((past perf) (be.v 3)))) ?)) (0 :ulf-recur)
