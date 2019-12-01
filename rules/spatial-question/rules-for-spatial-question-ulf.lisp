@@ -262,10 +262,11 @@
        2 (((*n1-ulf-tree* 1 2 3 4)) (k 1)) (0 :ulf-recur)
 
     ; Ellipsis ("the turn before this")
+    ; NOTE: we currently assume the user meant "turn" here... this probably isn't true in general
     1 (this)
-       2 (((lex-ulf! det 1)) (1 one.n)) (0 :ulf-recur)
+       2 (((lex-ulf! det 1)) (1 turn.n)) (0 :ulf-recur)
     1 (that)
-       2 (((lex-ulf! det 1)) (1 one.n)) (0 :ulf-recur)
+       2 (((lex-ulf! det 1)) (1 turn.n)) (0 :ulf-recur)
 
    ; Still need "There are...", "There is ..." sentence forms.
 )) ; END *np-ulf-tree*
