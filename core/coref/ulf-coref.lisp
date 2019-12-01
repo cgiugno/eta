@@ -377,11 +377,11 @@
 ; More may be added in the future
 ; NOTE: Maintain a list of visited references to avoid infinite recursion (if accidental cycle with reference links)
 ;
-  ;; (format t "resolving: ~a~%" ulf) ; DEBUGGING
+  (format t "resolving: ~a~%" ulf) ; DEBUGGING
   (labels ((resolve-references-recur (ulf visited)
       (cond
-        ((and (equal *coreference-mode* 1) (atom ulf) (not (member ulf visited)) (get ulf 'references))
-              (member (get ulf 'cat) '(anaphor indexical-np))
+        ((and (equal *coreference-mode* 1) (atom ulf) (not (member ulf visited)) (get ulf 'references)
+              (member (get ulf 'cat) '(anaphor indexical-np)))
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
         ((and (equal *coreference-mode* 2) (atom ulf) (not (member ulf visited)) (get ulf 'references))
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
