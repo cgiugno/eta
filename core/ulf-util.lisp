@@ -230,7 +230,7 @@
 ; Checks if a ULF is an anaphoric pronoun.
 ;
   (and (pron? ulf)
-    (not (relative? ulf)) (not (reflexive? ulf)))
+    (not (relative? ulf)) (not (reflexive? ulf)) (not (wh-pron? ulf)))
 ) ; END relative?
 
 
@@ -340,6 +340,14 @@
     (member (first ulf) '(which.d what.d whichever.d whatever.d))
     (and (equal (first ulf) 'np+preds) (wh-np? (second ulf)))))
 ) ; END wh-np?
+
+
+(defun wh-pron? (ulf)
+; `````````````````````````
+; Checks if a ULF is an wh-question noun phrase (e.g. "what block")
+;
+  (and (pron? ulf) (member ulf '(what.pro which.pro)))
+) ; END wh-pron?
 
 
 (defun indefinite-np? (ulf)
