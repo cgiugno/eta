@@ -1286,6 +1286,15 @@
 
 
 
+(defun test-parse (tree input)
+;```````````````````````````````
+; Used to check pattern matching/parsing given a rule tree and input (list of words)
+;
+  (choose-result-for (mapcar #'tagword input) tree)
+) ; END test-parse
+
+
+
 (defun error-check ()
 ;`````````````````````
 ; Checks whether program has entered an infinite loop using a counter

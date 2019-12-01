@@ -12,7 +12,7 @@
     (spatial-beginning-pair spatial-beginning there)
     (spatial-beginning spatial-verb between prep conj-prep)
     (spatial-verb be modal wh_ do)
-    (spatial-ending noun adj there directions ana-pron prep conj-prep facing)
+    (spatial-ending noun adj there directions ana-pron prep conj-prep facing adv-e ago verb-rel that)
     (spatial-word noun ana-pron supporting corp adj
       uppermost under close touching farthest rotated)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
@@ -21,44 +21,6 @@
     (answer understand hear interpret parse)
     (here here\'s heres)
     (directions left right top bottom back front)
-
-    (corp Burger_King McDonalds Mercedes NVidia SRI SRI_International
-      Starbucks Texaco Target Toyota Twitter Shell Adidas)
-    (block blocks)
-    (name corp)
-    (conj-prep of to)
-    (prep on under in behind near touching abutting between from
-                below above next next_to visible on_top_of to_the_left_of
-                to_the_right_of in_front_of)     ; currently "next" needs to have
-                                                 ; the 'prep' feature, to allow
-                                                 ; merging into 'next_to.p'; it's
-                                                 ; risky, & prior word-joining 
-                                                 ; by '_' would be safer.
-    (rel-adj near close touching adjacent flush)
-    (qual-adj purple blue green yellow orange red pink gray grey
-      black white brown clear visible nearby)
-    (num-adj two three four five six seven eight nine ten eleven twelve many)
-                   ; (But note: we assume numerals can also be determiners)
-    (sup-adj leftmost rightmost furthest farthest nearest closest highest
-      tallest nearest topmost uppermost smallest lowest largest
-      centermost shortest backmost longest fewest frontmost)
-    (ord-adj first second third fourth fifth sixth seventh eighth ninth
-      tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth
-      seventeens eighteenth nineteenth twentieth)
-    (diff-adj other different same distinct separate unique)
-    (adj qual-adj rel-adj num-adj sup-adj ord-adj diff-adj)
-    (mod-n adj corp)
-    (noun block table stack row edge face plane line circle pile object
-      color structure left right back front direction way other); NB: "each other"
-                                                         ; can also be adj, det
-    (under underneath supporting support)
-    (close next)
-    (touching face-to-face abutting against flush) 
-    (be is are was were)
-    (verb touch touches support supports connect connects consist_of
-      consists_of sit sits adjoin adjoins flank flanks face faces)
-    (farthest furthest)
-    (rotated angled swivelled turned)
   ))
 
   ; This is the top level choice tree for processing spatial question inputs.
@@ -126,10 +88,42 @@
       2 (*multi-token-word-tree* (1 to_the_left_of 6)) (0 :subtree+clause)
     1 (0 to the right of 0)
       2 (*multi-token-word-tree* (1 to_the_right_of 6)) (0 :subtree+clause)
-    1 (0 next to 0)
-      2 (*multi-token-word-tree* (1 next_to 4)) (0 :subtree+clause)
+    1 (0 left of 0)
+      2 (*multi-token-word-tree* (1 to_the_left_of 4)) (0 :subtree+clause)
+    1 (0 right of 0)
+      2 (*multi-token-word-tree* (1 to_the_right_of 4)) (0 :subtree+clause)
+    1 (0 left to 0)
+      2 (*multi-token-word-tree* (1 to_the_left_of 4)) (0 :subtree+clause)
+    1 (0 right to 0)
+      2 (*multi-token-word-tree* (1 to_the_right_of 4)) (0 :subtree+clause)
+    1 (0 prior to 0)
+      2 (*multi-token-word-tree* (1 prior_to 4)) (0 :subtree+clause)
+    1 (0 near to 0)
+      2 (*multi-token-word-tree* (1 near 4)) (0 :subtree+clause)
+    1 (0 close to 0)
+      2 (*multi-token-word-tree* (1 near 4)) (0 :subtree+clause)
+    1 (0 on to 0)
+      2 (*multi-token-word-tree* (1 on_to 4)) (0 :subtree+clause)
+    1 (0 onto 0)
+      2 (*multi-token-word-tree* (1 on_to 3)) (0 :subtree+clause)
     1 (0 in front of 0)
       2 (*multi-token-word-tree* (1 in_front_of 5)) (0 :subtree+clause)
+    1 (0 adjacent to 0)
+      2 (*multi-token-word-tree* (1 adjacent_to 4)) (0 :subtree+clause)
+    1 (0 flush with 0)
+      2 (*multi-token-word-tree* (1 flush_with 4)) (0 :subtree+clause)
+    1 (0 pick up 0)
+      2 (*multi-token-word-tree* (1 pick_up 4)) (0 :subtree+clause)
+    1 (0 picks up 0)
+      2 (*multi-token-word-tree* (1 picks_up 4)) (0 :subtree+clause)
+    1 (0 picked up 0)
+      2 (*multi-token-word-tree* (1 picked_up 4)) (0 :subtree+clause)
+    1 (0 consist of 0)
+      2 (*multi-token-word-tree* (1 consist_of 4)) (0 :subtree+clause)
+    1 (0 consists of 0)
+      2 (*multi-token-word-tree* (1 consists_of 4)) (0 :subtree+clause)
+    1 (0 consisted of 0)
+      2 (*multi-token-word-tree* (1 consisted_of 4)) (0 :subtree+clause)
     1 (0)
       2 (*trim-suffix-tree* (1)) (0 :subtree+clause)
   ))
@@ -226,10 +220,14 @@
   ; NOTE: Moved closer to end of file since the code was getting pretty long.
   (READRULES '*asr-fix-tree*
   '(
+    1 (0 anything 0); not a mistake per se, but want to split into two words for parsing
+      2 (*asr-fix-tree* (1 any thing 3)) (0 :subtree+clause)
     1 (0 mcdonald\'s 0)
       2 (*asr-fix-tree* (1 mcdonalds 3)) (0 :subtree+clause)
     1 (0 mcdonalds black 0)
       2 (*asr-fix-tree* (1 mcdonalds block 4)) (0 :subtree+clause)
+    1 (0 show 0)
+      2 (*asr-fix-tree* (1 Shell 3)) (0 :subtree+clause)
     1 (0 sra 0)
       2 (*asr-fix-tree* (1 SRI 3)) (0 :subtree+clause)
     1 (0 s or i 0)

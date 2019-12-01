@@ -120,6 +120,12 @@
   (defparameter *discourse-history-gist* nil)
   (defparameter *reference-list* nil)
 
+  ; Coreference mode
+  ; 0 : simply reconstruct the original ulf
+  ; 1 : substitute most specific references only for anaphors and indexical np's (e.g. that block)
+  ; 2 : substitute most specific references for all references
+  (defparameter *coreference-mode* 1)
+
   ; Recency cutoff used when attempting coreference (i.e. the coreference
   ; module will only look this far back, in terms of turns, in the discourse
   ; history to find possible referents).
@@ -987,7 +993,7 @@
         (setq user-ulf (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
-        ; Generate response
+        ; Generate response based on list of relations
         (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
           (setq ans (generate-response (eval user-ulf) (eval expr))))
         ;; (format t "answer to output: ~a~%" ans) ; DEBUGGING
@@ -1953,7 +1959,8 @@
         (setq newclause (instance (second pattern) parts))
         (setq new-tagged-clause (mapcar #'tagword newclause))
         (setq result (choose-result-for1 new-tagged-clause nil (car pattern)))
-        (setq result (coref-ulf result))
+        (if (and result (not (equal (car result) :out)))
+          (setq result (coref-ulf result)))
         ;; (format t "discourse entities are ~a~%" *discourse-entities*) ; DEBUGGING
         (return-from choose-result-for1 result))
 

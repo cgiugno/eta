@@ -69,16 +69,45 @@
                         (if (eq stem word-sym); assume singular if unchanged
                                               ; (somewhat error-prone)
                             (intern (format nil "~a.N" word-sym))
-                            (list 'plur (format nil "~a.N" stem))))))
+                            (list 'plur (intern (format nil "~a.N" stem)))))))
          ((p prep) (intern (format nil "~a.P" word-sym)))
          ((d det) (intern (format nil "~a.D" word-sym)))
          ; ** Here we should insert cases where the verb is known to be of
          ;    type (POS) VBZ, VBD, VB, VBG, VBN, VBEN; this is a generic stub:
          ((v verb) (case word-sym
+                     (can '(pres can.aux-s)) (could '(past can.aux-s))
+                     ((do does) '(pres do.aux-s)) (did '(past do.aux-s))
                      ((is are) '(pres be.v)) (be 'be.v) ((was were) '(past be.v))
-                     ((support supports) '(pres support.v))
-                     (supported '(past support.v))
-                     (t (intern (format nil "~a.V" word-sym)))))
+                     ((support supports) '(pres support.v)) (supported '(past support.v))
+                     ((sit sits) '(pres sit.v)) (sat '(past sit.v))
+                     ((touch touches) '(pres touch.v)) (touched '(past touch.v))
+                     ((connect connects) '(pres connect.v)) (connected '(past connect.v))
+                     ((consist_of consists_of) '(pres consist_of.v)) (consisted_of '(past consist_of.v))
+                     ((adjoin adjoins) '(pres adjoin.v)) (adjoined '(past adjoin.v))
+                     ((flank flanks) '(pres flank.v)) (flanked '(past flank.v))
+                     ((face faces) '(pres face.v)) (faced '(past face.v))
+                     ((move moves) '(pres move.v)) (moved '(past move.v))
+                     ((put puts) '(pres put.v))
+                     ((change changes) '(pres change.v)) (changed '(past change.v))
+                     ((pick_up picks_up) '(pres pick_up.v)) (picked_up '(past pick_up.v))
+                     ((rotate rotates) '(pres rotate.v)) (rotated '(past rotate.v))
+                     ((place places) '(pres place.v)) (placed '(past place.v))
+                     (t (read-from-string (format nil "(PRES ~a.V)" word-sym))))) ; by default we assume a verb is present tensed
+         ; Note: the way passives are dealt with is currently inadequate. It currently assumes that any passive is past tensed
+         ((v-pasv verb-passive) (case word-sym
+                     (moved '(past (pasv move.v)))
+                     (put '(past (pasv put.v)))
+                     (changed '(past (pasv change.v)))
+                     (picked_up '(past (pasv pick_up.v)))
+                     (rotated '(past (pasv rotate.v)))
+                     (placed '(past (pasv place.v)))
+                     (t (read-from-string (format nil "(PAST (PASV ~a.V))" word-sym))))) ; by default we assume a verb is present tensed
+         ; Untensed verb
+         ((v- verb-untensed)
+            ; This is a bit hacky...
+            (if (equal (second (lex-ulf! 'v word-sym)) (intern (format nil "~a.V" word-sym)))
+                (intern (format nil "~a.V" word-sym))
+                (second (lex-ulf! 'v word-sym))))
          (wh-pred (case word-sym
                      (where '(at.p (what.d place.n)))
                      (when '(at.p (what.d time.n)))
@@ -88,12 +117,15 @@
                     (leftmost 'left.a) (rightmost 'right.a)
                     ((furthest farthest) 'far.a) (nearest 'near.a)
                     (closest 'close.a) (highest 'high.a) (tallest 'tall.a)
-                    (nearest 'near.a) (topmost 'top.a) (uppermost 'upper.a)
+                    (nearest 'near.a) (topmost 'top.a) (top 'top.a) (uppermost 'upper.a)
                     (smallest 'small.a) (lowest 'low.a) (largest 'large.a)
                     (centermost 'centered.a) (shortest 'short.a) (backmost 'back.a)
                     (longest 'long.a) (fewest 'few.a) (frontmost 'front.a)
                     (t (intern (format nil "~a.A" (stem-superlative word-sym))))))
-         (adv (intern (format nil "~a.ADV-A" word-sym))) )
+         (adv-a (intern (format nil "~a.ADV-A" word-sym)))
+         (adv-e (intern (format nil "~a.ADV-E" word-sym)))
+         (mod-a (intern (format nil "~a.MOD-A" word-sym)))
+         (cc (intern (format nil "~a.CC" word-sym))) )
  )); end of lex-ulf!)
                    
 
