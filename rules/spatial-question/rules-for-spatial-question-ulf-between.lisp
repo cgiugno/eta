@@ -118,7 +118,7 @@
     1 (what be 2 between 7 noun ?); what is between the two red blocks ?
        2 ((what.pro (lex-ulf! v 2) (*pp-between-ulf-tree* 3 4 5 6) ?) 
           ((1 (2 3)) ?)) (0 :ulf-recur)
-    1 (wh-det 1 noun be 1 between 7 noun ?); What red blocks are (there) between the Nvidia and Mercedes blocks ?
+    1 (wh-det 1 noun be 1 between 7 noun ?); what red blocks are (there) between the Nvidia and Mercedes blocks ?
        2 (((lex-ulf! det 1) (*n1-ulf-tree* 2 3) (lex-ulf! v 4) 
           (*pp-between-ulf-tree* 5 6 7 8) ?) (((1 2) (3 4)) ?)) (0 :ulf-recur)
     1 (what color noun be 2 between 7 noun ?); e.g., what color block is between a red and a blue block ? [unusual subj NP!]
@@ -130,7 +130,7 @@
     1 (wh-pron be the 2 noun 1 between 7 noun ?); e.g., what is the block between a red block and a blue block ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5) 
           (*pp-between-ulf-tree* 6 7 8 9) ?) ((1 (2 (= (the.d (n+preds 4 5))))) ?)) (0 :ulf-recur)
-    1 (how many 1 block be 2 between 7 noun ?); e.g., How many blocks are (there) between a red block and a blue block ?
+    1 (how many 1 block be 2 between 7 noun ?); e.g., how many blocks are (there) between a red block and a blue block ?
        2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) 
           (*pp-between-ulf-tree* 6 7 8 9) ?) (((1 2) (3 4)) ?)) (0 :ulf-recur)
 
