@@ -42,6 +42,7 @@
 ; => (THERE IS 3 RED BLOCKS THAT BE ON THE TABLE |.|)
 ; converting to english: ((SET-OF (THE.D (|NVidia| BLOCK.N)) (THE.D (|Twitter| BLOCK.N)) (THE.D (|Texaco| BLOCK.N))) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))))
 ; => (THE NVIDIA BLOCK THE TWITTER BLOCK AND THE TEXACO BLOCK IS ON THE SRI BLOCK |.|)
+; (ulf2english:ulf2english ulf :add-commas t)
 ;
   (let ((query-type (get-query-type query-ulf)))
     (setq query-ulf (car query-ulf))
