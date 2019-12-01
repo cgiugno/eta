@@ -413,10 +413,10 @@
     ; Asking about a pronoun
     1 (be pron 0)
        ; Historical
-       2 (be pron 1 prep 2 np-bw 3 adv-e 0 ?); e.g., is it on top of [a red block]/[them]/[red blocks] ?
+       2 (be pron 1 prep 2 np-bw 3 adv-e 0 ?); e.g., was it on top of [a red block]/[them]/[red blocks] previously ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*pp-ulf-tree* 3 4 5 6 7) (*adv-ulf-tree* 8 9) ?)
              ((1 2 3 4) ?)) (0 :ulf-recur)
-       2 (be pron adj adv-e 0 ?); e.g., is it clear/red/visible ?
+       2 (be pron adj adv-e 0 ?); e.g., was it clear/red/visible previously ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! adj 3) (*adv-ulf-tree* 4 5) ?)
              ((1 2 3 4) ?)) (0 :ulf-recur)
        ; Standard
