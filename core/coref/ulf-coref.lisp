@@ -80,14 +80,6 @@
 ) ; END print-entities
 
 
-(defun add-discourse-history (ulf)
-; ``````````````````````````````````
-; Adds a ulf to discourse history.
-;
-  (setq *discourse-history* (cons ulf *discourse-history*))
-) ; END add-discourse-history
-
-
 ;; (defun create-implicit-discourse-entity-from-verb (ulf)
 ;; ; ````````````````````````````````````````````````````````````````````````
 ;; ; A verb can implicitly introduce a couple different discourse entities, corresponding to some of the permutations
