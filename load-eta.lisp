@@ -1,12 +1,14 @@
 ; Load ttt
 ;``````````
 ; NOTE: This is now loaded as part of the ulf2english dependencies. The local version is currently unused.
-;; (load (truename "ttt/src/load.lisp"))
+; NOTE: Re-enabled until issues with ulf2english on BW system are fixed
+(load (truename "ttt/src/load.lisp"))
 
 
 ; Load ulf2english
 ;```````````````````
-(ql:quickload "ulf2english")
+; NOTE: Currently disabled until issues with ulf2english on BW system are fixed
+;; (ql:quickload "ulf2english")
 ;; (sys:run-shell-command (format nil "python %s 8080 \"g:g\"" (truename "core/resources/python-repl-server.py")))
 ;; python core/resources/python-repl-server.py 8080 "g:g"
 

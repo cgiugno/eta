@@ -336,18 +336,18 @@
 
 
 
-(defun store-fact (fact keys kb)
+(defun store-gist (gist keys kb)
 ;`````````````````````````````````
-; Put 'fact' into the 'kb' (a hash table) using the given keys.
-; Avoid duplication of already stored facts. This is intended 
-; primarily for acquired facts (as gist clauses) about the user,
-; but should also be usable for facts about Eta, that Eta
+; Put 'gist' into the 'kb' (a hash table) using the given keys.
+; Avoid duplication of already stored gists. This is intended 
+; primarily for acquired gists (as gist clauses) about the user,
+; but should also be usable for gists about Eta, that Eta
 ; could consult in answering questions from the user.
 ;
-  (let ((facts (gethash keys kb)))
-    (if (not (member fact facts :test #'equal))
-      (setf (gethash keys kb) (cons fact facts)))
-)) ; END store-fact
+  (let ((gists (gethash keys kb)))
+    (if (not (member gist gists :test #'equal))
+      (setf (gethash keys kb) (cons gist gists)))
+)) ; END store-gist
 
 
 
@@ -415,6 +415,50 @@
       (remove-contradiction (butlast gist-list))
       (last gist-list))))
 ) ; END remove-contradiction
+
+
+
+(defun store-turn (agent text &key gists ulfs)
+;``````````````````````````````````````````````
+; Stores a turn (consisting of some text, and lists of gist clauses and semantic interpretations, if any)
+; in the discourse history, along with the agent taking the turn.
+; NOTE: currently *discourse-history* is just a list. If it's changed to a hash table in the future,
+; this will need to be modified.
+;
+  (let ((turn (list agent (list text gists ulfs))))
+    (setq *discourse-history* (cons turn *discourse-history*)))
+) ; END store-turn
+
+
+
+(defun print-history ()
+;```````````````````````
+; Pretty-prints the discourse history in order.
+;
+  (let ((i 1))
+    (mapcar (lambda (turn)
+      (let ((agent (first turn)) (text (first (second turn)))
+            (gists (second (second turn))) (ulfs (third (second turn))))
+        (format t "~a. ~a : ~a~%" i agent text)
+        (mapcar (lambda (gist)
+          (format t "   gist: ~a~%" (if gist gist "None"))) gists)
+        (mapcar (lambda (ulf)
+          (format t "   ulf: ~a~%" (if ulf ulf "None"))) ulfs))
+      (setq i (1+ i)))
+    (reverse *discourse-history*)))
+) ; END print-history
+
+
+
+(defun store-fact (fact ht &key keys)
+;``````````````````````````````````````
+; Stores a fact in a given hash table. The fact is always hashed on itself.
+; Optionally, a list of additional keys can be specified for the fact to be hashed on.
+;
+  (setf (gethash fact ht) t)
+  (mapcar (lambda (key)
+    (setf (gethash key ht) (append (gethash key ht) (list fact)))) keys)
+) ; END store-fact
 
 
 
@@ -907,8 +951,7 @@
 
 (defun get-answer () 
 ;``````````````````````
-; This waits until it can load a character sequence from "./answer.lisp",
-; which will set the value of *next-answer*, and then processes it.
+; This waits until it can load a list of relations from "./answer.lisp".
 ;
   (setq *next-answer* nil)
   (loop while (not *next-answer*) do
@@ -922,6 +965,31 @@
           
   *next-answer*
 ) ; END get-answer
+
+
+
+(defun get-answer-string () 
+;````````````````````````````
+; This waits until it can load a character sequence from "./answer.lisp",
+; which will set the value of *next-answer*, and then processes it.
+;
+  (setq *next-answer* nil)
+  (loop while (not *next-answer*) do
+    (sleep .5)
+    (progn
+      (load "./answer.lisp")
+		  (if *next-answer*
+        (with-open-file (outfile "./answer.lisp" :direction :output 
+                                                   :if-exists :supersede
+                                                   :if-does-not-exist :create)))))
+          
+  ;; (parse-chars (if (stringp *next-answer*) (coerce *next-answer* 'list)
+  ;;                                            (coerce (car *next-answer*) 'list)))
+  (cond
+    ((stringp *next-answer*) (list (parse-chars (coerce *next-answer* 'list))))
+    ((listp *next-answer*) (cons (parse-chars (coerce (car *next-answer*) 'list))
+                            (cdr *next-answer*))))
+) ; END get-answer-string
 
 
 

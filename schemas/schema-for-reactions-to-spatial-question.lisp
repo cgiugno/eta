@@ -45,14 +45,14 @@
                ; Currently variable given should be '?ans+alternates if expect
                ; to recieve list of answer and then alternates, or should be given
                ; as '?ans if expect to recieve only answer.
-              ;; ?a2. (me receive-answer-from.v |Spatial-QA-Server| ?ans+alternates)
-              ?a2. (me receive-answer-from.v |Spatial-QA-Server| ?ans-relations)
+              ?a2. (me receive-answer-from.v |Spatial-QA-Server| ?ans+alternates)
+              ;; ?a2. (me receive-answer-from.v |Spatial-QA-Server| ?ans-relations)
                ; the value of ?ans+alternates would be read off from a file
                ; to which Spatial-QA-Server sends the answer (with weighted
                ; alternates); once ; the answer is read off, the file would
                ; be emptied.
-              ?a3. (me conditionally-say-to.v you ?ulf ?ans-relations)
-              ;; ?a3. (me conditionally-say-to.v you (main-answer.f ?ans+alternates))
+              ;; ?a3. (me conditionally-say-to.v you ?ulf ?ans-relations)
+              ?a3. (me conditionally-say-to.v you (main-answer.f ?ans+alternates))
               ;; ?a3. (me conditionally-say-to.v you (relevant-answers.f ?ans+alternates ?ulf))
                ; here ?ans is split off from ?ans+alternates;
                ; "conditionally say to you" would normally expand

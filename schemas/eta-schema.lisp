@@ -15,16 +15,15 @@
 ; and is possibly preempted by some "smalltalk" questions (currently disabled).
 ;
 
-:fixed-roles
-?t table.n
-?b1 block.n ; Target
-?b2 block.n ; Starbucks
-?b3 block.n ; Twitter
-?b4 block.n ; Texaco
-?b5 block.n ; McDonalds
-?b6 block.n ; Mercedez
-?b7 block.n ; Toyota
-?b8 block.n ; BurgerKing
+:types
+  ; "Fixed" means that the variable that is the argument of the predicate
+  ; retains the same value throughout any schema instance, and is known
+  ; from the outset; (but this may be an unnecessary distinction); all 
+  ; are tacit Skolem functions of ?e
+  ?x person.n  ; this means (?x person.n)
+  ?y robot.n  
+  ?t table.n 
+  ?bb (plur block1.n)
 
 
 

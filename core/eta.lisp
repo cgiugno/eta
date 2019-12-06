@@ -85,40 +85,25 @@
   ; 'subplan' property which in turn has a 'rest-of-plan' property, etc.
   (defvar *dialog-plan*)
 
-  ; List of discourse entities
-  (defvar *discourse-entities* nil)
-
-  ; A doolittle relic, kept here because we'll probably
-  ; want to have some sort of *context* parameter
-  ; eventually, e.g., for the identity of the inter-
-  ; locutors, potential referents, etc. The doolittle
-  ; *context* was reset when doolittle asked a question,
-  ; and any very brief user response (such as "yes",
-  ; or "my mother") was expanded using that context.
-  ;
-  ; NOTE: Instead of doolittle's "contexts", Eta has 'subtree'
-  ; and 'schema' "directives" in its reassembly rules, giving the name
-  ; of another choice tree or schema to be used to construct a step or 
-  ; steps for a subplan.
-  ;
-  ; AS A MEMORY-PEG: The final doolittle code also allowed special "theme"
-  ; atoms in "contexts" (as specified in reassembly rules) that enabled
-  ; repetitive return to the same "region" of the doolittle choice tree,
-  ; maintaining topical focus. This may also turn out to be relevant to
-  ; Eta, although currently we attempt to maintain topical consistency
-  ; in Eta by (a) following sequences of steps, and (b) computing "gist
-  ; clauses" or interpretations based on the user input, which should reveal
-  ; the current theme unambiguously, and thus enable making relevant
-  ; response choices.
-  ;
-  (defparameter *context* nil)
-
   ; Here we maintain various histories of the conversation (surface text,
   ; ulf, gist, and references, respectively).
+  ; Currently these are just lists - maybe in the future they should be
+  ; hash tables (hashed on time)?
   (defparameter *discourse-history* nil)
   (defparameter *discourse-history-ulf* nil)
   (defparameter *discourse-history-gist* nil)
   (defparameter *reference-list* nil)
+
+  ; Context
+  ; Stores facts that Eta knows.
+  ; This is a hash table with propositions hashed on the full proposition, the predicate, the subject,
+  ; and possibly the time that the formula is true in.
+  (defparameter *context* (make-hash-table :test #'equal))
+
+  ; Memory
+  ; Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
+  ; from previous contexts.
+  (defparameter *memory* (make-hash-table :test #'equal))
 
   ; Coreference mode
   ; 0 : simply reconstruct the original ulf
@@ -133,12 +118,6 @@
 
   ; Certainty cutoff used to generate responses given a list of relations+certainties from the blocks world
   (defparameter *certainty-threshold* 0.7)
-
-  ; Another doolittle relic: a list of saved responses,
-  ; to be used to revert to an earlier exchange, if 
-  ; no better options remained. This idea may still be
-  ; relevant to Eta.
-  (defparameter *memory* nil)
 
   ; number of Eta outputs generated so far (maintained
   ; for latency enforcement, i.e., not repeating a previously
@@ -827,6 +806,9 @@
             ;(print-current-plan-status {sub}plan-name); DEBUGGING
             (delete-current-episode {sub}plan-name)
             ;(print-current-plan-status {sub}plan-name); DEBUGGING
+
+            ; Add turn to dialogue history
+            (store-turn 'me expr :gists (get episode-name 'gist-clauses) :ulfs (list (get episode-name 'ulf)))
           )
           ; Nonprimitive say-to.v act (e.g. (me say-to.v you (that (?e be.v finished.a)))):
           ; Should probably be illegal action specification since we can use 'tell.v' for
@@ -952,6 +934,62 @@
           (return-from implement-next-eta-action nil))
         (add-subplan {sub}plan-name new-subplan-name))
 
+      ;; ;````````````````````````````````````````
+      ;; ; Eta: Seek answer from external source
+      ;; ;````````````````````````````````````````
+      ;; ((setq bindings (bindings-from-ttt-match '(me seek-answer-from.v _! _!1) wff))
+      ;;   (setq system (get-single-binding bindings))
+      ;;   (setq bindings (cdr bindings))
+      ;;   (setq user-ulf (get-single-binding bindings))
+      ;;   ; Leaving this open in case we want different procedures for different systems
+      ;;   (cond
+      ;;     ((null *live*) (write-ulf user-ulf))
+      ;;     ((eq system '|Spatial-QA-Server|) (write-ulf user-ulf))
+      ;;     (t (write-ulf user-ulf)))
+      ;;   (delete-current-episode {sub}plan-name))
+
+      ;; ;``````````````````````````````````````````
+      ;; ; Eta: Recieve answer from external source
+      ;; ;``````````````````````````````````````````
+      ;; ((setq bindings (bindings-from-ttt-match '(me receive-answer-from.v _! _!1) wff))
+      ;;   (setq system (get-single-binding bindings))
+      ;;   (setq bindings (cdr bindings))
+      ;;   (setq expr (get-single-binding bindings))
+      ;;   ; Leaving this open in case we want different procedures for different systems
+      ;;   (cond
+      ;;     ((null *live*) (setq ans ''()))
+      ;;     ((eq system '|Spatial-QA-Server|) (setq ans `(quote ,(get-answer))))
+      ;;     (t (setq ans `(quote ,(get-answer)))))
+      ;;   ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
+      ;;   ; Substitute ans for given variable (e.g. ?ans-relations) in plan
+      ;;   (nsubst-variable {sub}plan-name ans expr)
+      ;;   (delete-current-episode {sub}plan-name))
+
+      ;; ;````````````````````````````
+      ;; ; Eta: Conditionally saying
+      ;; ;````````````````````````````
+      ;; ; NOTE: Currently just creates a primitive say-to.v subplan directly from the given
+      ;; ; answer
+      ;; ; TODO: In the future we should change this to use the alternates (if given) somehow
+      ;; ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _! _!1) wff))
+      ;;   (setq user-ulf (get-single-binding bindings))
+      ;;   (setq bindings (cdr bindings))
+      ;;   (setq expr (get-single-binding bindings))
+      ;;   ; Generate response based on list of relations
+      ;;   (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
+      ;;     (setq ans (generate-response (eval user-ulf) (eval expr))))
+      ;;   ;; (format t "answer to output: ~a~%" ans) ; DEBUGGING
+      ;;   ; Create say-to.v subplan from answer
+      ;;   (setq new-subplan-name
+      ;;     (init-plan-from-episode-list
+      ;;       (list :episodes (action-var) (create-say-to-wff ans))
+      ;;       {sub}plan-name))
+      ;;   ; If subplan creation is successful, attach as subplan (otherwise delete).
+      ;;   (when (null new-subplan-name)
+      ;;     (delete-current-episode {sub}plan-name)
+      ;;     (return-from implement-next-eta-action nil))
+      ;;   (add-subplan {sub}plan-name new-subplan-name))
+
       ;````````````````````````````````````````
       ; Eta: Seek answer from external source
       ;````````````````````````````````````````
@@ -975,11 +1013,11 @@
         (setq expr (get-single-binding bindings))
         ; Leaving this open in case we want different procedures for different systems
         (cond
-          ((null *live*) (setq ans ''()))
-          ((eq system '|Spatial-QA-Server|) (setq ans `(quote ,(get-answer))))
-          (t (setq ans `(quote ,(get-answer)))))
+          ((null *live*) (setq ans ''((Could not connect with system \: not in live mode \.))))
+          ((eq system '|Spatial-QA-Server|) (setq ans `(quote ,(get-answer-string))))
+          (t (setq ans `(quote ,(get-answer-string)))))
         ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans-relations) in plan
+        ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
         (nsubst-variable {sub}plan-name ans expr)
         (delete-current-episode {sub}plan-name))
 
@@ -989,13 +1027,15 @@
       ; NOTE: Currently just creates a primitive say-to.v subplan directly from the given
       ; answer
       ; TODO: In the future we should change this to use the alternates (if given) somehow
-      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _! _!1) wff))
-        (setq user-ulf (get-single-binding bindings))
-        (setq bindings (cdr bindings))
+      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _!) wff))
         (setq expr (get-single-binding bindings))
-        ; Generate response based on list of relations
-        (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
-          (setq ans (generate-response (eval user-ulf) (eval expr))))
+        (setq expr (eval-functions expr))
+        ; If poss-ans, append text to answer
+        (if (equal (first expr) 'poss-ans)
+          (setq ans (append
+            '(You are not sure if you understood the question correctly\, but your answer is)
+            (cdr expr)))
+          (setq ans expr))
         ;; (format t "answer to output: ~a~%" ans) ; DEBUGGING
         ; Create say-to.v subplan from answer
         (setq new-subplan-name
@@ -1095,7 +1135,7 @@
 ; 
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (user-episode-name (car rest))
         (wff (second rest)) bindings words user-episode-name1 wff1 eta-episode-name
-        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulf input)
+        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input)
 
     ;; (format t "~%WFF = ~a,~%      in the user action ~a being ~
     ;;           processed~%" wff user-episode-name) ; DEBUGGING
@@ -1157,10 +1197,13 @@
 
         ; Get ulfs from user gist clauses and set them as an attribute to the current
         ; user action
-        (setq user-ulf (mapcar #'form-ulf-from-clause user-gist-clauses))
+        (setq user-ulfs (mapcar #'form-ulf-from-clause user-gist-clauses))
 
-        (setf (get user-episode-name 'ulf) user-ulf)
-        (setf (get user-episode-name1 'ulf) user-ulf)
+        (setf (get user-episode-name 'ulf) user-ulfs)
+        (setf (get user-episode-name1 'ulf) user-ulfs)
+
+        ; Add turn to dialogue history
+        (store-turn 'you words :gists user-gist-clauses :ulfs user-ulfs)
 
         ; Advance the 'rest-of-plan' pointer of the primitive plan past the
         ; action name and wff just processed, and initialize the next action (if any)
@@ -1285,7 +1328,7 @@
     (when specific-answer
       (setq keys (second specific-answer))
       (setq specific-answer (car specific-answer))
-      (store-fact (car specific-answer) keys *gist-kb*))
+      (store-gist (car specific-answer) keys *gist-kb*))
 
     ; Form final question from input
     ;````````````````````````````````
@@ -1353,11 +1396,13 @@
 ; TODO: improve context - different types of facts (static & temporal), list of discourse entities, etc.
 ; Use hash tables?
 ;
-  (setq *context* (append (mapcar (lambda (wff)
-    (if (equal (car wff) 'quote)
-      (eval wff)
-      (eval-functions wff)))
-    wffs) *context*))
+  ; Get facts by evaluating each wff (which may have formulas)
+  (let ((facts (mapcar (lambda (wff)
+          (if (equal (car wff) 'quote) (eval wff) (eval-functions wff))) wffs)))
+    ; Store each fact in context, hashing on the subject of the fact (first element) as well
+    (mapcar (lambda (fact)
+      (let ((keys (list (car fact))))
+        (store-fact fact *context* :keys keys))) facts))
 ) ; END store-in-context
 
 
@@ -1369,7 +1414,7 @@
 ; Finds whether a given wff is made true by the context.
 ; TODO: see store-in-context note.
 ;
-  (member wff *context* :test #'equal)
+  (gethash wff *context*)
 ) ; END contextual-truth-value
 
 
