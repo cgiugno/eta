@@ -45,6 +45,15 @@
 
 
 
+(defun chars-to-int (chars)
+; ``````````````````````````````
+; Converts list of chars to integer
+;
+  (read-from-string (coerce chars 'string))
+) ; END chars-to-int
+
+
+
 (defun explode (s)
 ;``````````````````
 ; The list of the characters making up symbol s
@@ -99,9 +108,9 @@
 
 (defun variable? (atm)
 ;`````````````````````
-; Check whether a symbol is a variable, i.e. starts with '?'
+; Check whether a symbol is a variable, i.e. starts with '?' or '!'
 ;
-  (and (symbolp atm) (char-equal #\? (car (explode atm))))
+  (and (symbolp atm) (member (car (explode atm)) '(#\? #\!) :test #'char-equal))
 ) ; END variable?
 
 
@@ -450,15 +459,43 @@
 
 
 
-(defun store-fact (fact ht &key keys)
-;``````````````````````````````````````
+(defun print-context ()
+;```````````````````````
+; Prints the context (dividing between full propositions, and ones that are stored under some specific key)
+;
+  (let (l1 l2)
+    (maphash (lambda (k v)
+      (if (equal v t) (setq l1 (cons k l1))
+        (setq l2 (cons (list k v) l2)))) *context*)
+    (mapcar (lambda (f)
+      (format t "~a~%" f)) l1)
+    (mapcar (lambda (f)
+      (format t "~a~%" f)) l2))
+) ; END print-context
+
+
+
+(defun store-fact (fact ht &key keys no-self)
+;``````````````````````````````````````````````
 ; Stores a fact in a given hash table. The fact is always hashed on itself.
 ; Optionally, a list of additional keys can be specified for the fact to be hashed on.
+; Also, if no-self is given as true, don't hash on the fact itself.
 ;
-  (setf (gethash fact ht) t)
+  (unless no-self (setf (gethash fact ht) t))
   (mapcar (lambda (key)
     (setf (gethash key ht) (append (gethash key ht) (list fact)))) keys)
 ) ; END store-fact
+
+
+
+(defun update-prop (prop prop-list)
+;```````````````````````````````````
+; Given a proposition and a list of propositions, remove propositions in list with the same
+; predicate as the given proposition, and add the new one to the list.
+;
+  (subst prop (car prop) prop-list
+    :test (lambda (x y) (and (listp y) (>= (length y) 2) (equal (second prop) (second y)) (equal x (first y)))))
+) ; END update-prop
 
 
 
@@ -741,6 +778,23 @@
 
 
 
+(defun get-schema-sections (plan)
+;``````````````````````````````````
+; Gets list of sections of schema, currently forms tuple (types episodes)
+; TODO: Improve reading schemas - store as key-value pairs using class?
+;
+  (let (sections)
+    (dolist (section '(:episodes :types))
+      (let* ((lookup (member section plan))
+             (rest (member nil (cdr lookup) :test (lambda (x y) (keywordp y)))))
+        (setq sections
+          (cons (cons (car lookup)
+            (if rest (reverse (set-difference (cdr lookup) rest)) (cdr lookup))) sections))))
+    sections)
+) ; END get-schema-sections
+
+
+
 (defun create-say-to-wff (content &key reverse)
 ;```````````````````````````````````````````````
 ; Creates and returns a wff consisting of a (me say-to.v you '(...))
@@ -852,6 +906,23 @@
 
 
 
+(defun update-time ()
+;``````````````````````
+; Updates time to a "new period", i.e. creates a new constant denoting
+; a new time period (and stores before/after relationships in context)
+;
+  (let ((time-old *time*) time-new pred-before pred-after)
+    (setq time-new (intern (format nil "T~a"
+      (1+ (chars-to-int (cdr (explode *time*)))))))
+    (setq *time* time-new)
+    (setq pred-before (list time-old 'before.p time-new))
+    (setq pred-after  (list time-new 'after.p time-old))
+    (store-fact pred-before *context* :keys (list (car pred-before)))
+    (store-fact pred-after  *context* :keys (list (car pred-after))))
+) ; END update-time
+
+
+
 (defun write-ulf (ulf)
 ;````````````````````````
 ; Writes a ulf to the file ulf.lisp, so that it can be used
@@ -946,6 +1017,37 @@
           
   (parse-chars (coerce *next-input* 'list))
 ) ; END hear-words
+
+
+
+(defun get-coords () 
+;``````````````````````
+; This waits until it can load a list of block coords from "./coords.lisp".
+; This should have a list of relations of the form (|NVidia| at-coords.p ?x ?y ?z).
+;
+  (setq *next-coords* nil)
+  (loop while (not *next-coords*) do
+    (sleep .5)
+    (progn
+      (load "./coords.lisp")
+		  (if *next-coords*
+        (with-open-file (outfile "./coords.lisp" :direction :output 
+                                                 :if-exists :supersede
+                                                 :if-does-not-exist :create)))))
+          
+  *next-coords*
+) ; END get-coords
+
+
+
+(defun get-coords-offline () 
+;`````````````````````````````
+; This is the coords reader when ETA is used with argument live =
+; nil (hence also *live* = nil)
+;
+  (finish-output)
+  (read-from-string (read-line))
+) ; END get-coords-offline
 
 
 

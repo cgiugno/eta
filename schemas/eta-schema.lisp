@@ -16,14 +16,17 @@
 ;
 
 :types
-  ; "Fixed" means that the variable that is the argument of the predicate
-  ; retains the same value throughout any schema instance, and is known
-  ; from the outset; (but this may be an unnecessary distinction); all 
-  ; are tacit Skolem functions of ?e
-  ?x person.n  ; this means (?x person.n)
-  ?y robot.n  
-  ?t table.n 
-  ?bb (plur block1.n)
+  !r1 (you person.n)
+  !r2 (me robot.n)  
+  !r3 (|Table| table.n)
+  !r4 (|Target| (blue.a block.n))
+  !r5 (|Starbucks| (green.a block.n))
+  !r6 (|Twitter| (red.a block.n))
+  !r7 (|Texaco| (blue.a block.n))
+  !r8 (|McDonalds| (green.a block.n))
+  !r9 (|Mercedes| (red.a block.n))
+  !r10 (|Toyota| (blue.a block.n))
+  !r11 (|Burger King| (green.a block.n))
 
 
 

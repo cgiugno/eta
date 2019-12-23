@@ -6,6 +6,7 @@ output.txt
 input.lisp
 sessionInfo.lisp
 ulf.lisp
+coords.lisp
 reaction.lisp
 answer.lisp
 

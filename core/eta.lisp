@@ -100,6 +100,10 @@
   ; and possibly the time that the formula is true in.
   (defparameter *context* (make-hash-table :test #'equal))
 
+  ; Time
+  ; Stores the constant denoting the current time period
+  (defparameter *time* 'T0)
+
   ; Memory
   ; Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
   ; from previous contexts.
@@ -132,6 +136,10 @@
   ; system) with file IO. If *live* = nil, operates in terminal mode.
   (defparameter *live* nil)
 
+  ; perceive-coords mode, if *perceive-coords* = T, perceives coordinates (in terminal
+  ; mode, the user enters coords, otherwise they're provided in coords.lisp)
+  (defparameter *perceive-coords* nil)
+
   ; Initialize/clear output file (only used in live mode)
   (with-open-file (outfile "./output.txt" :direction :output
                                           :if-exists :append
@@ -142,9 +150,10 @@
 
 
 
-(defun eta (live)
-;``````````````````````````
+(defun eta (live &key perceive-coords)
+;```````````````````````````````````
 ; live = t: avatar mode; live = nil: terminal mode
+; perceive-coords = t: can enter coords if in terminal mode
 ;
 ; Main program: Originally handled initial and final formalities,
 ; (now largely commented out) and controls the loop for producing,
@@ -154,6 +163,7 @@
 ;
   (init)
   (setq *live* live)
+  (setq *perceive-coords* perceive-coords)
   (setq *discourse-entities* nil)
   (setq *count* 0) ; Number of outputs so far
 
@@ -203,7 +213,7 @@
 ; successive variables occurring in the (..) part of the header
 ; (i.e., exclusive of ?e) by successive elements of 'args'.
 ;
-  (let (plan episode-list prop-var prop-name)
+  (let (plan sections types episodes prop-var prop-name)
     (setf (get plan-name 'schema-name) schema-name)
 
     ;; (format t "~%'schema-name' of ~a has been set to ~a" plan-name
@@ -232,12 +242,24 @@
     ;; (format t "~%Schema to be used for plan ~a, with arguments instantiated~
     ;;            ~% ~a" plan-name plan) ; DEBUGGING
 
+    ; Get schema sections. This currently just forms a tuple (types episodes)
+    ; TODO: Improve reading schemas - store as key-value pairs using class?
+    (setq sections (get-schema-sections plan))
+    (setq types (first sections))
+    (setq episodes (second sections))
+
+    ; Add types to context
+    ; NOTE: Added by Ben 12/3/19
+    ; TODO: This is incomplete and needs to be updated in the future. Currently doesn't
+    ; handle formula variables at all, or do anything with the proposition variables e.g. !r1
+    (mapcar (lambda (type) (if (not (variable? type))
+      (store-fact type *context* :keys (list (car type))))) (cdr types))
+
     ; Find first action variable, should be a list like (:episodes ?a1. ...)
-    (setq episode-list (member :episodes plan))
-    (setq prop-var (second episode-list))
+    (setq prop-var (second episodes))
 
     ;; (format t "~%Action list of argument-instantiated schema is~
-    ;;            ~% ~a" episode-list) ; DEBUGGING
+    ;;            ~% ~a" episodes) ; DEBUGGING
     ;; (format t "~%The first action variable, ~a, has (variable? ~a) = ~a"
     ;;            prop-var prop-var (variable? prop-var)) ; DEBUGGING
 
@@ -248,7 +270,7 @@
       (return-from init-plan-from-schema nil))
 
     ; Found the next action to be processed; set rest-of-plan pointer
-    (setf (get plan-name 'rest-of-plan) (cdr episode-list))
+    (setf (get plan-name 'rest-of-plan) (cdr episodes))
 
     (process-plan-variables schema-name plan-name prop-name prop-var)
   plan-name)
@@ -773,7 +795,7 @@
 ;
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (episode-name (car rest))
         (wff (second rest)) bindings expr user-action-name user-ulf n new-subplan-name
-        user-gist-clauses user-gist-passage main-clause info topic suggestion query ans)
+        user-gist-clauses user-gist-passage main-clause info topic suggestion query ans coords)
   
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being ~
     ;;           processed~%" wff episode-name) ; DEBUGGING
@@ -944,7 +966,7 @@
       ;;   ; Leaving this open in case we want different procedures for different systems
       ;;   (cond
       ;;     ((null *live*) (write-ulf user-ulf))
-      ;;     ((eq system '|Spatial-QA-Server|) (write-ulf user-ulf))
+      ;;     ((eq system '|Blocks-World-System|) (write-ulf user-ulf))
       ;;     (t (write-ulf user-ulf)))
       ;;   (delete-current-episode {sub}plan-name))
 
@@ -958,7 +980,7 @@
       ;;   ; Leaving this open in case we want different procedures for different systems
       ;;   (cond
       ;;     ((null *live*) (setq ans ''()))
-      ;;     ((eq system '|Spatial-QA-Server|) (setq ans `(quote ,(get-answer))))
+      ;;     ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer))))
       ;;     (t (setq ans `(quote ,(get-answer)))))
       ;;   ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
       ;;   ; Substitute ans for given variable (e.g. ?ans-relations) in plan
@@ -1000,7 +1022,7 @@
         ; Leaving this open in case we want different procedures for different systems
         (cond
           ((null *live*) (write-ulf user-ulf))
-          ((eq system '|Spatial-QA-Server|) (write-ulf user-ulf))
+          ((eq system '|Blocks-World-System|) (write-ulf user-ulf))
           (t (write-ulf user-ulf)))
         (delete-current-episode {sub}plan-name))
 
@@ -1014,7 +1036,7 @@
         ; Leaving this open in case we want different procedures for different systems
         (cond
           ((null *live*) (setq ans ''((Could not connect with system \: not in live mode \.))))
-          ((eq system '|Spatial-QA-Server|) (setq ans `(quote ,(get-answer-string))))
+          ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer-string))))
           (t (setq ans `(quote ,(get-answer-string)))))
         ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
         ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
@@ -1047,6 +1069,39 @@
           (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
         (add-subplan {sub}plan-name new-subplan-name))
+
+      ;````````````````````````````
+      ; Eta: Perceiving world
+      ;````````````````````````````
+      ((setq bindings (bindings-from-ttt-match '(me perceive-world.v _! _!1) wff))
+        (setq system (get-single-binding bindings))
+        (setq bindings (cdr bindings))
+        (setq expr (get-single-binding bindings))
+        (cond
+          ((null *perceive-coords*) (setq coords nil))
+          ((null *live*) (setq coords (get-coords-offline)))
+          ((eq system '|Blocks-World-System|) (setq coords (get-coords)))
+          (t (setq coords (get-coords))))
+        (if (and coords (listp coords) (every #'listp coords))
+          (setq coords `(quote ,coords))
+          (setq coords nil))
+        ;; (format t "received coords: ~a~% (for variable ~a)~%" coords expr) ; DEBUGGING
+        ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
+        (nsubst-variable {sub}plan-name coords expr)
+        
+        ; Store coords/moves in context, deindexed at the current time
+        (if coords
+          (mapcar (lambda (coord)
+            (let ((deindexed-coords (list coord '@ *time*)))
+              (store-fact deindexed-coords *context*)
+              (store-fact (first deindexed-coords) *context* :keys (list (third deindexed-coords)) :no-self t)))
+            (eval coords)))
+
+        ; Update the time at which Eta is perceiving the world
+        (update-time)
+
+        (delete-current-episode {sub}plan-name)
+      )
       
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))

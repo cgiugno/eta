@@ -22,9 +22,17 @@
 
 ; Load core coreference code
 ; (in directory 'core/coref')
-;````````````````````````
+;``````````````````````````````
 (mapcar (lambda (file) (load file))
     (directory "core/coref/*.lisp"))
+
+
+; Load core response generation code
+; (in directory 'core/response')
+; NOTE: Currently disabled until response generation is working
+;`````````````````````````````````
+;; (mapcar (lambda (file) (load file))
+;;     (directory "core/response/*.lisp"))
 
 
 ; Load core resources

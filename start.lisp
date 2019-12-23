@@ -3,6 +3,8 @@
 ; T for speak mode
 ;; (defparameter *mode* t)
 (defparameter *mode* NIL)
+;; (defparameter *coords-mode* t)
+(defparameter *coords-mode* NIL)
 ;; (defparameter *safe-mode* t)
 (defparameter *safe-mode* NIL)
 (defparameter *user-id* NIL)
@@ -37,6 +39,10 @@
 (with-open-file (outfile "./ulf.lisp" :direction :output :if-exists 
                                :supersede :if-does-not-exist :create))
 
+; Delete the content of coords.lisp, if it exists, otherwise create
+(with-open-file (outfile "./coords.lisp" :direction :output :if-exists 
+                               :supersede :if-does-not-exist :create))
+
 ; Delete the content of reaction.lisp, if it exists, otherwise create
 (with-open-file (outfile "./answer.lisp" :direction :output :if-exists 
                                :supersede :if-does-not-exist :create))
@@ -57,8 +63,8 @@
 ; Run Eta
 ;``````````
 (if *safe-mode*
-  (handler-case (eta *mode*)
+  (handler-case (eta *mode* :perceive-coords *coords-mode*)
     (error (c)
       (error-message "Execution of Eta failed due to an internal error." *mode*)
       (values 0 c)))
-  (eta *mode*))
+  (eta *mode* :perceive-coords *coords-mode*))
