@@ -1,28 +1,10 @@
 ;; January 6/2020
 ;; ================================================
 ;;
-;; Starts Eta. Specify the avatar being used, and the modes to be used, using the
-;; global parameters at the top of this file.
+;; Starts Eta using the configuration specified in config.lisp
 ;;
 
-; Which avatar to use
-(defparameter *avatar* "david")
-
-; T for speak mode
-; NIL for text mode
-(defparameter *mode* NIL)
-
-; T to observe coordinates
-; NIL to ignore
-(defparameter *coords-mode* NIL)
-
-; T to exit smoothly if exception is thrown
-; NIL otherwise
-(defparameter *safe-mode* NIL)
-
-; ID of user
-(defparameter *user-id* NIL)
-
+(load "./config.lisp")
 
 
 (defun clean-io-files ()
@@ -72,7 +54,7 @@
       ;; (format t "~%~%Enter user-id ~%")
       ;; (princ "user id: ") (finish-output)
       ;; (setq *user-id* (write-to-string (read))))
-      (setq *user-id* "test"))
+    )
 ; Otherwise, load user-id from sessionInfo file
 ;``````````````````````````````````````````````````````
     (progn

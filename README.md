@@ -1,51 +1,55 @@
 
-# Eta Blocksworld (Ver 1 - 06/21/19):
+# Eta Dialogue Manager (Ver 2 - 01/06/2020):
 
 ## How to run
 
-Start SBCL in the top level directory and enter `(load "start.lisp")`. The dialogue will prompt
-you for an ID (just enter anything here). It will then begin with a getting-to-know question
-(currently just asking you for your name), and then will give a series of 10 prompts.
+Edit `config.lisp` and set the global parameters to the desired values (see the comment at the top of the file
+for information about the config options). `*avatar*` should be set to the name of one of the available avatars (in all lowercase),
+each one of which specifies a set of schemas and pattern transduction rules to guide the conversation. These options
+are discussed further below.
 
-Eta has two modes: text mode, and live mode. In `start.lisp`, the mode can be changed at the very
-top of the file. Use `(defparameter *mode* nil)` for text mode, and `(defparameter *mode* t)` for live mode.
+Start SBCL in the top level directory and enter `(load "start.lisp")`. The dialogue will then begin using the top-level
+schema of the chosen avatar.
+
+Eta has two modes: text mode, and live mode. These can be changed in `config.lisp`. Use `(defparameter *mode* nil)` for
+text mode, and `(defparameter *mode* t)` for live mode.
 
 In text mode, simply enter the query into the command line when the system prompts you to do so. The system will
-output the gist clause that was extracted, the corresponding ulf that it extracted, and will then react by
-echoing your query back to you (if it was a spatial question).
+output the gist clause that was extracted, and the corresponding ulf if one was extracted. In the case of the David
+avatar used in the blocks world system, no meaningful reaction will be given by the dialogue agent in text mode, since
+answering spatial questions requires connecting with the blocks world system in live mode.
 
-In live mode, the system will await for an input to be set in `input.lisp` as `(setq *next-input* "Input here")`,
-where the value of \*next-input\* is a string. If the input was a spatial question, the system will output the
-extracted ulf to `ulf.lisp` as `(setq *next-ulf* '(((PRES BE.V) THERE.PRO ...) ?))`, where the value of \*next-ulf\* is
-some list.
+In live mode, the system will await for an input to be set in `io/input.lisp` as `(setq *next-input* "Input here")`,
+where the value of \*next-input\* is a string. This is intended to be used in conjunction with an ASR program. If the
+input was a spatial question, the system will output the extracted ulf to `io/ulf.lisp` as `(setq *next-ulf* '(((PRES BE.V) THERE.PRO ...) ?))`, where the value of \*next-ulf\* is some list.
 
-**NOTE**: the value of \*next-ulf\* might not necessarily be a ulf; it could be `(:out SOME RESPONSE ...)`. The
-ulf could also have an additional *poss-ques* wrapper around it, e.g. `'(POSS-QUES (((PRES BE.V) THERE.PRO ...) ?))`.
-Currently, both of these should be dealt with by Georgiy's system externally to Eta, although this should be changed in
-the future.
+**NOTE**: the value of \*next-ulf\* might potentially have an additional *poss-ques* wrapper around it, e.g. `'(POSS-QUES (((PRES BE.V) THERE.PRO ...) ?))`.
 
-Finally, in the case of a spatial question, the system will await a response in `reaction.lisp` as
-`(setq *next-reaction* "Reaction here")`, where the value of \*next-reaction\* is a string. If the input
-was not a spatial question, the system will skip this step and form a reaction as normal. Finally, the
-system will output the reaction to `output.txt`, on a single line prepended by `#: ` (it will also form
-initial prompts this way).
+Eta's outputs are logged in plaintext in `io/output.txt`, with each output on a newline and preceeded by `#:`. This is intended
+to be used in conjunction with a TTS program.
 
-## Task breakdown
+The following live mode features are (currently) specific to the david avatar used in the blocks world system:
 
-* Connect inputs/outputs with Georgiy's blocksworld system **(mostly done by this point)**:
-  - Text would need to be taken from the ASR output rather than the command line. Much of this functionality should already be
-    in place from the elderly study, however.
-  - The ulf extracted at each step would need to be relayed to Georgiy's system for processing.
-  - The output response from Georgiy's system would need to be hooked back up to the response rule
-    file (which currently just echoes the user's query back to them - see `rules/spatial-question/rules-for-spatial-question-reaction.lisp`).
+In the case of a spatial question, the system will await a response in `answer.lisp` as
+`(setq *next-answer* "Answer here")`, where the value of \*next-answer\* is a string. If the input
+was not a spatial question, the system will skip this step and form a reaction as normal.
 
-* Expanding the gist clause rule files:
-  - Creating rules to catch non-query ("small talk") questions and inputs from the user - see `rules/spatial-questions/rules-for-spatial-question-input.lisp` and `rules/choose-reaction-to-input.lisp`.
-  - Creating the rules to detect and preprocess spatial questions (primarily removing prefixed and suffixed utterances that the user might attach to their queries) **(mostly done by this point)** - see `rules/spatial-question/rules-for-spatial-question-input.lisp`.
-  - Finding some way to use the previous utterance to help extract gist clauses. Not yet sure how this should be done, but it would be
-    impemented in `rules/choose-gist-clause-trees-for-input.lisp`.
+If `*coords-mode*` is enabled, after hearing a spatial question the system will await block coordinates in `coords.lisp`. The
+format of this is a list of coordinate propositions, e.g. `(setq *next-coords* '((|SRI | at-coords.p 1 1 1) (|Texaco| at-coords.p 1 3 1) (|Twitter| at-coords.p 1 1 2)))`.
 
-* Expanding the coverage of the ulf rule files:
-  - Len is primarily working on this, and I will incorporate his changes in `rules/spatial-question/rules-for-spatial-question-ulf.lisp`.
+## Supported avatars
 
-* Overall finding more elegant ways to implement Eta functionality, such as how it awaits a reaction from an external system currently.
+### David
+
+TODO: add details about operation of david and blocks world system.
+
+### Sophie
+
+TODO: Sophie not yet created. Add details once developed.
+
+## Code overview
+
+TODO: elaborate on code organization
+
+
+
