@@ -928,7 +928,7 @@
 ; Writes a ulf to the file ulf.lisp, so that it can be used
 ; by the blocksworld system.
 ;
-  (with-open-file (outfile "./ulf.lisp" :direction :output
+  (with-open-file (outfile "./io/ulf.lisp" :direction :output
                                         :if-exists :supersede
                                         :if-does-not-exist :create)
     (format outfile "(setq *next-ulf* ~a)" ulf))
@@ -959,7 +959,7 @@
 ; For terminal mode only, we use 'print-words'.
 ;
   (let (wordstring)
-    ; Write ETA's words to "./output.txt" as a continuous string
+    ; Write ETA's words to "./io/output.txt" as a continuous string
     ; (preceded by the output count and a colon)
     (dolist (word wordlist)
       (push (string word) wordstring)
@@ -967,7 +967,7 @@
     (setq wordstring (reverse (cdr wordstring)))
     (setq wordstring (eval (cons 'concatenate (cons ''string wordstring))))
 	  
-    (with-open-file (outfile "./output.txt" :direction :output
+    (with-open-file (outfile "./io/output.txt" :direction :output
                                             :if-exists :append
                                             :if-does-not-exist :create)
       (format outfile "~%#: ~a" wordstring))
@@ -998,7 +998,7 @@
 
 (defun hear-words () 
 ;````````````````````
-; This waits until it can load a character sequence from "./input.lisp",
+; This waits until it can load a character sequence from "./io/input.lisp",
 ; which will set the value of *next-input*, and then processes *input*
 ; in the same way as the result of (read-line) is processed in direct
 ; terminal input mode.
@@ -1007,11 +1007,11 @@
   (loop while (not *next-input*) do
     (sleep .5)
     (progn
-      (load "./input.lisp")
+      (load "./io/input.lisp")
 		  (if *next-input*
         (progn
           (format t "~a~%" *next-input*)
-          (with-open-file (outfile "./input.lisp" :direction :output 
+          (with-open-file (outfile "./io/input.lisp" :direction :output 
                                                   :if-exists :supersede
                                                   :if-does-not-exist :create))))))
           
@@ -1022,16 +1022,16 @@
 
 (defun get-coords () 
 ;``````````````````````
-; This waits until it can load a list of block coords from "./coords.lisp".
+; This waits until it can load a list of block coords from "./io/coords.lisp".
 ; This should have a list of relations of the form (|NVidia| at-coords.p ?x ?y ?z).
 ;
   (setq *next-coords* nil)
   (loop while (not *next-coords*) do
     (sleep .5)
     (progn
-      (load "./coords.lisp")
+      (load "./io/coords.lisp")
 		  (if *next-coords*
-        (with-open-file (outfile "./coords.lisp" :direction :output 
+        (with-open-file (outfile "./io/coords.lisp" :direction :output 
                                                  :if-exists :supersede
                                                  :if-does-not-exist :create)))))
           
@@ -1053,17 +1053,17 @@
 
 (defun get-answer () 
 ;``````````````````````
-; This waits until it can load a list of relations from "./answer.lisp".
+; This waits until it can load a list of relations from "./io/answer.lisp".
 ;
   (setq *next-answer* nil)
   (loop while (not *next-answer*) do
     (sleep .5)
     (progn
-      (load "./answer.lisp")
+      (load "./io/answer.lisp")
 		  (if *next-answer*
-        (with-open-file (outfile "./answer.lisp" :direction :output 
-                                                   :if-exists :supersede
-                                                   :if-does-not-exist :create)))))
+        (with-open-file (outfile "./io/answer.lisp" :direction :output 
+                                                    :if-exists :supersede
+                                                    :if-does-not-exist :create)))))
           
   *next-answer*
 ) ; END get-answer
@@ -1072,16 +1072,16 @@
 
 (defun get-answer-string () 
 ;````````````````````````````
-; This waits until it can load a character sequence from "./answer.lisp",
+; This waits until it can load a character sequence from "./io/answer.lisp",
 ; which will set the value of *next-answer*, and then processes it.
 ;
   (setq *next-answer* nil)
   (loop while (not *next-answer*) do
     (sleep .5)
     (progn
-      (load "./answer.lisp")
+      (load "./io/answer.lisp")
 		  (if *next-answer*
-        (with-open-file (outfile "./answer.lisp" :direction :output 
+        (with-open-file (outfile "./io/answer.lisp" :direction :output 
                                                    :if-exists :supersede
                                                    :if-does-not-exist :create)))))
           
@@ -1484,7 +1484,7 @@
 ;
   (format t "~a~%" str)
   (if mode
-    (with-open-file (outfile "./output.txt" :direction :output
+    (with-open-file (outfile "./io/output.txt" :direction :output
                                             :if-exists :append
                                             :if-does-not-exist :create)
       (format outfile "~%#: ~a" str)))

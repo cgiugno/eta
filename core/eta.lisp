@@ -140,10 +140,6 @@
   ; mode, the user enters coords, otherwise they're provided in coords.lisp)
   (defparameter *perceive-coords* nil)
 
-  ; Initialize/clear output file (only used in live mode)
-  (with-open-file (outfile "./output.txt" :direction :output
-                                          :if-exists :append
-                                          :if-does-not-exist :create))
 ) ; END init
 
 

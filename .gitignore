@@ -1,16 +1,15 @@
-.DS_Store
+# DS_Store files
+**/.DS_Store
 
+# Stored gist clauses
 gist-kb/*
 
-output.txt
-input.lisp
-sessionInfo.lisp
-ulf.lisp
-coords.lisp
-reaction.lisp
-answer.lisp
+# IO files
+io/*
 
+# ttt fasl files
 ttt/src/*.fasl
 ttt/src/operators/*.fasl
 
-TODO*
+# any TODO files
+**/TODO*
