@@ -11,6 +11,8 @@
 ;``````````````````````````
 ; Overwrites all io files used by Eta with blank files
 ;
+  (ensure-directories-exist "./io/")
+
   ; Delete the content of the sessionInfo.lisp file after reading
   (with-open-file (outfile "./io/sessionInfo.lisp" :direction :output :if-exists
                                                    :supersede :if-does-not-exist :create))
