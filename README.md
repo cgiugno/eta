@@ -49,7 +49,7 @@ TODO: Sophie not yet created. Add details once developed.
 
 ## Code overview
 
-TODO: elaborate on code organization
+TODO: elaborate on code organization.
 
 
 
