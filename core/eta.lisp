@@ -720,7 +720,7 @@
       ; bindings yields ((_+ (prop-var cond name1 wff1 ...)))
       ; prop-var supplies a (quoted) episode variable, cond supplies the condition of the loop,
       ; and the rest of the list is a number of name, wff pairs.
-      ((setq bindings (bindings-from-ttt-match '(:repeat-until  _+) wff))
+      ((setq bindings (bindings-from-ttt-match '(:repeat-until _+) wff))
         (setq expr (get-multiple-bindings bindings))
         ; Generate a subplan for the 1st action-wff with a true condition:
         (setq new-subplan-name (plan-repeat-until {sub}plan-name episode-name expr))
@@ -1356,12 +1356,12 @@
 ;       *question-from-favorite-class-input*,
 ;       etc. 
 ;
-  (let ((n (length words)) tagged-prior-gist-clause relevant-trees 
-        specific-content-tree question-content-tree chunks tagged-chunk
-        clause keys specific-answers question facts gist-clauses)
+  (let ((n (length words)) tagged-prior-gist-clause relevant-trees sentences
+        specific-content-tree question-content-tree unbidden-content-tree thematic-content-tree 
+        specific-answers questions unbidden-answers thematic-answer facts gist-clauses)
 
-    ; Form specific answer clauses from input
-    ;`````````````````````````````````````````
+    ; Get the relevant pattern transduction trees given the gist clause of Eta's previous utterance.
+    ;````````````````````````````````````````````````````````````````````````````````````````````````
     ;; (format t "~% prior-gist-clause =" prior-gist-clause) ; DEBUGGING
     (setq tagged-prior-gist-clause (mapcar #'tagword prior-gist-clause))
     ;; (format t "~% tagged prior gist clause = ~a" tagged-prior-gist-clause) ; DEBUGGING
@@ -1372,31 +1372,67 @@
     ;;   '*gist-clause-trees-for-input*))
     ;; (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING      
     (setq specific-content-tree (first relevant-trees)
-          question-content-tree (second relevant-trees))
+          question-content-tree (fourth relevant-trees)
+          unbidden-content-tree (second relevant-trees)
+          thematic-content-tree (third relevant-trees))
 
-    (setq specific-answer (cdr
-      (choose-result-for (mapcar #'tagword words) specific-content-tree)))
-    (when specific-answer
-      (setq keys (second specific-answer))
-      (setq specific-answer (car specific-answer))
-      (store-gist (car specific-answer) keys *gist-kb*))
+    ; Split user's reply into sentences for specific/question/unbidden trees
+    ;````````````````````````````````````````````````````````````````````````
+    (setq sentences (split-sentences words))
+    (dolist (sentence sentences)
+      (let ((tagged-sentence (mapcar #'tagword sentence)) (question? (equal (last sentence) '?))
+            clause keys)
 
-    ; Form final question from input
-    ;````````````````````````````````
-    ; Use up to 12 final words of input
-    (if (> n 2) (setq question (cdr
-      (choose-result-for (mapcar #'tagword (last words 12)) question-content-tree))))
-    ; NOTE: questions by the user are currently not stored
-    ; (though we could store the fact that the user asked them).
-      
+        ; Form specific answer(s) from input
+        ;`````````````````````````````````````
+        (when (not question?)
+          (setq clause (cdr (choose-result-for tagged-sentence specific-content-tree)))
+          (when clause
+            (setq keys (second clause))
+            (store-gist (car clause) keys *gist-kb*)
+            (push (car clause) specific-answers)
+            (push (car clause) facts)))
+
+        ; Form question(s) from input
+        ;``````````````````````````````
+        (when question?
+          (setq clause (cdr (choose-result-for tagged-sentence question-content-tree)))
+          (when clause
+            (push (car clause) questions)
+            (push (car clause) facts)))
+        ; NOTE: questions by the user are currently not stored
+        ; (though we could store the fact that the user asked them).
+
+        ; Form unbidden answer(s) from input
+        ;`````````````````````````````````````
+        (when (not question?)
+          (setq clause (cdr (choose-result-for tagged-sentence unbidden-content-tree)))
+          (when clause 
+            (setq keys (second clause))
+            (store-gist (car clause) keys *gist-kb*)
+            (push (car clause) unbidden-answers)))
+    ))
+
+    ; Form thematic answer from input (if there are more than two sentences)
+    ;```````````````````````````````````````````````````````````````````````
+    (when (> (length sentences) 2)
+      (setq thematic-answer (cdr
+        (choose-result-for (mapcar #'tagword words) thematic-content-tree)))
+      (when thematic-answer
+        (setq keys (second thematic-answer))
+        (setq thematic-answer (car thematic-answer))
+        (store-gist (car thematic-answer) keys *gist-kb*)))
+
+
     ; The results obtained will be stored as the 'gist-clauses'
-    ; property of the name of the user input. So, concatenate
-    ; the above results; in reacting, Eta will pay particular
-    ; attention to the first clause, and any final question.
-    (setq facts (list specific-answer))
-    (setq gist-clauses facts)
-    (if question
-      (setq gist-clauses (append facts (list question))))
+    ; property of the name of the user input. So, 'facts' should
+    ; be a concatenation of the above results in the order in
+    ; which they occur in the user's input; in reacting, Eta will
+    ; pay particular attention to the first clause, and any final question.
+    ; TODO: what should be done with thematic answers here?
+    (setq gist-clauses (reverse facts))
+    ;; (if thematic-answer 
+    ;;   (setq facts (append facts (list thematic-answer))))
 	
 	  ; Allow arbitrary unexpected inputs to be processed
     ; replace nil with (null gist-clauses)
@@ -1624,13 +1660,16 @@
             (list :episodes (action-var) (create-say-to-wff (cdr user-ulf)))
             {sub}plan-name))))
 
+    ; Remove 'nil' gist clauses (unless the only gist clause is the 'nil' gist clause)
+    (setq user-gist-clauses_p (purify-func user-gist-clauses))
+
     ; We use either choice tree '*reaction-to-input*' or
-    ; '*reactions-to-input*' (note plural) depending on  whether
+    ; '*reactions-to-input*' (note plural) depending on whether
     ; we have one or more gist clauses.
     (cond
       ; Single gist clause
-      ((null (cdr user-gist-clauses))
-        (setq tagged-words (mapcar #'tagword (car user-gist-clauses)))
+      ((null (cdr user-gist-clauses_p))
+        (setq tagged-words (mapcar #'tagword (car user-gist-clauses_p)))
         ;; (format t "~% (single clause) tagwords are ~a ~% " tagged-words) ; DEBUGGING
         (setq choice (choose-result-for tagged-words '*reaction-to-input*))
         ;; (format t "~% (single clause) choice are ~a ~% " choice) ; DEBUGGING
@@ -1638,8 +1677,6 @@
 
       ; Multiple gist clauses
       (t
-        ; Remove 'nil' gist clauses
-        (setq user-gist-clauses_p (purify-func user-gist-clauses))
         ;; (format t "~% user-gist-words are ~a ~% " user-gist-clauses_p) ; DEBUGGING
         (setq user-gist-words (apply 'append user-gist-clauses_p))
         ;; (format t "~% user-gist-words are ~a ~% " user-gist-words) ; DEBUGGING

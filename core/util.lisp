@@ -380,15 +380,22 @@
 
 
 
+(defun nil-gist-clause? (gist-clause)
+;`````````````````````````````````````
+; Return t if gist-clause is the nil gist clause (i.e. '(NIL GIST : ...)).
+;
+  (and (>= (length gist-clause) 2) (equal (subseq gist-clause 0 2) '(NIL GIST)))
+) ; END nil-gist-clause?
+
+
+
 (defun purify-func (user-gist-clauses)
 ;````````````````````````````````````````
-; Remove user gist clauses identical with '(NIL GIST), except such an item
-; in last place, when preceded by at least one non-(NIL GIST) item; (Why? -LS)
+; Remove user gist clauses identical with '(NIL GIST), unless this is the only gist clause.
 ;
-  (append
-    (remove-if (lambda (x) (and (>= 2 (length x)) (equal (subseq x 0 2) '(NIL GIST))))
-      (butlast user-gist-clauses))
-    (last user-gist-clauses))
+  (if (and (= 1 (length user-gist-clauses)) (nil-gist-clause? (car user-gist-clauses)))
+    user-gist-clauses
+    (remove-if (lambda (x) (nil-gist-clause? x)) user-gist-clauses))
 ) ; END purify-func
 
 
@@ -496,6 +503,29 @@
   (subst prop (car prop) prop-list
     :test (lambda (x y) (and (listp y) (>= (length y) 2) (equal (second prop) (second y)) (equal x (first y)))))
 ) ; END update-prop
+
+
+
+(defun split-sentences (words)
+;```````````````````````````````
+; Given the list of words 'words', split into multiple lists of words for each sentence,
+; delimited by punctuation.
+;
+  (let (result cur)
+    ; Loop through each word, keeping a buffer which is emptied once punctuation is reached
+    (mapcar (lambda (word)
+        (cond
+          ((member word '(|.| ? !))
+            (setq result (cons (reverse (cons word cur)) result))
+            (setq cur nil))
+          (t
+            (setq cur (cons word cur)))))
+      words)
+    ; Empty buffer (in case the last sentence is missing punctuation)
+    (when cur
+      (setq result (cons (reverse cur) result)))
+  (reverse result))
+) ; END split-sentences
 
 
 
