@@ -13,3 +13,6 @@ ttt/src/operators/*.fasl
 
 # any TODO files
 **/TODO*
+
+# any test avatars
+avatars/test_*

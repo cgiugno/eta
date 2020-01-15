@@ -1053,7 +1053,9 @@
 (defun get-coords () 
 ;``````````````````````
 ; This waits until it can load a list of block coords from "./io/coords.lisp".
-; This should have a list of relations of the form (|NVidia| at-coords.p ?x ?y ?z).
+; This should have a list of relations of the following two forms:
+; (|Twitter| at-loc.p ($ loc ?x ?y ?z))
+; (|Toyota| ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
 ;
   (setq *next-coords* nil)
   (loop while (not *next-coords*) do

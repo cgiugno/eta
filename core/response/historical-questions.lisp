@@ -5,15 +5,24 @@
 ;;
 
 
-; ((|Target| at-coords.p 0 0 0) (|Starbucks| at-coords.p 1 0 0) (|Twitter| at-coords.p 2 0 0) (|Texaco| at-coords.p 3 0 0) (|McDonalds| at-coords.p 4 0 0) (|Mercedes| at-coords.p 5 0 0) (|Toyota| at-coords.p 6 0 0) (|Burger King| at-coords.p 7 0 0))
+; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 1 0 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0)))
 
 
-(defun at-coords-prop? (prop)
-; ````````````````````````````
-; Checks whether a proposition is an at-coords.p formula.
+(defun at-loc-prop? (prop)
+; ```````````````````````````
+; Checks whether a proposition is an at-loc.p formula.
 ;
-  (and (listp prop) (= (length prop) 5) (equal (second prop) 'at-coords.p))
+  (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-loc.p))
 ) ; END at-coords-prop?
+
+
+
+;; (defun at-coords-prop? (prop)
+;; ; ````````````````````````````
+;; ; Checks whether a proposition is an at-coords.p formula.
+;; ;
+;;   (and (listp prop) (= (length prop) 5) (equal (second prop) 'at-coords.p))
+;; ) ; END at-coords-prop?
 
 
 

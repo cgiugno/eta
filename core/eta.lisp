@@ -1226,7 +1226,8 @@
         (setq eta-clauses (get eta-episode-name 'gist-clauses))
         ;; (format t "~%ETA action name is ~a" eta-episode-name)
         ;; (format t "~%ETA gist clauses that the user is responding to ~
-        ;;           ~% = ~a " eta-clauses) ; DEBUGGING
+        ;;           ~% = ~a " eta-clauses)
+        ;; (format t "~%using gist clause: ~a " (car (last eta-clauses))) ; DEBUGGING
 
         ; Compute the "interpretation" (gist clauses) of the user input,
         ; which will be done with a gist-clause packet selected using the
@@ -1362,7 +1363,7 @@
 
     ; Get the relevant pattern transduction trees given the gist clause of Eta's previous utterance.
     ;````````````````````````````````````````````````````````````````````````````````````````````````
-    ;; (format t "~% prior-gist-clause =" prior-gist-clause) ; DEBUGGING
+    ;; (format t "~% prior-gist-clause = ~a" prior-gist-clause) ; DEBUGGING
     (setq tagged-prior-gist-clause (mapcar #'tagword prior-gist-clause))
     ;; (format t "~% tagged prior gist clause = ~a" tagged-prior-gist-clause) ; DEBUGGING
     (setq relevant-trees (cdr

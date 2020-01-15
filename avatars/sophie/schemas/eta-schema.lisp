@@ -17,7 +17,11 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(Hi\, bye\.))
+?a1. (Me say-to.v you '(Hi\, what topic would you like to talk about first ?))
+
+?a2. (You reply-to.v ?a1.)
+
+?a3. (Me react-to.v ?a2.)
 
 )); end of defparameter *eta-schema*
 
@@ -50,7 +54,9 @@
 
 (mapcar #'(lambda (x) 
       (store-output-gist-clauses (first x) (second x) '*eta-schema*))
-  '()
+  '(
+    (?a1.  ((what do you want to talk about ?)))
+  )
 ); end of mapcar #'store-output-gist-clauses
 
 
@@ -66,5 +72,7 @@
 
 (mapcar #'(lambda (x) 
       (store-topic-keys (first x) (second x) '*eta-schema*))
-  '()
+  '(
+    (?a1.  (topic))
+  )
 ); end of mapcar
