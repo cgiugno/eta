@@ -165,6 +165,33 @@
 ) ; END adj?
 
 
+(defun color? (ulf)
+; ``````````````````
+; Checks if ULF is a color adjective.
+; NOTE: in the future, we may want to do this using an ontology instead.
+;
+  (and (atom ulf) (member ulf '(red.a orange.a yellow.a green.a blue.a
+    indigo.a violet.a purple.a pink.a black.a gray.a grey.a white.a)))
+) ; END color?
+
+
+(defun color-prop? (ulf)
+; ```````````````````````
+; Checks if a ULF is a proposition about color.
+;
+  (and (listp ulf) (= 2 (length ulf)) (listp (second ulf)) (color? (first (second ulf))))
+) ; END color-prop?
+
+
+(defun adv-e? (ulf)
+; ``````````````````
+; Checks if a ULF is an adv-e word or phrase.
+;
+  (or (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-E))
+      (and (listp ulf) (equal (car ulf) 'ADV-E)))
+) ; END adv-e?
+
+
 (defun noun? (ulf)
 ; `````````````````
 ; Checks if a ULF is a nominal predicate.
@@ -190,13 +217,34 @@
 ) ; END verb-pres?
 
 
+(defun verb-past? (ulf)
+; ``````````````````````
+; Checks if a ULF is a verb in past tense (no aspect).
+;
+  (and (listp ulf) (equal (first ulf) 'PAST) (verb-untensed? (second ulf)))
+) ; END verb-past?
+
+
 (defun verb? (ulf)
 ; ``````````````````
 ; Checks if a ULF is a verb in any tense.
-; NOTE: incomplete
+; TODO: incomplete, needs aspects still. Might get a bit messy with both tense & aspect.
 ;
-  (or (verb-untensed? ulf) (verb-pres? ulf))
+  (or (verb-untensed? ulf) (verb-pres? ulf) (verb-past? ulf))
 ) ; END verb?
+
+
+(defun verb-phrase? (ulf)
+; ````````````````````````
+; Checks if a ULF is a verb phrase.
+; NOTE: no verb categorization checks are done here, this simply returns true if the car of the list
+; is some individual, and the car of the second element of the list is a verb.
+; TODO: the indiv? condition is skipped currently due to the current exclusion of block names in the indiv? function.
+;
+  (and (listp ulf) (= 2 (length ulf)) (listp (second ulf)) (verb? (car (second ulf)))
+      ;;  (indiv? (car ulf))
+       )
+) ; END verb-phrase?
 
 
 (defun existential-there? (ulf)
@@ -293,7 +341,7 @@
 (defun proper-name? (ulf)
 ; `````````````````````````
 ; Checks if a ULF is a proper name.
-; NOTE: Due to the way company names act as modifiers in the blocks world ULF, we have to do
+; TODO: Due to the way company names act as modifiers in the blocks world ULF, we have to do
 ; a check here so these aren't counted as individuals. This is a bit odd and should be changed
 ; in the future.
 ;
@@ -436,12 +484,28 @@
 ) ; END numerical-det?
 
 
+(defun tense? (ulf)
+; ```````````````````
+; Checks if ULF is a tense operator
+; 
+  (if (member ulf '(past pres)) t nil)
+) ; END tense?
+
+
+(defun aspect? (ulf)
+; ```````````````````
+; Checks if ULF is an aspect operator
+; 
+  (if (member ulf '(perf prog)) t nil)
+) ; END aspect?
+
+
 (defun get-tense (ulf)
 ; `````````````````````
 ; Gets the tense of a sentence ULF.
 ;
   (cond
-    ((member ulf '(past pres)) ulf)
+    ((tense? ulf) ulf)
     ((atom ulf) nil)
     (t (some #'get-tense ulf)))
 ) ; END get-tense
@@ -452,7 +516,7 @@
 ; Gets the aspect of a sentence ULF.
 ;
   (cond
-    ((member ulf '(perf prog)) ulf)
+    ((aspect? ulf) ulf)
     ((atom ulf) nil)
     (t (some #'get-aspect ulf)))
 ) ; END get-aspect
@@ -485,6 +549,51 @@
 ;
   (member v '(be.v))
 ) ; END copulative?
+
+
+(defun after-prop? (prop)
+; ````````````````````````````
+; Checks whether a proposition is an after relation, i.e. after.p.
+;
+  (and (listp prop) (>= (length prop) 2) (equal (second prop) 'after.p))
+) ; END after-prop?
+
+
+(defun before-prop? (prop)
+; ````````````````````````````
+; Checks whether a proposition is an before relation, i.e. before.p.
+;
+  (and (listp prop) (>= (length prop) 2) (equal (second prop) 'before.p))
+) ; END before-prop?
+
+
+(defun loc-record? (list)
+; `````````````````````````
+; Checks whether a list is a location record of form ($ loc ?x ?y ?z)
+;
+  (and (listp list) (= (length list) 5) (equal '$ (first list)) (equal 'loc (second list))
+    (every #'numberp (cddr list)))
+) ; END loc-record?
+
+
+(defun at-loc-prop? (prop)
+; ```````````````````````````
+; Checks whether a proposition is an at-loc.p formula.
+; i.e. (|Twitter| at-loc.p ($ loc ?x ?y ?z))
+;
+  (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-loc.p) (loc-record? (third prop)))
+) ; END at-loc-prop?
+
+
+(defun move-prop? (prop)
+; `````````````````````````
+; Checks whether a proposition is a move.v formula.
+; i.e. (|Toyota| ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
+;
+  (and (listp prop) (= (length prop) 2) (listp (second prop)) (= (length (second prop)) 3)
+    (equal (first (second prop)) '(past move.v)) (listp (second (second prop))) (listp (third (second prop)))
+    (loc-record? (second (second (second prop)))) (loc-record? (second (third (second prop)))))
+) ; END move-prop?
 
 
 (defun same-sentence? (de1 de2 ulf)

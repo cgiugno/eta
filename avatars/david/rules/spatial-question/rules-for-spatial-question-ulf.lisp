@@ -340,17 +340,21 @@
 ; Parses adverbial phrase
 ;
 '(
-    1 (deg-adv); e.g., just
+    1 (just); just is an adv-e in the context of historical questions
+       2 (lex-ulf! adv-e 1) (0 :ulf); NOTE: might need changing in future
+    1 (deg-adv); e.g., directly
        2 (lex-ulf! adv-a 1) (0 :ulf)
     1 (adv-e); e.g., previously
        2 (lex-ulf! adv-e 1) (0 :ulf)
-    1 (prep 0 very 0); e.g., on the very first turn
-       2 (((*pp-ulf-tree* 1 2 4)) (adv-e 1)) (0 :ulf-recur)
-    1 (prep 0 conj prep 0); e.g., before the fifth turn and after the second turn
-       2 (((*pp-ulf-tree* 1 2) (lex-ulf! cc 3) (*pp-ulf-tree* 4 5)) (adv-e (1 2 3))) (0 :ulf-recur)
-    1 (deg-adv prep 0); e.g., right before the last turn
-       2 (((lex-ulf! adv-a 1) (*pp-ulf-tree* 2 3)) (adv-e (1 2))) (0 :ulf-recur)
-    1 (prep 0); e.g., during the first turn
+    1 (prep 0 very 0 noun-history); e.g., on the very first turn
+       2 (((*pp-ulf-tree* 1 2 4 5)) (adv-e 1)) (0 :ulf-recur)
+    1 (prep-history 0 noun-history conj prep-history 0 noun-history); e.g., before the fifth turn and after the second turn
+       2 (((*pp-ulf-tree* 1 2 3) (lex-ulf! cc 4) (*pp-ulf-tree* 5 6 7)) (adv-e (1 2 3))) (0 :ulf-recur)
+    1 (deg-adv prep 0 noun-history); e.g., right before the last turn
+       2 (((lex-ulf! adv-a 1) (*pp-ulf-tree* 2 3 4)) (adv-e (1 2))) (0 :ulf-recur)
+    1 (prep 0 noun-history); e.g., during the first turn
+       2 (((*pp-ulf-tree* 1 2 3)) (adv-e 1)) (0 :ulf-recur)
+    1 (prep-history-simple 0); e.g., before I moved it
        2 (((*pp-ulf-tree* 1 2)) (adv-e 1)) (0 :ulf-recur)
     1 (det noun-history ago); e.g., two turns ago
        2 (((*np-ulf-tree* 1 2)) (adv-e (sub 1 (ago.p *h)))) (0 :ulf-recur)

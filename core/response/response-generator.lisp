@@ -16,21 +16,26 @@
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (|SRI | BLOCK.N)) *H)) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (MOST-N LEFT.A (GREEN.A BLOCK.N))) *H)) ?)
 ; '((WHAT.PRO ((PRES BE.V) (= (THE.D (MOST-N LEFT.A BLOCK.N))))) ?)
-;
+; '((((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (TO_THE_LEFT_OF.P (THE.D (|Texaco| BLOCK.N))))) ?))
+; '((((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?))
+; '(((SUB (OF.P (WHAT.D COLOR.N)) ((PRES BE.V) (THE.D (|Texaco| BLOCK.N)) *H)) ?))
+; '(((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?))
 
 ; Example relations:
 ; 'None
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.6))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Texaco| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.6) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.8))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.6))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.6) (((the.d (|Twitter| block.n)) on.p (the.d (|SRI | block.n))) 0.6))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|NVidia| block.n)) near.p (the.d (|Twitter| block.n))) 0.8))
-; '((((the.d (|NVidia| block.n)) on.p (the.d (|SRI | block.n))) 0.8) (((the.d (|NVidia| block.n)) on.p (the.d (|Twitter| block.n))) 0.8))
-; '((((the.d (|SRI | block.n)) on.p (the.d (|NVidia| block.n))) 0.8) (((the.d (|SRI | block.n)) on.p (the.d (|Texaco| block.n))) 0.8) (((the.d (|SRI | block.n)) near.p (the.d (|Twitter| block.n))) 0.8))
-; '((((the.d (|SRI | block.n)) on.p (the.d (|NVidia| block.n))) 0.8) (((the.d (|SRI | block.n)) near.p (the.d (|Texaco| block.n))) 0.8) (((the.d (|SRI | block.n)) between.p ((the.d (|Cat | block.n)) and.cc (the.d (|Dog | block.n)))) 0.8) (((the.d (|SRI | block.n)) between.p ((the.d (|Bob | block.n)) and.cc (the.d (|Ben | block.n)))) 0.8))
+; '(((|Starbucks| on.p |Target|) 0.6))
+; '(((|Starbucks| on.p |Target|) 0.8))
+; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.8))
+; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.8) ((|Texaco| on.p |Target|) 0.8))
+; '(((|Starbucks| on.p |Target|) 0.6) ((|Twitter| on.p |Target|) 0.8))
+; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.6))
+; '(((|Starbucks| on.p |Target|) 0.6) ((|Twitter| on.p |Target|) 0.6))
+; '(((|Starbucks| on.p |Target|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
+; '(((|Starbucks| on.p |Target|) 0.8) ((|Starbucks| on.p |Twitter|) 0.8))
+; '(((|Target| on.p |Starbucks|) 0.8) ((|Target| on.p |Texaco|) 0.8) ((|Target| near.p |Twitter|) 0.8))
+; '(((|Target| on.p |Starbucks|) 0.8) ((|Target| near.p |Texaco|) 0.8) ((|Target| between.p (|Cat | and.cc |Dog |)) 0.8) ((|Target| between.p (|Bob | and.cc |Ben |)) 0.8))
+; '(((|Texaco| on.p |Twitter|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
+; '(((|Texaco| (past move.v)) 0.8) ((|Starbucks| (past move.v)) 0.8))
 ;
 ;; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (|SRI | BLOCK.N)) *H)) ?)
 ;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  ((ON.P (THE.D (|NVidia| BLOCK.N))) AND.CC (NEAR.P (THE.D (|Twitter| BLOCK.N))))  ))
@@ -92,7 +97,8 @@
 
 (defun respond-attr-color (query-ulf relations)
 ; ```````````````````````````````````````````````
-; TODO
+; Creates response ULF for what color questions
+; NOTE: should be modified to support "the Toyota block is touching what color block?" when these are supported
 ;
   (cond
     ; If no relations are returned
@@ -102,22 +108,23 @@
         (/ (color-flag? ((! verb-pres? verb-untensed?) (the.d _!))) (there.pro ((pres be.v) (= (no.d (such.a _!))))))
         (/ (color-flag?) (there.pro ((pres be.v) (= (no.d (such.a block.n))))))
       ) query-ulf))
-    ;; ; If one or more relations are returned
-    ;; (t (let ((certain-set (get-certain-subjs relations)) (uncertain-set (get-uncertain-subjs relations)))
-    ;;   (cond
-    ;;     ; If only uncertain results are given
-    ;;     ((null certain-set)
-    ;;       (ttt:apply-rules `(
-    ;;         (/ (yn-flag? there.pro _!1 _!2) (perhaps.adv-s (,uncertain-set ((pres might.aux-v) (be.v _!2)))))
-    ;;         (/ (yn-flag? there.pro _*) (perhaps.adv-s (,uncertain-set ((pres might.aux-v) be.v))))
-    ;;         ) query-ulf))
-    ;;     ; If any certain results are given
-    ;;     (t
-    ;;       (ttt:apply-rules `(
-    ;;         (/ (yn-flag? there.pro _!1 _!2) (yes.yn (,certain-set (yn-flag? _!2))))
-    ;;         (/ (yn-flag? there.pro _*) (yes.yn (,certain-set (pres be.v))))
-    ;;         ) query-ulf)))))
-    )
+    ; If one or more relations are returned
+    (t (let ((certain-set (get-certain-colors relations)) (uncertain-set (get-uncertain-colors relations)))
+      (cond
+        ; If only uncertain results are given
+        ((null certain-set)
+          (ttt:apply-rules `(
+            (/ (sub (of.p color-flag?) ((! verb-pres? verb-untensed?) (the.d _!) _!1)) (perhaps.adv-s ((the.d _!) (! ,uncertain-set))))
+            (/ (color-flag? ((! verb-pres? verb-untensed?) (the.d _!))) (perhaps.adv-s ((the.d _!) (! ,uncertain-set))))
+            ; what color block is on the table
+            ) query-ulf))
+        ; If any certain results are given
+        (t
+          (ttt:apply-rules `(
+            (/ (sub (of.p color-flag?) ((! verb-pres? verb-untensed?) (the.d _!) _!1)) ((the.d _!) (! ,certain-set)))
+            (/ (color-flag? ((! verb-pres? verb-untensed?) (the.d _!))) ((the.d _!) (! ,certain-set)))
+            ; what color block is on the table
+            ) query-ulf))))))
 ) ; END respond-attr-color
 
 
@@ -243,7 +250,7 @@
 
 (defun respond-descr (query-ulf relations)
 ; `````````````````````````````````````````````
-; TODO
+; Creates response ULF to where-questions
 ;
   (cond
     ; If no relations are returned
@@ -318,7 +325,7 @@
   (ttt:match-expr '(yn-flag? THERE.PRO _*) p))
 
 (defun color-flag? (p)
-  (ttt:match-expr '(WHAT.D (! COLOR.N (PLUR COLOR.N))) p))
+  (ttt:match-expr '(WHAT.D (! COLOR.N (PLUR COLOR.N) (COLOR.A (!1 BLOCK.N (PLUR BLOCK.N))))) p))
 
 (defun tense? (p)
   (member p '(PRES PAST PROG PERF)))
@@ -410,7 +417,7 @@
 ; Retrieves subjects from a list of relations with certainties above the threshold.
 ;
   (let ((subjs (remove-duplicates (remove nil (mapcar (lambda (rel)
-          (if (compare-certainty rel) (first (first rel)))) relations)) :test #'equal)))
+          (if (compare-certainty rel) (form-np (first (first rel))))) relations)) :test #'equal)))
     (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
 ) ; END get-certain-subjs
 
@@ -420,7 +427,7 @@
 ; Retrieves subjects from a list of relations with certainties below the threshold.
 ;
   (let ((subjs (remove-duplicates (remove nil (mapcar (lambda (rel)
-          (if (not (compare-certainty rel)) (first (first rel)))) relations)) :test #'equal)))
+          (if (not (compare-certainty rel)) (form-np (first (first rel))))) relations)) :test #'equal)))
     (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
 ) ; END get-uncertain-subjs
 
@@ -429,20 +436,20 @@
 ; ````````````````````````````````````
 ; Retrieves objects from a list of relations with certainties above the threshold.
 ;
-  (let ((subjs (remove-duplicates (remove nil (mapcar (lambda (rel)
-          (if (compare-certainty rel) (third (first rel)))) relations)) :test #'equal)))
-    (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
-) ; END get-certain-subjs
+  (let ((objs (remove-duplicates (remove nil (mapcar (lambda (rel)
+          (if (compare-certainty rel) (form-np (third (first rel))))) relations)) :test #'equal)))
+    (if (<= (length objs) 1) (car objs) (cons 'SET-OF objs)))
+) ; END get-certain-objs
 
 
 (defun get-uncertain-objs (relations)
 ; ````````````````````````````````````
 ; Retrieves objects from a list of relations with certainties below the threshold.
 ;
-  (let ((subjs (remove-duplicates (remove nil (mapcar (lambda (rel)
-          (if (not (compare-certainty rel)) (third (first rel)))) relations)) :test #'equal)))
-    (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
-) ; END get-uncertain-subjs
+  (let ((objs (remove-duplicates (remove nil (mapcar (lambda (rel)
+          (if (not (compare-certainty rel)) (form-np (third (first rel))))) relations)) :test #'equal)))
+    (if (<= (length objs) 1) (car objs) (cons 'SET-OF objs)))
+) ; END get-uncertain-objs
 
 
 (defun group-relations (relations)
@@ -486,30 +493,54 @@
   (cdr (mapcan (lambda (group)
     (if (and (listp group) (>= (length group) 2) (listp (second group)))
       (cons 'and.cc (cdr (mapcan (lambda (rel) (list 'and.cc (list (second rel) (third rel)))) group)))
-      (list 'and.cc (list (second group) (third group)))
-    )
-
-    ;; (list 'and.cc (list (second group) (third group)))
-    )
+      (list 'and.cc (list (second group) (third group)))))
     (mapcar #'condense-by-subjs (group-relations relations))))
 ) ; END conjoin-relations
 
 
-;; (defun get-certain-colors (relations)
-;; ; ````````````````````````````````````
-;; ;
-;; ;
-;;   (let ((subjs (remove-duplicates (remove nil (mapcar (lambda (rel)
-;;           (if (compare-certainty rel) (ttt:apply-rule '(/ ()) rel))) relations)) :test #'equal)))
-;;     (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
-;; ) ; END get-certain-colors
+(defun form-np (block)
+; ``````````````````````
+; Forms a definite noun phrase from a block name
+; e.g. |Twitter| => (the.d (|Twitter| block.n))
+;
+  `(the.d (,block block.n))
+) ; END form-np
 
 
-;; (defun get-uncertain-colors (relations)
-;; ; ````````````````````````````````````
-;; ;
-;; ;
-;;   (let ((subjs (remove-duplicates (remove nil (mapcar (lambda (rel)
-;;           (if (not (compare-certainty rel)) (third (first rel)))) relations)) :test #'equal)))
-;;     (if (<= (length subjs) 1) (car subjs) (cons 'SET-OF subjs)))
-;; ) ; END get-uncertain-colors
+(defun form-color-np (color)
+; ````````````````````````````
+; Forms an indefinite noun phrase from a color adjective
+; e.g. red.a => (a.d (red.a block.n))
+;
+  `(a.d (,color block.n))
+) ; END form-color-np
+
+
+(defun get-color (block)
+; ```````````````````````
+; Gets the color of a given block name
+; e.g. |Twitter| => red.a
+;
+  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context block)))))
+    (caadr color-prop))
+) ; END get-color
+
+
+(defun get-certain-colors (relations)
+; `````````````````````````````````````
+; Retrieves colors from a list of relations with certainties above the threshold.
+;
+  (let ((colors (remove-duplicates (remove nil (mapcar (lambda (rel)
+          (if (compare-certainty rel) (get-color (first (first rel))))) relations)) :test #'equal)))
+    (if (<= (length colors) 1) (car colors) (cons 'SET-OF colors)))
+) ; END get-certain-colors
+
+
+(defun get-uncertain-colors (relations)
+; ```````````````````````````````````````
+; Retrieves colors from a list of relations with certainties below the threshold.
+;
+  (let ((colors (remove-duplicates (remove nil (mapcar (lambda (rel)
+          (if (not (compare-certainty rel)) (get-color (third (first rel))))) relations)) :test #'equal)))
+    (if (<= (length colors) 1) (car colors) (cons 'SET-OF colors)))
+) ; END get-uncertain-colors
