@@ -17,11 +17,13 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(Hi\, what topic would you like to talk about first ?))
+?a1. (Me say-to.v you '(Hi\, it\'s nice to met you\. I\'ve just moved back here and I was
+                          doing pretty well after the radiation\, but now this pain seems
+                          to be getting worse\.))
 
-?a2. (You reply-to.v ?a1.)
+?a2. (You reply-to.v ?a1.) ; Doctor makes comment or asks follow-up question
 
-?a3. (Me react-to.v ?a2.)
+?a3. (Me react-to.v ?a2.) ; React to comment, or initiate sub-schema to respond to follow-up question
 
 )); end of defparameter *eta-schema*
 
