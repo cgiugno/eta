@@ -15,8 +15,7 @@
 ; '((SUB (WHAT.D BLOCK.N) ((THE.D (Twitter BLOCK.N)) ((PRES BE.V) (ON_TOP_OF.P *H)))) ?)
 ; '(((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (TO_THE_LEFT_OF.P (THE.D (|Texaco| BLOCK.N))))) ?)
 ; '(((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
-; '((SUB (OF.P (WHAT.D COLOR.N)) ((PRES BE.V) (THE.D (|Texaco| BLOCK.N)) *H)) ?)
-; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (Texaco BLOCK.N)) ((PRES BE.V) *H))) ?)
+; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (|Texaco| BLOCK.N)) ((PRES BE.V) *H))) ?)
 ; '((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
 ; '(((THE.D (NVidia BLOCK.N)) (EVER.ADV-E ((PAST PERF) (TOUCH.V (THE.D (NVidia BLOCK.N)))))) ?)
 ; '((SUB (DURING.P (WHAT.D TURN.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (SRI  BLOCK.N)) (ADV-E *H)))) ?)
@@ -56,9 +55,11 @@
 ; NOTE: Check for poss-ques:
 ; "You are not sure if you understood the question correctly\, but your answer is"
 ;
-  (let ((query-type (get-query-type query-ulf)) ans-ulf output-ulf)
+  (let ((query-type (get-query-type query-ulf)) ans-tuple ans-ulf output-ulf uncertain-flag)
     ;; (setq query-ulf (car query-ulf))
-    (setq ans-ulf (form-ans query-type relations))
+    (setq ans-tuple (form-ans query-type relations))
+    (setq ans-ulf (first ans-tuple))
+    (setq uncertain-flag (second ans-tuple))
 
     (format t "Query: ~a~%" query-ulf)
     (format t "Query type: ~a~%" query-type)
@@ -97,6 +98,10 @@
       ; Query is TIME type
       ((equal query-type 'TIME)
         (ttt:apply-rule `(/ time-flag? ,ans-ulf) query-ulf)))))
+
+    ; When answer is uncertain, append an adverb indicating uncertainty to answer
+    (when uncertain-flag
+      (setq output-ulf (list 'possibly.adv-s output-ulf)))
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
@@ -196,11 +201,11 @@
       (t
         '(Sorry \, you was unable to find an object that satisfies given constraints \, please rephrase in a simpler way \.))))
     
-    ; When answer is uncertain, append an adverb indicating uncertainty to answer
-    (when uncertain-flag
-      (setq ans (cons 'POSSIBLY.ADV-S ans)))
-      
-  ans)
+    ;; ; When answer is uncertain, append an adverb indicating uncertainty to answer
+    ;; (when uncertain-flag
+    ;;   (setq ans (cons 'POSSIBLY.ADV-S (if (and (listp ans) (= 1 (length ans))) ans (list ans)))))
+
+    (list ans uncertain-flag))
 ) ; END form-ans
 
 
