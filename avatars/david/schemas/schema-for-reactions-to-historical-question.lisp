@@ -45,7 +45,7 @@
                ; this would attempt to recall an answer from Eta's context (containing
                ; block moves at each time step), using the observed locations of blocks
                ; at the present time step.
-              ?a4. (me conditionally-say-to2.v you ?ulf ?ans-relations)
+              ?a4. (me conditionally-say-to.v you ?ulf ?ans-relations)
                ; here ?ans is split off from ?ans+alternates;
                ; "conditionally say to you" would normally expand
                ; into just (me say-to.v you '?ans); but I'm thinking

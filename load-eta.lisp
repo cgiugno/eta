@@ -13,6 +13,11 @@
 ;; python core/resources/python-repl-server.py 8080 "g:g"
 
 
+; Load ulf-pragmatics
+;``````````````````````
+(ql:quickload "ulf-pragmatics")
+
+
 ; Load core code
 ; (in directory 'core/')
 ;````````````````````````

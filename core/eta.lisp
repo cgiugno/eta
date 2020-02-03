@@ -137,7 +137,7 @@
   (defparameter *live* nil)
 
   ; perceive-coords mode, if *perceive-coords* = T, perceives coordinates (in terminal
-  ; mode, the user enters coords, otherwise they're provided in coords.lisp)
+  ; mode, the user enters coords, otherwise they're provided in perceptions.lisp)
   (defparameter *perceive-coords* nil)
 
 ) ; END init
@@ -975,59 +975,6 @@
         (delete-current-episode {sub}plan-name))
 
       ;````````````````````````````````````````
-      ; Eta: Seek answer from external source (NOTE: temporarily unused until response generator finished)
-      ;````````````````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(me seek-answer-from2.v _! _!1) wff))
-        (setq system (get-single-binding bindings))
-        (setq bindings (cdr bindings))
-        (setq user-ulf (get-single-binding bindings))
-        ; Leaving this open in case we want different procedures for different systems
-        (cond
-          ((null *live*) (write-ulf user-ulf))
-          ((eq system '|Blocks-World-System|) (write-ulf user-ulf))
-          (t (write-ulf user-ulf)))
-        (delete-current-episode {sub}plan-name))
-
-      ;``````````````````````````````````````````
-      ; Eta: Recieve answer from external source (NOTE: temporarily unused until response generator finished)
-      ;``````````````````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(me receive-answer-from2.v _! _!1) wff))
-        (setq system (get-single-binding bindings))
-        (setq bindings (cdr bindings))
-        (setq expr (get-single-binding bindings))
-        ; Leaving this open in case we want different procedures for different systems
-        (cond
-          ((null *live*) (setq ans ''()))
-          ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer))))
-          (t (setq ans `(quote ,(get-answer)))))
-        ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans-relations) in plan
-        (nsubst-variable {sub}plan-name ans expr)
-        (delete-current-episode {sub}plan-name))
-
-      ;````````````````````````````
-      ; Eta: Conditionally saying (NOTE: temporarily unused until response generator finished)
-      ;````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to2.v you _! _!1) wff))
-        (setq user-ulf (get-single-binding bindings))
-        (setq bindings (cdr bindings))
-        (setq expr (get-single-binding bindings))
-        ; Generate response based on list of relations
-        (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
-          (setq ans (generate-response (eval user-ulf) (eval expr))))
-        (format t "answer to output: ~a~%" ans) ; DEBUGGING
-        ; Create say-to.v subplan from answer
-        (setq new-subplan-name
-          (init-plan-from-episode-list
-            (list :episodes (action-var) (create-say-to-wff ans))
-            {sub}plan-name))
-        ; If subplan creation is successful, attach as subplan (otherwise delete).
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
-
-      ;````````````````````````````````````````
       ; Eta: Seek answer from external source
       ;````````````````````````````````````````
       ((setq bindings (bindings-from-ttt-match '(me seek-answer-from.v _! _!1) wff))
@@ -1050,30 +997,25 @@
         (setq expr (get-single-binding bindings))
         ; Leaving this open in case we want different procedures for different systems
         (cond
-          ((null *live*) (setq ans ''((Could not connect with system \: not in live mode \.))))
-          ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer-string))))
-          (t (setq ans `(quote ,(get-answer-string)))))
+          ((null *live*) (setq ans ''()))
+          ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer))))
+          (t (setq ans `(quote ,(get-answer)))))
         ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
+        ; Substitute ans for given variable (e.g. ?ans-relations) in plan
         (nsubst-variable {sub}plan-name ans expr)
         (delete-current-episode {sub}plan-name))
 
       ;````````````````````````````
       ; Eta: Conditionally saying
       ;````````````````````````````
-      ; NOTE: Currently just creates a primitive say-to.v subplan directly from the given
-      ; answer
-      ; TODO: In the future we should change this to use the alternates (if given) somehow
-      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to.v you _! _!1) wff))
+        (setq user-ulf (get-single-binding bindings))
+        (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
-        (setq expr (eval-functions expr))
-        ; If poss-ans, append text to answer
-        (if (equal (first expr) 'poss-ans)
-          (setq ans (append
-            '(You are not sure if you understood the question correctly\, but your answer is)
-            (cdr expr)))
-          (setq ans expr))
-        ;; (format t "answer to output: ~a~%" ans) ; DEBUGGING
+        ; Generate response based on list of relations
+        (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
+          (setq ans (generate-response (eval user-ulf) (eval expr))))
+        (format t "answer to output: ~a~%" ans) ; DEBUGGING
         ; Create say-to.v subplan from answer
         (setq new-subplan-name
           (init-plan-from-episode-list
@@ -1084,6 +1026,64 @@
           (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
         (add-subplan {sub}plan-name new-subplan-name))
+
+      ;; ;````````````````````````````````````````
+      ;; ; Eta: Seek answer from external source
+      ;; ;````````````````````````````````````````
+      ;; ((setq bindings (bindings-from-ttt-match '(me seek-answer-from2.v _! _!1) wff))
+      ;;   (setq system (get-single-binding bindings))
+      ;;   (setq bindings (cdr bindings))
+      ;;   (setq user-ulf (get-single-binding bindings))
+      ;;   ; Leaving this open in case we want different procedures for different systems
+      ;;   (cond
+      ;;     ((null *live*) (write-ulf user-ulf))
+      ;;     ((eq system '|Blocks-World-System|) (write-ulf user-ulf))
+      ;;     (t (write-ulf user-ulf)))
+      ;;   (delete-current-episode {sub}plan-name))
+
+      ;; ;``````````````````````````````````````````
+      ;; ; Eta: Recieve answer from external source
+      ;; ;``````````````````````````````````````````
+      ;; ((setq bindings (bindings-from-ttt-match '(me receive-answer-from2.v _! _!1) wff))
+      ;;   (setq system (get-single-binding bindings))
+      ;;   (setq bindings (cdr bindings))
+      ;;   (setq expr (get-single-binding bindings))
+      ;;   ; Leaving this open in case we want different procedures for different systems
+      ;;   (cond
+      ;;     ((null *live*) (setq ans ''((Could not connect with system \: not in live mode \.))))
+      ;;     ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer-string))))
+      ;;     (t (setq ans `(quote ,(get-answer-string)))))
+      ;;   ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
+      ;;   ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
+      ;;   (nsubst-variable {sub}plan-name ans expr)
+      ;;   (delete-current-episode {sub}plan-name))
+
+      ;; ;````````````````````````````
+      ;; ; Eta: Conditionally saying
+      ;; ;````````````````````````````
+      ;; ; NOTE: Currently just creates a primitive say-to.v subplan directly from the given
+      ;; ; answer
+      ;; ; TODO: In the future we should change this to use the alternates (if given) somehow
+      ;; ((setq bindings (bindings-from-ttt-match '(me conditionally-say-to2.v you _!) wff))
+      ;;   (setq expr (get-single-binding bindings))
+      ;;   (setq expr (eval-functions expr))
+      ;;   ; If poss-ans, append text to answer
+      ;;   (if (equal (first expr) 'poss-ans)
+      ;;     (setq ans (append
+      ;;       '(You are not sure if you understood the question correctly\, but your answer is)
+      ;;       (cdr expr)))
+      ;;     (setq ans expr))
+      ;;   ;; (format t "answer to output: ~a~%" ans) ; DEBUGGING
+      ;;   ; Create say-to.v subplan from answer
+      ;;   (setq new-subplan-name
+      ;;     (init-plan-from-episode-list
+      ;;       (list :episodes (action-var) (create-say-to-wff ans))
+      ;;       {sub}plan-name))
+      ;;   ; If subplan creation is successful, attach as subplan (otherwise delete).
+      ;;   (when (null new-subplan-name)
+      ;;     (delete-current-episode {sub}plan-name)
+      ;;     (return-from implement-next-eta-action nil))
+      ;;   (add-subplan {sub}plan-name new-subplan-name))
 
       ;````````````````````````````
       ; Eta: Perceiving world

@@ -42,7 +42,7 @@
                ; this is where Eta "sees" the blocks world, specifically block movements.
                ; ?perceptions is given as a list of propositions reflecting Eta's perceptions
                ; e.g. locations of blocks (at-loc.p), things that have moved (move.v), etc.
-              ?a3. (me seek-answer-from2.v |Blocks-World-System| ?ulf)
+              ?a3. (me seek-answer-from.v |Blocks-World-System| ?ulf)
                ; this would send the ulf (obtained from the properties
                ; of the actual name replacing ?var) to an appropriate
                ; file, monitored by the Spatial-QA-Server; the server
@@ -50,13 +50,13 @@
                ; Currently variable given should be '?ans+alternates if expect
                ; to recieve list of answer and then alternates, or should be given
                ; as '?ans if expect to recieve only answer.
-              ?a4. (me receive-answer-from2.v |Blocks-World-System| ?ans-relations)
+              ?a4. (me receive-answer-from.v |Blocks-World-System| ?ans-relations)
               ;; ?a4. (me receive-answer-from.v |Blocks-World-System| ?ans+alternates)
                ; the value of ?ans+alternates would be read off from a file
                ; to which Spatial-QA-Server sends the answer (with weighted
                ; alternates); once ; the answer is read off, the file would
                ; be emptied.
-              ?a5. (me conditionally-say-to2.v you ?ulf ?ans-relations)
+              ?a5. (me conditionally-say-to.v you ?ulf ?ans-relations)
               ;; ?a5. (me conditionally-say-to.v you (main-answer.f ?ans+alternates))
                ; here ?ans is split off from ?ans+alternates;
                ; "conditionally say to you" would normally expand

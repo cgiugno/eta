@@ -17,13 +17,15 @@
 ; ```````````````````
 ; Checks whether a ulf segment is an individual type (noun phrase,
 ; reified noun/action/sentence, etc.)
+; TODO: until coref is improved, reified propositions/events/actions are not
+; considered individual types
 ;
   (or
     ; Compound types
     (quan? ulf)
-    (reified-sentence? ulf)
-    (reified-action? ulf)
-    (reified-event? ulf)
+    ;; (reified-sentence? ulf)
+    ;; (reified-action? ulf)
+    ;; (reified-event? ulf)
     (det-np? ulf)
     (set-of? ulf)
     (kind? ulf)
@@ -234,6 +236,14 @@
 ) ; END verb?
 
 
+(defun aux? (ulf)
+; `````````````````
+; Checks if a ULF is an auxiliary verb (untensed).
+;
+  (and (atom ulf) (member (second (sym-split ulf 6)) '(.AUX-S .AUX-V)))
+) ; END aux?
+
+
 (defun verb-phrase? (ulf)
 ; ````````````````````````
 ; Checks if a ULF is a verb phrase.
@@ -245,6 +255,80 @@
       ;;  (indiv? (car ulf))
        )
 ) ; END verb-phrase?
+
+
+(defun add-vp-tense! (vp+ tense)
+; ````````````````````````````````
+; Adds the given tense marker to the given verb phrase.
+; Recursively search for first *.v or *.aux in depth first search.
+;
+; The first argument is a list of a verb phrase plus additional
+; phrases that are wrapped around the vp at the end.
+;
+; (run.v) past -> (past run.v)
+; ((run.v (k home.n))) past -> ((past run.v) (k home.n))
+; (((call.v again.adv-a) later.adv-e)) pres
+;   -> (((pres call.v) again.adv-a) later.adv-e)
+;
+; NOTE: Taken from Gene Kim's ulf-pragmatics library.
+;
+  (labels 
+    ((rechelper (vp)
+       (cond 
+         ;; Base case: found the verb/aux -- add tense and return.
+         ((and (atom vp) (or (verb-untensed? vp) (aux? vp))) (list tense vp))
+         ;; Base case: other atom, simply return value.
+         ((atom vp) vp)
+         ;; Recursive case:
+         ;;  recurse left, 
+         ;;    if returned val is diff, reconstruct and return
+         ;;    else recurse to right.
+         (t 
+           (let ((leftrec (rechelper (car vp))))
+             (if (not (equal leftrec (car vp)))
+               (cons leftrec (cdr vp))
+               (cons (car vp) (rechelper (cdr vp))))))))
+     ) ; end of labels definitions.
+   
+    ;; Main body.
+    (if (not (listp vp+))
+      (setf vp+ (list vp+)))
+    (let ((tvp (rechelper (car vp+)))
+          (additional (cdr vp+)))
+      (reduce #'list additional :initial-value tvp)))
+) ; END add-vp-tense!
+
+
+(defun remove-redundant-do (ulf)
+; ```````````````````````````````
+; Removes do.aux-s if followed directly by a verb, rather than, say a negation
+; operator.
+;
+; NOTE: Taken from Gene Kim's ulf-pragmatics library.
+;
+  (ttt:apply-rule
+    '(/ ((tense? do.aux-s) _!1 (+ (!2 adv? ((!3 adv-a adv-s adv-a) _!)))) ((add-vp-tense! (_!1) tense?) +))
+    (ttt:apply-rule
+      '(/ ((tense? do.aux-s) _!1) (add-vp-tense! (_!1) tense?)) ulf))
+) ; END remove-redundant-do
+
+
+(defun remove-question-do (ulf)
+; ``````````````````````````````
+; Removes any 'do' auxiliaries in a question ULF, unless followed by a negation.
+; 
+  (if (ttt:match-expr '(^* ((tense? do.aux-s) not.adv-a _*)) ulf)
+    ulf
+    (ttt:apply-rule '(/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1))) ulf))
+) ; END remove-question-do
+
+
+(defun remove-question-mark (ulf)
+; `````````````````````````````````
+; Removes question mark in ULF.
+;
+  (ttt:apply-rule '(/ (_* qmark?) _*) ulf)
+) ; END remove-question-mark
 
 
 (defun existential-there? (ulf)
@@ -282,12 +366,20 @@
 ) ; END relative?
 
 
-(defun preposition? (ulf)
-; ````````````````````````
-; Checks if a ULF is a preposition, e.g. on.p.
+(defun prep? (ulf)
+; `````````````````
+; Checks if a ULF is a preposition, e.g. on.p
 ;
-  (and (listp ulf) (atom (car ulf)) (equal (second (sym-split (car ulf) 2)) '.P))
-) ; END preposition?
+  (and (symbolp ulf) (equal (second (sym-split ulf 2)) '.P))
+) ; END prep?
+
+
+(defun preposition-phrase? (ulf)
+; ````````````````````````````````
+; Checks if a ULF is a prepositional phrase, e.g. (on.p (the.d table.n)).
+;
+  (and (listp ulf) (atom (car ulf)) (prep? (car ulf)))
+) ; END preposition-phrase?
 
 
 (defun sentential-preposition? (ulf)
@@ -468,6 +560,24 @@
       ((equal adj 'five) 5) ((equal adj 'six) 6) ((equal adj 'seven) 7)
       ((equal adj 'eight) 8) ((equal adj 'nine) 9) ((equal adj 'ten) 10)))
 ) ; END numerical-adj?
+
+
+(defun num-to-adj (num)
+; ````````````````````````
+; Converts a number to a ULF adjective (e.g. 5 => FIVE.A)
+; 
+  (cond
+    ((= num 0) 'zero.a) ((= num 1) 'one.a)  ((= num 2) 'two.a) ((= num 3) 'three.a)
+    ((= num 4) 'four.a) ((= num 5) 'five.a) ((= num 6) 'six.a) ((= num 7) 'seven.a)
+    ((= num 8) 'eight.a) ((= num 9) 'nine.a) ((= num 10) 'ten.a) ((= num 11) 'eleven.a)
+    ((= num 12) 'twelve.a) ((= num 13) 'thirteen.a) ((= num 14) 'fourteen.a)
+    ((= num 15) 'fifteen.a) ((= num 16) 'sixteen.a) ((= num 17) 'seventeen.a)
+    ((= num 18) 'eighteen.a) ((= num 19) 'nineteen.a) ((= num 20) 'twenty.a)
+    ((= num 30) 'thirty.a) ((= num 40) 'forty.a) ((= num 50) 'fifty.a)
+    ((= num 60) 'sixty.a) ((= num 70) 'seventy.a) ((= num 80) 'eighty.a)
+    ((= num 90) 'ninety.a) ((= num 100) 'one_hundred.a)
+    (t (intern (format nil "~a.A" num))))
+) ; END num-to-adj
 
 
 (defun numerical-det? (ulf)
