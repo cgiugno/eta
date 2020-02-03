@@ -312,7 +312,7 @@
   (cond
     ((and (mod? mod1) (mod? mod2)) (equal mod1 mod2))
     ((mod? mod1) (mod-subsumes? mod1 (car (last mod2))))
-    ((preposition? mod1) (equal mod1 mod2))
+    ((preposition-phrase? mod1) (equal mod1 mod2))
     (t (or (equal mod1 mod2) (and (listp mod2) (mod-subsumes? mod1 (car (last mod2)))))))
 ) ; END mod-subsumes?
 
