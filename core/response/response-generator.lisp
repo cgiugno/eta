@@ -20,7 +20,7 @@
 ; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (|Texaco| BLOCK.N)) ((PRES BE.V) *H))) ?)
 ; '((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
 ; '(((THE.D (NVidia BLOCK.N)) (EVER.ADV-E ((PAST PERF) (TOUCH.V (THE.D (NVidia BLOCK.N)))))) ?)
-; '((SUB (DURING.P (WHAT.D TURN.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (SRI  BLOCK.N)) (ADV-E *H)))) ?)
+; '((SUB (DURING.P (WHAT.D TURN.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|SRI | BLOCK.N)) (ADV-E *H)))) ?)
 ; '((SUB (WHAT.D BLOCK.N) ((THE.D (Twitter BLOCK.N)) ((PAST BE.V) INITIALLY.ADV-E (ON.P *H)))) ?)
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (WHICH.D BLOCK.N)))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
@@ -63,15 +63,18 @@
 ; "You are not sure if you understood the question correctly\, but your answer is"
 ;
   (let ((query-type (get-query-type query-ulf)) ans-tuple ans-ulf output-ulf uncertain-flag)
-    ;; (setq query-ulf (car query-ulf))
+
+    ; ans-tuple consists of a list (ans-ulf uncertain-flag), where ans-ulf is a ULF corresponding
+    ; to the relevant answer, and uncertain-flag indicates whether the answer is above or below the
+    ; certainty threshold.
     (setq ans-tuple (form-ans query-type relations))
     (setq ans-ulf (first ans-tuple))
     (setq uncertain-flag (second ans-tuple))
 
-    (format t "Query: ~a~%" query-ulf)
-    (format t "Query type: ~a~%" query-type)
-    (format t "Relations: ~a~%" relations)
-    (format t "Answer: ~a~%" ans-ulf) ; DEBUGGING
+    ;; (format t "Query: ~a~%" query-ulf)
+    ;; (format t "Query type: ~a~%" query-type)
+    ;; (format t "Relations: ~a~%" relations)
+    ;; (format t "Answer: ~a~%" ans-ulf) ; DEBUGGING
 
     ; Make appropriate substitutions of answer ULF into query ULF,
     ; and uninvert form of question to get output ULF.
@@ -116,7 +119,7 @@
     ; negation of that presupposition
     (if (null relations)
       (let ((presupposition-failure (respond-to-presupposition query-ulf)))
-        (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
+        ;; (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
         (if presupposition-failure (setq output-ulf presupposition-failure))))
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
@@ -124,78 +127,6 @@
       (ulf-to-english output-ulf)
       '(Sorry \, you was unable to find an object that satisfies given constraints \, please rephrase in a simpler way \.)))
 ) ; END generate-response
-
-
-(defun uninvert-question (ulf)
-; ``````````````````````````````
-; Uninvert a ULF question by removing the question mark, applying sub macros, and removing auxiliary verbs such as "do".
-;
-  (setq ulf (remove-question-mark ulf))
-  (setq ulf (remove-question-do ulf))
-  (nth-value 1 (ulf-lib:apply-sub-macro ulf :calling-package *package*))
-) ; END uninvert-question
-
-
-(defun ulf-to-english (ulf)
-; ``````````````````````````
-; For converting a ULF response to a surface form response via the ulf2english library.
-;
-  (format t "converting to english: ~a~%" ulf) ; DEBUGGING
-  (str-to-output (ulf2english:ulf2english ulf :add-commas t))
-) ; END ulf-to-english
-
-
-(defun respond-to-presupposition (ulf)
-; ``````````````````````````````````````
-; Generates presupposition for query ULF (if any), and creates a response to that
-; presupposition by negating it.
-;
-  (negate-wh-question-presupposition (normalize-wh-question-presupposition
-    (ulf-pragmatics:get-wh-question-presupposition ulf :calling-package *package*)))
-) ; END respond-to-presupposition
-
-
-(defun normalize-wh-question-presupposition (ulf)
-; `````````````````````````````````````````````````````````````
-; Extracts result formula and applies task-specific normalization, including
-; (for now) fixing bugs, such as the presupposition having "something.d block.n"
-; instead of "some.d block.n".
-;
-  (ttt:apply-rules
-    '((/ (something.d _!) (some.d _!))
-      (/ (some.d (ulf:adj? (! ulf:noun? (plur ulf:noun?)))) (some.d !))
-      (/ (nquan (somehow.mod-a many.a)) some.d)
-      (/ (I.pro ((past ulf:verb?) _! (adv-e (! (^* (some.d _!1))))))
-         (I.pro ((past ulf:verb?) _!)))
-      (/ ((a.d _!) ((tense? be.v) _*))
-         ((some.d _!) ((tense? be.v) _*))))
-    ulf)
-) ; END normalize-wh-question-presupposition
-
-
-(defun negate-wh-question-presupposition (ulf)
-; `````````````````````````````````````````````
-; Negates a presupposition by changing "some"/"something" to "no"/"nothing" (in
-; the case of negations, we want to remove the double negative), or otherwise adding
-; a negation to the ULF.
-  (cond
-    ((ttt:match-expr '(^* (! some.d something.pro)) ulf)
-      (ttt:apply-rules
-        '((/ something.pro nothing.pro)
-          (/ (some.d _!) (no.d _!))
-          (/ (nothing.pro ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) (everything.pro ((tense? ulf:verb?) _*)))
-          (/ ((no.d _!) ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
-          ;; (/ (pron? ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
-          (/ (nothing.pro ((tense? ulf:verb?) not.adv-a _*)) (everything.pro ((tense? ulf:verb?) _*)))
-          (/ ((no.d _!) ((tense? ulf:verb?) not.adv-a _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
-          (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
-      ulf))
-    (t
-      (ttt:apply-rules
-        '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not.adv-a _*)))
-          (/ (_! ((tense? ulf:verb?) _*)) (_! ((tense? do.aux-s) not.adv-a (ulf:verb? _*)))))
-      ulf :max-n 1 :shallow t)))
-) ; END negate-wh-question-presupposition
 
 
 (defun get-query-type (ulf)
@@ -215,10 +146,7 @@
     ((ttt:match-expr '(^* ident-flag?) ulf) 'IDENT)
     ((ttt:match-expr '(^* count-flag?) ulf) 'COUNT)
     ((ttt:match-expr '(^* exist-flag?) ulf) 'EXIST)
-    ;; ((ttt:match-expr '(^* yn-flag?)    ulf) 'CONFIRM)
-    ;; (t 'ERROR)
-    (t 'CONFIRM)
-  )
+    (t 'CONFIRM))
 ) ; END get-query-type
 
 
@@ -269,56 +197,82 @@
       ; Other
       (t
         '(Sorry \, you was unable to find an object that satisfies given constraints \, please rephrase in a simpler way \.))))
-    
-    ;; ; When answer is uncertain, append an adverb indicating uncertainty to answer
-    ;; (when uncertain-flag
-    ;;   (setq ans (cons 'POSSIBLY.ADV-S (if (and (listp ans) (= 1 (length ans))) ans (list ans)))))
 
     (list ans uncertain-flag))
 ) ; END form-ans
 
 
-; TTT flags and other preds are defined as follows
-; ``````````````````````````````````````````````````
-(defun yn-flag? (p)
-  (ttt:match-expr '(! yn-word? (tense? yn-word?) ((tense? aspect?) yn-word?) ((tense? aspect?) (yn-word? _*))
-                      ((tense? aspect?) (pasv yn-word?)) ((tense? aspect?) ((pasv yn-word?) _*))) p))
+(defun uninvert-question (ulf)
+; ``````````````````````````````
+; Uninvert a ULF question by removing the question mark, applying sub macros, and removing auxiliary verbs such as "do".
+;
+  (setq ulf (remove-question-mark ulf))
+  (setq ulf (remove-question-do ulf))
+  (nth-value 1 (ulf-lib:apply-sub-macro ulf :calling-package *package*))
+) ; END uninvert-question
 
-(defun count-flag? (p)
-  (ttt:match-expr '(! (HOW.MOD-A MANY.A)) p))
 
-(defun ident-prep-flag? (p)
-  (ttt:match-expr '(prep? (! WHAT.PRO WHICH.PRO (WHAT.D _!) (WHICH.D _!))) p))
+(defun ulf-to-english (ulf)
+; ``````````````````````````
+; For converting a ULF response to a surface form response via the ulf2english library.
+;
+  ;; (format t "converting to english: ~a~%" ulf) ; DEBUGGING
+  (str-to-output (ulf2english:ulf2english ulf :add-commas t))
+) ; END ulf-to-english
 
-(defun ident-flag? (p)
-  (ttt:match-expr '(! WHAT.PRO WHICH.PRO (WHAT.D _!) (WHICH.D _!)) p))
 
-(defun descr-flag? (p)
-  (ttt:match-expr '(! (AT.P (WHAT.D PLACE.N))) p))
+(defun respond-to-presupposition (ulf)
+; ``````````````````````````````````````
+; Generates presupposition for query ULF (if any), and creates a response to that
+; presupposition by negating it.
+;
+  (negate-wh-question-presupposition (normalize-wh-question-presupposition
+    (ulf-pragmatics:get-wh-question-presupposition ulf :calling-package *package*)))
+) ; END respond-to-presupposition
 
-(defun time-flag? (p)
-  (ttt:match-expr '(! (WHAT.D time-word?)) p))
 
-(defun exist-flag? (p)
-  (ttt:match-expr '(! THERE.PRO) p))
+(defun normalize-wh-question-presupposition (ulf)
+; `````````````````````````````````````````````````````````````
+; Extracts result formula and applies task-specific normalization, including
+; (for now) fixing bugs, such as the presupposition having "something.d block.n"
+; instead of "some.d block.n".
+;
+  (ttt:apply-rules
+    '((/ (something.d _!) (some.d _!))
+      (/ (some.d (ulf:adj? (! ulf:noun? (plur ulf:noun?)))) (some.d !))
+      (/ (nquan (somehow.mod-a many.a)) some.d)
+      (/ (I.pro ((past do.aux-s) (ulf:verb? _! (adv-e (! (^* (some.d _!1)))))))
+         (I.pro ((past ulf:verb?) _!)))
+      (/ (I.pro ((past ulf:verb?) _! (adv-e (! (^* (some.d _!1))))))
+         (I.pro ((past ulf:verb?) _!)))
+      (/ ((a.d _!) ((tense? be.v) _*))
+         ((some.d _!) ((tense? be.v) _*))))
+    ulf)
+) ; END normalize-wh-question-presupposition
 
-(defun color-object-flag? (p)
-  (ttt:match-expr '(WHAT.D (COLOR.A _!)) p))
 
-(defun color-flag? (p)
-  (ttt:match-expr '(OF.P (WHAT.D (! COLOR.N (PLUR COLOR.N)))) p))
-
-(defun yn-word? (p)
-  (member p '(BE.V DO.AUX-S DO.AUX-V CAN.AUX-S CAN.AUX-V)))
-
-(defun time-word? (p)
-  (member p '(TURN.N TIME.N STAGE.N STEP.N QUESTION.N ITERATION.N MOVE.N PERIOD.N)))
-
-(defun color-word? (p)
-  (member p '(RED.A ORANGE.A YELLOW.A GREEN.A BLUE.A PURPLE.A PINK.A WHITE.A BLACK.A MAGENTA.A GRAY.A GREY.A VIOLET.A INDIGO.A BROWN.A)))
-
-(defun qmark? (p)
-  (equal p '?))
+(defun negate-wh-question-presupposition (ulf)
+; `````````````````````````````````````````````
+; Negates a presupposition by changing "some"/"something" to "no"/"nothing" (in
+; the case of negations, we want to remove the double negative), or otherwise adding
+; a negation to the ULF.
+  (cond
+    ((ttt:match-expr '(^* (! some.d something.pro)) ulf)
+      (ttt:apply-rules
+        '((/ something.pro nothing.pro)
+          (/ (some.d _!) (no.d _!))
+          (/ (nothing.pro ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) (everything.pro ((tense? ulf:verb?) _*)))
+          (/ ((no.d _!) ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ (nothing.pro ((tense? ulf:verb?) not.adv-a _*)) (everything.pro ((tense? ulf:verb?) _*)))
+          (/ ((no.d _!) ((tense? ulf:verb?) not.adv-a _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
+      ulf))
+    (t
+      (ttt:apply-rules
+        '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not.adv-a _*)))
+          (/ (_! ((tense? ulf:verb?) _*)) (_! ((tense? do.aux-s) not.adv-a (ulf:verb? _*)))))
+      ulf :max-n 1 :shallow t)))
+) ; END negate-wh-question-presupposition
 
 
 (defun form-ans-obj (relations)
@@ -537,3 +491,46 @@
 ;
   (if (<= (length list) 1) (car list) (cons 'SET-OF list))
 ) ; END make-set
+
+
+; TTT flags and other preds are defined as follows
+; ``````````````````````````````````````````````````
+(defun yn-flag? (p)
+  (ttt:match-expr '(! yn-word? (tense? yn-word?) ((tense? aspect?) yn-word?) ((tense? aspect?) (yn-word? _*))
+                      ((tense? aspect?) (pasv yn-word?)) ((tense? aspect?) ((pasv yn-word?) _*))) p))
+
+(defun count-flag? (p)
+  (ttt:match-expr '(! (HOW.MOD-A MANY.A)) p))
+
+(defun ident-prep-flag? (p)
+  (ttt:match-expr '(prep? (! WHAT.PRO WHICH.PRO (WHAT.D _!) (WHICH.D _!))) p))
+
+(defun ident-flag? (p)
+  (ttt:match-expr '(! WHAT.PRO WHICH.PRO (WHAT.D _!) (WHICH.D _!)) p))
+
+(defun descr-flag? (p)
+  (ttt:match-expr '(! (AT.P (WHAT.D PLACE.N))) p))
+
+(defun time-flag? (p)
+  (ttt:match-expr '(! (WHAT.D time-word?)) p))
+
+(defun exist-flag? (p)
+  (ttt:match-expr '(! THERE.PRO) p))
+
+(defun color-object-flag? (p)
+  (ttt:match-expr '(WHAT.D (COLOR.A _!)) p))
+
+(defun color-flag? (p)
+  (ttt:match-expr '(OF.P (WHAT.D (! COLOR.N (PLUR COLOR.N)))) p))
+
+(defun yn-word? (p)
+  (member p '(BE.V DO.AUX-S DO.AUX-V CAN.AUX-S CAN.AUX-V)))
+
+(defun time-word? (p)
+  (member p '(TURN.N TIME.N STAGE.N STEP.N QUESTION.N ITERATION.N MOVE.N PERIOD.N)))
+
+(defun color-word? (p)
+  (member p '(RED.A ORANGE.A YELLOW.A GREEN.A BLUE.A PURPLE.A PINK.A WHITE.A BLACK.A MAGENTA.A GRAY.A GREY.A VIOLET.A INDIGO.A BROWN.A)))
+
+(defun qmark? (p)
+  (equal p '?))
