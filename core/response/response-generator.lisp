@@ -1,3 +1,23 @@
+;; Feb 4/2020
+;; ================================================
+;;
+;; This code is used to generate a response to a spatial query,
+;; given a list of propositional answer relations with certainties.
+;;
+;; The general process is to categorize each query into one of a small
+;; set of general question categories, such as "confirm" (yes/no question),
+;; "ident" (what question), "descr" (where question), etc. This category is
+;; used to form an appropriate answer ULF fragment (such as simple yes/no for
+;; "confirm", a noun phrase for "ident", a set of prepositional phrases for "descr",
+;; etc.). This answer ULF is then substituted in for the appropriate constituent in
+;; the query ULF, such as what.pro/(what.d block.n) in the case of "ident".
+;;
+;; After this substitution, the modified query ULF is uninverted by applying all
+;; sub operators and removing redundant auxiliaries to form the response ULF.
+;; Certain pragmatic modifications are made at this point, chiefly checking for
+;; and responding to presupposition failure using the ulf-pragmatics library.
+;;
+
 ; Example queries:
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
@@ -25,10 +45,10 @@
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (WHICH.D BLOCK.N)))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter|  BLOCK.N)) ((PAST BE.V) *H (ADV-E ((BEFORE.P (THE.D (SECOND.A TURN.N))) AND.CC (AFTER.P (THE.D (THIRD.A TURN.N)))))))) ?)
-
-
+;
+;
 ; Example relations:
-; 'None
+; '()
 ; '(((|Starbucks| on.p |Target|) 0.6))
 ; '(((|Starbucks| on.p |Target|) 0.8))
 ; '(((|Starbucks| touch.v |Target|) 0.8))
@@ -44,17 +64,6 @@
 ; '(((|Texaco| on.p |Twitter|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
 ; '(((|Texaco| (past move.v)) 0.8) ((|Starbucks| (past move.v)) 0.8))
 ;
-;; '((SUB (AT.P (WHAT.D PLACE.N)) ((PRES BE.V) (THE.D (|SRI | BLOCK.N)) *H)) ?)
-;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  ((ON.P (THE.D (|NVidia| BLOCK.N))) AND.CC (NEAR.P (THE.D (|Twitter| BLOCK.N))))  ))
-;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  ((ON.P (SET-OF (THE.D (|Mercedes| BLOCK.N)) (THE.D (|NVidia| BLOCK.N)) (THE.D (|Texaco| BLOCK.N)))) AND.CC (NEAR.P (THE.D (|Twitter| BLOCK.N))))  ))
-;; '((THE.D (|SRI | BLOCK.N)) ((PRES BE.V)  (ON.P (SET-OF (THE.D (|Mercedes| BLOCK.N)) (THE.D (|NVidia| BLOCK.N)) (THE.D (|Texaco| BLOCK.N))))  ))
-;
-; Issues with ulf2english:
-; converting to english: (THERE.PRO ((PRES BE.V) (3.D (N+PREDS (RED.A (PLUR BLOCK.N)) (THAT.REL ((PRES BE.V) (ON.P (THE.D TABLE.N))))))))
-; => (THERE IS 3 RED BLOCKS THAT BE ON THE TABLE |.|)
-; converting to english: ((SET-OF (THE.D (|NVidia| BLOCK.N)) (THE.D (|Twitter| BLOCK.N)) (THE.D (|Texaco| BLOCK.N))) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))))
-; => (THE NVIDIA BLOCK THE TWITTER BLOCK AND THE TEXACO BLOCK IS ON THE SRI BLOCK |.|)
-; (ulf2english:ulf2english ulf :add-commas t)
 
 
 (defun generate-response (query-ulf relations)
