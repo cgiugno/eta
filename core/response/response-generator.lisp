@@ -22,8 +22,8 @@
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PRES DO.AUX-S) NOT.ADV-A (TOUCH.V (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) NOT.ADV-A (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N))))) ?)
+; '(((WHAT.D (PLUR BLOCK.N)) ((PRES DO.AUX-S) NOT (TOUCH.V (THE.D (|SRI | BLOCK.N))))) ?)
+; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) NOT (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N))))) ?)
 ; '(((PRES BE.V) THERE.PRO (A.D BLOCK.N) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
 ; '(((PRES BE.V) THERE.PRO (K (PLUR BLOCK.N)) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
 ; '(((PRES DO.AUX-S) (SOME.D BLOCK.N) (TOUCH.V (THE.D (SRI  BLOCK.N)))) ?)
@@ -45,6 +45,10 @@
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (WHICH.D BLOCK.N)))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter|  BLOCK.N)) ((PAST BE.V) *H (ADV-E ((BEFORE.P (THE.D (SECOND.A TURN.N))) AND.CC (AFTER.P (THE.D (THIRD.A TURN.N)))))))) ?)
+; '((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H (ADV-E (DURING.P (THE.D (INITIAL.A (PLUR TURN.N)))))))) ?)
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (Twitter BLOCK.N)) (ADV-A *H)))) ?)
+; '((SUB (HOW_MANY.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
+; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (MOVE.V *H (ADV-E (SUB (TWO.D (PLUR TURN.N)) (AGO.P *H)))))) ?)
 ;
 ;
 ; Example relations:
@@ -270,16 +274,16 @@
       (ttt:apply-rules
         '((/ something.pro nothing.pro)
           (/ (some.d _!) (no.d _!))
-          (/ (nothing.pro ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) (everything.pro ((tense? ulf:verb?) _*)))
-          (/ ((no.d _!) ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
-          (/ (nothing.pro ((tense? ulf:verb?) not.adv-a _*)) (everything.pro ((tense? ulf:verb?) _*)))
-          (/ ((no.d _!) ((tense? ulf:verb?) not.adv-a _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ (nothing.pro ((? (tense? do.aux-s)) not (ulf:verb? _*))) (everything.pro ((tense? ulf:verb?) _*)))
+          (/ ((no.d _!) ((? (tense? do.aux-s)) not (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ (nothing.pro ((tense? ulf:verb?) not _*)) (everything.pro ((tense? ulf:verb?) _*)))
+          (/ ((no.d _!) ((tense? ulf:verb?) not _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
           (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
       ulf))
     (t
       (ttt:apply-rules
-        '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not.adv-a _*)))
-          (/ (_! ((tense? ulf:verb?) _*)) (_! ((tense? do.aux-s) not.adv-a (ulf:verb? _*)))))
+        '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not _*)))
+          (/ (_! ((tense? ulf:verb?) _*)) (_! ((tense? do.aux-s) not (ulf:verb? _*)))))
       ulf :max-n 1 :shallow t)))
 ) ; END negate-wh-question-presupposition
 

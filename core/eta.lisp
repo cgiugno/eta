@@ -1108,14 +1108,14 @@
         ; TODO: COME BACK TO THIS
         ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
         ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
-        (if perceived-actions
+        (if perceptions
           (mapcar (lambda (perceived-action)
             (let ((perceived-actions1 (list perceived-action '@ *time*)))
               (store-fact perceived-actions1 *context*)
               (store-fact (first perceived-actions1) *context* :keys (list (third perceived-actions1)) :no-self t)))
             (eval perceptions)))
 
-        ; Update the time at which Eta is perceiving the world
+        ; Update the time at which Eta is perceiving the world.
         (update-time)
 
         (delete-current-episode {sub}plan-name)

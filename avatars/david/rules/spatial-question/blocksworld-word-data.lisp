@@ -89,11 +89,11 @@
 
   (aux-bw do modal)
   
-  (adv-history previously before originally initially currently recently ever since always)
+  (adv-history previously before originally initially currently recently ever since always first)
   (noun-history turn stage step question iteration move period start beginning while past)
   (prep-history at in on prep-history-simple)
   (prep-history-simple during before after prior_to following preceding since)
-  (adj-history previous next current initial original following preceding future last final recent)
+  (adj-history previous next current initial first original following preceding future last final recent)
 
   ; Any word that signals that the following expression might be an adv-e
   ; 'right' for e.g., right before this turn

@@ -34,6 +34,17 @@
 
 
 
+(defun union1 (l)
+;``````````````````
+; Union of all sub-lists in l
+;
+  (cond
+    ((= 1 (length l)) (car l))
+    (t (union (car l) (union1 (cdr l)))))
+) ; END union1
+
+
+
 (defun replace-n (n l e)
 ; ```````````````````````
 ; Replaces the nth element of list l with e

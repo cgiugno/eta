@@ -194,6 +194,15 @@
 ) ; END adv-e?
 
 
+(defun adv-a? (ulf)
+; ``````````````````
+; Checks if a ULF is an adv-e word or phrase.
+;
+  (or (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-A))
+      (and (listp ulf) (equal (car ulf) 'ADV-A)))
+) ; END adv-e?
+
+
 (defun noun? (ulf)
 ; `````````````````
 ; Checks if a ULF is a nominal predicate.
@@ -299,25 +308,11 @@
 ) ; END add-vp-tense!
 
 
-(defun remove-redundant-do (ulf)
-; ```````````````````````````````
-; Removes do.aux-s if followed directly by a verb, rather than, say a negation
-; operator.
-;
-; NOTE: Taken from Gene Kim's ulf-pragmatics library.
-;
-  (ttt:apply-rule
-    '(/ ((tense? do.aux-s) _!1 (+ (!2 adv? ((!3 adv-a adv-s adv-a) _!)))) ((add-vp-tense! (_!1) tense?) +))
-    (ttt:apply-rule
-      '(/ ((tense? do.aux-s) _!1) (add-vp-tense! (_!1) tense?)) ulf))
-) ; END remove-redundant-do
-
-
 (defun remove-question-do (ulf)
 ; ``````````````````````````````
 ; Removes any 'do' auxiliaries in a question ULF, unless followed by a negation.
 ; 
-  (if (ttt:match-expr '(^* ((tense? do.aux-s) not.adv-a _*)) ulf)
+  (if (ttt:match-expr '(^* ((tense? do.aux-s) not _*)) ulf)
     ulf
     (ttt:apply-rule '(/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1))) ulf))
 ) ; END remove-question-do
@@ -440,6 +435,17 @@
 ) ; END no-type?
 
 
+(defun nnp? (ulf)
+; `````````````````
+; Check if ULF is a proper names which can act as an nnp.
+; TODO: See comment on proper-name?
+;
+  (and (symbolp ulf)
+    (member ulf '(|Adidas| |Burger King| |Esso| |Heineken| |HP | |HP| |McDonalds| |Mercedes|
+                  |NVidia| |Pepsi| |SRI | |SRI| |Starbucks| |Texaco| |Target| |Toyota| |Shell| |Twitter|)))
+) ; END nnp?
+
+
 (defun proper-name? (ulf)
 ; `````````````````````````
 ; Checks if a ULF is a proper name.
@@ -448,9 +454,7 @@
 ; in the future.
 ;
   (and (no-type? ulf)
-    (not (member ulf '(|Adidas| |Burger King| |Esso| |Heineken| |HP | |HP| |McDonalds| |Mercedes|
-                       |NVidia| |Pepsi| |SRI | |SRI| |Starbucks| |Texaco| |Target| |Toyota| |Shell| |Twitter|))))
-  
+    (not (nnp? ulf)))
 ) ; END proper-name?
 
 
@@ -470,6 +474,14 @@
     (member (first ulf) '(the.d))
     (and (equal (first ulf) 'np+preds) (definite-np? (second ulf)))))
 ) ; END definite-np?
+
+
+(defun quant-np? (ulf)
+; `````````````````````
+; Checks if a ULF is a quantificational noun phrase.
+;
+  (and (listp ulf) (numerical-det? (first ulf)))
+) ; END quant-np?
 
 
 (defun indexical-np? (ulf)
@@ -556,19 +568,37 @@
 ) ; END remove-plur
 
 
-(defun numerical-adj? (ulf)
+(defun numerical-adj! (ulf)
 ; ``````````````````````````
 ; If ULF is a numerical adjective (e.g. "5.a" or "five.a"), return the corresponding
 ; number, or nil otherwise.
 ; 
-  (if (numberp ulf) (return-from numerical-adj? ulf))
-  (if (not (adj? ulf)) (return-from numerical-adj? nil))
+  (if (numberp ulf) (return-from numerical-adj! ulf))
+  (if (not (adj? ulf)) (return-from numerical-adj! nil))
   (let ((adj (read-from-string (string (first (sym-split ulf 2))))))
     (cond
       ((numberp adj) adj) ((equal adj 'zero) 0) ((equal adj 'one) 1)
       ((equal adj 'two) 2) ((equal adj 'three) 3) ((equal adj 'four) 4)
       ((equal adj 'five) 5) ((equal adj 'six) 6) ((equal adj 'seven) 7)
-      ((equal adj 'eight) 8) ((equal adj 'nine) 9) ((equal adj 'ten) 10)))
+      ((equal adj 'eight) 8) ((equal adj 'nine) 9) ((equal adj 'ten) 10)
+      ((equal adj 'first) 1) ((equal adj 'second) 2) ((equal adj 'third) 3)
+      ((equal adj 'fourth) 4) ((equal adj 'fifth) 5) ((equal adj 'sixth) 6)
+      ((equal adj 'seventh) 7) ((equal adj 'eigth) 8) ((equal adj 'ninth) 9)
+      ((equal adj 'tenth) 10)))
+) ; END numerical-adj!
+
+
+(defun numerical-adj? (ulf)
+; ``````````````````````````
+; Check if ULF is a numerical adjective.
+;
+  (if (and (symbolp ulf) (or
+    (member ulf '(zero.a one.a two.a three.a four.a five.a six.a seven.a eight.a nine.a ten.a
+                  eleven.a twelve.a thirteen.a fourteen.a fifteen.a sixteen.a seventeen.a
+                  eighteen.a nineteen.a twenty.a thirty.a forty.a fifty.a sixty.a seventy.a
+                  eighty.a ninety.a one_hundred.a first.a second.a third.a fourth.a fifth.a
+                  sixth.a seventh.a eighth.a ninth.a tenth.a))
+    (numberp (read-from-string (format nil "~a" (car (sym-split ulf 2))))))) t)
 ) ; END numerical-adj?
 
 
@@ -590,17 +620,30 @@
 ) ; END num-to-adj
 
 
-(defun numerical-det? (ulf)
+(defun numerical-det! (ulf)
 ; ``````````````````````````
 ; If ULF is a numerical determiner (e.g. "two.d"), return the corresponding
 ; number, or nil otherwise.
 ; 
-  (if (not (det? ulf)) (return-from numerical-det? nil))
+  (if (not (det? ulf)) (return-from numerical-det! nil))
   (cond
     ((equal ulf 'zero.d) 0) ((equal ulf 'one.d) 1) ((equal ulf 'two.d) 2)
     ((equal ulf 'three.d) 3) ((equal ulf 'four.d) 4) ((equal ulf 'five.d) 5)
     ((equal ulf 'six.d) 6) ((equal ulf 'seven.d) 7) ((equal ulf 'eight.d) 8)
     ((equal ulf 'nine.d) 9) ((equal ulf 'ten.d) 10))
+) ; END numerical-det!
+
+
+(defun numerical-det? (ulf)
+; ``````````````````````````
+; Check if ULF is a numerical determiner.
+;
+  (and (symbolp ulf)
+    (member ulf '(zero.d one.d two.d three.d four.d five.d six.d
+                  seven.d eight.d nine.d ten.d eleven.d twelve.d
+                  thirteen.d fourteen.d fifteen.d sixteen.d seventeen.d
+                  eighteen.d nineteen.d twenty.d thirty.d forty.d fifty.d
+                  sixty.d seventy.d eighty.d ninety.d one_hundred.d)))
 ) ; END numerical-det?
 
 
@@ -648,7 +691,7 @@
 ; noun phrase without the quantificational modifier.
 ; NODE: Modify to return quantificational noun phrase without quant adj, along with number
 ;
-  (if (atom ulf) (numerical-adj? ulf)
+  (if (atom ulf) (numerical-adj! ulf)
     (some #'get-quan ulf))
 ) ; END get-quan
 
@@ -657,7 +700,7 @@
 ; ```````````````````````
 ; Removes quantificational modifier from ULF.
 ;
-  (if (atom ulf) (if (numerical-adj? ulf) nil ulf)
+  (if (atom ulf) (if (numerical-adj! ulf) nil ulf)
     (let ((tmp (remove nil (mapcar #'remove-quan ulf))))
       (if (and (listp tmp) (= (length tmp) 1)) (car tmp) tmp)))
 ) ; END remove-quan
