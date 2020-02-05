@@ -2,23 +2,30 @@
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PRES DO.AUX-S) NOT.ADV-A (TOUCH.V (THE.D (SRI  BLOCK.N))))) ?)
+; '(((WHAT.D (PLUR BLOCK.N)) ((PRES DO.AUX-S) NOT.ADV-A (TOUCH.V (THE.D (|SRI | BLOCK.N))))) ?)
+; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) NOT.ADV-A (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N))))) ?)
 ; '(((PRES BE.V) THERE.PRO (A.D BLOCK.N) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
 ; '(((PRES BE.V) THERE.PRO (K (PLUR BLOCK.N)) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
 ; '(((PRES DO.AUX-S) (SOME.D BLOCK.N) (TOUCH.V (THE.D (SRI  BLOCK.N)))) ?)
 ; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (MOST-N LEFT.A BLOCK.N)) ((PRES BE.V) *H))) ?)
-; '(((HOW_MANY.D (RED.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
+; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (N+PREDS BLOCK.N (ON.P (THE.D (|Twitter| BLOCK.N))))) ((PRES BE.V) *H))) ?)
+; '((((NQUAN (HOW.MOD-A MANY.A)) (RED.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
 ; '(((WHAT.D BLOCK.N) ((PRES BE.V) (BETWEEN.P ((THE.D (|SRI | BLOCK.N)) AND.CC (THE.D (|NVidia| BLOCK.N)))))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (SRI  BLOCK.N)) ((PRES BE.V) *H))) ?)
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|SRI | BLOCK.N)) ((PRES BE.V) *H))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (MOST-N LEFT.A (GREEN.A BLOCK.N))) ((PRES BE.V) *H))) ?)
 ; '((WHAT.PRO ((PRES BE.V) (= (THE.D (MOST-N LEFT.A BLOCK.N))))) ?)
-; '((SUB (WHAT.D BLOCK.N) ((THE.D (Twitter BLOCK.N)) ((PRES BE.V) (ON_TOP_OF.P *H)))) ?)
+; '((SUB (WHAT.D BLOCK.N) ((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON_TOP_OF.P *H)))) ?)
 ; '(((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (TO_THE_LEFT_OF.P (THE.D (|Texaco| BLOCK.N))))) ?)
 ; '(((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
 ; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (|Texaco| BLOCK.N)) ((PRES BE.V) *H))) ?)
 ; '((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
 ; '(((THE.D (NVidia BLOCK.N)) (EVER.ADV-E ((PAST PERF) (TOUCH.V (THE.D (NVidia BLOCK.N)))))) ?)
 ; '((SUB (DURING.P (WHAT.D TURN.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (SRI  BLOCK.N)) (ADV-E *H)))) ?)
+; '((SUB (WHAT.D BLOCK.N) ((THE.D (Twitter BLOCK.N)) ((PAST BE.V) INITIALLY.ADV-E (ON.P *H)))) ?)
+; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (WHICH.D BLOCK.N)))) ?)
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter|  BLOCK.N)) ((PAST BE.V) *H (ADV-E ((BEFORE.P (THE.D (SECOND.A TURN.N))) AND.CC (AFTER.P (THE.D (THIRD.A TURN.N)))))))) ?)
+
 
 ; Example relations:
 ; 'None
@@ -85,7 +92,9 @@
           (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))) query-ulf)) ; "one blocks" or "one red blocks"
       ; Query is EXIST type
       ((equal query-type 'EXIST)
-        (ttt:apply-rule `(/ exist-flag? ,ans-ulf) query-ulf))
+        (if ans-ulf
+          (ttt:apply-rule `(/ exist-flag? ,ans-ulf) query-ulf)
+          '(NO.YN)))
       ; Query is IDENT-PREP type
       ((equal query-type 'IDENT-PREP)
         (ttt:apply-rule `(/ (prep? ident-flag?) (prep? ,ans-ulf)) query-ulf))
@@ -102,6 +111,13 @@
     ; When answer is uncertain, append an adverb indicating uncertainty to answer
     (when uncertain-flag
       (setq output-ulf (list 'possibly.adv-s output-ulf)))
+
+    ; When no answer, check if a presupposition failure has occurred, if so, output the
+    ; negation of that presupposition
+    (if (null relations)
+      (let ((presupposition-failure (respond-to-presupposition query-ulf)))
+        (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
+        (if presupposition-failure (setq output-ulf presupposition-failure))))
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
@@ -127,6 +143,59 @@
   (format t "converting to english: ~a~%" ulf) ; DEBUGGING
   (str-to-output (ulf2english:ulf2english ulf :add-commas t))
 ) ; END ulf-to-english
+
+
+(defun respond-to-presupposition (ulf)
+; ``````````````````````````````````````
+; Generates presupposition for query ULF (if any), and creates a response to that
+; presupposition by negating it.
+;
+  (negate-wh-question-presupposition (normalize-wh-question-presupposition
+    (ulf-pragmatics:get-wh-question-presupposition ulf :calling-package *package*)))
+) ; END respond-to-presupposition
+
+
+(defun normalize-wh-question-presupposition (ulf)
+; `````````````````````````````````````````````````````````````
+; Extracts result formula and applies task-specific normalization, including
+; (for now) fixing bugs, such as the presupposition having "something.d block.n"
+; instead of "some.d block.n".
+;
+  (ttt:apply-rules
+    '((/ (something.d _!) (some.d _!))
+      (/ (some.d (ulf:adj? (! ulf:noun? (plur ulf:noun?)))) (some.d !))
+      (/ (nquan (somehow.mod-a many.a)) some.d)
+      (/ (I.pro ((past ulf:verb?) _! (adv-e (! (^* (some.d _!1))))))
+         (I.pro ((past ulf:verb?) _!)))
+      (/ ((a.d _!) ((tense? be.v) _*))
+         ((some.d _!) ((tense? be.v) _*))))
+    ulf)
+) ; END normalize-wh-question-presupposition
+
+
+(defun negate-wh-question-presupposition (ulf)
+; `````````````````````````````````````````````
+; Negates a presupposition by changing "some"/"something" to "no"/"nothing" (in
+; the case of negations, we want to remove the double negative), or otherwise adding
+; a negation to the ULF.
+  (cond
+    ((ttt:match-expr '(^* (! some.d something.pro)) ulf)
+      (ttt:apply-rules
+        '((/ something.pro nothing.pro)
+          (/ (some.d _!) (no.d _!))
+          (/ (nothing.pro ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) (everything.pro ((tense? ulf:verb?) _*)))
+          (/ ((no.d _!) ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
+          ;; (/ (pron? ((? (tense? do.aux-s)) not.adv-a (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ (nothing.pro ((tense? ulf:verb?) not.adv-a _*)) (everything.pro ((tense? ulf:verb?) _*)))
+          (/ ((no.d _!) ((tense? ulf:verb?) not.adv-a _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
+      ulf))
+    (t
+      (ttt:apply-rules
+        '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not.adv-a _*)))
+          (/ (_! ((tense? ulf:verb?) _*)) (_! ((tense? do.aux-s) not.adv-a (ulf:verb? _*)))))
+      ulf :max-n 1 :shallow t)))
+) ; END negate-wh-question-presupposition
 
 
 (defun get-query-type (ulf)

@@ -29,7 +29,7 @@
 (defun recall-answer (object-locations ulf)
 ; ````````````````````````````````````````````
 ; Given current observed block locations and the ULF of the query, recall the answer by consulting
-; historical record of block moves stored in context
+; historical record of block moves stored in context.
 ;
   (format t "object locations: ~a~%" object-locations) ; DEBUGGING
   (let ((coords (extract-coords object-locations)))
@@ -40,12 +40,34 @@
 ) ; END recall-answer
 
 
-(defun adv-e-of-phrase (ulf)
-; ```````````````````````````
-; Returns the adv-e modifiers in a ULF phrase
+(defun extract-adv-e-phrase (ulf)
+; `````````````````````````````````
+; Extracts an adv-e phrase from a ULF, and applies any sub macros in the phrase.
 ;
-  (remove-if-not #'adv-e? ulf)
-) ; END adv-e-of-phrase
+  (nth-value 1 (ulf-lib:apply-sub-macro (ttt:apply-rule '(/ (^* (adv-e _!)) (adv-e _!)) ulf
+                  :shallow t) :calling-package *package*))
+) ; END extract-adv-e-phrase
+
+
+; (ADV-E (DURING.P (THE.D (N+PREDS TURN.N ()))))
+; (WHEN.PS (I.PRO ((PRES MOVE.V) (THE.D (|Twitter| BLOCK.N)))))
+
+
+(defun resolve-adv-e-phrase (ulf)
+; `````````````````````````````````
+; Resolves a phrasal adv-e (e.g. "before I moved it") into a list of times.
+;
+  (let ((adv-e (cadr (extract-adv-e-phrase ulf))))
+    (cond
+      ((prep-conjunction? adv-e)
+        (intersection (resolve-adv-e-phrase (first adv-e)) (resolve-adv-e-phrase (third adv-e))))
+      ((reified-event? (second adv-e))
+        
+        )
+      (())
+    )
+  )
+) ; END resolve-adv-e-phrase
 
 
 (defun extract-coords (prop-list)

@@ -374,12 +374,22 @@
 ) ; END prep?
 
 
-(defun preposition-phrase? (ulf)
+(defun prep-phrase? (ulf)
 ; ````````````````````````````````
 ; Checks if a ULF is a prepositional phrase, e.g. (on.p (the.d table.n)).
 ;
   (and (listp ulf) (atom (car ulf)) (prep? (car ulf)))
-) ; END preposition-phrase?
+) ; END prep-phrase?
+
+
+(defun prep-conjunction? (ulf)
+; `````````````````````````````
+; Checks if a ULF is a conjunction of two prepositions,
+; e.g. ((before.p ...) and.cc (after.p ...))
+;
+  (and (listp ulf) (= 3 (length ulf)) (prep-phrase? (first ulf))
+       (equal 'and.cc (second ulf)) (prep-phrase? (third ulf)))
+) ; END prep-conjunction?
 
 
 (defun sentential-preposition? (ulf)
