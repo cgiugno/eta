@@ -189,18 +189,34 @@
 ; ``````````````````
 ; Checks if a ULF is an adv-e word or phrase.
 ;
-  (or (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-E))
+  (or (adv-e-lex? (ulf))
       (and (listp ulf) (equal (car ulf) 'ADV-E)))
 ) ; END adv-e?
+
+
+(defun adv-e-lex? (ulf)
+; ```````````````````````
+; Checks if a ULF is an adv-e word.
+;
+  (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-E))
+) ; END adv-e-lex?
 
 
 (defun adv-a? (ulf)
 ; ``````````````````
 ; Checks if a ULF is an adv-e word or phrase.
 ;
-  (or (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-A))
+  (or (adv-a-lex? ulf)
       (and (listp ulf) (equal (car ulf) 'ADV-A)))
 ) ; END adv-e?
+
+
+(defun adv-a-lex? (ulf)
+; ```````````````````````
+; Checks if a ULF is an adv-a word.
+;
+  (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-A))
+) ; END adv-a-lex?
 
 
 (defun noun? (ulf)

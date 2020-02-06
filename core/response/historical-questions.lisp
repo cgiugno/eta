@@ -49,6 +49,14 @@
 ) ; END extract-adv-e-phrase
 
 
+(defun extract-adv-e-word (ulf)
+; `````````````````````````````````
+; Extracts an adv-e phrase from a ULF, and applies any sub macros in the phrase.
+;
+  (ttt:apply-rule '(/ (^* adv-e-lex?) adv-e-lex?) ulf :shallow t)
+) ; END extract-adv-e-phrase
+
+
 ; (ADV-E (DURING.P (THE.D (N+PREDS TURN.N ()))))
 ; (WHEN.PS (I.PRO ((PRES MOVE.V) (THE.D (|Twitter| BLOCK.N)))))
 
