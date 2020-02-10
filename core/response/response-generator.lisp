@@ -67,6 +67,7 @@
 ; '(((|Target| on.p |Starbucks|) 0.8) ((|Target| near.p |Texaco|) 0.8) ((|Target| between.p |Mercedez| |Texaco|) 0.8) ((|Target| between.p |Twitter| |NVidia|) 0.8))
 ; '(((|Texaco| on.p |Twitter|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
 ; '(((|Texaco| (past move.v)) 0.8) ((|Starbucks| (past move.v)) 0.8))
+; '(((|Texaco| ((pres be.v) blue.a)) 0.8))
 ;
 
 
