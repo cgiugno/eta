@@ -345,6 +345,39 @@
 
 
 
+(defun store-output-semantics (var wff schema-name)
+;````````````````````````````````````````````````````
+; Stores a wff as the semantic interpretation of an episode in
+; a schema - this is stored in the schema's semantics hash table,
+; with the key being the propositional var for the episode.
+;
+  (setf (gethash var (get schema-name 'semantics)) wff)
+) ; END store-output-semantics
+
+
+
+(defun store-output-gist-clauses (var clauses schema-name)
+;````````````````````````````````````````````````````
+; Stores a gist clause corresponding to an episode in
+; a schema - this is stored in the schema's gist-clauses hash table,
+; with the key being the propositional var for the episode.
+;
+  (setf (gethash var (get schema-name 'gist-clauses)) clauses)
+) ; END store-output-gist-clauses
+
+
+
+(defun store-topic-keys (var keys schema-name)
+;````````````````````````````````````````````````````
+; Stores a topic key corresponding to an episode in
+; a schema - this is stored in the schema's topic-keys hash table,
+; with the key being the propositional var for the episode.
+;
+  (setf (gethash var (get schema-name 'topic-keys)) keys)
+) ; END store-topic-keys
+
+
+
 (defun store-gist (gist keys kb)
 ;`````````````````````````````````
 ; Put 'gist' into the 'kb' (a hash table) using the given keys.
