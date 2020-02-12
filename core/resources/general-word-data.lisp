@@ -73,8 +73,7 @@
 	'((FINISH FINISHED DONE QUIT STOP TERMINATE)
           (FOREIGN FRANCAIS DEUTSCH ITALIANO ESPANOL
 		   FRANCAIS? DEUTSCH? ITALIANO? ESPANOL?)
-          (END-PUNC \. \;
-					 	\- \? \! \:)
+          (END-PUNC - ? ! \. \: \;)
           (THEME-KEY PET-KEY CHAT1-OPENING CHAT1-ROCHESTER CHAT1-MOVIES
                              ; we could add other keys, as a flag for
                              ; adhering to a particular theme (i.e., capture

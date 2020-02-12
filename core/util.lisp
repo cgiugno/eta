@@ -4,6 +4,16 @@
 ;; Various utility functions used by Eta
 ;;
 
+
+;``````````````````````````````````````````````````````
+; Store a global hash table of schema headers to
+; the corresponding schema variable names.
+; NOTE: This is only defined in the eta-schema.lisp file.
+;
+(defparameter *schemas* (make-hash-table))
+
+
+
 (defun cddr1 (x)
 ;`````````````````
 ; For DEBUGGING
@@ -399,6 +409,34 @@
 
 
 
+(defun store-schema-name (header schema-name)
+;````````````````````````````````````````````````````
+; Stores the schema variable name in the *schemas* hash table,
+; using the schema header as the key.
+;
+  (setf (gethash header *schemas*) schema-name)
+) ; END store-schema-name
+
+
+
+(defun schema-header? (x)
+;``````````````````````````
+; Predicate which returns true if x is a schema header, e.g. 'discuss-food.v'.
+;
+  (gethash x *schemas*)
+) ; END schema-header?
+
+
+
+(defun schema-name! (header)
+;`````````````````````````````
+; Gets the schema variable name given the header.
+;
+  (gethash header *schemas*)
+) ; END schema-name!
+
+
+
 (defun store-gist (gist keys kb)
 ;`````````````````````````````````
 ; Put 'gist' into the 'kb' (a hash table) using the given keys.
@@ -517,6 +555,15 @@
       (setq i (1+ i)))
     (reverse *discourse-history*)))
 ) ; END print-history
+
+
+
+(defun print-hash (ht)
+; `````````````````````
+; Print the contents of a hash table
+;
+  (maphash (lambda (k v) (format t "k: ~a~%  v: ~a~%" k v)) ht)
+) ; END print-hash
 
 
 
