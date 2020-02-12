@@ -8,6 +8,11 @@ for information about the config options). `*avatar*` should be set to the name 
 each one of which specifies a set of schemas and pattern transduction rules to guide the conversation. These options
 are discussed further below.
 
+If using any of Eta's ULF/NLG capabilities, use the following command (from the root directory) to start up a python REPL server,
+which you should leave running during Eta's execution:
+
+`python core/resources/python-repl-server.py 8080 "g:g"`
+
 Start SBCL in the top level directory and enter `(load "start.lisp")`. The dialogue will then begin using the top-level
 schema of the chosen avatar.
 
