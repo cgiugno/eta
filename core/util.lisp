@@ -34,6 +34,17 @@
 
 
 
+(defun union1 (l)
+;``````````````````
+; Union of all sub-lists in l
+;
+  (cond
+    ((= 1 (length l)) (car l))
+    (t (union (car l) (union1 (cdr l)))))
+) ; END union1
+
+
+
 (defun replace-n (n l e)
 ; ```````````````````````
 ; Replaces the nth element of list l with e
@@ -103,6 +114,16 @@
         (cons (car input) (compress (cdr input))))
       (t (cons (get (car input) 'neg) (compress (cddr input)))))))
 ) ; END compress
+
+
+
+(defun find-car (x list)
+;`````````````````````````
+; Finds a sublist of list which has x as its car
+;
+  (if (every #'listp list)
+    (find x list :test (lambda (y l) (equal y (car l)))))
+) ; END find-car
 
 
 
@@ -512,6 +533,15 @@
     (mapcar (lambda (f)
       (format t "~a~%" f)) l2))
 ) ; END print-context
+
+
+
+(defun get-from-context (key)
+;``````````````````````````````
+; Retrieves a fact from context
+;
+  (gethash key *context*)
+) ; END get-from-context
 
 
 
@@ -1083,36 +1113,36 @@
 
 
 
-(defun get-coords () 
+(defun get-perceptions () 
 ;``````````````````````
-; This waits until it can load a list of block coords from "./io/coords.lisp".
+; This waits until it can load a list of block perceptions from "./io/perceptions.lisp".
 ; This should have a list of relations of the following two forms:
 ; (|Twitter| at-loc.p ($ loc ?x ?y ?z))
 ; (|Toyota| ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
 ;
-  (setq *next-coords* nil)
-  (loop while (not *next-coords*) do
+  (setq *next-perceptions* nil)
+  (loop while (not *next-perceptions*) do
     (sleep .5)
     (progn
-      (load "./io/coords.lisp")
-		  (if *next-coords*
-        (with-open-file (outfile "./io/coords.lisp" :direction :output 
+      (load "./io/perceptions.lisp")
+		  (if *next-perceptions*
+        (with-open-file (outfile "./io/perceptions.lisp" :direction :output 
                                                  :if-exists :supersede
                                                  :if-does-not-exist :create)))))
           
-  *next-coords*
-) ; END get-coords
+  *next-perceptions*
+) ; END get-perceptions
 
 
 
-(defun get-coords-offline () 
+(defun get-perceptions-offline () 
 ;`````````````````````````````
-; This is the coords reader when ETA is used with argument live =
+; This is the perceptions reader when ETA is used with argument live =
 ; nil (hence also *live* = nil)
 ;
   (finish-output)
   (read-from-string (read-line))
-) ; END get-coords-offline
+) ; END get-perceptions-offline
 
 
 

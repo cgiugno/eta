@@ -262,8 +262,8 @@
           (t 
             `((set (cardinality ,(second (first np))) (type+mods ,(get-type+mods (remove-plur (second np))))))))))
     ; Quantificational determiner
-    ((and (listp np) (numerical-det? (first np)))
-      `((set (cardinality ,(numerical-det? (first np))) (type+mods ,(get-type+mods (list 'some.d (remove-plur (second np))))))))
+    ((and (listp np) (numerical-det! (first np)))
+      `((set (cardinality ,(numerical-det! (first np))) (type+mods ,(get-type+mods (list 'some.d (remove-plur (second np))))))))
     ; Any quantificational modifier
     ((and (get-quan np) (> (get-quan np) 1))
       `((set (cardinality ,(get-quan np)) (type+mods (get-type+mods (remove-plur (remove-quan np)))))))
@@ -312,7 +312,7 @@
   (cond
     ((and (mod? mod1) (mod? mod2)) (equal mod1 mod2))
     ((mod? mod1) (mod-subsumes? mod1 (car (last mod2))))
-    ((preposition? mod1) (equal mod1 mod2))
+    ((prep-phrase? mod1) (equal mod1 mod2))
     (t (or (equal mod1 mod2) (and (listp mod2) (mod-subsumes? mod1 (car (last mod2)))))))
 ) ; END mod-subsumes?
 
