@@ -1,18 +1,13 @@
 (READRULES '*gist-clause-trees-for-input*
    '(
-      1 (what do you want to talk about ?)
-         2 (*specific-answer-from-topic-input*
-            *question-from-topic-input*
-            nil
+      1 (I would like a refill of medicine \.)
+         2 (*specific-answer-from-medicine-input*
+            *question-from-medicine-input*
+            *unbidden-answer-from-medicine-input*
             nil) (0 :subtrees)
-      1 (what food do you like ?)
-         2 (*specific-answer-from-food-input*
-            *question-from-food-input*
-            nil
-            nil) (0 :subtrees)
-      1 (what do you think about politics ?)
-         2 (*specific-answer-from-politics-input*
-            *question-from-politics-input*
+      1 (0)
+         2 (*general-input*
+            *general-question*
             nil
             nil) (0 :subtrees)
 ))
