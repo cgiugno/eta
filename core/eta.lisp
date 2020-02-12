@@ -568,6 +568,7 @@
 ; 'gist-clauses' of 'eta-action-name'.
 ;
   (let (topic-keys facts)
+    ;; (format t "~% ****** input sentence: ~a~%" sentence)
     ;; (format t "~% ****** quoted question returns ~a **** ~%" (quoted-question? sentence)) ; DEBUGGING
     (if (not (quoted-question? sentence))
       (return-from obviated-question nil))
@@ -585,6 +586,29 @@
     ; actually obviate the question, but just assume that they do. 
   facts)
 ) ; END obviated-question
+
+
+
+
+
+(defun obviated-action (eta-action-name)
+;`````````````````````````````````````````
+; Check whether this is an obviated action (such as a schema instantiation),
+; i.e. if the action has a topic-key(s) associated, check if any facts are stored
+; in *gist-kb* under the topic-key(s). If there are such facts, we assume that
+; these facts obviate the action, so the action can be deleted from the plan.
+;
+  (let (topic-keys facts)
+    (setq topic-keys (get eta-action-name 'topic-keys))
+    ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
+    (if (null topic-keys) (return-from obviated-action nil))
+    (setq facts (gethash topic-keys *gist-kb*))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb*)
+    ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
+    ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
+    (if (null facts) (return-from obviated-action nil))
+  facts)
+) ; END obviated-action
 
 
 
@@ -1098,6 +1122,21 @@
 
         (delete-current-episode {sub}plan-name)
       )
+
+      ;````````````````````````````
+      ; Eta: Initiating Subschema
+      ;````````````````````````````
+      ((setq bindings (bindings-from-ttt-match '(me schema-header? you (? _*)) wff))
+        ; Before instantiating the schema, check whether the episode is an obviated action
+        (when (not (null (obviated-action episode-name)))
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (setq new-subplan-name (gensym "SUBPLAN"))
+        ; Instantiate schema from schema name
+        ; TODO: allow for schema arguments
+        (init-plan-from-schema new-subplan-name (schema-name! (second wff)) nil)
+        (add-subplan {sub}plan-name new-subplan-name)
+      )
       
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
@@ -1373,9 +1412,9 @@
     ;;   '*gist-clause-trees-for-input*))
     ;; (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING      
     (setq specific-content-tree (first relevant-trees)
-          question-content-tree (fourth relevant-trees)
-          unbidden-content-tree (second relevant-trees)
-          thematic-content-tree (third relevant-trees))
+          question-content-tree (second relevant-trees)
+          unbidden-content-tree (third relevant-trees)
+          thematic-content-tree (fourth relevant-trees))
 
     ; Split user's reply into sentences for specific/question/unbidden trees
     ;````````````````````````````````````````````````````````````````````````
@@ -1399,6 +1438,8 @@
         (when question?
           (setq clause (cdr (choose-result-for tagged-sentence question-content-tree)))
           (when clause
+            (setq keys (second clause))
+            (store-gist (car clause) keys *gist-kb*)
             (push (car clause) questions)
             (push (car clause) facts)))
         ; NOTE: questions by the user are currently not stored
