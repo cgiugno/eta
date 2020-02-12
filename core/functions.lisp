@@ -4,6 +4,28 @@
 ;; Definitions for any ELF functions used in schema formulas.
 ;;
 
+(defun get-object-locations.f (x)
+; `````````````````````````````
+; Extracts all locations (at-loc.p propositions) from a list of
+; propositions reflecting Eta's current perceptions.
+;
+  (setq x (eval x))
+  (if (listp x) (remove-if-not #'at-loc-prop? x) nil)
+) ; END get-object-locations.f
+
+
+
+(defun get-actions.f (x)
+; `````````````````````````
+; Extracts all perceived actions (verb phrases) from a list of
+; propositions reflecting Eta's current perceptions.
+;
+  (setq x (eval x))
+  (if (listp x) (remove-if-not #'verb-phrase? x) nil)
+) ; END get-object-locations.f
+
+
+
 (defun ulf-of.f (x)
 ; ````````````````````
 ; Retrieves ulf attached to action proposition name.

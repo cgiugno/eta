@@ -96,37 +96,33 @@
       ((:not (:or (:equal (ulf-of.f ?a8.) (PAUSE.GR)) (:equal (ulf-of.f ?a8.) (GOODBYE.GR))))
         ?a20. (Me react-to.v ?a8.))))
 
-)); end of defparameter *eta-schema*
+)) ; END defparameter *eta-schema*
 
 
 
-
-
-
+;````````````````````````````````````````````````````````
+; Create empty hash tables for semantics,
+; gist-clauses, and topic-keys
+;
 (setf (get '*eta-schema* 'semantics) (make-hash-table))
+(setf (get '*eta-schema* 'gist-clauses) (make-hash-table))
+(setf (get '*eta-schema* 'topic-keys) (make-hash-table))
+
+
+
 ;````````````````````````````````````````````````````````
 ; EL Semantics - Not yet used
 ;
-(defun store-output-semantics (var wff schema-name)
-  (setf (gethash var (get schema-name 'semantics)) wff)
-); end of store-output-semantics
-
 (mapcar #'(lambda (x)
       (store-output-semantics (first x) (second x) '*eta-schema*))
   '()
-); end of mapcar #'store-output-semantics
+) ; END mapcar #'store-output-semantics
 
 
 
-
-(setf (get '*eta-schema* 'gist-clauses) (make-hash-table))
 ;````````````````````````````````````````````````````````
 ; Gist clauses
 ;
-(defun store-output-gist-clauses (var clauses schema-name)
-  (setf (gethash var (get schema-name 'gist-clauses)) clauses)
-); end of store-output-gist-clauses
-
 (mapcar #'(lambda (x) 
       (store-output-gist-clauses (first x) (second x) '*eta-schema*))
   '(
@@ -134,23 +130,17 @@
     (?a7.  ((do you have a spatial question ?)))
     (?a14. ((do you want to resume ?)))
   )
-); end of mapcar #'store-output-gist-clauses
+) ; END mapcar #'store-output-gist-clauses
 
 
 
-
-(setf (get '*eta-schema* 'topic-keys) (make-hash-table))
 ;````````````````````````````````````````````````````````
 ; Topic keys
 ;
-(defun store-topic-keys (var keys schema-name)
-  (setf (gethash var (get schema-name 'topic-keys)) keys)
-); end of store-topic-keys
-
 (mapcar #'(lambda (x) 
       (store-topic-keys (first x) (second x) '*eta-schema*))
   '(
     ;; (?a2.  (name))
     (?a7.  (spatial-question1))
   )
-); end of mapcar
+) ; END mapcar #'store-topic-keys

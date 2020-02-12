@@ -25,8 +25,8 @@
   ; Delete the content of ulf.lisp, if it exists, otherwise create
   (with-open-file (outfile "./io/ulf.lisp" :direction :output :if-exists 
                                            :supersede :if-does-not-exist :create))
-  ; Delete the content of coords.lisp, if it exists, otherwise create
-  (with-open-file (outfile "./io/coords.lisp" :direction :output :if-exists 
+  ; Delete the content of perceptions.lisp, if it exists, otherwise create
+  (with-open-file (outfile "./io/perceptions.lisp" :direction :output :if-exists 
                                               :supersede :if-does-not-exist :create))
   ; Delete the content of reaction.lisp, if it exists, otherwise create
   (with-open-file (outfile "./io/answer.lisp" :direction :output :if-exists 

@@ -34,7 +34,7 @@ In the case of a spatial question, the system will await a response in `answer.l
 `(setq *next-answer* "Answer here")`, where the value of \*next-answer\* is a string. If the input
 was not a spatial question, the system will skip this step and form a reaction as normal.
 
-If `*coords-mode*` is enabled, after hearing a spatial question the system will await block coordinates in `coords.lisp`. The
+If `*coords-mode*` is enabled, after hearing a spatial question the system will await block coordinates in `perceptions.lisp`. The
 format of this is a list of coordinate propositions, e.g. `(setq *next-coords* '((|SRI | at-coords.p 1 1 1) (|Texaco| at-coords.p 1 3 1) (|Twitter| at-coords.p 1 1 2)))`.
 
 ## Supported avatars

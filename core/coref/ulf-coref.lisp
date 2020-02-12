@@ -366,8 +366,9 @@
 ; Retrieves the references for each discourse entity and substitutes them
 ; in for that discourse entity to obtain a final result. This depends on coreference mode parameter:
 ; 0 : simply reconstruct the original ulf
-; 1 : substitute most specific references only for anaphors and indexical np's (e.g. that block)
-; 2 : substitute most specific references for all references
+; 1 : mode 2 but excluding i.pro and you.pro from resolved references
+; 2 : substitute most specific references only for anaphors and indexical np's (e.g. that block)
+; 3 : substitute most specific references for all references
 ; More may be added in the future
 ; NOTE: Maintain a list of visited references to avoid infinite recursion (if accidental cycle with reference links)
 ;
@@ -375,9 +376,12 @@
   (labels ((resolve-references-recur (ulf visited)
       (cond
         ((and (equal *coreference-mode* 1) (atom ulf) (not (member ulf visited)) (get ulf 'references)
+              (member (get ulf 'cat) '(anaphor indexical-np)) (not (member (get ulf 'ulf) '(i.pro you.pro))))
+          (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
+        ((and (equal *coreference-mode* 2) (atom ulf) (not (member ulf visited)) (get ulf 'references)
               (member (get ulf 'cat) '(anaphor indexical-np)))
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
-        ((and (equal *coreference-mode* 2) (atom ulf) (not (member ulf visited)) (get ulf 'references))
+        ((and (equal *coreference-mode* 3) (atom ulf) (not (member ulf visited)) (get ulf 'references))
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
         ((and (atom ulf) (get ulf 'ulf)) (reconstruct-ulf (get ulf 'ulf)))
         ((atom ulf) ulf)
