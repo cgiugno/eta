@@ -70,13 +70,6 @@
 (load-avatar-files *avatar*)
 
 
-; Create hash table to store gist clauses
-;```````````````````````````````````````````
-(defvar *gist-kb* (make-hash-table :test #'equal)); for storage of gist
-                ; clauses, particularly ones obtained from user inputs;
-(clrhash *gist-kb*)
-
-
 ; Run Eta
 ;`````````````
 (if *safe-mode*

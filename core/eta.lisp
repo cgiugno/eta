@@ -94,6 +94,12 @@
   (defparameter *discourse-history-gist* nil)
   (defparameter *reference-list* nil)
 
+  ; Hash table of gist clauses attributed to each person
+  ; involved in the conversation.
+  ;```````````````````````````````````````````
+  (defparameter *gist-kb-user* (make-hash-table :test #'equal))
+  (defparameter *gist-kb-eta* (make-hash-table :test #'equal))
+
   ; Context
   ; Stores facts that Eta knows.
   ; This is a hash table with propositions hashed on the full proposition, the predicate, the subject,
@@ -564,7 +570,7 @@
 (defun obviated-question (sentence eta-action-name)
 ;````````````````````````````````````````````````````
 ; Check whether this is a (quoted, bracketed) question.
-; If so, check what facts, if any, are stored in *gist-kb* under 
+; If so, check what facts, if any, are stored in *gist-kb-user* under 
 ; the 'topic-keys' obtained as the value of that property of
 ; 'eta-action-name'. If there are such facts, check if they
 ; seem to provide an answer to the gist-version of the question,
@@ -579,8 +585,8 @@
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
     (if (null topic-keys) (return-from obviated-question nil))
-    (setq facts (gethash topic-keys *gist-kb*))
-    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb*)
+    (setq facts (gethash topic-keys *gist-kb-user*))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
     ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
     ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
     (if (null facts) (return-from obviated-question nil))
@@ -599,15 +605,15 @@
 ;`````````````````````````````````````````
 ; Check whether this is an obviated action (such as a schema instantiation),
 ; i.e. if the action has a topic-key(s) associated, check if any facts are stored
-; in *gist-kb* under the topic-key(s). If there are such facts, we assume that
+; in *gist-kb-user* under the topic-key(s). If there are such facts, we assume that
 ; these facts obviate the action, so the action can be deleted from the plan.
 ;
   (let (topic-keys facts)
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
     (if (null topic-keys) (return-from obviated-action nil))
-    (setq facts (gethash topic-keys *gist-kb*))
-    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb*)
+    (setq facts (gethash topic-keys *gist-kb-user*))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
     ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
     ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
     (if (null facts) (return-from obviated-action nil))
@@ -838,7 +844,7 @@
         (setq expr (get-single-binding bindings))
         ; If the current "say" action is a question (final question mark,
         ; can also check for wh-words & other cues), then use 'topic-keys'
-        ; and 'gist-clauses' of current episode-name and the *gist-kb*
+        ; and 'gist-clauses' of current episode-name and the *gist-kb-user*
         ; to see if question has already been answered. If so, omit action.
         (when (not (null (obviated-question expr episode-name)))
           (delete-current-episode {sub}plan-name)
@@ -850,9 +856,9 @@
             (setq expr (second expr))
             (setq *count* (1+ *count*))
             (if *live* (say-words expr) (print-words expr))
-            ;(print-current-plan-status {sub}plan-name); DEBUGGING
+            ;; (print-current-plan-status {sub}plan-name); DEBUGGING
             (delete-current-episode {sub}plan-name)
-            ;(print-current-plan-status {sub}plan-name); DEBUGGING
+            ;; (print-current-plan-status {sub}plan-name); DEBUGGING
 
             ; Add turn to dialogue history
             (store-turn 'me expr :gists (get episode-name 'gist-clauses) :ulfs (list (get episode-name 'ulf)))
@@ -1398,14 +1404,6 @@
 ; will become simpler, based on the gist clauses extracted from
 ; the input.
 ;
-; TODO:
-; For the purposes of the Blocksworld application, this function
-; has been modified to only use one strategy for extracting gist
-; clauses, which simply uses the entire input (in addition to
-; potentially looking for a final question). In the future, this
-; should be made more flexible somehow (without relying on hardcoded
-; functionality)
-;
 ; - look for a final question -- either yes-no, starting
 ;   with auxiliary + "you{r}", or wh-question, starting with
 ;   a wh-word and with "you{r}" coming within a few words.
@@ -1413,90 +1411,58 @@
 ;   wh-word is not detected but "you"/"your" is quite reliable.)
 ;   The question, by default, is reciprocal to Eta's question.
 ;
-;   This might use choice trees such as
-;       *question-from-major-input*,
-;       *question-from-favorite-class-input*,
-;       etc. 
-;
-  (let ((n (length words)) tagged-prior-gist-clause relevant-trees sentences
-        specific-content-tree question-content-tree unbidden-content-tree thematic-content-tree 
-        specific-answers questions unbidden-answers thematic-answer facts gist-clauses)
+  (let ((n (length words)) tagged-prior-gist-clause tagged-words relevant-trees sentences
+        specific-tree thematic-tree facts gist-clauses)
 
-    ; Get the relevant pattern transduction trees given the gist clause of Eta's previous utterance.
+    ; Get the relevant pattern transduction tree given the gist clause of Eta's previous utterance.
     ;````````````````````````````````````````````````````````````````````````````````````````````````
     ;; (format t "~% prior-gist-clause = ~a" prior-gist-clause) ; DEBUGGING
     (setq tagged-prior-gist-clause (mapcar #'tagword prior-gist-clause))
     ;; (format t "~% tagged prior gist clause = ~a" tagged-prior-gist-clause) ; DEBUGGING
     (setq relevant-trees (cdr
       (choose-result-for tagged-prior-gist-clause '*gist-clause-trees-for-input*)))
-         
     ;; (format t "~% this is a clue == ~a" (choose-result-for tagged-prior-gist-clause
     ;;   '*gist-clause-trees-for-input*))
-    ;; (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING      
-    (setq specific-content-tree (first relevant-trees)
-          question-content-tree (second relevant-trees)
-          unbidden-content-tree (third relevant-trees)
-          thematic-content-tree (fourth relevant-trees))
+    ;; (format t "~% relevant trees = ~a" relevant-tree) ; DEBUGGING   
+    (setq specific-tree (first relevant-trees)) 
+    (setq thematic-tree (second relevant-trees))  
 
-    ; Split user's reply into sentences for specific/question/unbidden trees
-    ;````````````````````````````````````````````````````````````````````````
+    ;; ; Get the list of gist clauses from the user's utterance, using the contextually
+    ;; ; relevant pattern transduction tree.
+    ;; ;```````````````````````````````````````````````````````````````````````````````````````````````````````
+    ;; (setq tagged-words (mapcar #'tagword words))
+    ;; ;; (format t "~% tagged words = ~a" tagged-words) ; DEBUGGING
+    ;; (setq facts (cdr (choose-result-for tagged-words relevant-tree)))
+    ;; (format t "~% gist clauses = ~a" facts) ; DEBUGGING
+
+    ; Split user's reply into sentences for extracting specific gist clauses
+    ;`````````````````````````````````````````````````````````````````````````
     (setq sentences (split-sentences words))
     (dolist (sentence sentences)
-      (let ((tagged-sentence (mapcar #'tagword sentence)) (question? (equal (last sentence) '?))
-            clause keys)
+      (let ((tagged-sentence (mapcar #'tagword sentence)))
+        (setq clause (cdr (choose-result-for tagged-sentence specific-tree)))
+        (when clause
+          (setq keys (second clause))
+          (store-gist (car clause) keys *gist-kb-user*)
+          (push (car clause) facts))))
 
-        ; Form specific answer(s) from input
-        ;`````````````````````````````````````
-        (when (not question?)
-          (setq clause (cdr (choose-result-for tagged-sentence specific-content-tree)))
-          (when clause
-            (setq keys (second clause))
-            (store-gist (car clause) keys *gist-kb*)
-            (push (car clause) specific-answers)
-            (push (car clause) facts)))
-
-        ; Form question(s) from input
-        ;``````````````````````````````
-        (when question?
-          (setq clause (cdr (choose-result-for tagged-sentence question-content-tree)))
-          (when clause
-            (setq keys (second clause))
-            (store-gist (car clause) keys *gist-kb*)
-            (push (car clause) questions)
-            (push (car clause) facts)))
-        ; NOTE: questions by the user are currently not stored
-        ; (though we could store the fact that the user asked them).
-
-        ; Form unbidden answer(s) from input
-        ;`````````````````````````````````````
-        (when (not question?)
-          (setq clause (cdr (choose-result-for tagged-sentence unbidden-content-tree)))
-          (when clause 
-            (setq keys (second clause))
-            (store-gist (car clause) keys *gist-kb*)
-            (push (car clause) unbidden-answers)))
-    ))
-
-    ; Form thematic answer from input (if there are more than two sentences)
-    ;```````````````````````````````````````````````````````````````````````
-    (when (> (length sentences) 2)
-      (setq thematic-answer (cdr
-        (choose-result-for (mapcar #'tagword words) thematic-content-tree)))
-      (when thematic-answer
-        (setq keys (second thematic-answer))
-        (setq thematic-answer (car thematic-answer))
-        (store-gist (car thematic-answer) keys *gist-kb*)))
-
+    ; Form thematic answer from input (if no specific facts are extracted)
+    ;``````````````````````````````````````````````````````````````````````
+    (when (and (> (length sentences) 2) (null facts))
+      (setq clause (cdr (choose-result-for (mapcar #'tagword words) thematic-tree)))
+      (when clause
+        (setq keys (second clause))
+        (store-gist (car clause) keys *gist-kb-user*)
+        (push (car clause) facts)))
 
     ; The results obtained will be stored as the 'gist-clauses'
     ; property of the name of the user input. So, 'facts' should
     ; be a concatenation of the above results in the order in
     ; which they occur in the user's input; in reacting, Eta will
     ; pay particular attention to the first clause, and any final question.
-    ; TODO: what should be done with thematic answers here?
     (setq gist-clauses (reverse facts))
-    ;; (if thematic-answer 
-    ;;   (setq facts (append facts (list thematic-answer))))
+
+    ;; (format t "~% extracted gist clauses: ~a" gist-clauses) ; DEBUGGING
 	
 	  ; Allow arbitrary unexpected inputs to be processed
     ; replace nil with (null gist-clauses)
