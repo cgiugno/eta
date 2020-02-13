@@ -27,10 +27,15 @@
 ?a3. (Me react-to.v ?a2.)
 ;; ?a3. (Me reply-to.v ?a2.)
 
-?a4. (Me discuss-medicine.v you)
+?a4. (Me say-to.v you '(I have a list of questions I would like to discuss with you now\.))
 
-?a5. (Me discuss-prognosis.v you)
-;; ?a5. (Me say-to.v you '(BLAH \.))
+?a5. (Me discuss-medicine.v you)
+
+?a6. (Me discuss-prognosis.v you)
+
+; Discuss steps for future contact
+
+?a7. (Me say-to.v you '(Thank you for the conversation\, goodbye\.))
 
 )) ; END defparameter *eta-schema*
 
@@ -83,7 +88,7 @@
       (store-topic-keys (first x) (second x) '*eta-schema*))
   '(
     (?a1.  (introduce))
-    (?a4.  (medicine))
-    (?a5.  (prognosis))
+    (?a5.  (medicine))
+    (?a6.  (prognosis))
   )
 ) ; END mapcar #'store-topic-keys

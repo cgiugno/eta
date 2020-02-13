@@ -3,22 +3,17 @@
   ))
 
 
-(READRULES '*specific-answer-from-medicine-input*
+(READRULES '*medicine-input*
 '(
+  1 (0 sure \, I can arrange that 0)
+    2 ((I will give you more medicine \.) (medicine)) (0 :gist)
   1 (0)
-    2 (NIL Gist) (0 :gist)
+    2 *general-input* (0 :subtree)
 ))
 
 
-(READRULES '*question-from-medicine-input*
+(READRULES '*medicine-reaction*
 '(
-  1 (0)
-    2 (NIL Gist) (0 :gist)
-))
-
-
-(READRULES '*unbidden-answer-from-medicine-input*
-'(
-  1 (0)
-    2 (NIL Gist) (0 :gist)
+  1 (0 I will give you more medicine 0)
+    2 (Great\, thank me !) (0 :out)
 ))

@@ -47,13 +47,13 @@
 
 :episodes ; we start execution at this keyword
          ; (other schema components are omitted for the time being.)
-?a1. (You paraphrase.v '?question)
+?a1. (You paraphrase.v '?clause)
 
 ?a2. (Me react-to.v ?a1.)
 
-?a3. (Me say-to.v you '(So \,))
+?a3. (Me say-to.v you '(As for your question \,))
 
-?a4. (You paraphrase.v '?answer)
+?a4. (You paraphrase.v '?question)
 
 ?a5. (Me react-to.v ?a4.)
 

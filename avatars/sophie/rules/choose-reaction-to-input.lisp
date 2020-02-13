@@ -18,19 +18,21 @@
     2 *reaction-to-question* (0 :subtree)
    1 (0 aux you 0)
     2 *reaction-to-question* (0 :subtree)
+   1 (0 ?); anything ending with ?
+    2 *reaction-to-question* (0 :subtree)
    1 (0); by default, it's an assertion
     2 *reaction-to-assertion* (0 :subtree)
  ))
 
 (READRULES '*reaction-to-assertion*
- '(
-    1 (0 food 0)
-      2 *reaction-to-topic-input* (0 :subtree)
-    1 (0 politics 0)
-      2 *reaction-to-topic-input* (0 :subtree)
-    1 (0)
-      2 (You apologize \, you could not understand what I said \.) (0 :out)
-  ))
+'(
+  1 (0 medicine 0)
+    2 *medicine-reaction* (0 :subtree)
+  1 (0 years left alive 0)
+    2 *prognosis-reaction* (0 :subtree)
+  1 (0)
+    2 (You apologize \, you could not understand what I said \.) (0 :out)
+))
 
 (READRULES '*reaction-to-unexpected*
  '())

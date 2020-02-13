@@ -17,9 +17,9 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(Prognosis ?))
+?a1. (Me say-to.v you '(Can you tell me what kind of time we\'re looking at ?))
 
-?a2. (you reply-to.v ?a1.)
+?a2. (You reply-to.v ?a1.)
 
 ?a3. (Me react-to.v ?a2.)
 
@@ -60,7 +60,7 @@
 (mapcar #'(lambda (x) 
       (store-output-gist-clauses (first x) (second x) '*prognosis-schema*))
   '(
-    (?a1.  ((prognosis ?)))
+    (?a1.  ((What is my prognosis ?)))
   )
 ) ; END mapcar #'store-output-gist-clauses
 

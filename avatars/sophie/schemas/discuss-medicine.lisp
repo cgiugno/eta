@@ -17,9 +17,16 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(I would like a refill \.))
+; Have (You paraphrase.v ...) action here, with previous gist clause being passed in schema header?
 
-?a2. (you reply-to.v ?a1.)
+?a1. (Me say-to.v you '(I would like a refill \.)) ; Somehow this should be a reaction to whatever gist
+                                                   ; clause triggered the schema, or a "default" action if there is
+                                                   ; no such gist clause (that is, if the user initiated the schema themselves)
+                                                   ; i.e. if this is in response to "how are you on medicine" it makes sense,
+                                                   ; but not if the person just says "I would like a refill of medicine" out of
+                                                   ; context.
+ 
+?a2. (You reply-to.v ?a1.)
 
 ?a3. (Me react-to.v ?a2.)
 
