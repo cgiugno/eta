@@ -10,8 +10,8 @@
 ;; *user-id* : unique ID of user (potentially overwritten by sessionInfo.lisp if in live mode)
 ;;
 
-(defparameter *avatar* "sophie")
+(defparameter *avatar* "david")
 (defparameter *mode* NIL)
-(defparameter *coords-mode* NIL)
+(defparameter *coords-mode* T)
 (defparameter *safe-mode* NIL)
 (defparameter *user-id* "test")

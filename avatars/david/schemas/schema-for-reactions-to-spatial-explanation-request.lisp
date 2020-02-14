@@ -44,7 +44,7 @@
                ; but also mention alternates (attached as property
                ; to ?a3., I suppose).
 
-)) ; end of parameter *reactions-to-spatial-question*
+)) ; END parameter *reactions-to-spatial-question*
 
 
 (setf (get '*reactions-to-spatial-question* 'semantics) (make-hash-table))

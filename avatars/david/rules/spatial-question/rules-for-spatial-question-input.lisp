@@ -25,7 +25,7 @@
 
   ; This is the top level choice tree for processing spatial question inputs.
   ; Currently, redirect input to *asr-fix-tree* as the very first step.
-  (READRULES '*specific-answer-from-spatial-question-input*
+  (READRULES '*spatial-question-input*
   '(
     1 (0)
       2 (*asr-fix-tree* (1)) (0 :subtree+clause)
@@ -56,7 +56,7 @@
     ;; Special requests
     ;; -----------------
     1 (0 special-request 0)
-      2 (*specific-answer-from-request-input* (1 2 3)) (0 :subtree+clause)
+      2 (*request-input* (1 2 3)) (0 :subtree+clause)
     ;; ---------------------
     ;; "Small talk" patterns
     ;; ---------------------
@@ -488,8 +488,4 @@
       2 (*asr-fix-tree* (1 some 3)) (0 :subtree+clause)
     1 (0)
       2 (*detect-smalltalk-tree* (1)) (0 :subtree+clause)
-  ))
-		
-  (READRULES '*question-from-spatial-question-input*
-  '(
   ))

@@ -10,7 +10,16 @@
 ;;     gist-question: (2 what is your name 1)
 
 
- (READRULES '*specific-answer-from-name-input*
+(READRULES '*name-input*
+'(
+   1 (0 ?)
+      2 *question-from-name-input* (0 :subtree)
+   1 (0)
+      2 *specific-answer-from-name-input* (0 :subtree)
+))
+
+
+(READRULES '*specific-answer-from-name-input*
   '(
   1 (0 american-names american-family-names 0)
      2 ((My name is 2 3 \.)  (name)) (0 :gist)
@@ -18,22 +27,22 @@
      2 ((My name is 2 \.)  (name)) (0 :gist)
   1 (0)
      2 ((ETA could not understand what my name is \.)  (name)) (0 :gist)
-  ))
+))
 		
- (READRULES '*question-from-name-input*
-    '(
+(READRULES '*question-from-name-input*
+   '(
     1 (0 what 2 you 0)
        2 (What is your name ?) (0 :gist)
     1 (0 how 2 you 0)
        2 (What is your name ?) (0 :gist)
     1 (0 wh_ 1 your name 0)
        2 (What is your name ?) (0 :gist)
-    ))
+))
 
- (READRULES '*reaction-to-name-input*
+(READRULES '*reaction-to-name-input*
   '(
     1 (0 my name is american-names 0)
       2 (It is very nice to meet me 5 \. You hope we have many great interactions in the future\.) (100 :out)
     1 (0)
       2 (It is very nice to meet me \. You hope we have many great interactions in the future\.) (100 :out)
-  ))
+))

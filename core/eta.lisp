@@ -1431,7 +1431,7 @@
       (choose-result-for tagged-prior-gist-clause '*gist-clause-trees-for-input*)))
     ;; (format t "~% this is a clue == ~a" (choose-result-for tagged-prior-gist-clause
     ;;   '*gist-clause-trees-for-input*))
-    ;; (format t "~% relevant trees = ~a" relevant-tree) ; DEBUGGING   
+    (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING   
     (setq specific-tree (first relevant-trees)) 
     (setq thematic-tree (second relevant-trees))  
 

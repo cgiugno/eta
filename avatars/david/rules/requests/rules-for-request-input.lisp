@@ -6,7 +6,7 @@
         '((moment second minute bit)
           (finished-word it all everything)))
 
-(READRULES '*specific-answer-from-request-input*
+(READRULES '*request-input*
 '(
   1 (bye 0)
     2 ((Goodbye \.)) (0 :gist)
