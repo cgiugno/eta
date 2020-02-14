@@ -34,7 +34,7 @@
 ))
 
 
-(READRULES '*reaction-to-general-input*
+(READRULES '*general-reaction*
 '(
   1 (0)
     2 (It is very nice to meet me \. You hope we have many great interactions in the future\.) (100 :out)

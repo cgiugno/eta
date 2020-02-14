@@ -1155,6 +1155,7 @@
       ; Eta: Initiating Subschema
       ;````````````````````````````
       ((setq bindings (bindings-from-ttt-match '(me schema-header? you (? _*)) wff))
+        (setq args-list (get-multiple-bindings bindings))
         ; Before instantiating the schema, check whether the episode is an obviated action
         (when (not (null (obviated-action episode-name)))
           (delete-current-episode {sub}plan-name)
@@ -1162,7 +1163,7 @@
         (setq new-subplan-name (gensym "SUBPLAN"))
         ; Instantiate schema from schema name
         ; TODO: allow for schema arguments
-        (init-plan-from-schema new-subplan-name (schema-name! (second wff)) nil)
+        (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
         (add-subplan {sub}plan-name new-subplan-name)
       )
       
@@ -1285,12 +1286,19 @@
         (setq wff1 (get user-episode-name1 'wff))
         ;; (format t "~%User WFF1 = ~a, if correct,~%            ~
         ;;           ends in a ETA action name" wff1) ; DEBUGGING
-        (setq eta-episode-name (car (last wff1)))
-        (when (not (symbolp eta-episode-name))
-          (format t "~%***UNEXPECTED USER ACTION ~A" wff)
-          (return-from observe-next-user-action nil))
-        ; Next, the "interpretation" (gist clauses) of the Eta action:
-        (setq eta-clauses (get eta-episode-name 'gist-clauses))
+        
+        (cond
+          ; If replying to specific gist clauses
+          ((quoted-sentence-list? (car (last wff1)))
+            (setq eta-clauses (eval (car (last wff1)))))
+          ; If replying to an action which has gist clauses associated
+          (t
+            (setq eta-episode-name (car (last wff1)))
+            (when (not (symbolp eta-episode-name))
+              (format t "~%***UNEXPECTED USER ACTION ~A" wff)
+              (return-from observe-next-user-action nil))
+            ; Next, the "interpretation" (gist clauses) of the Eta action:
+            (setq eta-clauses (get eta-episode-name 'gist-clauses))))
         ;; (format t "~%ETA action name is ~a" eta-episode-name)
         ;; (format t "~%ETA gist clauses that the user is responding to ~
         ;;           ~% = ~a " eta-clauses)

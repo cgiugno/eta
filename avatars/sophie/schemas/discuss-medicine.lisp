@@ -9,15 +9,12 @@
 
 '(Event-schema (((set-of me you) discuss-medicine.v) ** ?e)
 ;```````````````````````````````````````````````````````````
-; Blocks world conversation. An expected blocks world dialogue consists of the agent repeatedly asking
-; the user if they have a spatial question to ask, followed by a question from the user, followed by
-; an appropriate response by the agent. This repeats until the user says something interpreted as a goodbye,
-; and is possibly preempted by some "smalltalk" questions (currently disabled).
+;
 ;
 
 :episodes 
 
-; Have (You paraphrase.v ...) action here, with previous gist clause being passed in schema header?
+; Have (You paraphrase.v ?gist) action here, with previous gist clause being passed in schema header?
 
 ?a1. (Me say-to.v you '(I would like a refill \.)) ; Somehow this should be a reaction to whatever gist
                                                    ; clause triggered the schema, or a "default" action if there is

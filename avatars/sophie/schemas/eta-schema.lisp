@@ -9,11 +9,10 @@
 
 '(Event-schema (((set-of me you) have-eta-dialog.v) ** ?e)
 ;```````````````````````````````````````````````````````````
-; Blocks world conversation. An expected blocks world dialogue consists of the agent repeatedly asking
-; the user if they have a spatial question to ask, followed by a question from the user, followed by
-; an appropriate response by the agent. This repeats until the user says something interpreted as a goodbye,
-; and is possibly preempted by some "smalltalk" questions (currently disabled).
-;
+; An Eta dialogue focused around a patient-doctor interaction: after an introduction, the
+; doctor may initiate conversation with a question. Otherwise, the patient has a list of
+; questions on his agenda to ask the doctor (each one may spiral to various sub-dialogues
+; before returning to the overall conversation track).
 
 :episodes 
 
@@ -22,16 +21,20 @@
                           to be getting worse\.))
 
 ?a2. (You reply-to.v ?a1.)
-;; ?a2. (You say-to.v me ?gist)
 
 ?a3. (Me react-to.v ?a2.)
-;; ?a3. (Me reply-to.v ?a2.)
 
 ?a4. (Me say-to.v you '(I have a list of questions I would like to discuss with you now\.))
 
-?a5. (Me discuss-medicine.v you)
+?a5. (Me have-subdialogue.v you (I would like a refill of my medicine \.)
+                                ((I would like a refill of medicine \.)))
 
-?a6. (Me discuss-prognosis.v you)
+?a6. (Me have-subdialogue.v you (Can you tell me what you think my prognosis is going to be ?)
+                                ((What is my prognosis ?)))
+
+;; ?a5. (Me discuss-medicine.v you)
+
+;; ?a6. (Me discuss-prognosis.v you)
 
 ; Discuss steps for future contact
 

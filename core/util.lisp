@@ -184,6 +184,41 @@
 
 
 
+(defun quoted-list? (list)
+;````````````````````````````````````
+; Is list of form (quote (...))?
+;
+  (if (and
+        (listp list)
+        (eq (car list) 'quote)
+        (listp (second list))) t nil)
+) ; END quoted-list?
+
+
+
+(defun quoted-sentence? (list)
+;````````````````````````````````````````````````
+; Is list of form (quote (word1 word2 ... wordn)) ?
+;
+  (if (and
+        (quoted-list? list)
+        (every #'symbolp (second list))) t nil)
+) ; END quoted-sentence?
+
+
+
+(defun quoted-sentence-list? (list)
+;````````````````````````````````````````````````
+; Is list of the form (quote ((word1 ... wordn) ... (word1 ... wordm))) ?
+;
+  (if (and
+        (quoted-list? list)
+        (every #'listp (second list))
+        (every (lambda (s) (every #'symbolp s)) (second list))) t nil)
+) ; END quoted-sentence-list?
+
+
+
 (defun quoted-question? (sentence)
 ;```````````````````````````````````````
 ; Is sentence of form (quote (<word> ... <word> ?)), or with the
@@ -196,10 +231,7 @@
   (let (word)
     ;; (format t "~% ****** quoted-question? first line = ~a **** ~%" (listp sentence))
     ;; (format t "~% ****** quoted-question? third line = ~a **** ~%" sentence) ; DEBUGGING
-    (if (and
-          (listp sentence)
-          (eq (car sentence) 'quote)
-          (listp (second sentence)))
+    (if (quoted-sentence? sentence)
       (setq word (car (last (second sentence))))
       (return-from quoted-question? nil))
     (or

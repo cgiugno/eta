@@ -31,7 +31,7 @@
   1 (0 years left alive 0)
     2 *prognosis-reaction* (0 :subtree)
   1 (0)
-    2 (You apologize \, you could not understand what I said \.) (0 :out)
+    2 *general-reaction* (0 :subtree)
 ))
 
 (READRULES '*reaction-to-unexpected*
