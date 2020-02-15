@@ -189,7 +189,7 @@
 ; ``````````````````
 ; Checks if a ULF is an adv-e word or phrase.
 ;
-  (or (adv-e-lex? (ulf))
+  (or (adv-e-lex? ulf)
       (and (listp ulf) (equal (car ulf) 'ADV-E)))
 ) ; END adv-e?
 
@@ -204,11 +204,11 @@
 
 (defun adv-a? (ulf)
 ; ``````````````````
-; Checks if a ULF is an adv-e word or phrase.
+; Checks if a ULF is an adv-a word or phrase.
 ;
   (or (adv-a-lex? ulf)
       (and (listp ulf) (equal (car ulf) 'ADV-A)))
-) ; END adv-e?
+) ; END adv-a?
 
 
 (defun adv-a-lex? (ulf)

@@ -49,6 +49,9 @@
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (Twitter BLOCK.N)) (ADV-A *H)))) ?)
 ; '((SUB (HOW_MANY.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
 ; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (MOVE.V *H (ADV-E (SUB (TWO.D (PLUR TURN.N)) (AGO.P *H)))))) ?)
+; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))))) ?)
+; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))) (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Starbucks| BLOCK.N))))))))) ?)
+; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H)))) ?)
 ;
 ;
 ; Example relations:
@@ -270,6 +273,10 @@
 ; Negates a presupposition by changing "some"/"something" to "no"/"nothing" (in
 ; the case of negations, we want to remove the double negative), or otherwise adding
 ; a negation to the ULF.
+; NOTE: It seems like, in the future, this function could be made more robust using
+; natural logic like inference rules, i.e. making use of NPI/PPI to get the
+; "rewritings" correctly.
+;
   (cond
     ((ttt:match-expr '(^* (! some.d something.pro)) ulf)
       (ttt:apply-rules
@@ -279,6 +286,8 @@
           (/ ((no.d _!) ((? (tense? do.aux-s)) not (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
           (/ (nothing.pro ((tense? ulf:verb?) not _*)) (everything.pro ((tense? ulf:verb?) _*)))
           (/ ((no.d _!) ((tense? ulf:verb?) not _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
+          (/ ((tense? do.aux-s) (^* (ulf:verb? (no.d _!)))) ((tense? do.aux-s) not (ulf:verb? (any.d _!))))
+          (/ ((tense? do.aux-s) (^* (ulf:verb? nothing.pro))) ((tense? do.aux-s) not (ulf:verb? anything.d)))
           (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
       ulf))
     (t

@@ -20,11 +20,10 @@
 ; T3
 ; [ans]
 
-
 ; "Where did I move the Texaco block" => "Where was the Texaco block after I moved it"
 
-
-
+; '((|Target| at-loc.p ($ loc 2 0 1)) (|Starbucks| at-loc.p ($ loc 5 5 0)) (|Twitter| at-loc.p ($ loc 5 5 1)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0)))
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
 
 (defun recall-answer (object-locations ulf)
 ; ````````````````````````````````````````````
@@ -32,39 +31,91 @@
 ; historical record of block moves stored in context.
 ;
   (format t "object locations: ~a~%" object-locations) ; DEBUGGING
-  (let ((coords (extract-coords object-locations)))
+  (let* ((coords (extract-coords object-locations)) (quant-times (get-referred-times ulf))
+        (quantifier (first quant-times)) (times (second quant-times)))
     (format t "blocks at coordinates: ~a~%" coords) ; DEBUGGING
+
+    ; First check "when" questions
+
+    ; Then check "what block(s) did I move" questions
+
 
     '((|Texaco| to-the-left-of.p |Twitter|))
   )
 ) ; END recall-answer
 
 
+(defun get-referred-times (ulf)
+; ``````````````````````````````
+; Given a historical question ULF, get the list of times referred to by the ULF (for instance,
+; by the adv-e phrases/lexical words), and a quantifier over those times (by default, most-recent)
+  (let (adv-e-phrase adv-e-word quantifier times-phrase times-word times)
+    ; Retrieve any adv-e phrase and adv-e lexical word in ulf
+    (setq adv-e-phrase (extract-adv-e-phrase ulf))
+    (setq adv-e-word (extract-adv-e-word ulf))
+    ; Resolve adv-e phrase and adv-e word to times (or quantifier over times in
+    ; the case of the latter)
+    ;; (format t "adv-e-phrase: ~a~%" adv-e-phrase)
+    ;; (format t "adv-e-word: ~a~%" adv-e-word) ; DEBUGGING
+    (when adv-e-phrase
+      (setq times-phrase (get-times-from-adv-e-phrase adv-e-phrase)))
+    (when adv-e-word
+      (setq times-word (get-times-from-adv-e-word adv-e-word)))
+    (cond
+      ; If lexical adv-e gives some special quantifier
+      ((and times-word (not (listp times-word)))
+        (setq quantifier times-word)
+        (setq times times-phrase))
+      ; If both phrasal adv-e and lexical adv-e give list of times
+      ((and times-word times-phrase)
+        (setq times (intersection times-word times-phrase)))
+      ; If only lexical adv-e gives list of times
+      (times-word (setq times times-word)))
+    ; If no times have been identified by adv-e expressions (or no adv-e expressions
+    ; exist), simply assume the historical question identifies all previous times
+    ; NOTE: for more complex aspectual questions, this may not be the case.
+    (if (not times) (setq times (get-times-before *time* -1)))
+    (if (not quantifier) (setq quantifier 'most-recent))
+  (list quantifier times))
+) ; END get-referred-times
+
+
 (defun extract-adv-e-phrase (ulf)
 ; `````````````````````````````````
 ; Extracts an adv-e phrase from a ULF, and applies any sub macros in the phrase.
 ;
-  (nth-value 1 (ulf-lib:apply-sub-macro (ttt:apply-rule '(/ (^* (adv-e _!)) (adv-e _!)) ulf
-                  :shallow t) :calling-package *package*))
+  (let ((adv-e-phrase
+      (nth-value 1 (ulf-lib:apply-sub-macro (ttt:apply-rule '(/ (^* (adv-e _!)) (adv-e _!)) ulf
+                      :shallow t) :calling-package *package*))))
+    (if (adv-e? adv-e-phrase) adv-e-phrase nil))
 ) ; END extract-adv-e-phrase
 
 
 (defun extract-adv-e-word (ulf)
 ; `````````````````````````````````
-; Extracts an adv-e phrase from a ULF, and applies any sub macros in the phrase.
+; Extracts an adv-e word from a ULF.
 ;
-  (ttt:apply-rule '(/ (^* adv-e-lex?) adv-e-lex?) ulf :shallow t)
+  (let ((adv-e-word (ttt:apply-rule '(/ (^* adv-e-lex?) adv-e-lex?) ulf :shallow t)))
+    (if (adv-e? adv-e-word) adv-e-word nil))
 ) ; END extract-adv-e-phrase
-
-
-; (ADV-E (DURING.P (THE.D (N+PREDS TURN.N ()))))
-; (WHEN.PS (I.PRO ((PRES MOVE.V) (THE.D (|Twitter| BLOCK.N)))))
 
 
 (defun get-times-from-adv-e-word (ulf)
 ; ``````````````````````````````````````
+; Resolves a lexical adv-e into either a list of times (for example,
+; something like "previously"), or an operator over times (e.g. "ever").
 ;
-;
+  (let ((time-funcall (ttt:apply-rules
+      `((/ hist-adv-prev? (get-times-before ,*time* -1))
+        (/ hist-adv-next? (get-times-after ,*time* -1))
+        (/ hist-adv-recent? (get-times-before ,*time* 3))
+        (/ hist-adv-init? (get-times-init 1))
+        (/ hist-adv-cur? (list ,*time*))
+        (/ hist-adv-always? (identity always))
+        (/ hist-adv-ever? (identity ever))
+        (/ hist-adv-never? (identity not-ever)))
+      ulf)))
+    (apply (car time-funcall) (cdr time-funcall)))
 ) ; END get-times-from-adv-e-word
 
 
@@ -193,7 +244,7 @@
 ; coords should be a list of coordinates in the simplified form (|Name| ?x ?y ?z)
 ;
   (let* ((Ti (get-prev-time *time*)) (scene coords) moves)
-    (loop while (and Ti (> (compare-time Ti Tn) -1) (> (compare-time Ti 'T0) -1)) do
+    (loop while (and Ti (> (compare-time Ti Tn) -1) (> (compare-time Ti 'NOW0) -1)) do
       (setq moves (extract-moves (gethash Ti *context*)))
       (mapcar (lambda (move)
         (setq scene (subst (first move) (second move) scene :test #'equal))) moves)
@@ -229,7 +280,7 @@
         (cond
           ((and neg (not rel-true)) Ti)
           ((and (not neg) rel-true) Ti)
-          ((equal Ti 'T0) nil)
+          ((equal Ti 'NOW0) nil)
           (t (get-time-of-relation-recur rel (get-prev-time Ti)))))))
     (get-time-of-relation-recur rel (get-prev-time *time*)))
 ) ; END get-time-of-relation
@@ -244,7 +295,7 @@
              (moved-blocks (mapcar #'caar moves)))
         (cond
           ((member name moved-blocks) Ti)
-          ((equal Ti 'T0) nil)
+          ((equal Ti 'NOW0) nil)
           (t (get-time-of-move-recur name (get-prev-time Ti)))))))
     (get-time-of-move-recur name (get-prev-time *time*)))
 ) ; END get-time-of-move
@@ -286,7 +337,7 @@
   (labels ((eval-relation-all-time-recur (rel Ti)
       (let ((rel-true (eval-relation-time coords rel Ti)))
         (cond
-          ((equal Ti 'T0) rel-true)
+          ((equal Ti 'NOW0) rel-true)
           (t (and rel-true (eval-relation-all-time-recur rel (get-prev-time Ti))))))))
     (let ((result (eval-relation-all-time-recur rel (get-prev-time *time*))))
       (if (or (and neg (not result)) (and (not neg) result)) t)))
@@ -301,7 +352,7 @@
   (labels ((eval-relation-all-time-recur (rel Ti)
       (let ((rel-true (eval-relation-time coords rel Ti :neg t)))
         (cond
-          ((equal Ti 'T0) rel-true)
+          ((equal Ti 'NOW0) rel-true)
           (t (and rel-true (eval-relation-all-time-recur rel (get-prev-time Ti))))))))
     (let ((result (eval-relation-all-time-recur rel (get-prev-time *time*))))
       (if (or (and neg (not result)) (and (not neg) result)) t)))
@@ -314,7 +365,7 @@
 ; If Ti is given, lists all moves since Ti.
 ; If block is given, lists all moves with block as the subject.
 ; 
-  (if (null Ti) (setq Ti 'T0))
+  (if (null Ti) (setq Ti 'NOW0))
   
 ) ; END count-moves
 
@@ -386,10 +437,10 @@
 (defun get-times-init (n)
 ; ````````````````````````
 ; Gets the initial time(s), going forward n hops.
-; NOTE: should this assume initial time always 'T0, or
+; NOTE: should this assume initial time always 'NOW0, or
 ; use recursive method from *time* to find initial time?
 ;
-  (cons 'T0 (get-times-after 'T0 (- n 1)))
+  (cons 'NOW0 (get-times-after 'NOW0 (- n 1)))
 ) ; END get-times-init
 
 
@@ -416,16 +467,18 @@
   (member ulf '(previously.adv-e before.adv-e)))
 (defun hist-adv-next? (ulf)
   (member ulf '(since.adv-e)))
-(defun hist-adv-always? (ulf)
-  (member ulf '(always.adv-e)))
-(defun hist-adv-ever? (ulf)
-  (member ulf '(ever.adv-e)))
+(defun hist-adv-recent? (ulf)
+  (member ulf '(recently.adv-e just.adv-e)))
 (defun hist-adv-init? (ulf)
   (member ulf '(originally.adv-e initially.adv-e)))
 (defun hist-adv-cur? (ulf)
   (member ulf '(currently.adv-e)))
-(defun hist-adv-recent? (ulf)
-  (member ulf '(recently.adv-e)))
+(defun hist-adv-always? (ulf)
+  (member ulf '(always.adv-e)))
+(defun hist-adv-ever? (ulf)
+  (member ulf '(ever.adv-e)))
+(defun hist-adv-never? (ulf)
+  (member ulf '(never.adv-e)))
 
 (defun hist-noun-turn? (ulf)
   (member ulf '(turn.n stage.n step.n question.n iteration.n move.n period.n)))

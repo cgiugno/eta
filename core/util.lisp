@@ -1084,8 +1084,8 @@
 ; a new time period (and stores before/after relationships in context)
 ;
   (let ((time-old *time*) time-new pred-before pred-after)
-    (setq time-new (intern (format nil "T~a"
-      (1+ (chars-to-int (cdr (explode *time*)))))))
+    (setq time-new (intern (format nil "NOW~a"
+      (1+ (chars-to-int (cdddr (explode *time*)))))))
     (setq *time* time-new)
     (setq pred-before (list time-old 'before.p time-new))
     (setq pred-after  (list time-new 'after.p time-old))

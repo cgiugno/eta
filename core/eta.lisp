@@ -108,7 +108,7 @@
 
   ; Time
   ; Stores the constant denoting the current time period
-  (defparameter *time* 'T0)
+  (defparameter *time* 'NOW0)
 
   ; Memory
   ; Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
@@ -1139,14 +1139,15 @@
         ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
         ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
         (if perceptions
-          (mapcar (lambda (perceived-action)
-            (let ((perceived-actions1 (list perceived-action '@ *time*)))
-              (store-fact perceived-actions1 *context*)
-              (store-fact (first perceived-actions1) *context* :keys (list (third perceived-actions1)) :no-self t)))
+          (mapcar (lambda (perception)
+            (let ((perception1 (list perception '@ *time*)))
+              (store-fact perception1 *context*)
+              (store-fact (first perception1) *context* :keys (list (third perception1)) :no-self t)
+              ; If a block move (or some other event) occurs, update the time.
+              (when (verb-phrase? perception)
+                (format t "noticed event ~a~%updating time~%" perception)
+                (update-time))))
             (eval perceptions)))
-
-        ; Update the time at which Eta is perceiving the world.
-        (update-time)
 
         (delete-current-episode {sub}plan-name)
       )
@@ -1431,7 +1432,7 @@
       (choose-result-for tagged-prior-gist-clause '*gist-clause-trees-for-input*)))
     ;; (format t "~% this is a clue == ~a" (choose-result-for tagged-prior-gist-clause
     ;;   '*gist-clause-trees-for-input*))
-    (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING   
+    ;; (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING   
     (setq specific-tree (first relevant-trees)) 
     (setq thematic-tree (second relevant-trees))  
 
