@@ -28,7 +28,7 @@
                                  the other side from where it started\.)
                                 ((My pain has recently been getting worse \.)))
 
-?a5. (Me have-subdialogue.v you (I\'ll never forget what happened\. When the pain got really bad\, I first went to my regular doctor
+?a5. (Me have-subdialogue.v you (I\'ll never forget what happened before this\. When the pain got really bad\, I first went to my regular doctor
                                  but he didn\'t find anything and he thought I just had a bad cold\. But the pain and cough got so bad
                                  over the next few days\, I went to the ER on the weekend\. At the ER they thought it was just pneumonia
                                  and gave me antibiotics and the Lortab for pain\. When they told me how much I weighed\, I realized that

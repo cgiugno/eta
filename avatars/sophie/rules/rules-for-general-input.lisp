@@ -23,6 +23,9 @@
   ; If asked about diagnosis details
   1 (0 diagnosis 0)
     2 *diagnosis-details-question* (0 :subtree)
+  ; If asked about radiation treatment
+  1 (0 radiation 0)
+    2 *radiation-question* (0 :subtree)
 
   ; The following two will need modification
   1 (0 medicine 0)
@@ -42,10 +45,7 @@
   ; If no gist clauses were extracted from user, ask them to repeat the question (repeats at most 2 times in a row,
   ; otherwise Eta will ignore and return to the central conversation)
   1 (0)
-    2 (0)
-      3 (*have-subdialogue* ((I\'m sorry\, I didn\'t quite understand\. Can you say it again ?) nil)) (3 :schema+args)
-    2 (0)
-      3 (*have-subdialogue* ((Would you mind repeating ?) nil)) (3 :schema+args)
-    2 (0)
-      3 (Sorry\, you still didn\'t quite understand\. Let you see if you can fill in some more details \.) (0 :out)
+    2 (*have-subdialogue* ((I\'m sorry\, I didn\'t quite understand\. Can you say it again ?) nil)) (3 :schema+args)
+    2 (*have-subdialogue* ((Would you mind repeating ?) nil)) (3 :schema+args)
+    2 (Sorry\, you still didn\'t quite understand\. Let you see if you can fill in some more details \.) (0 :out)
 ))
