@@ -1,4 +1,4 @@
-(mapc 'attachfeat
+(MAPC 'ATTACHFEAT
   '()
 )
 
@@ -20,24 +20,6 @@
     2 *reaction-to-question* (0 :subtree)
   1 (0 ?); anything ending with ?
     2 *reaction-to-question* (0 :subtree)
-  1 (0); by default, it's an assertion
-    2 *reaction-to-assertion* (0 :subtree)
+  1 (0); by default, it's a statement
+    2 *reaction-to-statement* (0 :subtree)
 ))
-
-(READRULES '*reaction-to-assertion*
-; Here we need to be able to respond to any (non-question) gist clauses
-; which are extracted during the conversation. This includes all possible
-; sub-topics (this is possible because gist clauses are designed to be explicit
-; and context-independent) - in general, we use subtrees here for organizational
-; purposes.
-'(
-  1 (0 medicine 0)
-    2 *medicine-reaction* (0 :subtree)
-  1 (0 years left alive 0)
-    2 *prognosis-reaction* (0 :subtree)
-  1 (0)
-    2 *general-reaction* (0 :subtree)
-))
-
-(READRULES '*reaction-to-unexpected*
-'())

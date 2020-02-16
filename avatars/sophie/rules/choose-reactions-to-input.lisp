@@ -70,29 +70,33 @@
                 ;       in the pattern syntax makes the following
                 ;       quite awkward. (TTT will make it easier.)
       3 (0 \. 0 end-punc 0 ?); answer, intervening clauses, & question
-        4 (5 \. 0 end-punc 5 ?); short answer & question?
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-        4 (5 \. 0 end-punc 10 ?); allow longer question 
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-        4 (10 \. 0 end-punc 5 ?); allow longer answer clause
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-        4 (10 \. 0 end-punc 10 ?); allow longer answer clause & question
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-      3 (10 \. 10 ?); no intervening clauses (by above level-3 failure)
-        4 (*reactions-to-question+clause* ((1 \.) (3 ?))) (0 :schema+args)
+        4 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (5 \. 0 end-punc 5 ?); short answer & question?
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (5 \. 0 end-punc 10 ?); allow longer question 
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (10 \. 0 end-punc 5 ?); allow longer answer clause
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (10 \. 0 end-punc 10 ?); allow longer answer clause & question
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+      ;; 3 (10 \. 10 ?); no intervening clauses (by above level-3 failure)
+      ;;   4 (*reactions-to-question+clause* ((3 ?) (1 \.))) (0 :schema+args)
+      3 (*reactions-to-question+clause* ((3 ?) (1 \.))) (0 :schema+args)
     2 (0 ? 6); non-final question (by previous level-2 failure);
              ; is it close to the end? If so, respond to it;
       3 (0 \. 0 end-punc 0 ? 6); initial clause, & intervening one(s)?
-        4 (5 \. 0 end-punc 5 ? 6); short answer & question?
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-        4 (5 \. 0 end-punc 10 ? 6); allow longer question
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-        4 (10 \. 0 end-punc 5 ? 6); allow longer answer clause
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-        4 (10 \. 0 end-punc 10 ? 6); allow longer answer clause & question
-          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
-      3 (10 \. 10 ? 6); no intervening clauses (by above level-3 failure)
-        4 (*reactions-to-question+clause* ((1 \.) (3 ?))) (0 :schema+args)
+        4 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (5 \. 0 end-punc 5 ? 6); short answer & question?
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (5 \. 0 end-punc 10 ? 6); allow longer question
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (10 \. 0 end-punc 5 ? 6); allow longer answer clause
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+        ;; 4 (10 \. 0 end-punc 10 ? 6); allow longer answer clause & question
+        ;;   5 (*reactions-to-question+clause* ((5 ?) (1 \.))) (0 :schema+args)
+      ;; 3 (10 \. 10 ? 6); no intervening clauses (by above level-3 failure)
+      ;;   4 (*reactions-to-question+clause* ((3 ?) (1 \.))) (0 :schema+args)
+      3 (*reactions-to-question+clause* ((3 ?) (1 \.))) (0 :schema+args)
 
   ; No question among the gist clauses (by earlier level-1 failure)
   1 (5 \. 0); short initial answer? Respond just to that
@@ -100,5 +104,7 @@
   1 (10 \. 0); longer initial answer? Respond just to that
     2 (*reaction-to-assertion* (1 \.)) (0 :subtree+clause)
   1 (15 \. 0); longer initial answer? Respond just to that
+    2 (*reaction-to-assertion* (1 \.)) (0 :subtree+clause)
+  1 (0 \. 0); longer initial answer? Respond just to that
     2 (*reaction-to-assertion* (1 \.)) (0 :subtree+clause)
 )) ; END *reactions-to-input*

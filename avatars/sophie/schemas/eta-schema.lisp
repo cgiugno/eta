@@ -16,15 +16,14 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(Hi\, it\'s nice to met you\. I\'ve just moved back here and I was
-                          doing pretty well after the radiation\, but now this pain seems
-                          to be getting worse\.))
+?a1. (Me say-to.v you '(Hi\, it\'s nice to met you\. I just moved back into the area from Florida about two weeks ago\.
+                        And for a while I was feeling pretty well after radiation\, but recently the pain seems to be getting worse\.))
 
 ?a2. (You reply-to.v ?a1.)
 
 ?a3. (Me react-to.v ?a2.)
 
-?a4. (Me say-to.v you '(I have a list of questions I would like to discuss with you now\.))
+?a4. (Me say-to.v you '(I would like to go through some questions with you now\, if that\'s okay\.))
 
 ?a5. (Me have-subdialogue.v you (I would like a refill of my medicine \.)
                                 ((I would like a refill of medicine \.)))
@@ -78,7 +77,7 @@
       (store-output-gist-clauses (first x) (second x) '*eta-schema*))
   '(
     (?a1.  ((It is nice to meet you \.) (I\'ve just moved back to Rochester \.)
-            (I was doing well after radiation\, but now my pain is getting worse \.)))
+            (My pain has recently been getting worse \.)))
   )
 ) ; END mapcar #'store-output-gist-clauses
 

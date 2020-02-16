@@ -76,7 +76,7 @@
 ;         (formed from corresponding packets).
 ;
   ; Use response inhibition via latency numbers when *use-latency* = T
-  (defvar *use-latency* nil)
+  (defvar *use-latency* t)
 
   ; Initialized from a dialogue schema, which is destructively
   ; modified as the plan is implemented. It retains already
