@@ -4,6 +4,8 @@
       2 (*pain-input*) (0 :subtrees)
    1 (I am here alone \.)
       2 (*anyone-here-with-you-input*) (0 :subtrees)
+   1 (I learned about my lung cancer after visiting a lung doctor \.)
+      2 (*diagnosis-details-input*) (0 :subtrees)
 
    ; The following two will need modification
    1 (I would like a refill of medicine \.)

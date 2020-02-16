@@ -12,17 +12,17 @@
 ;   2 (*have-subdialogue* ((Answer to output \.)
 ;                          ((Gist clause one \.) (Gist clause two \.)))) (100 :schema+args)
 '(
-  1 (is anyone here with you ?)
+  1 (Is anyone here with you ?)
     2 (*have-subdialogue* ((I\'m staying with my daughter now\. She took the day off to come in today\,
                             but someone called in sick where she works\. So\, she had to go in\. She
                             really wanted to be here\.)
                            ((I am here alone \.)))) (100 :schema+args)
 
   ; The following two will need modification
-  1 (how are you on medicine ?)
+  1 (How are you on medicine ?)
     2 (*have-subdialogue* ((I need a refill \.)
                            ((I would like a refill of medicine \.)))) (100 :schema+args)
-  1 (what is your prognosis ?)
+  1 (What is your prognosis ?)
     2 (*have-subdialogue* ((Can you tell me what kind of time we\'re looking at ?)
                            ((What is my prognosis ?)))) (100 :schema+args)
 
@@ -33,6 +33,8 @@
 
 (READRULES '*reaction-to-question-off-topic*
 '(
-  1 (where does your daughter work ?)
+  1 (Where does your daughter work ?)
     2 (She works as a school nurse in the county school system\.) (0 :out)
+  1 (How old is your daughter ?)
+    2 (She\'s thirty four\. Turning thirty five in a few months\.) (0 :out)
 ))

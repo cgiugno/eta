@@ -23,13 +23,31 @@
 
 ?a3. (Me react-to.v ?a2.)
 
-?a4. (Me say-to.v you '(I would like to go through some questions with you now\, if that\'s okay\.))
+?a4. (Me have-subdialogue.v you (The pain was pretty much under control for a while\, but in the past week it has been more difficult.
+                                 It used to be in my back and left side of my chest\, but now it\'s in my shoulder blade too\, and on
+                                 the other side from where it started\.)
+                                ((My pain has recently been getting worse \.)))
 
-?a5. (Me have-subdialogue.v you (I would like a refill of my medicine \.)
-                                ((I would like a refill of medicine \.)))
+?a5. (Me have-subdialogue.v you (I\'ll never forget what happened\. When the pain got really bad\, I first went to my regular doctor
+                                 but he didn\'t find anything and he thought I just had a bad cold\. But the pain and cough got so bad
+                                 over the next few days\, I went to the ER on the weekend\. At the ER they thought it was just pneumonia
+                                 and gave me antibiotics and the Lortab for pain\. When they told me how much I weighed\, I realized that
+                                 I had lost fifteen pounds over the course of the past six months\. A couple of days after I went to the ER\,
+                                 I made appointments to go for a bunch of tests\. That took a couple of weeks\. I had to get a bone scan\,
+                                 and I was sent to a lung doctor for a biopsy\. After all that\, the lung doctor told me I had lung cancer\.)
+                                ((The ER gave me Lortab for pain \.) (I learned about my lung cancer after visiting a lung doctor \.)))
 
-?a6. (Me have-subdialogue.v you (Can you tell me what you think my prognosis is going to be ?)
-                                ((What is my prognosis ?)))
+?a6. (Me have-subdialogue.v you (I had radiation treatment for about five weeks\, except weekends\. That finished six weeks ago\.)
+                                ((I had radiation treatment for five weeks \.)))
+
+
+?a100. (Me say-to.v you '(I would like to go through some questions with you now\, if that\'s okay\.))
+
+;; ?a5. (Me have-subdialogue.v you (I would like a refill of my medicine \.)
+;;                                 ((I would like a refill of medicine \.)))
+
+;; ?a6. (Me have-subdialogue.v you (Can you tell me what you think my prognosis is going to be ?)
+                                ;; ((What is my prognosis ?)))
 
 ;; ?a5. (Me discuss-medicine.v you)
 
@@ -90,7 +108,7 @@
       (store-topic-keys (first x) (second x) '*eta-schema*))
   '(
     (?a1.  (introduce))
-    (?a5.  (medicine))
-    (?a6.  (prognosis))
+    (?a4.  (pain-description))
+    (?a5.  (diagnosis-details))
   )
 ) ; END mapcar #'store-topic-keys
