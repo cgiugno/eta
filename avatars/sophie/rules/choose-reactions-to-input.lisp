@@ -58,7 +58,8 @@
   ; will be needed as schema arguments.
   ;
   ; Deal with input containing questions first.
- '(1 (0 ? 0); is there a question?
+'(
+  1 (0 ? 0); is there a question?
     2 (0 \. 0 ?); >= 1 answer clause, and final question;
                 ; react to initial clause & final question --
                 ; we need to identify the end of the answer
@@ -68,49 +69,36 @@
                 ;       Unfortunately the lack of local negation
                 ;       in the pattern syntax makes the following
                 ;       quite awkward. (TTT will make it easier.)
-     3 (0 \. 0 end-punc 0 ?); answer, intervening clauses, & question
-      4 (5 \. 0 end-punc 5 ?); short answer & question?
-       5 (*reaction-to-question* (5 ?))  ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause);(0 :schema+args)
-      4 (5 \. 0 end-punc 10 ?); allow longer question 
-       5 (*reaction-to-question* (5 ?))  ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause);(0 :schema+args)
-      4 (10 \. 0 end-punc 5 ?); allow longer answer clause
-       5 (*reaction-to-question* (5 ?)) ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause) ;(0 :schema+args)
-      4 (10 \. 0 end-punc 10 ?); allow longer answer clause & question
-       5 (*reaction-to-question* (5 ?)) ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause) ;(0 :schema+args)
-     3 (10 \. 10 ?); no intervening clauses (by above level-3 failure)
-      4 (*reaction-to-question* (3 ?)) ;(*reactions-to-answer+question* ((1 \.) (3 ?)))
-        (0 :subtree+clause) ;(0 :schema+args)
+      3 (0 \. 0 end-punc 0 ?); answer, intervening clauses, & question
+        4 (5 \. 0 end-punc 5 ?); short answer & question?
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+        4 (5 \. 0 end-punc 10 ?); allow longer question 
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+        4 (10 \. 0 end-punc 5 ?); allow longer answer clause
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+        4 (10 \. 0 end-punc 10 ?); allow longer answer clause & question
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+      3 (10 \. 10 ?); no intervening clauses (by above level-3 failure)
+        4 (*reactions-to-question+clause* ((1 \.) (3 ?))) (0 :schema+args)
     2 (0 ? 6); non-final question (by previous level-2 failure);
              ; is it close to the end? If so, respond to it;
-     3 (0 \. 0 end-punc 0 ? 6); initial clause, & intervening one(s)?
-      4 (5 \. 0 end-punc 5 ? 6); short answer & question?
-       5 (*reaction-to-question* (5 ?)) ; (*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause) ;(0 :schema+args)
-      4 (5 \. 0 end-punc 10 ? 6); allow longer question
-       5 (*reaction-to-question* (5 ?)) ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause) ;(0 :schema+args)
-      4 (10 \. 0 end-punc 5 ? 6); allow longer answer clause
-       5 (*reaction-to-question* (5 ?)) ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause) ;(0 :schema+args)
-      4 (10 \. 0 end-punc 10 ? 6); allow longer answer clause & question
-       5 (*reaction-to-question* (5 ?)) ;(*reactions-to-answer+question* ((1 \.) (5 ?)))
-         (0 :subtree+clause) ;(0 :schema+args)
-     3 (10 \. 10 ? 6); no intervening clauses (by above level-3 failure)
-      4 (*reaction-to-question* (3 ?)) ;(*reactions-to-answer+question* ((1 \.) (3 ?)))
-        (0 :subtree+clause) ;(0 :schema+args)
+      3 (0 \. 0 end-punc 0 ? 6); initial clause, & intervening one(s)?
+        4 (5 \. 0 end-punc 5 ? 6); short answer & question?
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+        4 (5 \. 0 end-punc 10 ? 6); allow longer question
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+        4 (10 \. 0 end-punc 5 ? 6); allow longer answer clause
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+        4 (10 \. 0 end-punc 10 ? 6); allow longer answer clause & question
+          5 (*reactions-to-question+clause* ((1 \.) (5 ?))) (0 :schema+args)
+      3 (10 \. 10 ? 6); no intervening clauses (by above level-3 failure)
+        4 (*reactions-to-question+clause* ((1 \.) (3 ?))) (0 :schema+args)
 
-   ; No question among the gist clauses (by earlier level-1 failure)
-   1 (5 \. 0); short initial answer? Respond just to that
-    2 (*reaction-to-assertion* (1 \.))
-      (0 :subtree+clause)
-   1 (10 \. 0); longer initial answer? Respond just to that
-    2 (*reaction-to-assertion* (1 \.))
-      (0 :subtree+clause)
-   1 (15 \. 0); longer initial answer? Respond just to that
-    2 (*reaction-to-assertion* (1 \.))
-      (0 :subtree+clause)
- )); end of *reactions-to-input*
+  ; No question among the gist clauses (by earlier level-1 failure)
+  1 (5 \. 0); short initial answer? Respond just to that
+    2 (*reaction-to-assertion* (1 \.)) (0 :subtree+clause)
+  1 (10 \. 0); longer initial answer? Respond just to that
+    2 (*reaction-to-assertion* (1 \.)) (0 :subtree+clause)
+  1 (15 \. 0); longer initial answer? Respond just to that
+    2 (*reaction-to-assertion* (1 \.)) (0 :subtree+clause)
+)) ; END *reactions-to-input*
