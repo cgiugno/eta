@@ -8,6 +8,10 @@
       2 (*diagnosis-details-input*) (0 :subtrees)
    1 (I had radiation treatment for five weeks \.)
       2 (*radiation-input*) (0 :subtrees)
+   1 (Do I need chemotherapy ?)
+      2 (*chemotherapy-input*) (0 :subtrees)
+   1 (What are the side effects of chemotherapy ?)
+      2 (*chemotherapy-details-input*) (0 :subtrees)
 
    ; The following two will need modification
    1 (I would like a refill of medicine \.)

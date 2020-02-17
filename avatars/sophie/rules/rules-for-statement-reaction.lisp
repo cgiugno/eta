@@ -12,6 +12,13 @@
 '(
   1 (I am sorry that your daughter couldn\'t come today \.)
     2 (That\'s okay\. We\'ll have to discuss it with her some other time\.) (0 :out)
+  ; Chemotherapy
+  1 (I think you need chemotherapy \.)
+    ;; 2 *discuss-chemotherapy* (0 :schema)
+    2 (*have-subdialogue* ((What would be the side effects of chemotherapy ?)
+                           ((What are the side effects of chemotherapy ?)))) (100 :schema+args)
+  1 (I do not think you need chemotherapy \.)
+    2 (Ah\, okay\.) (0 :out)
   1 (0)
     2 *general-reaction* (0 :subtree)
 ))

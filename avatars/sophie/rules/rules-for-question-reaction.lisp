@@ -55,6 +55,11 @@
                             but someone called in sick where she works\. So\, she had to go in\. She
                             really wanted to be here\.)
                            ((I am here alone \.)))) (100 :schema+args)
+  ; Questions about chemotherapy
+  1 (Did your doctor mention chemotherapy ?)
+    2 (*have-subdialogue* ((My doctor mentioned something about chemotherapy\, but said that I should wait to see how things go
+                            after the radiation is done\. Why? Do you think I need chemotherapy?)
+                           ((Do I need chemotherapy ?)))) (100 :schema+args)
 
   ; The following two will need modification
   1 (How are you on medicine ?)
