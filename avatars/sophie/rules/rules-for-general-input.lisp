@@ -33,6 +33,16 @@
   1 (0 prognosis 0)
     2 *prognosis-question* (0 :subtree)
     
+  ; Interjections/prompts to continue
+  1 (2 okay 2)
+    2 ((Continue talking \.)) (0 :gist)
+  1 (2 go on 2)
+    2 ((Continue talking \.)) (0 :gist)
+  1 (2 uh huh 2)
+    2 ((Continue talking \.)) (0 :gist)
+  1 (2 sure 2)
+    2 ((Continue talking \.)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist)) (0 :gist)
 ))
@@ -40,8 +50,11 @@
 
 (READRULES '*general-reaction*
 '(
-  1 (0 nice 1 meet you 0)
+  1 (It is nice to meet you \.)
     2 (Thank me \.) (100 :out)
+  ; If doctor is just giving an indication to keep talking, react silently and continue
+  1 (Continue talking \.)
+    2 () (0 :out)
   ; If no gist clauses were extracted from user, ask them to repeat the question (repeats at most 2 times in a row,
   ; otherwise Eta will ignore and return to the central conversation)
   1 (0)
