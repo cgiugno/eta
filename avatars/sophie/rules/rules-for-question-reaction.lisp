@@ -33,6 +33,22 @@
     2 (*have-subdialogue* ((It hurts whenever I take a deep breath\. It used to hurt to swallow during radiation\, but that
                             isn\'t as bad now\.)
                            ((My pain has recently been getting worse \.)))) (100 :schema+args)
+  ; Questions about how you got your diagnosis
+  1 (How did you get your diagnosis ?)
+    2 (*have-subdialogue* ((Well\, I first went to my regular doctor\, but he didn\'t find anything and just thought I had a bad
+                            cold\. But after the pain and cough got really bad\, I went to the ER\. They thought it was just pneumonia
+                            and gave me antibiotics and Lortab for pain\. When they told me how much I weighed\, I realized that I
+                            had lost fifteen pounds over the course of the past six months\. A couple of days ago after I went to the
+                            ER\, I made appointments to go for a bunch of tests\. That took a couple of weeks\. I had to get a bone scan\,
+                            and I was sent to the lung doctor for a biopsy\. After all that\, the lung doctor told me I had lung cancer\.)
+                           ((I got my diagnosis after visiting a lung doctor \.)))) (100 :schema+args)
+  ; Questions about radiation treatment
+  1 (Did you get radiation treatment ?)
+    2 (*have-subdialogue* ((I did get radiation treatment\, for about five weeks\. I finished about six weeks ago\.)
+                           ((I had radiation treatment for five weeks \.)))) (100 :schema+args)
+  1 (Did you get any hair loss or redness during radiation treatment ?)
+    2 (*have-subdialogue* ((I had a little bit of hair loss and redness at the site\, but it\'s mostly gone now\.)
+                           ((I had some hair loss and redness at the site of radiation \.)))) (100 :schema+args)
   ; Questions about anyone here with you
   1 (Is anyone here with you ?)
     2 (*have-subdialogue* ((I\'m staying with my daughter now\. She took the day off to come in today\,

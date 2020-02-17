@@ -4,7 +4,7 @@
       2 (*pain-input*) (0 :subtrees)
    1 (I am here alone \.)
       2 (*anyone-here-with-you-input*) (0 :subtrees)
-   1 (I learned about my lung cancer after visiting a lung doctor \.)
+   1 (I got my diagnosis after visiting a lung doctor \.)
       2 (*diagnosis-details-input*) (0 :subtrees)
    1 (I had radiation treatment for five weeks \.)
       2 (*radiation-input*) (0 :subtrees)

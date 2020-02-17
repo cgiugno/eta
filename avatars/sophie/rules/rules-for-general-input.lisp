@@ -26,6 +26,9 @@
   ; If asked about radiation treatment
   1 (0 radiation 0)
     2 *radiation-question* (0 :subtree)
+  ; If doctor mentions possibility of chemotherapy
+  1 (0 chemotherapy 0)
+    2 *chemotherapy-question* (0 :subtree)
 
   ; The following two will need modification
   1 (0 medicine 0)

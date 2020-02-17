@@ -6,6 +6,7 @@
   (scale rate rating)
   (part parts section sections area areas)
   (pain-bad bad much strongly intensely badly)
+  (take taking)
 ))
 
 
@@ -23,6 +24,16 @@
     2 (*pain-question* (how do you rate your pain ?)) (0 :subtree+clause)
   1 (0 scale 0)
     2 (*pain-question* (how do you rate your pain ?)) (0 :subtree+clause)
+  ; If doctor asks about what lead up to this
+  1 (0 what 2 happened 3 before 0)
+    2 (*diagnosis-details-question* (what lead to your diagnosis ?)) (0 :subtree+clause)
+  1 (0 how do 3 know 0)
+    2 (*diagnosis-details-question* (what lead to your diagnosis ?)) (0 :subtree+clause)
+  1 (0 how 0 find out 0)
+    2 (*diagnosis-details-question* (what lead to your diagnosis ?)) (0 :subtree+clause)
+  ; If doctor asks what you're taking for the pain
+  1 (0 what 1 you 1 take 0)
+    2 (*medicine-question* (what are you taking for the pain ?)) (0 :subtree+clause)
   1 (0)
     2 *general-input* (0 :subtree)
 ))

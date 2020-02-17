@@ -35,7 +35,7 @@
                                  I had lost fifteen pounds over the course of the past six months\. A couple of days after I went to the ER\,
                                  I made appointments to go for a bunch of tests\. That took a couple of weeks\. I had to get a bone scan\,
                                  and I was sent to a lung doctor for a biopsy\. After all that\, the lung doctor told me I had lung cancer\.)
-                                ((The ER gave me Lortab for pain \.) (I learned about my lung cancer after visiting a lung doctor \.)))
+                                ((The ER gave me Lortab for pain \.) (I got my diagnosis after visiting a lung doctor \.)))
 
 ?a6. (Me have-subdialogue.v you (I had radiation treatment for about five weeks\, except weekends\. That finished six weeks ago\.)
                                 ((I had radiation treatment for five weeks \.)))
@@ -110,5 +110,6 @@
     (?a1.  (introduce))
     (?a4.  (pain-description))
     (?a5.  (diagnosis-details))
+    (?a6.  (radiation-treatment))
   )
 ) ; END mapcar #'store-topic-keys
