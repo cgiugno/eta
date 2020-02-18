@@ -76,10 +76,15 @@
 
 (defun generate-response (query-ulf relations)
 ; `````````````````````````````````````````````
-; NOTE: Check for poss-ques:
-; "You are not sure if you understood the question correctly\, but your answer is"
+; Generates a natural language response, given a query ULF and a list of satisfying relations+certainties.
+; In the case where relations is nil, we rely on presupposition handling to generate the appropriate response.
 ;
-  (let ((query-type (get-query-type query-ulf)) ans-tuple ans-ulf output-ulf uncertain-flag)
+  (let ((query-type (get-query-type query-ulf)) ans-tuple ans-ulf output-ulf uncertain-flag poss-ans)
+
+    ; Check if poss-ques, if so set flag to true (to add a hedge later on) and set ulf to remainder
+    (when (poss-ques? query-ulf)
+      (setq poss-ans t)
+      (setq query-ulf (second query-ulf)))
 
     ; ans-tuple consists of a list (ans-ulf uncertain-flag), where ans-ulf is a ULF corresponding
     ; to the relevant answer, and uncertain-flag indicates whether the answer is above or below the
@@ -141,7 +146,8 @@
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
-      (ulf-to-english output-ulf)
+      (append (if poss-ans '(You\'re not sure you understood the question correctly \, but))
+        (ulf-to-english output-ulf))
       '(Sorry \, you was unable to find an object that satisfies given constraints \, please rephrase in a simpler way \.)))
 ) ; END generate-response
 
@@ -557,3 +563,6 @@
 
 (defun qmark? (p)
   (equal p '?))
+
+(defun poss-ques? (ulf)
+  (and (listp ulf) (equal (car ulf) 'poss-ques)))

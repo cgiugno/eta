@@ -137,6 +137,24 @@
 
 
 
+(defun function? (x)
+;`````````````````````
+; Returns t if x is a function, nil otherwise.
+;
+  (fboundp x)
+) ; END function?
+
+
+
+(defun not-function? (x)
+;`````````````````````````
+; Returns t if x is not a function, nil otherwise.
+;
+  (not (function? x))
+) ; END not-function?
+
+
+
 (defun variable? (atm)
 ;`````````````````````
 ; Check whether a symbol is a variable, i.e. starts with '?' or '!'
@@ -1239,7 +1257,8 @@
                                                     :if-exists :supersede
                                                     :if-does-not-exist :create)))))
           
-  *next-answer*
+  (if (equal *next-answer* 'None) nil
+    *next-answer*)
 ) ; END get-answer
 
 
