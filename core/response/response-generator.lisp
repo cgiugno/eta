@@ -52,7 +52,7 @@
 ; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))))) ?)
 ; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))) (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Starbucks| BLOCK.N))))))))) ?)
 ; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H)))) ?)
-;
+; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (IT.PRO ((PAST BE.V) (ON.P (THE.D (|Starbucks| BLOCK.N))))))))))) ?)
 ;
 ; Example relations:
 ; '()
@@ -223,16 +223,6 @@
 
     (list ans uncertain-flag))
 ) ; END form-ans
-
-
-(defun uninvert-question (ulf)
-; ``````````````````````````````
-; Uninvert a ULF question by removing the question mark, applying sub macros, and removing auxiliary verbs such as "do".
-;
-  (setq ulf (remove-question-mark ulf))
-  (setq ulf (remove-question-do ulf))
-  (nth-value 1 (ulf-lib:apply-sub-macro ulf :calling-package *package*))
-) ; END uninvert-question
 
 
 (defun ulf-to-english (ulf)

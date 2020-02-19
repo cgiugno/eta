@@ -334,6 +334,9 @@
        2 (prep np_ 2 verb np_ 3); e.g., before I moved it
           3 (((lex-ulf! prep 1) (*np-ulf-tree* 2 3) (lex-ulf! v 4) (*np-ulf-tree* 5 6))
              (1 (ke (2 (3 4))))) (0 :ulf-recur)
+       2 (prep np_ 3 be prep np_ 3); e.g., before it was on the Twitter block
+          3 (((lex-ulf! prep 1) (*np-ulf-tree* 2 3) (lex-ulf! v 4) (*pp-ulf-tree* 5 6 7))
+             (1 (ke (2 (3 4))))) (0 :ulf-recur)
 
 )) ; END *pp-ulf-tree*
 

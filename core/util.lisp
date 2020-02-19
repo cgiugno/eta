@@ -137,21 +137,30 @@
 
 
 
-(defun function? (x)
+(defun fbound? (x)
 ;`````````````````````
-; Returns t if x is a function, nil otherwise.
+; Returns t if x is a bound function, nil otherwise.
 ;
-  (fboundp x)
-) ; END function?
+  (and (symbolp x) (fboundp x))
+) ; END fbound?
 
 
 
-(defun not-function? (x)
+(defun not-fbound? (x)
 ;`````````````````````````
 ; Returns t if x is not a function, nil otherwise.
 ;
-  (not (function? x))
-) ; END not-function?
+  (not (fbound? x))
+) ; END not-fbound?
+
+
+
+(defun restricted-variable? (atm)
+;``````````````````````````````````
+; Check whether a symbol is a variable, or a variable with a restriction following it.
+;
+  (or (variable? atm) (and (listp atm) (variable? (car atm))))
+) ; END restricted-variable?
 
 
 
@@ -920,6 +929,14 @@
 
 
 
+(defun new-var! ()
+;```````````````````
+; TTT pred for creating new variable starting with ?x
+  (intern (format nil "?~a" (string (gensym "X"))))
+) ; END new-var!
+
+
+
 (defun action-var ()
 ;````````````````````````````
 ; Creates an action variable starting with "?A" % with final "."
@@ -1093,23 +1110,6 @@
       (unless subplan-name
         (setq cont nil)))
 )) ; END print-current-plan-status
-
-
-
-(defun update-time ()
-;``````````````````````
-; Updates time to a "new period", i.e. creates a new constant denoting
-; a new time period (and stores before/after relationships in context)
-;
-  (let ((time-old *time*) time-new pred-before pred-after)
-    (setq time-new (intern (format nil "NOW~a"
-      (1+ (chars-to-int (cdddr (explode *time*)))))))
-    (setq *time* time-new)
-    (setq pred-before (list time-old 'before.p time-new))
-    (setq pred-after  (list time-new 'after.p time-old))
-    (store-fact pred-before *context* :keys (list (car pred-before)))
-    (store-fact pred-after  *context* :keys (list (car pred-after))))
-) ; END update-time
 
 
 

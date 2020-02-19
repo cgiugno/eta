@@ -342,6 +342,24 @@
 ) ; END remove-question-mark
 
 
+(defun apply-sub-macro (ulf)
+; ````````````````````````````
+; Applies the sub macro to a ULF.
+;
+  (nth-value 1 (ulf-lib:apply-sub-macro ulf :calling-package *package*))
+) ; END apply-sub-macro
+
+
+(defun uninvert-question (ulf)
+; ``````````````````````````````
+; Uninvert a ULF question by removing the question mark, applying sub macros, and removing auxiliary verbs such as "do".
+;
+  (setq ulf (remove-question-mark ulf))
+  (setq ulf (remove-question-do ulf))
+  (apply-sub-macro ulf)
+) ; END uninvert-question
+
+
 (defun existential-there? (ulf)
 ; ``````````````````````````````
 ; Checks if ULF is an existential 'there'.
@@ -728,6 +746,15 @@
 ;
   (member v '(be.v))
 ) ; END copulative?
+
+
+(defun relation-prop? (prop)
+; ````````````````````````````
+; Checks whether a proposition is a relation, i.e. (|Twitter| on.p |Texaco|).
+;
+  (and (listp prop) (or (nnp? (first prop)) (restricted-variable? (first prop)))
+    (or (nnp? (third prop)) (restricted-variable? (third prop))) (prep? (second prop)))
+) ; END relation-prop?
 
 
 (defun after-prop? (prop)
