@@ -110,6 +110,10 @@
   ; Stores the constant denoting the current time period
   (defparameter *time* 'NOW0)
 
+  ; Time of previous episode
+  ; Stores the constant denoting the time of the previous episode
+  (defparameter *time-prev* *time*)
+
   ; Memory
   ; Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
   ; from previous contexts.
@@ -998,7 +1002,7 @@
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
         ; Determine answers by recalling from history
-        (setq ans (recall-answer object-locations user-ulf))
+        (setq ans (recall-answer object-locations (eval user-ulf)))
         (format t "recalled answer: ~a~%" ans) ; DEBUGGING
         ; Substitute ans for given variable (e.g. ?ans-relations) in plan
         (nsubst-variable {sub}plan-name ans expr)
@@ -1138,6 +1142,7 @@
         ; TODO: COME BACK TO THIS
         ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
         ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
+        (setq *time-prev* *time*)
         (if perceptions
           (mapcar (lambda (perception)
             (let ((perception1 (list perception '@ *time*)))

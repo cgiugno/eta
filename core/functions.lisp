@@ -52,6 +52,17 @@
 
 
 
+(defun color-of.f (name)
+; ````````````````````````
+; Gets the color of a given name based on contextual knowledge.
+; e.g. (color-of.f '|Twitter|) => red.a
+;
+  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context name)))))
+    (caadr color-prop))
+) ; END color-of.f
+
+
+
 (defun main-answer.f (x)
 ; ```````````````````````
 ; Given a list of an answer and alternatives, split off the main answer from the list.

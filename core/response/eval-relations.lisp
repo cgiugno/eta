@@ -6,14 +6,18 @@
 ;; so that the centroid coordinates of two blocks which are touching will differ by 1
 ;;
 
+(defvar *spatial-prep-list*
+  '(touching.p to-the-left-of.p to-the-right-of.p below.p above.p behind.p in-front-of.p on.p))
 
-(defun eval-relation (rel coords1 coords2)
-; ``````````````````````````````````````````
+
+
+(defun eval-relation (rel coords1 coords2 &optional coords3)
+; ````````````````````````````````````````````````````````````
 ; Evaluate whether relation rel holds between an object with centroid at coords1, and
-; an object with centroid at coords2.
+; an object with centroid at coords2 (plus an additional object at coords3 for between.p)
 ; NOTE: coords is a list of the form e.g. (|Texaco| 2 3 0)
 ;
-  (apply rel (append (cdr coords1) (cdr coords2)))
+  (apply rel (append (cdr coords1) (cdr coords2) (cdr coords3)))
 ) ; END eval-relation
 
 

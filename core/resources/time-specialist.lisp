@@ -24,6 +24,15 @@
 ) ; END compare-time
 
 
+(defun diff-times (Ti Tj)
+; `````````````````````````
+; Returns the difference between time Ti and Tj
+;
+  (let ((i (chars-to-int (cdddr (explode Ti)))) (j (chars-to-int (cdddr (explode Tj)))))
+    (abs (- i j)))
+) ; END diff-times
+
+
 (defun get-next-time (Ti)
 ; `````````````````````````
 ; Get a constant denoting the subsequent period (related by before.p/after.p propositions in context).
@@ -95,3 +104,13 @@
 ;
   *time*
 ) ; END get-time-current
+
+
+(defun most-recent (times)
+; ``````````````````````````
+; Gets the most recent time.
+; NOTE: for now, this assumes that the symbols representing times are in alphanumerical
+; order, e.g. NOW5 > NOW1. This is probably not ideal, since it relies on internal representations...
+;
+  (car (sort times (lambda (x y) (> (compare-time x y) 0))))
+) ; END most-recent

@@ -44,13 +44,24 @@
 
 
 
+(defun intersection1 (l)
+;`````````````````````````
+; Intersection of all sub-lists in l
+;
+  (cond
+    ((= 1 (length l)) (car l))
+    (t (intersection (car l) (intersection1 (cdr l)) :test #'equal)))
+) ; END intersection
+
+
+
 (defun union1 (l)
 ;``````````````````
 ; Union of all sub-lists in l
 ;
   (cond
     ((= 1 (length l)) (car l))
-    (t (union (car l) (union1 (cdr l)))))
+    (t (union (car l) (union1 (cdr l)) :test #'equal)))
 ) ; END union1
 
 
@@ -129,11 +140,28 @@
 
 (defun find-car (x list)
 ;`````````````````````````
-; Finds a sublist of list which has x as its car
+; Finds a sublist of list which has x as its car.
 ;
   (if (every #'listp list)
     (find x list :test (lambda (y l) (equal y (car l)))))
 ) ; END find-car
+
+
+
+(defun find-cars-var (x list)
+;``````````````````````````````
+; Finds a list of sublists of list which have x as its car,
+; where x may be either a specific symbol, or a variable (possibly
+; with a restrictor).
+;
+  (if (every #'listp list) (cond
+    ((nnp? x) (remove-if-not (lambda (l) (equal x (car l))) list))
+    ((variable? x) list)
+    ((restricted-variable? x)
+      (let ((r (cadr x))) (remove-if-not
+        (lambda (l) (equal (funcall (first r) (car l)) (second r))) list)))
+    (t list)))
+) ; END find-car-var
 
 
 

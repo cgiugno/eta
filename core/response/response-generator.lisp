@@ -53,12 +53,14 @@
 ; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))) (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Starbucks| BLOCK.N))))))))) ?)
 ; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H)))) ?)
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (IT.PRO ((PAST BE.V) (ON.P (THE.D (|Starbucks| BLOCK.N))))))))))) ?)
+; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H (ON.P (THE.D (|Twitter| BLOCK.N))))))) ?)
+; '(((PAST DO.AUX-S) (THE.D (|Twitter| BLOCK.N)) (EVER.ADV-E (TOUCH.V (THE.D (|Texaco| BLOCK.N))))) ?)
 ;
 ; Example relations:
 ; '()
 ; '(((|Starbucks| on.p |Target|) 0.6))
 ; '(((|Starbucks| on.p |Target|) 0.8))
-; '(((|Starbucks| touch.v |Target|) 0.8))
+; '(((|Starbucks| touching.p |Target|) 0.8))
 ; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.8))
 ; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.8) ((|Texaco| on.p |Target|) 0.8))
 ; '(((|Starbucks| on.p |Target|) 0.6) ((|Twitter| on.p |Target|) 0.8))
@@ -282,8 +284,8 @@
           (/ ((no.d _!) ((? (tense? do.aux-s)) not (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
           (/ (nothing.pro ((tense? ulf:verb?) not _*)) (everything.pro ((tense? ulf:verb?) _*)))
           (/ ((no.d _!) ((tense? ulf:verb?) not _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
-          (/ ((tense? do.aux-s) (^* (ulf:verb? (no.d _!)))) ((tense? do.aux-s) not (ulf:verb? (any.d _!))))
-          (/ ((tense? do.aux-s) (^* (ulf:verb? nothing.pro))) ((tense? do.aux-s) not (ulf:verb? anything.d)))
+          (/ ((tense? do.aux-s) (^* (ulf:verb? (no.d _!) _*))) ((tense? do.aux-s) not (ulf:verb? (any.d _!) _*)))
+          (/ ((tense? do.aux-s) (^* (ulf:verb? nothing.pro _*))) ((tense? do.aux-s) not (ulf:verb? anything.d _*)))
           (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
       ulf))
     (t

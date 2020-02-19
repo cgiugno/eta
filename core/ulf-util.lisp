@@ -261,6 +261,41 @@
 ) ; END verb?
 
 
+(defun spatial-verb? (ulf)
+; `````````````````````````
+; Checks if a ULF is a spatial verb.
+;
+  (if (and (atom ulf)
+    (member ulf '(touch.v support.v connect.v consist_of.v sit.v adjoin.v flank.v face.v))) t nil)
+) ; END spatial-verb?
+
+
+(defun action-verb? (ulf)
+; ````````````````````````
+; Checks if a ULF is an action verb.
+;
+  (if (and (atom ulf)
+    (member ulf '(move.v put.v change.v pick_up.v rotate.v place.v))) t nil)
+) ; END action-verb?
+
+
+(defun spatial-verb-to-prep! (ulf)
+; `````````````````````````````````
+; Converts some spatial verbs to relational prepositions, e.g. touch.v => touching.p.
+;
+  (if (verb-untensed? ulf)
+    (let* ((verb-rel-pairs '((touch.v touching.p) (support.v supporting.p) (connect.v connecting.p)
+                            (consist_of.v consisting_of.p) (sit.v sitting.p) (adjoin.v adjoining.p)
+                            (flank.v flanking.p) (face.v facing.p)))
+          (pair (find ulf verb-rel-pairs :key #'car)))
+      (second pair)))
+) ; END spatial-verb-to-prep
+
+
+;; (verb-rel touch support connect consist_of sit adjoin flank face
+;;       move put change pick_up rotate place)
+
+
 (defun aux? (ulf)
 ; `````````````````
 ; Checks if a ULF is an auxiliary verb (untensed).
