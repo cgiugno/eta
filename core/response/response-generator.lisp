@@ -19,6 +19,7 @@
 ;;
 
 ; Example queries:
+; '((SUB (WHAT.D BLOCK.N) ((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P *H)))) ?)
 ; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
 ; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
@@ -147,6 +148,8 @@
       (let ((presupposition-failure (respond-to-presupposition query-ulf)))
         ;; (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
         (if presupposition-failure (setq output-ulf presupposition-failure))))
+    
+    ;; (format t "output ULF: ~a~%" output-ulf) ; DEBUGGING
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
@@ -256,12 +259,12 @@
 ;
   (ttt:apply-rules
     '((/ (something.d _!) (some.d _!))
-      (/ (some.d (ulf:adj? (! ulf:noun? (plur ulf:noun?)))) (some.d !))
+      (/ (some.d (adj? noun?)) (some.d !))
       (/ (nquan (somehow.mod-a many.a)) some.d)
-      (/ (I.pro ((past do.aux-s) (ulf:verb? _! (adv-e (! (^* (some.d _!1)))))))
-         (I.pro ((past ulf:verb?) _!)))
-      (/ (I.pro ((past ulf:verb?) _! (adv-e (! (^* (some.d _!1))))))
-         (I.pro ((past ulf:verb?) _!)))
+      (/ (I.pro ((past do.aux-s) (verb-untensed? _! (adv-e (! (^* (some.d _!1)))))))
+         (I.pro ((past verb-untensed?) _!)))
+      (/ (I.pro ((past verb-untensed?) _! (adv-e (! (^* (some.d _!1))))))
+         (I.pro ((past verb-untensed?) _!)))
       (/ ((a.d _!) ((tense? be.v) _*))
          ((some.d _!) ((tense? be.v) _*))))
     ulf)
@@ -282,18 +285,18 @@
       (ttt:apply-rules
         '((/ something.pro nothing.pro)
           (/ (some.d _!) (no.d _!))
-          (/ (nothing.pro ((? (tense? do.aux-s)) not (ulf:verb? _*))) (everything.pro ((tense? ulf:verb?) _*)))
-          (/ ((no.d _!) ((? (tense? do.aux-s)) not (ulf:verb? _*))) ((every.d _!) ((tense? ulf:verb?) _*)))
-          (/ (nothing.pro ((tense? ulf:verb?) not _*)) (everything.pro ((tense? ulf:verb?) _*)))
-          (/ ((no.d _!) ((tense? ulf:verb?) not _*)) ((every.d _!) ((tense? ulf:verb?) _*)))
-          (/ ((tense? do.aux-s) (^* (ulf:verb? (no.d _!) _*))) ((tense? do.aux-s) not (ulf:verb? (any.d _!) _*)))
-          (/ ((tense? do.aux-s) (^* (ulf:verb? nothing.pro _*))) ((tense? do.aux-s) not (ulf:verb? anything.d _*)))
-          (/ (every.d (! (^* (plur ulf:noun?)))) (all.d !)))
+          (/ (nothing.pro ((? (tense? do.aux-s)) not (verb-untensed? _*))) (everything.pro ((tense? verb-untensed?) _*)))
+          (/ ((no.d _!) ((? (tense? do.aux-s)) not (verb-untensed? _*))) ((every.d _!) ((tense? verb-untensed?) _*)))
+          (/ (nothing.pro ((tense? verb-untensed?) not _*)) (everything.pro ((tense? verb-untensed?) _*)))
+          (/ ((no.d _!) ((tense? verb-untensed?) not _*)) ((every.d _!) ((tense? verb-untensed?) _*)))
+          (/ ((tense? do.aux-s) (^* (verb-untensed? (no.d _!) _*))) ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*)))
+          (/ ((tense? do.aux-s) (^* (verb-untensed? nothing.pro _*))) ((tense? do.aux-s) not (verb-untensed? anything.d _*)))
+          (/ (every.d (! (^* (plur noun?)))) (all.d !)))
       ulf))
     (t
       (ttt:apply-rules
         '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not _*)))
-          (/ (_! ((tense? ulf:verb?) _*)) (_! ((tense? do.aux-s) not (ulf:verb? _*)))))
+          (/ (_! ((tense? verb-untensed?) _*)) (_! ((tense? do.aux-s) not (verb-untensed? _*)))))
       ulf :max-n 1 :shallow t)))
 ) ; END negate-wh-question-presupposition
 

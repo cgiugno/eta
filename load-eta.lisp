@@ -1,21 +1,41 @@
-; Load ttt
-;``````````
-; NOTE: This is now loaded as part of the ulf2english dependencies. The local version is currently unused.
-; NOTE: Re-enabled until issues with ulf2english on BW system are fixed
-;; (load (truename "ttt/src/load.lisp"))
+; If *responsive-mode* is enabled, we need various dependencies such as ulf2english and ulf-pragmatics.
+; Otherwise, we can just use local ttt.
+(cond
+(*responsive-mode*
 
+    ; Load ttt
+    ;```````````````````
+    (ql:quickload "ttt")
 
-; Load ulf2english
-;```````````````````
-; NOTE: Currently disabled until issues with ulf2english on BW system are fixed
-(ql:quickload "ulf2english")
-;; (sys:run-shell-command (format nil "python %s 8080 \"g:g\"" (truename "core/resources/python-repl-server.py")))
-;; python core/resources/python-repl-server.py 8080 "g:g"
+    ; Load ulf-lib
+    ;```````````````````
+    (ql:quickload "ulf-lib")
 
+    ; Load ulf2english
+    ;```````````````````
+    (ql:quickload "ulf2english")
 
-; Load ulf-pragmatics
-;``````````````````````
-(ql:quickload "ulf-pragmatics")
+    ; Load ulf-pragmatics
+    ;``````````````````````
+    (ql:quickload "ulf-pragmatics"))
+
+((not *responsive-mode*)
+
+    ; Load local ttt
+    ;``````````````````
+    (load (truename "local_packages/ttt/src/load.lisp"))
+
+    ; Load local ulf-lib
+    ;`````````````````````
+    (load (truename "local_packages/ulf-lib/load.lisp"))
+
+    ; Load local ulf2english
+    ;````````````````````````
+    (load (truename "local_packages/ulf2english/load.lisp"))
+
+    ; Load local ulf-pragmatics
+    ;```````````````````````````
+    (load (truename "local_packages/ulf-pragmatics/load.lisp"))))
 
 
 ; Load core code
@@ -25,19 +45,18 @@
     (directory "core/*.lisp"))
 
 
+; Load core response generation code
+; (in directory 'core/response')
+;`````````````````````````````````
+(mapcar (lambda (file) (load file))
+    (directory "core/response/*.lisp"))
+
+
 ; Load core coreference code
 ; (in directory 'core/coref')
 ;``````````````````````````````
 (mapcar (lambda (file) (load file))
     (directory "core/coref/*.lisp"))
-
-
-; Load core response generation code
-; (in directory 'core/response')
-; NOTE: Currently disabled until response generation is working
-;`````````````````````````````````
-(mapcar (lambda (file) (load file))
-    (directory "core/response/*.lisp"))
 
 
 ; Load core resources

@@ -146,9 +146,16 @@
   ; system) with file IO. If *live* = nil, operates in terminal mode.
   (defparameter *live* nil)
 
-  ; perceive-coords mode, if *perceive-coords* = T, perceives coordinates (in terminal
-  ; mode, the user enters coords, otherwise they're provided in perceptions.lisp)
-  (defparameter *perceive-coords* nil)
+  ; If *perceptive* = T, is capable of perceiving the world during the
+  ; perceive-world.v episode in the scema (in terminal mode, the user enters
+  ; a list of facts, otherwise they're provided in perceptions.lisp)
+  (defparameter *perceptive* nil)
+
+  ; If *responsive* = T, is capable of constructing natural language responses
+  ; from any ULF, including generating responses from spatial relation answers in
+  ; the BW system. If *responsive* = nil, the system can only form responses/reactions
+  ; at the level of gist clauses, and will refrain from fully answering spatial questions.
+  (defparameter *responsive* nil)
 
 ) ; END init
 
@@ -156,10 +163,10 @@
 
 
 
-(defun eta (live &key perceive-coords)
-;``````````````````````````````````````
+(defun eta (live perceptive responsive)
+;```````````````````````````````````````
 ; live = t: avatar mode; live = nil: terminal mode
-; perceive-coords = t: system awaits information during perceive-world.v action
+; perceptive = t: system awaits information during perceive-world.v action
 ;                      (from command line if in terminal mode)
 ;
 ; Main program: Originally handled initial and final formalities,
@@ -170,7 +177,8 @@
 ;
   (init)
   (setq *live* live)
-  (setq *perceive-coords* perceive-coords)
+  (setq *perceptive* perceptive)
+  (setq *responsive* responsive)
   (setq *discourse-entities* nil)
   (setq *count* 0) ; Number of outputs so far
 
@@ -1002,7 +1010,9 @@
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
         ; Determine answers by recalling from history
-        (setq ans `(quote ,(recall-answer object-locations (eval user-ulf))))
+        (if *responsive*
+          (setq ans `(quote ,(recall-answer object-locations (eval user-ulf))))
+          (setq ans '()))
         (format t "recalled answer: ~a~%" ans) ; DEBUGGING
         ; Substitute ans for given variable (e.g. ?ans-relations) in plan
         (nsubst-variable {sub}plan-name ans expr)
@@ -1031,10 +1041,13 @@
         (setq expr (get-single-binding bindings))
         ; Leaving this open in case we want different procedures for different systems
         (cond
-          ((null *live*) (setq ans ''()))
+          ((null *responsive*) (setq ans '()))
+          ((null *live*) (setq ans `(quote ,(get-answer-offline))))
           ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer))))
           (t (setq ans `(quote ,(get-answer)))))
-        ;; (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
+        (if (not (answer-list? (eval ans)))
+          (setq ans '()))
+        (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
         ; Substitute ans for given variable (e.g. ?ans-relations) in plan
         (nsubst-variable {sub}plan-name ans expr)
         (delete-current-episode {sub}plan-name))
@@ -1047,8 +1060,9 @@
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
         ; Generate response based on list of relations
-        (if (null *live*) (setq ans '(Could not connect with system \: not in live mode \.))
-          (setq ans (generate-response (eval user-ulf) (eval expr))))
+        (cond
+          ((null *responsive*) (setq ans '(Could not form final answer \: not in responsive mode \.)))
+          (t (setq ans (generate-response (eval user-ulf) (eval expr)))))
         (format t "answer to output: ~a~%" ans) ; DEBUGGING
         ; Create say-to.v subplan from answer
         (setq new-subplan-name
@@ -1127,7 +1141,7 @@
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
         (cond
-          ((null *perceive-coords*) (setq perceptions nil))
+          ((null *perceptive*) (setq perceptions nil))
           ((null *live*) (setq perceptions (get-perceptions-offline)))
           ((eq system '|Blocks-World-System|) (setq perceptions (get-perceptions)))
           (t (setq perceptions (get-perceptions))))

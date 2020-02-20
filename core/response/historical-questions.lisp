@@ -175,9 +175,9 @@
         (/ (_!1 ((tense? be.v) (^* (prep? _!2))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
         ; "what block did I put on the Twitter block?"
-        (/ (_! ((tense? ulf:verb?) _!1 (between.p (set-of _!2 _!3))))
+        (/ (_! ((tense? verb-untensed?) _!1 (between.p (set-of _!2 _!3))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
-        (/ (_! ((tense? ulf:verb?) _!1 (prep? _!2)))
+        (/ (_! ((tense? verb-untensed?) _!1 (prep? _!2)))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
         ; "what block touches the Twitter block?" (TODO: needs to be generalized)
         (/ (_!1 ((tense? spatial-verb?) _!2))
@@ -194,7 +194,7 @@
 ; ?x or (?x red.a).
   (let ((subj
       (ttt:apply-rules '(
-        (/ (_!1 (! (^* (tense? ulf:verb?)))) (resolve-rel-np! _!1)))
+        (/ (_!1 (! (^* (tense? verb-untensed?)))) (resolve-rel-np! _!1)))
       ulf))) 
     (if (or (nnp? subj) (variable? subj) (restricted-variable? subj)) subj nil))
 ) ; END extract-subj
@@ -207,7 +207,7 @@
 ; ?x or (?x red.a).
   (let ((obj
     (ttt:apply-rules '(
-      (/ (_! (^* ((tense? ulf:verb?) (^*2 (! wh-pron? (det? _!1)))))) (resolve-rel-np! !)))
+      (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1)))))) (resolve-rel-np! !)))
     ulf)))
   (if (or (nnp? obj) (variable? obj) (restricted-variable? obj)) obj nil))
 ) ; END extract-obj

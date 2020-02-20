@@ -51,7 +51,7 @@
 
 ; If text mode (or sessionInfo missing), manually set user-id
 ;````````````````````````````````````````````````````````````````
-  (if (or (not *mode*) (not (probe-file "./io/sessionInfo.lisp")))
+  (if (or (not *live-mode*) (not (probe-file "./io/sessionInfo.lisp")))
     (progn
       ;; (format t "~%~%Enter user-id ~%")
       ;; (princ "user id: ") (finish-output)
@@ -73,8 +73,8 @@
 ; Run Eta
 ;`````````````
 (if *safe-mode*
-  (handler-case (eta *mode* :perceive-coords *coords-mode*)
+  (handler-case (eta *live-mode* *perceptive-mode* *responsive-mode*)
     (error (c)
-      (error-message "Execution of Eta failed due to an internal error." *mode*)
+      (error-message "Execution of Eta failed due to an internal error." *live-mode*)
       (values 0 c)))
-  (eta *mode* :perceive-coords *coords-mode*))
+  (eta *live-mode* *perceptive-mode* *responsive-mode*))

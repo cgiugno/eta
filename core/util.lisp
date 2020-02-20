@@ -203,6 +203,17 @@
 
 
 
+(defun answer-list? (list)
+;``````````````````````````
+; Check whether a list is a list of propositional answers with associated certainties.
+;
+  (or (and (listp list) (every (lambda (l) (and (listp l) (= 2 (length l)) (numberp (second l))
+      (or (symbolp (first l)) (and (listp (first l)) (symbolp (car (first l))))))) list))
+    (equal list 'None))
+) ; END answer-list?
+
+
+
 (defun prop-var? (atm)
 ;`````````````````````
 ; Check whether a symbol is a proposition variable, i.e. ends with .
@@ -1290,6 +1301,18 @@
   (if (equal *next-answer* 'None) nil
     *next-answer*)
 ) ; END get-answer
+
+
+
+(defun get-answer-offline () 
+;`````````````````````````````
+; This is the answer reader when ETA is used with argument live =
+; nil (hence also *live* = nil)
+;
+  (finish-output)
+  (let ((ans (read-from-string (read-line))))
+    (if (equal ans 'None) nil ans))
+) ; END get-answer-offline
 
 
 

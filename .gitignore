@@ -7,9 +7,12 @@ gist-kb/*
 # IO files
 io/*
 
-# ttt fasl files
-ttt/src/*.fasl
-ttt/src/operators/*.fasl
+# package fasl files
+local_packages/ttt/src/*.fasl
+local_packages/ttt/src/operators/*.fasl
+local_packages/ulf-lib/*.fasl
+local_packages/ulf-pragmatics/*.fasl
+local_packages/ulf2english/*.fasl
 
 # any TODO files
 **/TODO*
