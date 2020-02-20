@@ -11,7 +11,7 @@
 ;;
 
 (defparameter *avatar* "david")
-(defparameter *mode* NIL)
+(defparameter *mode* T)
 (defparameter *coords-mode* T)
 (defparameter *safe-mode* NIL)
 (defparameter *user-id* "test")

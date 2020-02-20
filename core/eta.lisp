@@ -1002,7 +1002,7 @@
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
         ; Determine answers by recalling from history
-        (setq ans (recall-answer object-locations (eval user-ulf)))
+        (setq ans `(quote ,(recall-answer object-locations (eval user-ulf))))
         (format t "recalled answer: ~a~%" ans) ; DEBUGGING
         ; Substitute ans for given variable (e.g. ?ans-relations) in plan
         (nsubst-variable {sub}plan-name ans expr)
@@ -1142,18 +1142,16 @@
         ; TODO: COME BACK TO THIS
         ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
         ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
-        (setq *time-prev* *time*)
-        (if perceptions
-          (mapcar (lambda (perception)
-            (let ((perception1 (list perception '@ *time*)))
-              (store-fact perception1 *context*)
-              (store-fact (first perception1) *context* :keys (list (third perception1)) :no-self t)
-              ; If a block move (or some other event) occurs, update the time.
-              (when (verb-phrase? perception)
-                (format t "noticed event ~a~%updating time~%" perception)
-                (update-time))))
-            (eval perceptions)))
-
+        (let ((action-perceptions (remove-if-not #'verb-phrase? (eval perceptions))))
+          (when action-perceptions
+            (setq *time-prev* *time*)
+            (mapcar (lambda (perception)
+                (let ((perception1 (list perception '@ *time*)))
+                  (store-fact perception1 *context*)
+                  (store-fact (first perception1) *context* :keys (list (third perception1)) :no-self t)
+                  (update-time)))
+              action-perceptions)))
+        
         (delete-current-episode {sub}plan-name)
       )
 

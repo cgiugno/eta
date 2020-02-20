@@ -92,7 +92,7 @@
   (adv-history previously before originally initially currently recently ever since always first never)
   (noun-history turn stage step question iteration move period start beginning while past)
   (prep-history at in on prep-history-simple)
-  (prep-history-simple during before after prior_to following preceding since)
+  (prep-history-simple during before after prior_to following preceding since from until)
   (adj-history previous next current initial first original following preceding future last final recent)
 
   ; Any word that signals that the following expression might be an adv-e

@@ -55,6 +55,8 @@
 ; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (IT.PRO ((PAST BE.V) (ON.P (THE.D (|Starbucks| BLOCK.N))))))))))) ?)
 ; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H (ON.P (THE.D (|Twitter| BLOCK.N))))))) ?)
 ; '(((PAST DO.AUX-S) (THE.D (|Twitter| BLOCK.N)) (EVER.ADV-E (TOUCH.V (THE.D (|Texaco| BLOCK.N))))) ?)
+; '((SUB (AT.P (WHAT.D TIME.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|Starbucks| BLOCK.N)) (ADV-E *H)))) ?)
+; '(((WHAT.D (PLUR BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N)))))) ?)
 ;
 ; Example relations:
 ; '()
@@ -102,7 +104,7 @@
 
     ; Make appropriate substitutions of answer ULF into query ULF,
     ; and uninvert form of question to get output ULF.
-    (setq output-ulf (uninvert-question (cond
+    (setq output-ulf (remove-adv-e (uninvert-question (cond
       ; Query is CONFIRM type
       ((equal query-type 'CONFIRM)
         ans-ulf)
@@ -133,7 +135,7 @@
         (ttt:apply-rule `(/ descr-flag? ,ans-ulf) query-ulf))
       ; Query is TIME type
       ((equal query-type 'TIME)
-        (ttt:apply-rule `(/ time-flag? ,ans-ulf) query-ulf)))))
+        (ttt:apply-rule `(/ time-flag? ,ans-ulf) query-ulf))))))
 
     ; When answer is uncertain, append an adverb indicating uncertainty to answer
     (when uncertain-flag
@@ -361,7 +363,7 @@
 ; ````````````````````````````````
 ; Creates a ULF from a list of times.
 ;
-  (make-set relations)
+  (make-set (mapcar (lambda (time) (intern (string-downcase (string time)))) relations))
 ) ; END form-ans-time
 
 

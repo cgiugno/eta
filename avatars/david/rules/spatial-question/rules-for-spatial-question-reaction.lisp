@@ -11,10 +11,10 @@
   ; UNLESS the historical question involves the previous turn, which the
   ; BW specialist system is capable of answering using "high-fidelity visual memory"
   1 (0 history-question 0)
-    2 (0 just verb 0)
-      3 *reactions-to-spatial-question* (0 :schema+ulf)
-    2 (0 prep-history-at 1 recent-times noun-history 0)
-      3 *reactions-to-spatial-question* (0 :schema+ulf)
+    ;; 2 (0 just verb 0)
+    ;;   3 *reactions-to-spatial-question* (0 :schema+ulf)
+    ;; 2 (0 prep-history-at 1 recent-times noun-history 0)
+    ;;   3 *reactions-to-spatial-question* (0 :schema+ulf)
     2 (0)
       3 *reactions-to-historical-question* (0 :schema+ulf)
   ; TODO: spatial explanation requests

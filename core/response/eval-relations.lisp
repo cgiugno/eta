@@ -7,7 +7,7 @@
 ;;
 
 (defvar *spatial-prep-list*
-  '(touching.p to-the-left-of.p to-the-right-of.p below.p above.p behind.p in-front-of.p on.p))
+  '(touching.p to_the_left_of.p to_the_right_of.p below.p above.p behind.p in_front_of.p on.p))
 
 
 
@@ -46,19 +46,19 @@
 
 
 
-(defun to-the-left-of.p (x1 y1 z1 x2 y2 z2)
+(defun to_the_left_of.p (x1 y1 z1 x2 y2 z2)
 ; ````````````````````````````````````````````
   (let ((diffx (- x1 x2)) (diffy (abs (- y1 y2))) (diffz (abs (- z1 z2))))
     (<= diffx -1))
-) ; END to-the-left-of.p
+) ; END to_the_left_of.p
 
 
 
-(defun to-the-right-of.p (x1 y1 z1 x2 y2 z2)
+(defun to_the_right_of.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````
   (let ((diffx (- x1 x2)) (diffy (abs (- y1 y2))) (diffz (abs (- z1 z2))))
     (>= diffx 1))
-) ; END to-the-right-of.p
+) ; END to_the_right_of.p
 
 
 
@@ -86,11 +86,11 @@
 
 
 
-(defun in-front-of.p (x1 y1 z1 x2 y2 z2)
+(defun in_front_of.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (- y1 y2)) (diffz (abs (- z1 z2))))
     (>= diffy 1))
-) ; END in-front-of.p
+) ; END in_front_of.p
 
 
 

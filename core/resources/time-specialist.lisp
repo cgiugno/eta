@@ -112,5 +112,26 @@
 ; NOTE: for now, this assumes that the symbols representing times are in alphanumerical
 ; order, e.g. NOW5 > NOW1. This is probably not ideal, since it relies on internal representations...
 ;
-  (car (sort times (lambda (x y) (> (compare-time x y) 0))))
+  (let ((most (car (sort (copy-seq times) (lambda (x y) (> (compare-time x y) 0))))))
+    (if most (list most)))
 ) ; END most-recent
+
+
+(defun least-recent (times)
+; ``````````````````````````
+; Gets the least recent time.
+; NOTE: for now, this assumes that the symbols representing times are in alphanumerical
+; order, e.g. NOW5 > NOW1. This is probably not ideal, since it relies on internal representations...
+;
+  (let ((least (car (sort (copy-seq times) (lambda (x y) (< (compare-time x y) 0))))))
+    (if least (list least)))
+) ; END least-recent
+
+
+(defun time-inclusive (times)
+; ````````````````````````````
+; Makes list of times inclusive by including previous time, e.g. (NOW1 NOW2 NOW3) => (NOW0 NOW1 NOW3 NOW4)
+;
+  (let* ((least (least-recent times)) (prev (get-prev-time (car least))))
+    (append (if prev (list prev)) times))
+) ; END time-inclusive

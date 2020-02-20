@@ -49,6 +49,7 @@
 ; Intersection of all sub-lists in l
 ;
   (cond
+    ((null l) nil)
     ((= 1 (length l)) (car l))
     (t (intersection (car l) (intersection1 (cdr l)) :test #'equal)))
 ) ; END intersection
@@ -60,6 +61,7 @@
 ; Union of all sub-lists in l
 ;
   (cond
+    ((null l) nil)
     ((= 1 (length l)) (car l))
     (t (union (car l) (union1 (cdr l)) :test #'equal)))
 ) ; END union1

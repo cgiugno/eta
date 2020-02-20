@@ -20,6 +20,10 @@
 ; NOW4
 ; [ans]
 
+; "What blocks did I move?"
+; "What blocks did I move since the beginning?"
+; "What block did I just move?"
+
 ; "Where did I move the Texaco block" => "Where was the Texaco block after I moved it"
 
 ; '((|Target| at-loc.p ($ loc 2 0 1)) (|Starbucks| at-loc.p ($ loc 5 5 0)) (|Twitter| at-loc.p ($ loc 5 5 1)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0)))
@@ -121,10 +125,12 @@
     ; "what block did I move" looks only at the most recent time (since times correspond to individual moves).
     (cond
       ((ttt:match-expr '(_! ((tense? action-verb?) (! wh-pron? (det? (^* (plur noun?)))) _*)) ulf-base)
-        (if (not times) (setq times (cons *time* (get-times-before *time* (diff-times *time* *time-prev*)))))
+        (if (not times) (setq times (get-times-before *time* (diff-times *time* *time-prev*)))
+          (setq times (time-inclusive times)))
         (setq quantifier 'ever))
       ((ttt:match-expr '(_! ((tense? action-verb?) (det? (^* noun?)) _*)) ulf-base)
-        (if (not times) (setq times (list *time*)))
+        (if (not times) (setq times (get-times-before *time* 1))
+          (setq times (time-inclusive times)))
         (setq quantifier 'most-recent)))
     ; By default, look at all times before now, and quantifier is just the most recent.
     (if (not times) (setq times (get-times-before *time* -1)))
@@ -132,25 +138,6 @@
 
   (list quantifier times))
 ) ; END get-referred-times
-
-
-(defun remove-adv-e (ulf)
-; ````````````````````````
-; Removes all adv-e modifiers from ULF.
-;
-  (ttt:apply-rules
-    '((/ (adv-e-lex? _!) _!)
-      (/ (_*1 (adv-e _!) _*2) (_*1 _*2))) ulf)
-) ; END remove-adv-e
-
-
-(defun remove-not (ulf)
-; ```````````````````````
-; Removes all negations from ULF.
-;
-  (ttt:apply-rules
-    '((/ (_*1 not _*2) (_*1 _*2))) ulf)
-) ; END remove-not
 
 
 (defun extract-adv-e-phrase (ulf)
@@ -321,12 +308,16 @@
     ; Apply predicate operation (before, after, during), along with any modifying
     ; adverb (e.g. "right before").
     (cond
+      ; "just before"
       ((and adv-a (hist-prep-prev? prep)) (set-difference (union1 (mapcar
         (lambda (ref-time) (get-times-before ref-time 1)) ref-times)) ref-times))
+      ; "before"
       ((hist-prep-prev? prep)
         (set-difference (get-times-before (car ref-times) -1) ref-times))
+      ; "just after"
       ((and adv-a (hist-prep-next? prep)) (set-difference (union1 (mapcar
         (lambda (ref-time) (get-times-after ref-time 1)) ref-times)) ref-times))
+      ; "after"
       ((hist-prep-next? prep)
         (set-difference (get-times-after (car ref-times) -1) ref-times))
       (t ref-times)))
@@ -477,7 +468,7 @@
 ;
   ; If quantifier is most-recent, simply replace times with only the most recent time in the list
   (when (equal quantifier 'most-recent)
-    (setq times (list (most-recent times))))
+    (setq times (most-recent times)))
   ; Apply function to each time, and create a list of the time paired with all returned relation
   (let* ((time-rels (mapcar (lambda (time)
           (list time (apply (car f) (cons time (cdr f))))) times))
@@ -667,9 +658,9 @@
 (defun hist-prep-during? (ulf)
   (member ulf '(at.p in.p on.p during.p ago.p)))
 (defun hist-prep-prev? (ulf)
-  (member ulf '(before.p prior_to.p preceding.p)))
+  (member ulf '(before.p prior_to.p preceding.p until.p)))
 (defun hist-prep-next? (ulf)
-  (member ulf '(after.p following.p since.p)))
+  (member ulf '(after.p following.p since.p from.p)))
 
 (defun hist-adj-prev? (ulf)
   (member ulf '(last.a previous.a preceding.a recent.a)))

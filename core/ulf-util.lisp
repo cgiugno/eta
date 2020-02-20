@@ -365,7 +365,10 @@
 ; 
   (if (ttt:match-expr '(^* ((tense? do.aux-s) not _*)) ulf)
     ulf
-    (ttt:apply-rule '(/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1))) ulf))
+    (ttt:apply-rules
+      '((/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1)))
+        (/ ((tense? do.aux-s) _* (_! (verb-untensed? _*1))) (_* (_! ((tense? verb-untensed?) _*1)))))
+    ulf))
 ) ; END remove-question-do
 
 
@@ -393,6 +396,25 @@
   (setq ulf (remove-question-do ulf))
   (apply-sub-macro ulf)
 ) ; END uninvert-question
+
+
+(defun remove-adv-e (ulf)
+; ````````````````````````
+; Removes all adv-e modifiers from ULF.
+;
+  (ttt:apply-rules
+    '((/ (adv-e-lex? _!) _!)
+      (/ (_*1 (adv-e _!) _*2) (_*1 _*2))) ulf)
+) ; END remove-adv-e
+
+
+(defun remove-not (ulf)
+; ```````````````````````
+; Removes all negations from ULF.
+;
+  (ttt:apply-rules
+    '((/ (_*1 not _*2) (_*1 _*2))) ulf)
+) ; END remove-not
 
 
 (defun existential-there? (ulf)
