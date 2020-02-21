@@ -12,6 +12,8 @@
       2 (*chemotherapy-input*) (0 :subtrees)
    1 (What are the side effects of chemotherapy ?)
       2 (*chemotherapy-details-input*) (0 :subtrees)
+   1 (I have not been sleeping well \.)
+      2 (*sleep-input*) (0 :subtrees)
 
    ; The following two will need modification
    1 (I would like a refill of medicine \.)

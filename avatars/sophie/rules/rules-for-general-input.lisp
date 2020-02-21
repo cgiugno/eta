@@ -4,6 +4,7 @@
   (come came)
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
+  (energy mood concentrate concentration concentrating depression depressed)
 ))
 
 
@@ -29,6 +30,12 @@
   ; If doctor mentions possibility of chemotherapy
   1 (0 chemotherapy 0)
     2 *chemotherapy-question* (0 :subtree)
+  ; If doctor asks something about sleep
+  1 (0 sleep 0)
+    2 *sleep-question* (0 :subtree)
+  ; If doctor asks something about patient's energy (or mood)
+  1 (0 energy 0)
+    2 *energy-question* (0 :subtree)
 
   ; The following two will need modification
   1 (0 medicine 0)

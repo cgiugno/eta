@@ -52,6 +52,10 @@
   1 (0 what pain 1 be you 0)
     2 ((Can you tell me about your pain ?) (pain-description)) (0 :gist)
   ; Where does it hurt?
+  1 (0 where it 3 pain 0)
+    2 ((Where is the pain located ?) (pain-description)) (0 :gist)
+  1 (0 where do 3 pain 0)
+    2 ((Where is the pain located ?) (pain-description)) (0 :gist)
   1 (0 where be 3 pain 0)
     2 ((Where is the pain located ?) (pain-description)) (0 :gist)
   1 (0 what part 3 pain 0)

@@ -40,8 +40,26 @@
 ?a6. (Me have-subdialogue.v you (I had radiation treatment for about five weeks\, except weekends\. That finished six weeks ago\.)
                                 ((I had radiation treatment for five weeks \.)))
 
+?a7. (Me have-subdialogue.v you (Recently\, I haven\'t been sleeping very well\. I am waking up at night\. Most nights I have to take my pain medication
+                                before falling back to sleep\.)
+                                ((I have not been sleeping well \.))) ;*
+
+?a8. (Me have-subdialogue.v you (I\'m a little bit worried because the medication doesn\'t really seem to be working anymore\. Do you know why ?)
+                                ((Why isn\'t the pain medication working anymore ?))) ;*
 
 ?a100. (Me say-to.v you '(I would like to go through some questions with you now\, if that\'s okay\.))
+
+?a101. (Me have-subdialogue.v you (What are my choices at this point ?)
+                                  ((What are my options ?))) ;*
+
+?a102. (Me have-subdialogue.v you (What kind of time are we looking at ?)
+                                  ((What is my prognosis ?))) ;*
+
+?a103. (Me have-subdialogue.v you (While I\’m here\, can I get a refill on my cholesterol medicine ?)
+                                  ((Can I have a refill of my cholesterol medicine ?))) ;*
+
+?a200. (Me have-subdialogue.v you (What should I do to schedule and prepare for a follow up appointment ?)
+                                  ((How should I schedule a follow up appointment ?))) ;*
 
 ;; ?a5. (Me have-subdialogue.v you (I would like a refill of my medicine \.)
 ;;                                 ((I would like a refill of medicine \.)))
@@ -55,7 +73,7 @@
 
 ; Discuss steps for future contact
 
-?a7. (Me say-to.v you '(Thank you for the conversation\, goodbye\.))
+?a300. (Me say-to.v you '(Thank you for the conversation\, goodbye\.))
 
 )) ; END defparameter *eta-schema*
 
@@ -111,5 +129,7 @@
     (?a4.  (pain-description))
     (?a5.  (diagnosis-details))
     (?a6.  (radiation-treatment))
+    (?a7.  (sleep))
+    (?a8.  (physical-dependence))
   )
 ) ; END mapcar #'store-topic-keys
