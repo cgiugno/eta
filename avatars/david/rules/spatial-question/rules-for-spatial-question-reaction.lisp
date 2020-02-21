@@ -1,6 +1,6 @@
 (MAPC 'ATTACHFEAT
 '(
-  (history-question was were did has)
+  (history-question was were did have)
   (recent-times previous current preceding last)
   (prep-history-at at on in during)
 ))

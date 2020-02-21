@@ -111,7 +111,7 @@
        2 *exist-question-ulf-tree* (0 :subtree)
 
     ; have questions (usually indicates perfect aspect)
-    1 (has 0)
+    1 (have 0)
        2 *has-question-ulf-tree* (0 :subtree)
 
     ; modal questions
@@ -476,23 +476,29 @@
 ; Parses has questions (typically indicates perfect aspect, i.e. "has been")
 ;
 '( 
-    1 (has 2 np-bw 3 adv_ verb-rel 2 np-bw 3 ?); e.g., has the SRI block ever touched the NVidia block ?
+    1 (have 2 np-bw 3 adv_ verb-rel 2 np-bw 3 ?); e.g., has the SRI block ever touched the NVidia block ?
        2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (lex-ulf! v- 6) (*np-ulf-tree* 7 8 9) ?)
           ((1 (2 ((past perf) (3 4)))) ?)) (0 :ulf-recur)
-    1 (has 2 np-bw 3 adv_ been 1 adj ?); e.g., has the SRI block ever been (totally) clear ?
+    1 (have 2 np-bw 3 adv_ been 1 adj ?); e.g., has the SRI block ever been (totally) clear ?
        2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (lex-ulf! adj 8) ?) ((1 (2 ((past perf) (be.v 3)))) ?)) (0 :ulf-recur)
-    1 (has 2 np-bw 3 adv_ been between 0 ?); e.g., has the SRI block ever been between the NVidia block and Twitter block ?
+    1 (have 2 np-bw 3 adv_ been between 0 ?); e.g., has the SRI block ever been between the NVidia block and Twitter block ?
        2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (*pp-between-ulf-tree* 7 8) ?)
           ((1 (2 ((past perf) (be.v 3)))) ?)) (0 :ulf-recur)
-    1 (has 2 np-bw 3 adv_ been 1 prep 2 np-bw 3 ?); e.g., has the SRI block ever been on the NVidia block ?
+    1 (have 2 np-bw 3 adv_ been 1 prep 2 np-bw 3 ?); e.g., has the SRI block ever been on the NVidia block ?
        2 (((*np-ulf-tree* 2 3 4) (*adv-ulf-tree* 5) (*pp-ulf-tree* 7 8 9 10 11) ?)
           ((1 (2 ((past perf) (be.v 3)))) ?)) (0 :ulf-recur)
-    1 (has there adv_ been 2 np-bw 3 between 0 ?); e.g., has there ever been a block between the NVidia block and Twitter block ?
+    1 (have there adv_ been 2 np-bw 3 between 0 ?); e.g., has there ever been a block between the NVidia block and Twitter block ?
        2 ((there.pro (*adv-ulf-tree* 3) (*np-ulf-tree* 5 6 7 8 9) ?)
           ((2 ((past perf) (be.v 1 3))) ?)) (0 :ulf-recur)
-    1 (has there adv_ been 2 np-bw 3 prep 2 np-bw 3 ?); e.g., has there ever been a block on the SRI block ?
+    1 (have there adv_ been 2 np-bw 3 prep 2 np-bw 3 ?); e.g., has there ever been a block on the SRI block ?
        2 ((there.pro (*adv-ulf-tree* 3) (*np-ulf-tree* 5 6 7 8 9 10 11) ?)
           ((2 ((past perf) (be.v 1 3))) ?)) (0 :ulf-recur)
+    1 (have pron adv_ verb-rel 2 np-bw 3 ?); e.g., have I ever moved the Target block ?
+       2 (((*np-ulf-tree* 2) (*adv-ulf-tree* 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) ?)
+          ((1 (2 ((past perf) (3 4)))) ?)) (0 :ulf-recur)
+    1 (have pron verb-rel 2 np-bw 3 ?); e.g., have I moved the Target block ?
+       2 (((*np-ulf-tree* 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) ?)
+          ((1 ((past perf) (2 3))) ?)) (0 :ulf-recur)
 
 )) ; END *has-question-ulf-tree*
 
