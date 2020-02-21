@@ -99,7 +99,7 @@
     (setq uncertain-flag (second ans-tuple))
 
     ;; (format t "Query: ~a~%" query-ulf)
-    ;; (format t "Query type: ~a~%" query-type)
+    (format t "Query type: ~a~%" query-type)
     ;; (format t "Relations: ~a~%" relations)
     ;; (format t "Answer: ~a~%" ans-ulf) ; DEBUGGING
 
@@ -153,7 +153,7 @@
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
-      (append (if poss-ans '(You\'re not sure you understood the question correctly \, but))
+      (append (if poss-ans '(You are not sure that you understood the question correctly \, but))
         (ulf-to-english output-ulf))
       '(Sorry \, you was unable to find an object that satisfies given constraints \, please rephrase in a simpler way \.)))
 ) ; END generate-response

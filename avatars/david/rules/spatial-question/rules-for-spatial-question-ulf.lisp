@@ -839,14 +839,16 @@
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5) (lex-ulf! v- 6) ?)
           ((sub 1 (2 3 (4 (5 *h)))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron adv_ verb-rel between 0 ?); e.g., how many blocks did I just put between the SRI block and NVidia block ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8)
-          (*pp-between-ulf-tree* 9 10) ?) ((sub (1 2) (3 4 (5 (6 *h 7)))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8)
+           (*pp-between-ulf-tree* 9 10) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron adv_ verb-rel 1 prep 2 np-bw 3 ?); e.g., how many blocks did I just put on the SRI block ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8)
-          (*pp-between-ulf-tree* 9 10 11 12 13) ?) ((sub (1 2) (3 4 (5 (6 *h 7)))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8)
+           (*pp-between-ulf-tree* 9 10 11 12 13) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron adv_ verb-rel ?); e.g., how many blocks did I just move ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8) ?)
-          ((sub (1 2) (3 4 (5 (6 *h)))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 (5 *h)))) ?)) (0 :ulf-recur)
 
     ; Postmodifying adv-e
     1 (where do pron verb-rel 2 np-bw 3 adv-e 0 ?); e.g., where did I move the NVidia block two turns ago ?
@@ -862,14 +864,16 @@
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (lex-ulf! v- 5) (*adv-ulf-tree* 6 7) ?)
           ((sub 1 (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel between 0 adv-e 0 ?); e.g., how many blocks did I put between the SRI block and NVidia block two turns ago ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9)
-          (*adv-ulf-tree* 10 11) ?) ((sub (1 2) (3 4 (5 *h 6 7))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9)
+           (*adv-ulf-tree* 10 11) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5 6))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel 1 prep 2 np-bw 3 adv-e 0 ?); e.g., how many blocks did I put on the SRI block two turns ago ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-ulf-tree* 8 9 10 11 12)
-          (*adv-ulf-tree* 13 14) ?) ((sub (1 2) (3 4 (5 *h 6 7))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-ulf-tree* 8 9 10 11 12)
+           (*adv-ulf-tree* 13 14) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5 6))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel adv-e 0 ?); e.g., how many blocks did I move two turns ago ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*adv-ulf-tree* 8 9) ?)
-          ((sub (1 2) (3 4 (5 *h 6))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*adv-ulf-tree* 8 9) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
 
     ; Standard
     1 (where do pron verb-rel 2 np-bw 3 ?); e.g., where did I move the NVidia block ?
@@ -885,14 +889,14 @@
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (lex-ulf! v- 5) ?)
           ((sub 1 (2 3 (4 *h))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel between 0 ?); e.g., how many blocks did I put between the SRI block and NVidia block ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9) ?)
-          ((sub (1 2) (3 4 (5 *h 6))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel 1 prep 2 np-bw 3 ?); e.g., how many blocks did I put on the SRI block ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-ulf-tree* 8 9 10 11 12) ?)
-          ((sub (1 2) (3 4 (5 *h 6))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-ulf-tree* 8 9 10 11 12) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel ?); e.g., how many blocks did I move ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) ?)
-          ((sub (1 2) (3 4 (5 *h))) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h))) ?)) (0 :ulf-recur)
     
 )) ; END *wh-do-question-ulf-tree*
 

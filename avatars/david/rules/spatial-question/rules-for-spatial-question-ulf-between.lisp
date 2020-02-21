@@ -108,8 +108,8 @@
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5) 
           (*pp-between-ulf-tree* 6 7 8 9) (*adv-ulf-tree* 10 11) ?) ((1 (2 (= (the.d (n+preds 4 5))) 6)) ?)) (0 :ulf-recur)
     1 (how many 1 block be 2 between 7 noun adv-e 0 ?); e.g., how many blocks were (there) between a red block and a blue block previously ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-between-ulf-tree* 6 7 8 9)
-          (*adv-ulf-tree* 10 11) ?) (((1 2) (3 4 5)) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-between-ulf-tree* 6 7 8 9) (*adv-ulf-tree* 10 11) ?)
+          ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
 
     ; Standard
     1 (wh-det noun be 2 between 7 noun ?); e.g., what/which block is there directly between the Nvidia block and a red block ?
@@ -131,8 +131,8 @@
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5) 
           (*pp-between-ulf-tree* 6 7 8 9) ?) ((1 (2 (= (the.d (n+preds 4 5))))) ?)) (0 :ulf-recur)
     1 (how many 1 block be 2 between 7 noun ?); e.g., how many blocks are (there) between a red block and a blue block ?
-       2 ((how_many.d (*n1-ulf-tree* 3 4) (lex-ulf! v 5) 
-          (*pp-between-ulf-tree* 6 7 8 9) ?) (((1 2) (3 4)) ?)) (0 :ulf-recur)
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-between-ulf-tree* 6 7 8 9) ?)
+          ((((nquan (how.mod-a many.a)) 1) (2 3)) ?)) (0 :ulf-recur)
 
 )) ; END *wh-between-question-ulf-tree*
 
