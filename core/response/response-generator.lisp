@@ -58,6 +58,7 @@
 ; '(((PAST DO.AUX-S) (THE.D (|Twitter| BLOCK.N)) (EVER.ADV-E (TOUCH.V (THE.D (|Texaco| BLOCK.N))))) ?)
 ; '((SUB (AT.P (WHAT.D TIME.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|Starbucks| BLOCK.N)) (ADV-E *H)))) ?)
 ; '(((WHAT.D (PLUR BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N)))))) ?)
+; '((SUB (OF.P (WHAT.D COLOR.N)) ((SET-OF (THE.D (|Target| BLOCK.N)) (THE.D (|Starbucks| BLOCK.N))) ((PRES BE.V) *H))) ?)
 ;
 ; Example relations:
 ; '()
@@ -146,7 +147,7 @@
     ; negation of that presupposition
     (if (null relations)
       (let ((presupposition-failure (respond-to-presupposition query-ulf)))
-        ;; (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
+        (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
         (if presupposition-failure (setq output-ulf presupposition-failure))))
     
     ;; (format t "output ULF: ~a~%" output-ulf) ; DEBUGGING
@@ -246,8 +247,9 @@
 ; Generates presupposition for query ULF (if any), and creates a response to that
 ; presupposition by negating it.
 ;
-  (negate-wh-question-presupposition (normalize-wh-question-presupposition
-    (ulf-pragmatics:get-wh-question-presupposition ulf :calling-package *package*)))
+  (let ((presupposition (ulf-pragmatics:get-wh-question-presupposition ulf :calling-package *package*)))
+    (format t "presupposition: ~a~%" presupposition) ; DEBUGGING
+    (negate-wh-question-presupposition (normalize-wh-question-presupposition (remove-adv-e presupposition))))
 ) ; END respond-to-presupposition
 
 
@@ -259,14 +261,13 @@
 ;
   (ttt:apply-rules
     '((/ (something.d _!) (some.d _!))
-      (/ (some.d (adj? noun?)) (some.d !))
+      ;; (/ (some.d (adj? noun?)) (some.d noun?))
       (/ (nquan (somehow.mod-a many.a)) some.d)
       (/ (I.pro ((past do.aux-s) (verb-untensed? _! (adv-e (! (^* (some.d _!1)))))))
          (I.pro ((past verb-untensed?) _!)))
       (/ (I.pro ((past verb-untensed?) _! (adv-e (! (^* (some.d _!1))))))
          (I.pro ((past verb-untensed?) _!)))
-      (/ ((a.d _!) ((tense? be.v) _*))
-         ((some.d _!) ((tense? be.v) _*))))
+    )
     ulf)
 ) ; END normalize-wh-question-presupposition
 
@@ -283,16 +284,16 @@
   (cond
     ((ttt:match-expr '(^* (! some.d something.pro)) ulf)
       (ttt:apply-rules
-        '((/ something.pro nothing.pro)
-          (/ (some.d _!) (no.d _!))
-          (/ (nothing.pro ((? (tense? do.aux-s)) not (verb-untensed? _*))) (everything.pro ((tense? verb-untensed?) _*)))
+        '((/ (nothing.pro ((? (tense? do.aux-s)) not (verb-untensed? _*))) (everything.pro ((tense? verb-untensed?) _*)))
           (/ ((no.d _!) ((? (tense? do.aux-s)) not (verb-untensed? _*))) ((every.d _!) ((tense? verb-untensed?) _*)))
           (/ (nothing.pro ((tense? verb-untensed?) not _*)) (everything.pro ((tense? verb-untensed?) _*)))
           (/ ((no.d _!) ((tense? verb-untensed?) not _*)) ((every.d _!) ((tense? verb-untensed?) _*)))
+          (/ ((tense? verb-untensed?) (no.d _!) _*) ((tense? do.aux-s) (verb-untensed? (no.d _!) _*)))
+          (/ ((tense? verb-untensed?) nothing.pro _*) ((tense? do.aux-s) (verb-untensed? nothing.pro _*)))
           (/ ((tense? do.aux-s) (^* (verb-untensed? (no.d _!) _*))) ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*)))
           (/ ((tense? do.aux-s) (^* (verb-untensed? nothing.pro _*))) ((tense? do.aux-s) not (verb-untensed? anything.d _*)))
           (/ (every.d (! (^* (plur noun?)))) (all.d !)))
-      ulf))
+      (ttt:apply-rules '((/ something.pro nothing.pro) (/ (some.d _!) (no.d _!))) ulf :max-n 1)))
     (t
       (ttt:apply-rules
         '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not _*)))

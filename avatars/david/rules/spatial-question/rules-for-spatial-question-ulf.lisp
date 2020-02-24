@@ -575,6 +575,9 @@
     1 (what color noun be 1 prep 2 np-bw 3 adv-e 0 ?); e.g., what color block was to_the_left_of the SRI block previously ?
        2 (((lex-ulf! det 1) (lex-ulf! adj 2) (lex-ulf! noun 3) (lex-ulf! v 4) 
           (*pp-ulf-tree* 5 6 7 8 9) (*adv-ulf-tree* 10 11) ?) (((1 (2 3)) (4 5 6)) ?)) (0 :ulf-recur)
+    1 (what color be np_ 2 conj np_ 2 adv-e 0 ?); e.g., what color were the Target block and the Starbucks block initially ?
+       2 (((lex-ulf! det 1) (lex-ulf! noun 2) (lex-ulf! v 3) (*np-ulf-tree* 4 5) (*np-ulf-tree* 7 8) (*adv-ulf-tree* 9 10) ?)
+          ((sub ({of}.p (1 2)) ((set-of 4 5) (3 *h 6))) ?)) (0 :ulf-recur)
     1 (what color be np_ 0 adv-e 0 ?); e.g., what color was the Nvidia block initially ?
        2 (((lex-ulf! det 1) (lex-ulf! noun 2) (lex-ulf! v 3) (*np-ulf-tree* 4 5) (*adv-ulf-tree* 6 7) ?)
           ((sub ({of}.p (1 2)) (4 (3 *h 5))) ?)) (0 :ulf-recur)
@@ -582,6 +585,9 @@
     1 (what color noun be 1 prep 2 np-bw 3 ?); e.g., what color block is to_the_left_of the SRI block ?
        2 (((lex-ulf! det 1) (lex-ulf! adj 2) (lex-ulf! noun 3) (lex-ulf! v 4) 
           (*pp-ulf-tree* 5 6 7 8 9) ?) (((1 (2 3)) (4 5)) ?)) (0 :ulf-recur)
+    1 (what color be np_ 2 conj np_ 2 ?); e.g., what color are the Target block and the Starbucks block ?
+       2 (((lex-ulf! det 1) (lex-ulf! noun 2) (lex-ulf! v 3) (*np-ulf-tree* 4 5) (*np-ulf-tree* 7 8) ?)
+          ((sub ({of}.p (1 2)) ((set-of 4 5) (3 *h))) ?)) (0 :ulf-recur)
     1 (what color be np_ 0 ?); e.g., what color is the Nvidia block ?
        2 (((lex-ulf! det 1) (lex-ulf! noun 2) (lex-ulf! v 3) (*np-ulf-tree* 4 5))
           ((sub ({of}.p (1 2)) (4 (3 *h))) ?)) (0 :ulf-recur)
