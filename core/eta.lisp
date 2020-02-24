@@ -1009,6 +1009,8 @@
         (setq user-ulf (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
+        ; Output ULF if in live mode, along with indicator that the ULF is not intended as a query.
+        (write-ulf `(quote ,(list 'non-query (eval user-ulf))))
         ; Determine answers by recalling from history
         (if *responsive*
           (setq ans `(quote ,(recall-answer object-locations (eval user-ulf))))
