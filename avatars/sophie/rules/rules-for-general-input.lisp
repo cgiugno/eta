@@ -53,6 +53,8 @@
   1 (2 sure 2)
     2 ((Continue talking \.)) (0 :gist)
 
+  1 (0 ?)
+    2 ((NIL Question ?)) (0 :gist)
   1 (0)
     2 ((NIL Gist)) (0 :gist)
 ))
@@ -67,8 +69,10 @@
     2 () (0 :out)
   ; If no gist clauses were extracted from user, ask them to repeat the question (repeats at most 2 times in a row,
   ; otherwise Eta will ignore and return to the central conversation)
-  1 (0)
+  1 (0 ?)
     2 (*have-subdialogue* ((I\'m sorry\, I didn\'t quite understand\. Can you say it again ?) nil)) (3 :schema+args)
     2 (*have-subdialogue* ((Would you mind repeating ?) nil)) (3 :schema+args)
     2 (Sorry\, you still didn\'t quite understand\. Let you see if you can fill in some more details \.) (0 :out)
+  1 (0)
+    2 () (0 :out)
 ))
