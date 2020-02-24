@@ -73,6 +73,8 @@
     ; Extract subject (needed for where-questions) and/or object (needed for "what block did I move" questions)
     (setq subj (extract-subj ulf-base))
     (setq obj (extract-obj ulf-base))
+    (format t "subj: ~a~%" subj)
+    (format t "obj: ~a~%" obj) ; DEBUGGING
 
     ; Extract relation from question, possibly including variables & restrictors for the subject and/or object.
     (setq relation (extract-relation ulf-base))
@@ -182,14 +184,23 @@
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
         (/ (_!1 ((tense? be.v) (^* (prep? _!2))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
-        ; "what block did I put on the Twitter block?"
+        (/ (_!1 ((tense? aspect?) (be.v (^* (between.p (set-of _!2 _!3))))))
+           ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
+        (/ (_!1 ((tense? aspect?) (be.v (^* (prep? _!2)))))
+           ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
+        ; "what block did I put on the Twitter block?" (TODO: currently this is just treated as
+        ; meaning the same as "what block was on the Twitter block", but it really is asking about
+        ; this PLUS some block that I actually moved recently).
         (/ (_! ((tense? verb-untensed?) _!1 (between.p (set-of _!2 _!3))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
         (/ (_! ((tense? verb-untensed?) _!1 (prep? _!2)))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
         ; "what block touches the Twitter block?" (TODO: needs to be generalized)
         (/ (_!1 ((tense? spatial-verb?) _!2))
-           ((resolve-rel-np! _!1) (spatial-verb-to-prep! spatial-verb?) (resolve-rel-np! _!2))))
+           ((resolve-rel-np! _!1) (spatial-verb-to-prep! spatial-verb?) (resolve-rel-np! _!2)))
+        (/ (_!1 ((tense? aspect?) (spatial-verb? _!2)))
+           ((resolve-rel-np! _!1) (spatial-verb-to-prep! spatial-verb?) (resolve-rel-np! _!2)))
+      )
       ulf)))
     (if (relation-prop? relation) relation nil))
 ) ; END extract-relation
@@ -215,7 +226,9 @@
 ; ?x or (?x red.a).
   (let ((obj
     (ttt:apply-rules '(
-      (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1)))))) (resolve-rel-np! !)))
+      (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1)))))) (resolve-rel-np! !))
+      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))))))) (resolve-rel-np! !))
+    )
     ulf)))
   (if (or (nnp? obj) (variable? obj) (restricted-variable? obj)) obj nil))
 ) ; END extract-obj
