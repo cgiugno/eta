@@ -14,6 +14,8 @@
       2 (*chemotherapy-details-input*) (0 :subtrees)
    1 (I have not been sleeping well \.)
       2 (*sleep-input*) (0 :subtrees)
+   1 (I have been fatigued \.)
+      2 (*energy-input*) (0 :subtrees)
 
    ; The following two will need modification
    1 (I would like a refill of medicine \.)
