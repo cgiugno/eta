@@ -53,6 +53,7 @@
 ;````````````````````````````````````````````````````````````````
   (if (or (not *live-mode*) (not (probe-file "./io/sessionInfo.lisp")))
     (progn
+      (defparameter *user-id* "test")
       ;; (format t "~%~%Enter user-id ~%")
       ;; (princ "user id: ") (finish-output)
       ;; (setq *user-id* (write-to-string (read))))

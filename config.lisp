@@ -18,4 +18,3 @@
 (defparameter *perceptive-mode* NIL)
 (defparameter *responsive-mode* NIL)
 (defparameter *safe-mode* NIL)
-(defparameter *user-id* "test")
