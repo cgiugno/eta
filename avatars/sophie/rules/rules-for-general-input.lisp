@@ -71,7 +71,7 @@
   ; otherwise Eta will ignore and return to the central conversation)
   1 (0 ?)
     2 (*have-subdialogue* ((I\'m sorry\, I didn\'t quite understand\. Can you say it again ?) nil)) (3 :schema+args)
-    2 (*have-subdialogue* ((Would you mind repeating ?) nil)) (3 :schema+args)
+    2 (*have-subdialogue* ((Would you mind rephrasing ?) nil)) (3 :schema+args)
     2 (Sorry\, you still didn\'t quite understand\. Let you see if you can fill in some more details \.) (0 :out)
   1 (0)
     2 () (0 :out)

@@ -63,16 +63,16 @@
   ; Questions about sleep
   1 (Have you been sleeping okay ?)
     2 (*have-subdialogue* ((I\'ve been having a bit of trouble\. I keep waking up at night\. Most nights I have to take my pain medication
-                           before falling back to sleep again\.)
-                          ((I have not been sleeping well \.)))) (100 :schema+args)
+                            before falling back to sleep again\.)
+                           ((I have not been sleeping well \.)))) (100 :schema+args)
   ; Questions about energy
   1 (How is your energy ?)
     2 (*have-subdialogue* ((I\'ve been fatigued most days for the past month\. If I\'m just doing something normal\, I\'m fine\, but I don\'t
-                           have as much energy as I used to\.)
-                          ((I have been fatigued \.)))) (100 :schema+args)
+                            have as much energy as I used to\.)
+                           ((I have been fatigued \.)))) (100 :schema+args)
   1 (Have you had trouble concentrating ?)
-    (*have-subdialogue* ((Only sometimes\.)
-                          ((I have had trouble concentrating \.)))) (100 :schema+args)
+    2 (*have-subdialogue* ((Only sometimes\.)
+                           ((I have had trouble concentrating \.)))) (100 :schema+args)
 
   ; The following two will need modification
   1 (How are you on medicine ?)
