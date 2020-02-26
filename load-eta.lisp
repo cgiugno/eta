@@ -3,39 +3,28 @@
 (cond
 (*responsive-mode*
 
-    ; Load ttt
+    ; Quickload packages
     ;```````````````````
-    (ql:quickload "ttt")
-
-    ; Load ulf-lib
-    ;```````````````````
-    (ql:quickload "ulf-lib")
-
-    ; Load ulf2english
-    ;```````````````````
-    (ql:quickload "ulf2english")
-
-    ; Load ulf-pragmatics
-    ;``````````````````````
-    (ql:quickload "ulf-pragmatics"))
+    (load (truename "packages/quickload-dependencies.lisp"))
+    (quickload-packages '("ttt" "ulf-lib" "ulf2english" "ulf-pragmatics")))
 
 ((not *responsive-mode*)
 
     ; Load local ttt
     ;``````````````````
-    (load (truename "local_packages/ttt/src/load.lisp"))
+    (load (truename "packages/local/ttt/src/load.lisp"))
 
     ; Load local ulf-lib
     ;`````````````````````
-    (load (truename "local_packages/ulf-lib/load.lisp"))
+    (load (truename "packages/local/ulf-lib/load.lisp"))
 
     ; Load local ulf2english
     ;````````````````````````
-    (load (truename "local_packages/ulf2english/load.lisp"))
+    (load (truename "packages/local/ulf2english/load.lisp"))
 
     ; Load local ulf-pragmatics
     ;```````````````````````````
-    (load (truename "local_packages/ulf-pragmatics/load.lisp"))))
+    (load (truename "packages/local/ulf-pragmatics/load.lisp"))))
 
 
 ; Load core code
