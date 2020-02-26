@@ -1,4 +1,4 @@
 (defpackage :ulf2english)
 (asdf:defsystem :ulf2english
-    :components ((:file "package"))
+    :components ((:file "package") (:file "functions"))
     :serial t)

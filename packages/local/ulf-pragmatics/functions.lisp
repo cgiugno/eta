@@ -1,0 +1,1 @@
+(defun get-wh-question-presupposition (ulf &key calling-package) nil)
