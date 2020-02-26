@@ -34,6 +34,9 @@
 ) ; END clean-io-files
 
 
+
+
+
 (defun load-avatar-files (avatar-name)
 ;``````````````````````````````````````
 ; Loads all schema and rule files used by a particular avatar
@@ -43,7 +46,11 @@
           (mapcar (lambda (f) (load f))
             (directory (concatenate 'string (namestring d) "/*.lisp")))
           (load-files-recur (coerce (butlast (explode (namestring d))) 'string)))
-        (remove nil (mapcar (lambda (p) (if (not (pathname-name p)) p))
+        (remove nil (mapcar (lambda (p)
+            ; This is pretty awkward, but has to be done to handle differences btwn ACL and SBCL
+            (if (fboundp 'probe-directory)
+              (if (probe-directory p) p)
+              (if (not (pathname-name p)) p)))
           (directory (concatenate 'string directory "/*")))))))
     (load-files-recur (concatenate 'string "./avatars/" avatar-name)))
 ) ; END load-avatar-files
