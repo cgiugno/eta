@@ -638,6 +638,26 @@
 
 
 
+(defun print-gist-kb (&key filename)
+;`````````````````````````````````````
+; Prints all gist clauses in the gist-kb for a user.
+; If a file is specified, append to that file.
+;
+  (if filename
+    (with-open-file (outfile filename :direction :output :if-exists :supersede :if-does-not-exist :create)))
+
+  (maphash (lambda (key val)
+    (if (not (nil-gist-clause? (car val)))
+      (if filename
+        (with-open-file (outfile filename :direction :output :if-exists
+                                          :append :if-does-not-exist :create)
+          (format outfile "~% ~a   ~a" key val))
+        (format t "~% ~a   ~a" key val))))
+  *gist-kb-user*)
+) ; END print-gist-kb
+
+
+
 (defun print-history ()
 ;```````````````````````
 ; Pretty-prints the discourse history in order.
@@ -1197,10 +1217,11 @@
     (setq wordstring (reverse (cdr wordstring)))
     (setq wordstring (eval (cons 'concatenate (cons ''string wordstring))))
 	  
+    ; Output words
     (with-open-file (outfile "./io/output.txt" :direction :output
                                             :if-exists :append
                                             :if-does-not-exist :create)
-      (format outfile "~%#: ~a" wordstring))
+      (format outfile "~%#~D: ~a" *count* wordstring))
 
     ; Also write ETA's words to standard output:
     (format t "~% ... ")

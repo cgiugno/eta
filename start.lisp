@@ -49,19 +49,18 @@
 ) ; END load-avatar-files
 
 
-; If text mode (or sessionInfo missing), manually set user-id
+; If live mode, load *user-id* from sessionInfo file (if it exists).
+; Otherwise, manually set *user-id* (or prompt user for input).
 ;````````````````````````````````````````````````````````````````
-  (if (or (not *live-mode*) (not (probe-file "./io/sessionInfo.lisp")))
-    (progn
-      (defparameter *user-id* "test")
-      ;; (format t "~%~%Enter user-id ~%")
-      ;; (princ "user id: ") (finish-output)
-      ;; (setq *user-id* (write-to-string (read))))
-    )
-; Otherwise, load user-id from sessionInfo file
-;``````````````````````````````````````````````````````
-    (progn
-      (load "./io/sessionInfo.lisp")))
+(defparameter *user-id* nil)
+(if (and *live-mode* (probe-file "./io/sessionInfo.lisp"))
+  (load "./io/sessionInfo.lisp"))
+(when (not *user-id*)
+  (defparameter *user-id* "_test")
+  ;; (format t "~%~%Enter user-id ~%")
+  ;; (princ "user id: ") (finish-output)
+  ;; (setq *user-id* (write-to-string (read))))
+)
 
 
 ; Clean IO files, load Eta, and load avatar-specific files
@@ -79,3 +78,9 @@
       (error-message "Execution of Eta failed due to an internal error." *live-mode*)
       (values 0 c)))
   (eta *live-mode* *perceptive-mode* *responsive-mode*))
+
+
+; Write user gist clauses to file
+;````````````````````````````````````
+(print-gist-kb :filename
+  (ensure-directories-exist (concatenate 'string "./gist-kb/" *user-id* ".txt")))

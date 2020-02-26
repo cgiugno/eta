@@ -14,7 +14,7 @@
 ;;
 
 (defparameter *avatar* "sophie")
-(defparameter *live-mode* NIL)
+(defparameter *live-mode* T)
 (defparameter *perceptive-mode* NIL)
 (defparameter *responsive-mode* NIL)
 (defparameter *safe-mode* NIL)
