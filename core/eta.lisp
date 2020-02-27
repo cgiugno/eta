@@ -133,10 +133,13 @@
   ; Certainty cutoff used to generate responses given a list of relations+certainties from the blocks world
   (defparameter *certainty-threshold* 0.7)
 
-  ; number of Eta outputs generated so far (maintained
+  ; Number of Eta outputs generated so far (maintained
   ; for latency enforcement, i.e., not repeating a previously
   ; used response too soon).
   (defparameter *count* 0)
+
+  ; Used for keeping track of output number in output.txt.
+  (defparameter *output-count* 0)
 
   ; This is used to check whether some error has caused Eta to enter
   ; an infinite loop (e.g. if the plan isn't correctly updated).

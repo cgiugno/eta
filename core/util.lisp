@@ -1216,12 +1216,15 @@
       (push " " wordstring))
     (setq wordstring (reverse (cdr wordstring)))
     (setq wordstring (eval (cons 'concatenate (cons ''string wordstring))))
+
+    ; Increment output number
+    (setq *output-count* (1+ *output-count*))
 	  
     ; Output words
     (with-open-file (outfile "./io/output.txt" :direction :output
                                             :if-exists :append
                                             :if-does-not-exist :create)
-      (format outfile "~%#~D: ~a" *count* wordstring))
+      (format outfile "~%#~D: ~a" *output-count* wordstring))
 
     ; Also write ETA's words to standard output:
     (format t "~% ... ")
@@ -1256,10 +1259,11 @@
 ;
   ; Write empty star line to output to prompt avatar to listen
   ; TODO: there has to be a better way of doing this...
+  (setq *output-count* (1+ *output-count*))
   (with-open-file (outfile "./io/output.txt" :direction :output
                                              :if-exists :append
                                              :if-does-not-exist :create)
-    (format outfile "~%*~D: " *count*))
+    (format outfile "~%*~D: dummy" *output-count*))
 
   (setq *next-input* nil)
   (loop while (not *next-input*) do
