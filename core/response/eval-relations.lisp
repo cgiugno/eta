@@ -81,7 +81,7 @@
 (defun behind.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (- y1 y2)) (diffz (abs (- z1 z2))))
-    (<= diffy -1))
+    (>= diffy 1))
 ) ; END behind.p
 
 
@@ -89,7 +89,7 @@
 (defun in_front_of.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (- y1 y2)) (diffz (abs (- z1 z2))))
-    (>= diffy 1))
+    (<= diffy -1))
 ) ; END in_front_of.p
 
 
