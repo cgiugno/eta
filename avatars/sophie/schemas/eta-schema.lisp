@@ -16,7 +16,7 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(Hi\, it\'s nice to met you\. I just moved back into the area from Florida about two weeks ago\.
+?a1. (Me say-to.v you '(Hi\, it\'s nice to meet you\. I just moved back into the area from Florida about two weeks ago\.
                         And for a while I was feeling pretty well after radiation\, but recently the pain seems to be getting worse\.))
 
 ?a2. (You reply-to.v ?a1.)
@@ -30,12 +30,12 @@
 
 ?a5. (Me have-subdialogue.v you (I\'ll never forget what happened before this\. When the pain got really bad\, I first went to my regular doctor
                                  but he didn\'t find anything and he thought I just had a bad cold\. But the pain and cough got so bad
-                                 over the next few days\, I went to the ER on the weekend\. At the ER they thought it was just pneumonia
+                                 over the next few days\, I went to the E.R. on the weekend\. At the E.R. they thought it was just pneumonia
                                  and gave me antibiotics and the Lortab for pain\. When they told me how much I weighed\, I realized that
                                  I had lost fifteen pounds over the course of the past six months\. A couple of days after I went to the ER\,
                                  I made appointments to go for a bunch of tests\. That took a couple of weeks\. I had to get a bone scan\,
                                  and I was sent to a lung doctor for a biopsy\. After all that\, the lung doctor told me I had lung cancer\.)
-                                ((The ER gave me Lortab for pain \.) (I got my diagnosis after visiting a lung doctor \.)))
+                                ((The E.R. gave me Lortab for pain \.) (I got my diagnosis after visiting a lung doctor \.)))
 
 ?a6. (Me have-subdialogue.v you (I had radiation treatment for about five weeks\, except weekends\. That finished six weeks ago\.)
                                 ((I had radiation treatment for five weeks \.)))

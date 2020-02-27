@@ -1254,6 +1254,13 @@
 ; in the same way as the result of (read-line) is processed in direct
 ; terminal input mode.
 ;
+  ; Write empty star line to output to prompt avatar to listen
+  ; TODO: there has to be a better way of doing this...
+  (with-open-file (outfile "./io/output.txt" :direction :output
+                                             :if-exists :append
+                                             :if-does-not-exist :create)
+    (format outfile "~%*~D: " *count*))
+
   (setq *next-input* nil)
   (loop while (not *next-input*) do
     (sleep .5)

@@ -63,7 +63,7 @@
 (READRULES '*general-reaction*
 '(
   1 (It is nice to meet you \.)
-    2 (Thank me \.) (100 :out)
+    2 (Thank me\, it\'s nice to meet me too \.) (100 :out)
   ; If doctor is just giving an indication to keep talking, react silently and continue
   1 (Continue talking \.)
     2 () (0 :out)
