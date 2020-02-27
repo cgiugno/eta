@@ -36,10 +36,6 @@
 ; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 1 0 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
 ; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 1 0 0)) (to.p-arg ($ loc 0 2 0))))  )
 ; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-;
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0.15 0 0)) (|Twitter| at-loc.p ($ loc 0.30 0 0)) (|Texaco| at-loc.p ($ loc 0.45 0 0)) (|McDonalds| at-loc.p ($ loc 0.60 0 0)) (|Mercedes| at-loc.p ($ loc 0.75 0 0)) (|Toyota| at-loc.p ($ loc 0.90 0 0)) (|Burger King| at-loc.p ($ loc 1.05 0 0))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 0.30 0)) (|Twitter| at-loc.p ($ loc 0.30 0 0)) (|Texaco| at-loc.p ($ loc 0.45 0 0)) (|McDonalds| at-loc.p ($ loc 0.60 0 0)) (|Mercedes| at-loc.p ($ loc 0.75 0 0)) (|Toyota| at-loc.p ($ loc 0.90 0 0)) (|Burger King| at-loc.p ($ loc 1.05 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 0.15 0 0)) (to.p-arg ($ loc 0 0.30 0))))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 0.30 0)) (|Twitter| at-loc.p ($ loc 0.30 0 0)) (|Texaco| at-loc.p ($ loc 0.45 0 0)) (|McDonalds| at-loc.p ($ loc 0.60 0 0)) (|Mercedes| at-loc.p ($ loc 0.75 0 0)) (|Toyota| at-loc.p ($ loc 0.90 0 0)) (|Burger King| at-loc.p ($ loc 1.05 0 0))  )
 ; 
 ;
 

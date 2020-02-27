@@ -8,7 +8,7 @@
 
 (defvar *spatial-prep-list*
   '(touching.p to_the_left_of.p to_the_right_of.p below.p above.p behind.p in_front_of.p on.p near.p next-to.p))
-(defvar *blocksize* 0.15)
+(defvar *blocksize* 1)
 (defvar *std-error* (/ *blocksize* 10))
 
 
