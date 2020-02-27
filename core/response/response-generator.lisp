@@ -106,6 +106,7 @@
 
     ; Make appropriate substitutions of answer ULF into query ULF,
     ; and uninvert form of question to get output ULF.
+    ; (I.PRO ((PAST MOVE.V) ((NQUAN ONE.A) (PLUR BLOCK.N))))
     (setq output-ulf (remove-adv-e (uninvert-question (cond
       ; Query is CONFIRM type
       ((equal query-type 'CONFIRM)
@@ -118,9 +119,7 @@
         (ttt:apply-rule `(/ color-object-flag? ,ans-ulf) query-ulf))
       ; Query is COUNT type
       ((equal query-type 'COUNT)
-        (ttt:apply-rules `((/ count-flag? ,ans-ulf)
-          (/ ((nquan one.a) (_! (plur _!1))) ((nquan one.a) (_! _!1))) ; These two rules are to fix cases like
-          (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))) query-ulf)) ; "one blocks" or "one red blocks"
+        (ttt:apply-rule `(/ count-flag? ,ans-ulf) query-ulf))
       ; Query is EXIST type
       ((equal query-type 'EXIST)
         (if ans-ulf
@@ -155,7 +154,7 @@
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
       (append (if poss-ans '(You are not sure that you understood the question correctly \, but))
-        (ulf-to-english output-ulf))
+        (ulf-to-english (normalize-output output-ulf)))
       '(Sorry \, you was unable to find an object that satisfies given constraints \, please rephrase in a simpler way \.)))
 ) ; END generate-response
 
@@ -251,6 +250,16 @@
     (format t "presupposition: ~a~%" presupposition) ; DEBUGGING
     (negate-wh-question-presupposition (normalize-wh-question-presupposition (remove-adv-e presupposition))))
 ) ; END respond-to-presupposition
+
+
+(defun normalize-output (ulf)
+; `````````````````````````````
+; Apply any final normalization rules to fix output.
+;
+  (ttt:apply-rules
+    '((/ ((nquan one.a) (_! (plur _!1))) ((nquan one.a) (_! _!1)))
+      (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))) ulf)
+) ; END normalize-output
 
 
 (defun normalize-wh-question-presupposition (ulf)
