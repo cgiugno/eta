@@ -16,6 +16,18 @@
       2 (*sleep-input*) (0 :subtrees)
    1 (I have been fatigued \.)
       2 (*energy-input*) (0 :subtrees)
+   1 (I have had trouble concentrating \.)
+      2 (*energy-input*) (0 :subtrees)
+   1 (I don\'t have allergies to any medicine \.)
+      2 (*medicine-input*) (0 :subtrees)
+   1 (I am only taking Lortab to treat my pain \.)
+      2 (*medicine-input*) (0 :subtrees)
+   1 (I am taking Cozar to help with blood pressure \.)
+      2 (*medicine-input*) (0 :subtrees)
+   1 (Why isn\'t the pain medication working anymore ?)
+      2 (*medicine-input*) (0 :subtrees)
+   1 (Can you tell me about the side effects ?)
+      2 (*side-effects-input*) (0 :subtrees)
 
    ; The following two will need modification
    1 (I would like a refill of medicine \.)

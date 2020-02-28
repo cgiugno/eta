@@ -5,6 +5,11 @@
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
   (energy mood concentrate concentration concentrating depression depressed)
+  (medicine pain-med pain-med-other blood-pressure-med med-narcotic drug drugs pill pills)
+  (pain-med lortab vicodin norco)
+  (pain-med-other ibuprofen aleve)
+  (med-narcotic narcotic oxycodone morphine)
+  (blood-pressure-med cozar)
 ))
 
 

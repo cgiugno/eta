@@ -74,6 +74,30 @@
     2 (*have-subdialogue* ((Only sometimes\.)
                            ((I have had trouble concentrating \.)))) (100 :schema+args)
 
+  ; Questions about medicine
+  1 (Do you have allergies to any medicine ?)
+    2 (*have-subdialogue* ((No\, you don\'t believe so\.)
+                           ((I don\'t have allergies to any medicine \.)))) (100 :schema+args)
+  1 (What medicine are you taking ?)
+    2 (*have-subdialogue* ((I\'m just taking the Lortab for pain right now\.)
+                           ((I am only taking Lortab to treat my pain \.)))) (100 :schema+args)
+  1 (Are you taking pain-med ?)
+    2 (*have-subdialogue* ((I\'m just taking the Lortab for pain right now\.)
+                           ((I am only taking Lortab to treat my pain \.)))) (100 :schema+args)
+  1 (Are you taking pain-med-other ?)
+    2 (*have-subdialogue* ((No\, I\'m not taking any of those\. Just the Lortab\.)
+                           ((I am only taking Lortab to treat my pain \.)))) (100 :schema+args)
+  1 (Are you taking blood-pressure-med ?)
+    2 (*have-subdialogue* ((I\'m taking Cozar for blood pressure\.)
+                           ((I am taking Cozar to help with blood pressure \.)))) (100 :schema+args)
+  1 (Is the pain medication working at all ?)
+    2 (*have-subdialogue* ((A little bit\, but not much\.)
+                           ((Why isn\'t the pain medication working anymore ?)))) (100 :schema+args)
+  1 (Is the pain medication working ?)
+    2 (*have-subdialogue* ((No\, it\'s not really working anymore\. So I\'ve been taking the pills
+                            every three hours instead of every four\.)
+                           ((Why isn\'t the pain medication working anymore ?)))) (100 :schema+args)
+
   ; The following two will need modification
   1 (How are you on medicine ?)
     2 (*have-subdialogue* ((I need a refill \.)

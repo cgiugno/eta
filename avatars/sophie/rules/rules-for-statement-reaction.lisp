@@ -19,6 +19,10 @@
                            ((What are the side effects of chemotherapy ?)))) (100 :schema+args)
   1 (I do not think you need chemotherapy \.)
     2 (Ah\, okay\.) (0 :out)
+  ; Medicine
+  1 (I think you should take med-narcotic \.)
+    2 (*have-subdialogue* ((Could you tell me about some of the side effects of that ?)
+                           ((Can you tell me about the side effects ?)))) (100 :schema+args)
   1 (0)
     2 *general-reaction* (0 :subtree)
 ))

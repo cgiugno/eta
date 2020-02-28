@@ -16,8 +16,9 @@
 
 :episodes 
 
-?a1. (Me say-to.v you '(Hi\, it\'s nice to meet you\. I just moved back into the area from Florida about two weeks ago\.
-                        And for a while I was feeling pretty well after radiation\, but recently the pain seems to be getting worse\.))
+?a1. (Me say-to.v you '(Hi\, my name is Sophie\. I just moved back into the area from Florida about two weeks ago\.
+                        I recently went to radiation therapy\, and was feeling pretty well for a while\, but
+                        recently the pain seems to be getting worse\.))
 
 ?a2. (You reply-to.v ?a1.)
 
@@ -42,10 +43,10 @@
 
 ?a7. (Me have-subdialogue.v you (Recently\, I haven\'t been sleeping very well\. I am waking up at night\. Most nights I have to take my pain medication
                                 before falling back to sleep\.)
-                                ((I have not been sleeping well \.))) ;*
+                                ((I have not been sleeping well \.)))
 
 ?a8. (Me have-subdialogue.v you (I\'m a little bit worried because the medication doesn\'t really seem to be working anymore\. Do you know why ?)
-                                ((Why isn\'t the pain medication working anymore ?))) ;*
+                                ((Why isn\'t the pain medication working anymore ?)))
 
 ?a100. (Me say-to.v you '(I would like to go through some questions with you now\, if that\'s okay\.))
 
@@ -73,7 +74,8 @@
 
 ; Discuss steps for future contact
 
-?a300. (Me say-to.v you '(Thank you for the conversation\, goodbye\.))
+?a300. (Me say-to.v you '(Thank you for taking the time to meet with me today\. It was helpful to learn more
+                          about my options\. I hope we can meet again soon to discuss further\. Bye\.))
 
 )) ; END defparameter *eta-schema*
 

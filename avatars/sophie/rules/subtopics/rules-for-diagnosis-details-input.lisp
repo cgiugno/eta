@@ -3,6 +3,7 @@
   (lead leading)
   (before prior lead)
   (know aware)
+  (bring brings)
 ))
 
 
@@ -15,6 +16,8 @@
 
 (READRULES '*diagnosis-details-question*
 '(
+  1 (0 what 2 bring you 0)
+      2 ((How did you get your diagnosis ?) (diagnosis-details)) (0 :gist)
   1 (0 what 1 before 1 to 2 diagnosis 0)
     2 ((How did you get your diagnosis ?) (diagnosis-details)) (0 :gist)
   1 (0 what 2 before 0 diagnosis 0)
