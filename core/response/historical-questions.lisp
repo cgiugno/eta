@@ -433,7 +433,8 @@
             (mapcar (lambda (prep)
               (let ((certainty (eval-relation prep coords1 coords2)))
                 ; If certainty is greater than zero, add tuple + certainty to pred-list
-                (if (> certainty 0) (list (list (car coords1) prep (car coords2)) certainty))))
+                (if (and (numberp certainty) (> certainty 0))
+                  (list (list (car coords1) prep (car coords2)) certainty))))
             prep-list)))
           coords-list2)) coords-list1))))
     ; Sort by certainty

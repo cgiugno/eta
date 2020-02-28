@@ -258,7 +258,9 @@
 ;
   (ttt:apply-rules
     '((/ ((nquan one.a) (_! (plur _!1))) ((nquan one.a) (_! _!1)))
-      (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))) ulf)
+      (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))
+      (/ (a.d (plur block.n)) (a.d block.n)))
+  ulf)
 ) ; END normalize-output
 
 
