@@ -144,6 +144,7 @@
         (setq quantifier 'most-recent)))
     ; By default, look at all times before now, and quantifier is just the most recent.
     (if (not times) (setq times (get-times-before *time* -1)))
+    (if (not times) (setq times (list *time*)))
     (if (not quantifier) (setq quantifier 'most-recent))
 
   (list quantifier times))
@@ -430,6 +431,30 @@
 ) ; END form-pred-list
 
 
+(defun find-k-nearest (scene subj k)
+; ````````````````````````````````````
+; Find the k nearest blocks to the subj block(s).
+; NOTE: if subj describes multiple blocks, this will find the k-nearest
+; for each one (possibly overlapping).
+;
+  (let* ((subj-blocks (find-cars-var subj scene))
+         (non-subj-blocks (remove-if (lambda (block) (member block subj-blocks :test #'equal)) scene)))
+    (append subj-blocks (mapcar #'first (remove-duplicates (mapcan (lambda (subj-block)
+      (last (reverse (sort (copy-seq (mapcar (lambda (non-subj-block)
+              (list non-subj-block (apply 'near.p (append (cdr subj-block) (cdr non-subj-block)))))
+            non-subj-blocks)) #'> :key #'second)) k))
+      subj-blocks) :test #'equal))))
+) ; END find-k-nearest
+
+
+(defun get-k-relations (relations k)
+; ```````````````````````````````````
+; Filters list of relations to k relations, preferrably with unique objects.
+;
+  
+) ; END get-k-relations
+
+
 (defun compute-relations (Ti subj coords)
 ; `````````````````````````````````````````
 ; Computes all spatial relations that hold at a particular time, for a particular
@@ -438,8 +463,10 @@
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
   (let* ((scene (reconstruct-scene coords Ti))
+        ; Get the nearest blocks to the subj
+        (nearest (find-k-nearest scene subj 2))
         ; Find all possible pairs of subject + object in the scene, and check if relation holds
-        (relations (form-pred-list scene *spatial-prep-list* scene)))
+        (relations (form-pred-list nearest *spatial-prep-list* nearest)))
     ; Filter relations
     (find-cars-var subj relations))
 ) ; END compute-relations
