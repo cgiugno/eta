@@ -419,40 +419,23 @@
 ; Form predicates from all relations that are satisfied having
 ; things from coords-list1 as the subject, a preposition from
 ; prep-list, and coords-list2 as the object.
+; NOTE: preds are returned in decreasing order of certainty.
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
-  (remove nil (mapcan (lambda (coords1) (mapcan (lambda (coords2)
-    (if (not (equal (car coords1) (car coords2)))
-      (mapcar (lambda (prep)
-        (if (eval-relation prep coords1 coords2)
-          (list (car coords1) prep (car coords2))))
-      prep-list)))
-    coords-list2)) coords-list1))
+  (let ((pred-list (remove nil
+        ; Check all combination of blocks between coords-list1 and coords-list2
+        (mapcan (lambda (coords1) (mapcan (lambda (coords2)
+          (if (not (equal (car coords1) (car coords2)))
+            ; Evaluate all prepositions in prep-list
+            (mapcar (lambda (prep)
+              (let ((certainty (eval-relation prep coords1 coords2)))
+                ; If certainty is greater than zero, add tuple + certainty to pred-list
+                (if (> certainty 0) (list (list (car coords1) prep (car coords2)) certainty))))
+            prep-list)))
+          coords-list2)) coords-list1))))
+    ; Sort by certainty
+    (mapcar #'first (sort (copy-seq pred-list) #'> :key #'second)))
 ) ; END form-pred-list
-
-
-(defun find-k-nearest (scene subj k)
-; ````````````````````````````````````
-; Find the k nearest blocks to the subj block(s).
-; NOTE: if subj describes multiple blocks, this will find the k-nearest
-; for each one (possibly overlapping).
-;
-  (let* ((subj-blocks (find-cars-var subj scene))
-         (non-subj-blocks (remove-if (lambda (block) (member block subj-blocks :test #'equal)) scene)))
-    (append subj-blocks (mapcar #'first (remove-duplicates (mapcan (lambda (subj-block)
-      (last (reverse (sort (copy-seq (mapcar (lambda (non-subj-block)
-              (list non-subj-block (apply 'near.p (append (cdr subj-block) (cdr non-subj-block)))))
-            non-subj-blocks)) #'> :key #'second)) k))
-      subj-blocks) :test #'equal))))
-) ; END find-k-nearest
-
-
-(defun get-k-relations (relations k)
-; ```````````````````````````````````
-; Filters list of relations to k relations, preferrably with unique objects.
-;
-  
-) ; END get-k-relations
 
 
 (defun compute-relations (Ti subj coords)
@@ -463,12 +446,10 @@
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
   (let* ((scene (reconstruct-scene coords Ti))
-        ; Get the nearest blocks to the subj
-        (nearest (find-k-nearest scene subj 2))
         ; Find all possible pairs of subject + object in the scene, and check if relation holds
-        (relations (form-pred-list nearest *spatial-prep-list* nearest)))
+        (relations (form-pred-list scene *spatial-prep-list* scene)))
     ; Filter relations
-    (find-cars-var subj relations))
+    (last (reverse (find-cars-var subj relations)) 2))
 ) ; END compute-relations
 
 
@@ -563,7 +544,7 @@
   (labels ((get-time-of-relation-recur (rel Ti)
       (let* ((scene (reconstruct-scene coords Ti))
              (coords1 (find-car (first rel) scene)) (coords2 (find-car (third rel) scene))
-             (rel-true (eval-relation (second rel) coords1 coords2)))
+             (rel-true (eval-relation-bool (second rel) coords1 coords2)))
         (cond
           ((and neg (not rel-true)) Ti)
           ((and (not neg) rel-true) Ti)

@@ -362,10 +362,11 @@
 (defun form-ans-descr (relations)
 ; ```````````````````````````````````
 ; Creates a ULF conjunction of relations describing where the subject is.
+; TODO: function needs cleaning.
 ;
   (when (equal relations 'None) (return-from conjoin-relations 'None))
-  (cons 'set-of (mapcan (lambda (group)
-    (if (and (listp group) (>= (length group) 2) (listp (second group)))
+  (make-set (mapcan (lambda (group)
+    (if (and (listp group) (listp (car group)))
       (mapcan (lambda (rel) (list (list (second rel) (third rel)))) group)
       (list (list (second group) (third group)))))
     (mapcar #'condense-by-objs (group-relations relations))))
@@ -450,6 +451,7 @@
 (defun group-relations (relations)
 ; `````````````````````````````````
 ; Groups relations into sublists according to predicate.
+; TODO: function needs cleaning.
 ;
   (when (equal relations 'None) (return-from group-relations 'None))
   (let ((i -1) preps result)
