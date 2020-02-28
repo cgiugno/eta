@@ -134,10 +134,13 @@
     ; adv-e is specified, the times between the previous utterance and the current utterance), whereas
     ; "what block did I move" looks only at the most recent time (since times correspond to individual moves).
     (cond
-      ((ttt:match-expr '(_! ((tense? action-verb?) (! wh-pron? (det? (^* (plur noun?)))) _*)) ulf-base)
+      ; Plural or "how many"
+      ((or (ttt:match-expr '(_! ((tense? action-verb?) (! wh-pron? (det? (^* (plur noun?)))) _*)) ulf-base)
+           (ttt:match-expr '(_! ((tense? action-verb?) ((nquan (how.mod-a many.a)) (plur noun?)) _*)) ulf-base))
         (if (not times) (setq times (get-times-before *time* (diff-times *time* *time-prev*)))
           (setq times (time-inclusive times)))
         (setq quantifier 'ever))
+      ; Singular
       ((ttt:match-expr '(_! ((tense? action-verb?) (det? (^* noun?)) _*)) ulf-base)
         (if (not times) (setq times (get-times-before *time* 1))
           (setq times (time-inclusive times)))
