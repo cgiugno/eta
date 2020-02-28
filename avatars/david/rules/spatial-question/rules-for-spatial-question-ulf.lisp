@@ -353,6 +353,8 @@
        2 (lex-ulf! adv-a 1) (0 :ulf)
     1 (adv-e); e.g., previously
        2 (lex-ulf! adv-e 1) (0 :ulf)
+    1 (prep the 1 noun-bw); e.g., before the Twitter block ("did I move the Target block before the Twitter block?")
+       2 (((*pp-ulf-tree* 1 I moved 2 3 4)) (adv-e 1)) (0 :ulf-recur)
     1 (prep 0 very 0 noun-history); e.g., on the very first turn
        2 (((*pp-ulf-tree* 1 2 4 5)) (adv-e 1)) (0 :ulf-recur)
     1 (prep-history 0 noun-history conj prep-history 0 noun-history); e.g., before the fifth turn and after the second turn
