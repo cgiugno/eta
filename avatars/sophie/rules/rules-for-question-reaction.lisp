@@ -73,6 +73,32 @@
   1 (Have you had trouble concentrating ?)
     2 (*have-subdialogue* ((Only sometimes\.)
                            ((I have had trouble concentrating \.)))) (100 :schema+args)
+  
+  ; Questions about weight loss
+  ; Might need to add reaction with more details
+  1 (Have you lost weight ?)
+    2 (*have-subdialogue* ((Yes\, I\’m down about 8 pounds still\.)
+                           ((I\’ve gained some back\, but I still need to put on a little more \.)))) (100 :schema+args)
+
+  ; Questions about substance use
+  1 (Do you drink alcohol ?)
+    2 (*have-subdialogue* ((I might have one or two drinks a couple of times a week\.)
+                           ((Maybe\. Not all the time \.)))) (100 :schema+args)
+  1 (How often do you drink ?)
+    2 (*have-subdialogue* ((At most\, two days a week\. I\’ve cut down since I have gotten ill 
+                            I just don\’t have the taste for it anymore\. I don\’t think it\’s a problem now \.)
+                           ((At most\, two days a week\. I just don\’t have the taste for it since I have gotten sick \.)))) (100 :schema+args)
+  1 (Do you do drugs ?)
+    2 (*have-subdialogue* ((No \.)
+                           ((I tried some marijuana when I was young\, but stopped in my twenties \.)))) (100 :schema+args)
+
+  ; Questions about mental health
+  1 (How are you feeling ?)
+    2 (*have-subdialogue* ((I try not to think about it.\.)
+                           ((I try to keep carrying on\, but sometimes I do feel down \.)))) (100 :schema+args)
+  1 (Have you thought of suicide ?)
+    2 (*have-subdialogue* ((I never think about hurting myself\, I don\’t believe in that\.)
+                           ((I try not to\, you know\. Worry and depression, I don't think about harming myself or anything like that \.)))) (100 :schema+args)
 
   ; Questions about medicine
   1 (Do you have allergies to any medicine ?)
