@@ -59,6 +59,7 @@
 ; '((SUB (AT.P (WHAT.D TIME.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|Starbucks| BLOCK.N)) (ADV-E *H)))) ?)
 ; '(((WHAT.D (PLUR BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N)))))) ?)
 ; '((SUB (OF.P (WHAT.D COLOR.N)) ((SET-OF (THE.D (|Target| BLOCK.N)) (THE.D (|Starbucks| BLOCK.N))) ((PRES BE.V) *H))) ?)
+; '((SUB (AT.P (WHAT.D TIME.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|Twitter| BLOCK.N)) (ADV-E *H)))) ?)
 ;
 ; Example relations:
 ; '()
@@ -77,6 +78,7 @@
 ; '(((|Texaco| on.p |Twitter|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
 ; '(((|Texaco| (past move.v)) 0.8) ((|Starbucks| (past move.v)) 0.8))
 ; '(((|Texaco| ((pres be.v) blue.a)) 0.8))
+; '((NOW1 1.0))
 ;
 
 
@@ -102,12 +104,12 @@
     ;; (format t "Query: ~a~%" query-ulf)
     (format t "Query type: ~a~%" query-type)
     ;; (format t "Relations: ~a~%" relations)
-    ;; (format t "Answer: ~a~%" ans-ulf) ; DEBUGGING
+    (format t "Answer: ~a~%" ans-ulf) ; DEBUGGING
 
     ; Make appropriate substitutions of answer ULF into query ULF,
     ; and uninvert form of question to get output ULF.
     ; (I.PRO ((PAST MOVE.V) ((NQUAN ONE.A) (PLUR BLOCK.N))))
-    (setq output-ulf (remove-adv-e (uninvert-question (cond
+    (setq output-ulf (uninvert-question (cond
       ; Query is CONFIRM type
       ((equal query-type 'CONFIRM)
         ans-ulf)
@@ -136,7 +138,7 @@
         (ttt:apply-rule `(/ descr-flag? ,ans-ulf) query-ulf))
       ; Query is TIME type
       ((equal query-type 'TIME)
-        (ttt:apply-rule `(/ time-flag? ,ans-ulf) query-ulf))))))
+        (ttt:apply-rule `(/ time-flag? ,ans-ulf) query-ulf)))))
 
     ; When answer is uncertain, append an adverb indicating uncertainty to answer
     (when uncertain-flag
@@ -148,8 +150,12 @@
       (let ((presupposition-failure (respond-to-presupposition query-ulf)))
         (format t "presupposition failure response: ~a~%" presupposition-failure) ; DEBUGGING
         (if presupposition-failure (setq output-ulf presupposition-failure))))
+
+    ; Unless a TIME type question, remove all adv-e from output
+    (when (not (equal query-type 'TIME))
+      (setq output-ulf (remove-adv-e output-ulf)))
     
-    ;; (format t "output ULF: ~a~%" output-ulf) ; DEBUGGING
+    (format t "output ULF: ~a~%" output-ulf) ; DEBUGGING
 
     ; Convert output ULF to an english string and output (or output an error if the output ULF is nil)
     (if output-ulf
@@ -259,7 +265,8 @@
   (ttt:apply-rules
     '((/ ((nquan one.a) (_! (plur _!1))) ((nquan one.a) (_! _!1)))
       (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))
-      (/ (a.d (plur block.n)) (a.d block.n)))
+      (/ (a.d (plur block.n)) (a.d block.n))
+      (/ (past perf) (pres perf)))
   ulf)
 ) ; END normalize-output
 
@@ -294,16 +301,25 @@
 ;
   (cond
     ((ttt:match-expr '(^* (! some.d something.pro)) ulf)
-      (ttt:apply-rules
-        '((/ (nothing.pro ((? (tense? do.aux-s)) not (verb-untensed? _*))) (everything.pro ((tense? verb-untensed?) _*)))
+      (ttt:apply-rules '(
+          ; nothing does not touch the Twitter block => everything touches the Twitter block
+          (/ (nothing.pro ((? (tense? do.aux-s)) not (verb-untensed? _*))) (everything.pro ((tense? verb-untensed?) _*)))
           (/ ((no.d _!) ((? (tense? do.aux-s)) not (verb-untensed? _*))) ((every.d _!) ((tense? verb-untensed?) _*)))
+          ; nothing is not to the left of the Twitter block => everything is to the left of the Twitter block
           (/ (nothing.pro ((tense? verb-untensed?) not _*)) (everything.pro ((tense? verb-untensed?) _*)))
           (/ ((no.d _!) ((tense? verb-untensed?) not _*)) ((every.d _!) ((tense? verb-untensed?) _*)))
-          (/ ((tense? verb-untensed?) (no.d _!) _*) ((tense? do.aux-s) (verb-untensed? (no.d _!) _*)))
+          ; touches nothing => does touch nothing
           (/ ((tense? verb-untensed?) nothing.pro _*) ((tense? do.aux-s) (verb-untensed? nothing.pro _*)))
+          (/ ((tense? verb-untensed?) (no.d _!) _*) ((tense? do.aux-s) (verb-untensed? (no.d _!) _*)))
+          ; have moved nothing => have not moved anything
+          (/ ((tense? aspect?) (verb-untensed? nothing.pro _*)) ((tense? aspect?) not (verb-untensed? anything.pro _*)))
+          (/ ((tense? aspect?) (verb-untensed? (no.d _!) _*)) ((tense? aspect?) not (verb-untensed? (any.d _!) _*)))
+          ; does touch nothing => does not touch anything
+          (/ ((tense? do.aux-s) (^* (verb-untensed? nothing.pro _*))) ((tense? do.aux-s) not (verb-untensed? anything.pro _*)))
           (/ ((tense? do.aux-s) (^* (verb-untensed? (no.d _!) _*))) ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*)))
-          (/ ((tense? do.aux-s) (^* (verb-untensed? nothing.pro _*))) ((tense? do.aux-s) not (verb-untensed? anything.d _*)))
+          ; every blocks => all blocks
           (/ (every.d (! (^* (plur noun?)))) (all.d !)))
+      ; something => nothing, some block => no block
       (ttt:apply-rules '((/ something.pro nothing.pro) (/ (some.d _!) (no.d _!))) ulf :max-n 1)))
     (t
       (ttt:apply-rules
@@ -379,7 +395,11 @@
 ; ````````````````````````````````
 ; Creates a ULF from a list of times.
 ;
-  (make-set (mapcar (lambda (time) (intern (string-downcase (string time)))) relations))
+  (make-set (mapcar (lambda (time) 
+    (intern (string-downcase (string time))))
+    ;; (let ((date-time (third (car (remove-if-not #'at-about-prop? (gethash time *context*))))))
+    ;;   (intern (format nil "~a\\:~a" (fourth date-time) (fifth date-time)))))
+    relations))
 ) ; END form-ans-time
 
 

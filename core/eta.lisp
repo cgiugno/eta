@@ -109,6 +109,7 @@
   ; Time
   ; Stores the constant denoting the current time period
   (defparameter *time* 'NOW0)
+  (store-time)
 
   ; Time of previous episode
   ; Stores the constant denoting the time of the previous episode

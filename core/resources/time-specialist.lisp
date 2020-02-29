@@ -1,5 +1,5 @@
 (defun update-time ()
-;``````````````````````
+; ``````````````````````
 ; Updates time to a "new period", i.e. creates a new constant denoting
 ; a new time period (and stores before/after relationships in context)
 ;
@@ -7,11 +7,31 @@
     (setq time-new (intern (format nil "NOW~a"
       (1+ (chars-to-int (cdddr (explode *time*)))))))
     (setq *time* time-new)
+    (store-time)
     (setq pred-before (list time-old 'before.p time-new))
     (setq pred-after  (list time-new 'after.p time-old))
     (store-fact pred-before *context* :keys (list (car pred-before)))
     (store-fact pred-after  *context* :keys (list (car pred-after))))
 ) ; END update-time
+
+
+(defun get-time ()
+; ``````````````````
+; Gets the system time and returns a record structure. The format of the
+; record is ($ time ?second ?minute ?hour ?day ?month ?year).
+; 
+  (multiple-value-bind (seconds minutes hours days months years) (get-decoded-time)
+    `($ date-time ,years ,months ,days ,hours ,minutes ,seconds))
+) ; END get-time
+
+
+(defun store-time ()
+; ````````````````````
+; Gets and stores the date-time of the current time proposition.
+;
+  (let ((pred-time (list *time* 'at-about.p (get-time))))
+    (store-fact pred-time *context* :keys (list (car pred-time))))
+) ; END store-time
 
 
 (defun compare-time (Ti Tj)

@@ -830,6 +830,14 @@
 ) ; END before-prop?
 
 
+(defun at-about-prop? (prop)
+; ````````````````````````````
+; Checks whether a proposition is an at-about relation, i.e. at-about.p.
+;
+  (and (listp prop) (>= (length prop) 2) (equal (second prop) 'at-about.p))
+) ; END before-prop?
+
+
 (defun loc-record? (list)
 ; `````````````````````````
 ; Checks whether a list is a location record of form ($ loc ?x ?y ?z)

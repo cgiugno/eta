@@ -117,8 +117,8 @@
       (setq times-phrase (get-times-from-adv-e-phrase coords adv-e-phrase)))
     (when adv-e-word
       (setq times-word (get-times-from-adv-e-word coords adv-e-word)))
-    (format t "times-phrase: ~a~%" times-phrase)
-    (format t "times-word: ~a~%" times-word) ; DEBUGGING
+    ;; (format t "times-phrase: ~a~%" times-phrase)
+    ;; (format t "times-word: ~a~%" times-word) ; DEBUGGING
 
     (cond
       ; If lexical adv-e gives some special quantifier
@@ -140,12 +140,14 @@
     (cond
       ; Plural or "how many"
       ((or (ttt:match-expr '(_! ((tense? action-verb?) (! wh-pron? (det? (^* (plur noun?)))) _*)) ulf-base)
+           (ttt:match-expr '(_! ((tense? aspect?) (action-verb? (! wh-pron? (det? (^* (plur noun?)))) _*))) ulf-base)
            (ttt:match-expr '(_! ((tense? action-verb?) ((nquan (how.mod-a many.a)) (plur noun?)) _*)) ulf-base))
         (if (not times) (setq times (get-times-before *time* (diff-times *time* *time-prev*)))
           (setq times (time-inclusive times)))
         (setq quantifier 'ever))
       ; Singular
       ((ttt:match-expr '(_! ((tense? action-verb?) (det? (^* noun?)) _*)) ulf-base)
+       (ttt:match-expr '(_! ((tense? aspect?) (action-verb? (det? (^* noun?)) _*))) ulf-base)
         (if (not times) (setq times (get-times-before *time* 1))
           (setq times (time-inclusive times)))
         (setq quantifier 'most-recent)))
@@ -507,8 +509,8 @@
   (when (equal quantifier 'most-recent)
     (setq times (most-recent times)))
   ; Apply function to each time, and create a list of the time paired with all returned relation
-  (let* ((time-rels (mapcar (lambda (time)
-          (list time (apply (car f) (cons time (cdr f))))) times))
+  (let* ((time-rels (remove-if (lambda (x) (null (second x))) (mapcar (lambda (time)
+          (list time (apply (car f) (cons time (cdr f))))) times)))
          (answers (mapcar (lambda (time-rel)
           (if when-question
             (list (add-certainty (first time-rel) (first time-rel)))
