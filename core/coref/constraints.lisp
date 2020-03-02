@@ -11,10 +11,12 @@
   (5.00 exact-match-c)
   (5.00 precise-construct-c)
   (1.00 indefinite-reference-c)
+  (0.90 n+preds-c)
   (0.90 binding-reflexive-c)
   (0.90 binding-anaphor-c)
   (0.90 binding-r-expression-c)
   (0.90 proper-name-conflict-c)
+  (0.90 nnp-reference-conflict-c)
   (0.75 definite-reference-conflict-c)
   (0.75 pronoun-conflict-c)
   (0.50 type-match-c)
@@ -22,6 +24,7 @@
   (0.15 recency-c)
   (0.15 salience-c)
   (0.15 parallel-c)
+  (0.05 simple-preference-c)
 )) ; END get-constraints
 
 
@@ -174,11 +177,22 @@
 (defun definite-reference-conflict-c (de1 de2 ulf)
 ; `````````````````````````````````````````````````
 ; A definite reference is unlikely to refer to a past discourse entity for which the proper name is known (e.g. *"John went to the
-; store. The man bought an apple", cf. "John went to the store. He bough an apple.").
+; store. The man bought an apple", cf. "John went to the store. He bought an apple.").
 ;
   (let ((proper-names2 (remove-if-not #'proper-name? (mapcar (lambda (ref) (get ref 'ulf)) (get de2 'references)))))
     (if (and (equal (get de1 'cat) 'definite-np) proper-names2) -1 0))
 ) ; END definite-reference-conflict-c
+
+
+(defun nnp-reference-conflict-c (de1 de2 ulf)
+; ````````````````````````````````````````````
+; A definite reference is unlikely to refer to a past discourse entity with a different nnp modifier, e.g. "The Twitter block"
+; does not refer to the same entity as "The NVidia block".
+;
+  (let ((nnp1 (find nil (get de1 'mods) :test (lambda (x y) (nnp? y))))
+        (nnp2 (find nil (get de2 'mods) :test (lambda (x y) (nnp? y)))))
+    (if (and nnp1 nnp2) (if (equal nnp1 nnp2) 1 -1) 0))
+) ; END nnp-reference-conflict-c
 
 
 (defun existential-there-c (de1 de2 ulf)
@@ -187,3 +201,20 @@
 ;
   (if (or (equal (get de1 'cat) 'existential-there) (equal (get de2 'cat) 'existential-there)) -1 0)
 ) ; END existential-there-c
+
+
+(defun n+preds-c (de1 de2 ulf)
+; ``````````````````````````````
+; Something embedded within an n+preds modifier cannot refer to the same entity that the overall np refers to, unless that
+; thing is a relative pronoun e.g. that.rel.
+;
+  (if (embedded-in-n+preds? (get de2 'ulf) de1) (if (equal (get de1 'cat) 'relative) 1 -1) 0)
+) ; END n+preds-c
+
+
+(defun simple-preference-c (de1 de2 ulf)
+; ````````````````````````````````````````
+; As a minor tiebreaker, a pronoun tends to prefer a shorter (less modifiers) referent.
+;
+  (if (has-n+preds? (get de2 'ulf)) -1 0)
+) ; END simple-preference-c

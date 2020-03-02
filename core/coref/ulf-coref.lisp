@@ -383,7 +383,7 @@
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
         ((and (equal *coreference-mode* 3) (atom ulf) (not (member ulf visited)) (get ulf 'references))
           (resolve-references-recur (get-most-specific-reference ulf) (cons ulf visited)))
-        ((and (atom ulf) (get ulf 'ulf)) (reconstruct-ulf (get ulf 'ulf)))
+        ((and (atom ulf) (get ulf 'ulf)) (resolve-references-recur (get ulf 'ulf) visited))
         ((atom ulf) ulf)
         (t (mapcar (lambda (x)
             (resolve-references-recur x visited))

@@ -122,8 +122,9 @@
 
   ; Coreference mode
   ; 0 : simply reconstruct the original ulf
-  ; 1 : substitute most specific references only for anaphors and indexical np's (e.g. that block)
-  ; 2 : substitute most specific references for all references
+  ; 1 : mode 2 but excluding i.pro and you.pro from resolved references
+  ; 2 : substitute most specific references only for anaphors and indexical np's (e.g. that block)
+  ; 3 : substitute most specific references for all references
   (defparameter *coreference-mode* 1)
 
   ; Recency cutoff used when attempting coreference (i.e. the coreference
@@ -183,7 +184,6 @@
   (setq *live* live)
   (setq *perceptive* perceptive)
   (setq *responsive* responsive)
-  (setq *discourse-entities* nil)
   (setq *count* 0) ; Number of outputs so far
 
   ; Create a partially instantiated dialog plan from a schema,
@@ -2156,7 +2156,6 @@
         (setq result (choose-result-for1 new-tagged-clause nil (car pattern)))
         (if (and result (not (equal (car result) :out)))
           (setq result (coref-ulf result)))
-        ;; (format t "discourse entities are ~a~%" *discourse-entities*) ; DEBUGGING
         (return-from choose-result-for1 result))
 
       ;```````````````````````

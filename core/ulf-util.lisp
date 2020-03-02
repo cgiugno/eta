@@ -903,6 +903,24 @@
 ) ; END precise-construct?
 
 
+(defun embedded-in-n+preds? (phrase1 phrase2)
+; `````````````````````````````````````````````
+; Checks whether phase1 is an n+preds or np+preds embedding phrase2.
+;
+  (or
+    (ttt:match-expr `(np+preds _! (^* ,phrase2)) phrase1)
+    (ttt:match-expr `(det? (n+preds _! (^* ,phrase2))) phrase1))
+) ; END embedded-in-n+preds?
+
+
+(defun has-n+preds? (ulf)
+; ````````````````````````
+; Checks whether a ulf contains an n+preds or np+preds.
+;
+  (ttt:match-expr '(^* (! np+preds n+preds)) ulf)
+) ; END has-n+preds?
+
+
 (defun local? (phrase1 phrase2 ulf)
 ; ``````````````````````````````````
 ; Checks whether phrase1 is a local ancestor to phrase2; i.e. if there is no other discourse entity standing
