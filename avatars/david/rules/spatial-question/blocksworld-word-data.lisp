@@ -65,13 +65,15 @@
         below above next_to close_to near_to visible on_top_of to_the_left_of
         to_the_right_of in_front_of adjacent_to flush_with)
 
-  (rel-adj near close touching facing adjacent flush)
+  (rel-adj near close touching facing adjacent flush central)
   (qual-adj purple blue green yellow orange red pink gray grey
             black white brown clear visible nearby)
   (num-adj two three four five six seven eight nine ten eleven twelve many)
   (sup-adj leftmost rightmost furthest farthest nearest closest highest
            tallest nearest topmost top uppermost smallest lowest largest
            centermost shortest backmost longest fewest frontmost)
+  (sup-adj-base left right far near close high tall near small low large
+           center central short back long few front)
   (ord-adj first second third fourth fifth sixth seventh eighth ninth
            tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth
            seventeens eighteenth nineteenth twentieth)
@@ -80,7 +82,7 @@
   (mod-n adj-bw corp)
 
   (noun-bw block table stack row edge face plane line circle pile object
-        color structure left right back front direction way other one thing)
+        color structure left center right back front direction way other one thing)
 
   (verb be verb-rel)
   (be is are was were)

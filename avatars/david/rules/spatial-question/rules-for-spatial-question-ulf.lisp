@@ -197,8 +197,11 @@
     1 (sup-adj noun 0); e.g., highest block on the stack
        2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3)) (most-n 1 2)) (0 :ulf-recur)
     1 (sup-adj adj noun 0); e.g., highest red block on the table
-       2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3 4)) 
-          (most-n 1 2)) (0 :ulf-recur)
+       2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3 4)) (most-n 1 2)) (0 :ulf-recur)
+    1 (most sup-adj-base noun 0); e.g., highest block on the stack
+       2 (((lex-ulf! adj 2) (*n1-ulf-tree* 3 4)) (most-n 1 2)) (0 :ulf-recur)
+    1 (most sup-adj-base adj noun 0); e.g., highest red block on the table
+       2 (((lex-ulf! adj 2) (*n1-ulf-tree* 3 4 5)) (most-n 1 2)) (0 :ulf-recur)
     
     ; Postmodifiers (allow two, i.e., 2 PPs or a PP and a relative clause (either order) 
     1 (2 noun 1 prep det 1 noun 1 prep 2 np-bw 3); e.g., blocks near each other on the table
@@ -739,6 +742,9 @@
     1 (wh-pron be the sup-adj 2 adv-e 0 ?); e.g., what was the highest red block before I moved the SRI block ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5) (*adv-ulf-tree* 6 7) ?)
           ((1 (2 (= (the.d 4)) 5)) ?)) (0 :ulf-recur)
+    1 (wh-pron be the most sup-adj-base 2 adv-e 0 ?); e.g., what was the most high red block before I moved the SRI block ?
+       2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5 6) (*adv-ulf-tree* 7 8) ?)
+          ((1 (2 (= (the.d 4)) 5)) ?)) (0 :ulf-recur)
     1 (wh-pron be the 2 noun prep np_ 3 adv-e 0 ?); e.g., what was the block next_to the farthest blue block initially ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6 7 8) (*adv-ulf-tree* 9 10) ?)
           ((1 (2 (= 3) 4)) ?)) (0 :ulf-recur)
@@ -810,6 +816,9 @@
           ((1 (2 3)) ?)) (0 :ulf-recur)
     1 (wh-pron be the sup-adj 2 ?); e.g., what is the highest red block ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5) ?)
+          ((1 (2 (= (the.d 4)))) ?)) (0 :ulf-recur)
+    1 (wh-pron be the most sup-adj-base 2 ?); e.g., what is the highest red block ?
+       2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5 6) ?)
           ((1 (2 (= (the.d 4)))) ?)) (0 :ulf-recur)
     1 (wh-pron be the 2 noun prep np_ 3 ?); e.g., what is the block next_to the farthest blue block ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6 7 8) ?)
@@ -1098,10 +1107,16 @@
           (poss-ques 1)) (0 :ulf-recur)
     1 (4 wh-pron be 2 sup-adj 2 noun 2)
        2 (((*wh-question-ulf-tree* 2 3 the 5 6 7 ?)) (poss-ques 1)) (0 :ulf-recur)
+    1 (4 wh-pron be 2 most sup-adj-base 2 noun 2)
+       2 (((*wh-question-ulf-tree* 2 3 the 5 6 7 8 ?)) (poss-ques 1)) (0 :ulf-recur)
     1 (4 wh-det 2 noun be the sup-adj 2); e.g., which red block is the highest up ?
        2 (((*wh-question-ulf-tree* which is the 7 3 4 ?)) (poss-ques 1)) (0 :ulf-recur)
+    1 (4 wh-det 2 noun be the most sup-adj-base 2); e.g., which red block is the highest up ?
+       2 (((*wh-question-ulf-tree* which is the 7 8 3 4 ?)) (poss-ques 1)) (0 :ulf-recur)
     1 (8 sup-adj 2 noun 5); desperation rule for a superlative
        2 (((*wh-question-ulf-tree* which is the 2 3 4 ?)) (poss-ques 1)) (0 :ulf-recur) 
+    1 (8 most sup-adj-base 2 noun 5); desperation rule for a superlative
+       2 (((*wh-question-ulf-tree* which is the 2 3 4 5 ?)) (poss-ques 1)) (0 :ulf-recur)
     1 (4 wh-pron be the 2 noun 1 be 1 prep 3 det 2 noun 5)
        2 (((*wh-question-ulf-tree* what is 4 5 6 that is 9 10 11 12 13 14 ?))
        (poss-ques 1)) (0 :ulf-recur)
