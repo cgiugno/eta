@@ -37,7 +37,7 @@
 ; to use iteration in interpreting the user's response until, say,
 ; an end of turn is recorded in *context*?
 ;
-  (if (and (symbolp x) (get x 'ulf)) (car (get x 'ulf)) nil)
+  (if (and (symbolp x) (get x 'ulf)) (car (remove nil (get x 'ulf))) nil)
 ) ; END ulf-of.f
 
 
