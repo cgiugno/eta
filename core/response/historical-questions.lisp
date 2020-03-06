@@ -88,6 +88,7 @@
     ; Detect different types of historical questions which might be asked. Some are straightforward spatial questions
     ; but just asked about the past, whereas others have to do with the actions themselves, e.g. "what blocks did I move?"
     ; TODO: this is currently all very simplistic (for both scenarios), and needs to be improved in the future.
+    ; It currently doesn't handle verbs other than move.v, for instance, "did the Twitter block touch the Texaco block?"
     (cond
       ; If asking a where-question
       (where-question
@@ -186,7 +187,6 @@
 ; Extracts a relation (e.g. (|Twitter| on.p |Texaco)) from a ULF.
 ; If subject or object is not definite, use variables with restrictors, e.g.
 ; (?x on.p ?y), ((?x red.a) on.p |Texaco|), etc.
-; TODO: what if ulf contains a negated relation, e.g. "is not on the Twitter block"
 ;
   (let ((relation
       (ttt:apply-rules '(
@@ -424,11 +424,12 @@
 ) ; END reconstruct-scene
 
 
-(defun form-pred-list (coords-list1 prep-list coords-list2)
-; ```````````````````````````````````````````````````````````
+(defun form-pred-list (coords-list1 prep-list coords-list2 &key neg)
+; ```````````````````````````````````````````````````````````````````
 ; Form predicates from all relations that are satisfied having
 ; things from coords-list1 as the subject, a preposition from
 ; prep-list, and coords-list2 as the object.
+; If neg is given as t, return negated predicates.
 ; NOTE: preds are returned in decreasing order of certainty.
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
@@ -439,9 +440,14 @@
             ; Evaluate all prepositions in prep-list
             (mapcar (lambda (prep)
               (let ((certainty (eval-relation prep coords1 coords2)))
-                ; If certainty is greater than zero, add tuple + certainty to pred-list
-                (if (and (numberp certainty) (> certainty 0))
-                  (list (list (car coords1) prep (car coords2)) certainty))))
+                (if neg
+                  ; If neg, add negated tuple + certainty for all with zero certainty
+                  (if (and (numberp certainty) (<= certainty 0))
+                    (list (list (car coords1) 'not prep (car coords2)) (- 1.0 certainty)))
+                  ; Otherwise, if certainty is greater than zero, add tuple + certainty to pred-list
+                  (if (and (numberp certainty) (> certainty 0))
+                    (list (list (car coords1) prep (car coords2)) certainty))
+                )))
             prep-list)))
           coords-list2)) coords-list1))))
     ; Sort by certainty
@@ -474,7 +480,7 @@
   (let* ((subj (first rel)) (prep (second rel)) (obj (third rel)) (obj2 (fourth rel))
         (scene (reconstruct-scene coords Ti))
         (coords-list1 (find-cars-var subj scene)) (coords-list2 (find-cars-var obj scene)))
-    (form-pred-list coords-list1 (list prep) coords-list2))
+    (form-pred-list coords-list1 (list prep) coords-list2 :neg neg))
 ) ; END compute-relation
 
 
