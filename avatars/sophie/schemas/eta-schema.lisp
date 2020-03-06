@@ -133,5 +133,8 @@
     (?a6.  (radiation-treatment))
     (?a7.  (sleep))
     (?a8.  (physical-dependence))
+    (?a9.  (weight))
+    (?a10. (substance))
+    (?a11. (mental))
   )
 ) ; END mapcar #'store-topic-keys
