@@ -318,7 +318,10 @@
           (/ ((tense? do.aux-s) (^* (verb-untensed? nothing.pro _*))) ((tense? do.aux-s) not (verb-untensed? anything.pro _*)))
           (/ ((tense? do.aux-s) (^* (verb-untensed? (no.d _!) _*))) ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*)))
           ; every blocks => all blocks
-          (/ (every.d (! (^* (plur noun?)))) (all.d !)))
+          (/ (every.d (! (^* (plur noun?)))) (all.d !))
+          ; not do not move any => move every
+          ;; (/ (not ))
+          )
       ; something => nothing, some block => no block
       (ttt:apply-rules '((/ something.pro nothing.pro) (/ (some.d _!) (no.d _!))) ulf :max-n 1)))
     (t

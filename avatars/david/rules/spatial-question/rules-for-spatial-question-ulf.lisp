@@ -352,8 +352,12 @@
 '(
     1 (just); just is an adv-e in the context of historical questions
        2 (lex-ulf! adv-e 1) (0 :ulf); NOTE: might need changing in future
+    1 (not); e.g., not
+       2 not (0 :ulf)
     1 (deg-adv); e.g., directly
        2 (lex-ulf! adv-a 1) (0 :ulf)
+    1 (adv-f); e.g., once
+       2 (lex-ulf! adv-f 1) (0 :ulf)
     1 (adv-e); e.g., previously
        2 (lex-ulf! adv-e 1) (0 :ulf)
     1 (prep the 1 noun-bw); e.g., before the Twitter block ("did I move the Target block before the Twitter block?")
@@ -368,6 +372,8 @@
        2 (((*pp-ulf-tree* 1 2 3)) (adv-e 1)) (0 :ulf-recur)
     1 (prep-history-simple 0); e.g., before I moved it
        2 (((*pp-ulf-tree* 1 2)) (adv-e 1)) (0 :ulf-recur)
+    1 (det time); e.g., three times
+       2 (((*np-ulf-tree* 1 2)) (adv-f (at.p 1))) (0 :ulf-recur)
     1 (det noun-history ago); e.g., two turns ago
        2 (((*np-ulf-tree* 1 2)) (adv-e (sub 1 (ago.p *h)))) (0 :ulf-recur)
     1 (adj-history noun-history); e.g., last turn
@@ -709,6 +715,8 @@
        2 (((*np-ulf-tree* 1 2) (*adv-ulf-tree* 4) (lex-ulf! v-pasv 5) (*pp-between-ulf-tree* 6 7) ?) ((1 (2 (3 4))) ?)) (0 :ulf-recur)
     1 (wh_ 2 be adv_ verb-rel 1 prep 2 np-bw 3 ?); e.g., what (block) was just placed on the SRI block ?
        2 (((*np-ulf-tree* 1 2) (*adv-ulf-tree* 4) (lex-ulf! v-pasv 5) (*pp-ulf-tree* 6 7 8 9 10) ?) ((1 (2 (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 be adv_ verb-rel adv-e 0 ?); e.g., what (block) was only moved once ?
+       2 (((*np-ulf-tree* 1 2) (*adv-ulf-tree* 4) (lex-ulf! v-pasv 5) (*adv-ulf-tree* 6 7) ?) ((1 (2 (3 4))) ?)) (0 :ulf-recur)
     1 (wh_ 2 be adv_ verb-rel ?); e.g., what (block) was just moved ?
        2 (((*np-ulf-tree* 1 2) (*adv-ulf-tree* 4) (lex-ulf! v-pasv 5) ?) ((1 (2 3)) ?)) (0 :ulf-recur)
     1 (wh_ 2 be verb-rel between 0 ?); e.g., what (block) was placed between the SRI and NVidia blocks ?
@@ -909,6 +917,12 @@
     1 (wh_ 2 do pron adv_ verb-rel 1 prep 2 np-bw 3 ?); e.g., what (block) did I just put on the SRI block ?
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5) (lex-ulf! v- 6)
           (*pp-ulf-tree* 7 8 9 10 11) ?) ((sub 1 (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron adv_ verb-rel adv-e 0 ?); e.g., what (block) did I only move once?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5) (lex-ulf! v- 6) (*adv-ulf-tree* 7 8) ?)
+          ((sub 1 (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron not adv_ verb-rel ?); e.g., what (block) did I not just move ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 6) (lex-ulf! v- 7) ?)
+          ((sub 1 (2 3 (not (4 (5 *h))))) ?)) (0 :ulf-recur)
     1 (wh_ 2 do pron adv_ verb-rel ?); e.g., what (block) did I just move ?
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5) (lex-ulf! v- 6) ?)
           ((sub 1 (2 3 (4 (5 *h)))) ?)) (0 :ulf-recur)
@@ -920,9 +934,15 @@
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8)
            (*pp-between-ulf-tree* 9 10 11 12 13) ?)
           ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
+    1 (how many 1 noun do pron adv_ verb-rel adv-e 0 ?); e.g., how many blocks did I only move once ?
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8) (*adv-ulf-tree* 9 10) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron adv_ verb-rel ?); e.g., how many blocks did I just move ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 7) (lex-ulf! v- 8) ?)
           ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 (5 *h)))) ?)) (0 :ulf-recur)
+    1 (how many 1 noun do pron not adv_ verb-rel ?); e.g., how many blocks did I not just move ?
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (*adv-ulf-tree* 8) (lex-ulf! v- 9) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (not (4 (5 *h))))) ?)) (0 :ulf-recur)
 
     ; Postmodifying adv-e
     1 (where do pron verb-rel 2 np-bw 3 adv-e 0 ?); e.g., where did I move the NVidia block two turns ago ?
@@ -937,6 +957,9 @@
     1 (wh_ 2 do pron verb-rel adv-e 0 ?); e.g., what (block) did I move two turns ago ?
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (lex-ulf! v- 5) (*adv-ulf-tree* 6 7) ?)
           ((sub 1 (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron not verb-rel adv-e 0 ?); e.g., what (blocks) did I not move two turns ago ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (lex-ulf! v- 6) (*adv-ulf-tree* 7 8) ?)
+          ((sub 1 (2 3 (not (4 *h 5)))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel between 0 adv-e 0 ?); e.g., how many blocks did I put between the SRI block and NVidia block two turns ago ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9)
            (*adv-ulf-tree* 10 11) ?)
@@ -948,6 +971,9 @@
     1 (how many 1 noun do pron verb-rel adv-e 0 ?); e.g., how many blocks did I move two turns ago ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*adv-ulf-tree* 8 9) ?)
           ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
+    1 (how many 1 noun do pron verb-rel adv-e 0 ?); e.g., how many blocks did I not move two turns ago ?
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 8) (*adv-ulf-tree* 9 10) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (not (4 *h 5)))) ?)) (0 :ulf-recur)
 
     ; Standard
     1 (where do pron verb-rel 2 np-bw 3 ?); e.g., where did I move the NVidia block ?
@@ -962,6 +988,9 @@
     1 (wh_ 2 do pron verb-rel ?); e.g., what (block) did I move ?
        2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (lex-ulf! v- 5) ?)
           ((sub 1 (2 3 (4 *h))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron not verb-rel ?); e.g., what (block) did I not move ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (lex-ulf! v- 6) ?)
+          ((sub 1 (2 3 (not (4 *h)))) ?)) (0 :ulf-recur)
     1 (how many 1 noun do pron verb-rel between 0 ?); e.g., how many blocks did I put between the SRI block and NVidia block ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9) ?)
           ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
@@ -971,6 +1000,9 @@
     1 (how many 1 noun do pron verb-rel ?); e.g., how many blocks did I move ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 7) ?)
           ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (4 *h))) ?)) (0 :ulf-recur)
+    1 (how many 1 noun do pron not verb-rel ?); e.g., how many blocks did I not move ?
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*np-ulf-tree* 6) (lex-ulf! v- 8) ?)
+          ((sub ((nquan (how.mod-a many.a)) 1) (2 3 (not (4 *h)))) ?)) (0 :ulf-recur)
     
 )) ; END *wh-do-question-ulf-tree*
 

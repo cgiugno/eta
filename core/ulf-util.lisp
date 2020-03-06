@@ -202,6 +202,14 @@
 ) ; END adv-e-lex?
 
 
+(defun adv-f-lex? (ulf)
+; ```````````````````````
+; Checks if a ULF is an adv-f word.
+;
+  (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-F))
+) ; END adv-f-lex?
+
+
 (defun adv-a? (ulf)
 ; ``````````````````
 ; Checks if a ULF is an adv-a word or phrase.
@@ -406,6 +414,16 @@
     '((/ (adv-e-lex? _!) _!)
       (/ (_*1 (adv-e _!) _*2) (_*1 _*2))) ulf)
 ) ; END remove-adv-e
+
+
+(defun remove-adv-f (ulf)
+; ````````````````````````
+; Removes all adv-f modifiers from ULF.
+;
+  (ttt:apply-rules
+    '((/ (adv-f-lex? _!) _!)
+      (/ (_*1 (adv-f _!) _*2) (_*1 _*2))) ulf)
+) ; END remove-adv-f
 
 
 (defun remove-not (ulf)

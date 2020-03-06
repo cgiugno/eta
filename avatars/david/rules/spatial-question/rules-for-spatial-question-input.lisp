@@ -12,7 +12,7 @@
     (spatial-beginning-pair spatial-beginning there)
     (spatial-beginning spatial-verb between prep conj-prep)
     (spatial-verb be modal wh_ do)
-    (spatial-ending noun adj there directions ana-pron prep conj-prep facing adv-e ago verb-rel that this)
+    (spatial-ending noun adj there directions ana-pron prep conj-prep facing adv-e adv-f ago verb-rel that this)
     (spatial-word noun ana-pron supporting corp adj
       uppermost under close touching farthest rotated)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
@@ -220,6 +220,8 @@
   ; NOTE: Moved closer to end of file since the code was getting pretty long.
   (READRULES '*asr-fix-tree*
   '(
+    1 (0 do not pron 0)
+      2 (*asr-fix-tree* (1 2 4 3 5)) (0 :subtree+clause)
     1 (0 anything 0); not a mistake per se, but want to split into two words for parsing
       2 (*asr-fix-tree* (1 any thing 3)) (0 :subtree+clause)
     1 (0 mcdonald\'s 0)

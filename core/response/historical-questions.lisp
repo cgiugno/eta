@@ -50,7 +50,7 @@
 ; historical record of block moves stored in context.
 ;
   (format t "object locations: ~a~%" object-locations) ; DEBUGGING
-  (let* ((ulf-base (uninvert-question (remove-not (remove-adv-e ulf))))
+  (let* ((ulf-base (uninvert-question (remove-not (remove-adv-f (remove-adv-e ulf)))))
          (coords (extract-coords object-locations)) (quant-times (get-referred-times coords ulf ulf-base))
          (quantifier (first quant-times)) (times (second quant-times))
          when-question where-question neg ans relation subj obj)

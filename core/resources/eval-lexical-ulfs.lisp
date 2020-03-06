@@ -124,6 +124,7 @@
                     (t (intern (format nil "~a.A" (stem-superlative word-sym))))))
          (adv-a (intern (format nil "~a.ADV-A" word-sym)))
          (adv-e (intern (format nil "~a.ADV-E" word-sym)))
+         (adv-f (intern (format nil "~a.ADV-F" word-sym)))
          (mod-a (intern (format nil "~a.MOD-A" word-sym)))
          (cc (intern (format nil "~a.CC" word-sym))) )
  )); end of lex-ulf!)

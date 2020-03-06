@@ -30,6 +30,7 @@
   (thing things)
 
   (turn turns)
+  (time times)
   (stage stages)
   (step steps)
   (question questions)
@@ -92,16 +93,17 @@
   (aux-bw do modal)
   
   (adv-history previously before originally initially currently recently ever since always first never)
-  (noun-history turn stage step question iteration move period start beginning while past)
+  (adv-f once twice)
+  (noun-history turn time stage step question iteration move period start beginning while past)
   (prep-history at in on prep-history-simple)
   (prep-history-simple during before after prior_to following preceding since from until)
   (adj-history previous next current initial first original following preceding future last final recent)
 
-  ; Any word that signals that the following expression might be an adv-e
+  ; Any word that signals that the following expression might be an adv-e (or adv-f)
   ; 'right' for e.g., right before this turn
   ; number determiners for e.g., two turns ago
-  (adv-e adv-history prep-history adj-history right one two three four five six seven eight nine ten)
-  (adv_ adv adv-history)
+  (adv-e adv-f adv-history prep-history adj-history right one two three four five six seven eight nine ten)
+  (adv_ adv adv-history adv-f)
   
   (prep prep-bw prep-history)
   (adj adj-bw adj-history)
