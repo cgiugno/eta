@@ -227,6 +227,14 @@
 ) ; END adv-a-lex?
 
 
+(defun non-neg? (ulf)
+; `````````````````````````
+; Checks if a ULF is a token other than 'not'.
+;
+  (and (atom ulf) (not (equal 'not ulf)))
+) ; END non-neg?
+
+
 (defun noun? (ulf)
 ; `````````````````
 ; Checks if a ULF is a nominal predicate.
@@ -373,9 +381,9 @@
 ; 
   (if (ttt:match-expr '(^* ((tense? do.aux-s) not _*)) ulf)
     ulf
-    (ttt:apply-rules
-      '((/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1)))
-        (/ ((tense? do.aux-s) _* (_! (verb-untensed? _*1))) (_* (_! ((tense? verb-untensed?) _*1)))))
+    (ttt:apply-rules '(
+        (/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1)))
+        (/ ((tense? do.aux-s) _* (non-neg? (verb-untensed? _*1))) (_* (non-neg? ((tense? verb-untensed?) _*1)))))
     ulf))
 ) ; END remove-question-do
 
@@ -430,8 +438,10 @@
 ; ```````````````````````
 ; Removes all negations from ULF.
 ;
-  (ttt:apply-rules
-    '((/ (_*1 not _*2) (_*1 _*2))) ulf)
+  (ttt:apply-rules '(
+      (/ (not _!) _!)
+      (/ (_*1 not _*2) (_*1 _*2))
+    ) ulf)
 ) ; END remove-not
 
 
@@ -770,6 +780,14 @@
 ; 
   (if (member ulf '(perf prog)) t nil)
 ) ; END aspect?
+
+
+(defun get-head-noun (ulf)
+; `````````````````````````
+; Gets the head noun of a ULF
+;
+  (ttt:apply-rule '(/ (^* (_* noun?)) noun?) ulf :shallow t)
+) ; END get-head-noun
 
 
 (defun get-tense (ulf)

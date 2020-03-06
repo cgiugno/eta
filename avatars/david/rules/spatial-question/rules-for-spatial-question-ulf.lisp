@@ -310,6 +310,12 @@
        2 (((lex-ulf! prep 1) (*np-ulf-tree* 2)) (1 2)) (0 :ulf-recur)
 
     ; Recurse if there's a premodifying adverb-rel 
+    1 (not prep det 3 noun); e.g., not on a red block
+       2 (((*pp-ulf-tree* 2 3 4 5)) (not 1)) (0 :ulf-recur)
+    1 (not prep adj 1 noun); e.g., not on red blocks
+       2 (((*pp-ulf-tree* 2 3 4 5)) (not 1)) (0 :ulf-recur)
+    1 (not prep pron); e.g., not on it
+       2 (((*pp-ulf-tree* 2 3)) (not 1)) (0 :ulf-recur)
     1 (deg-adv prep det 3 noun); e.g., directly on a red block
        2 (((lex-ulf! adv-a 1) (*pp-ulf-tree* 2 3 4 5)) (1 2)) (0 :ulf-recur)
     1 (deg-adv prep adj 1 noun); e.g., directly on red blocks
@@ -560,12 +566,18 @@
 ; Parses when questions.
 ;
 '(
+    1 (when do pron not verb-rel 2 np-bw 3 ?); e.g., when did I not move the Twitter block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8))
+          ((sub 1 (2 3 (not (4 5 (adv-e *h))))) ?)) (0 :ulf-recur)
     1 (when do pron verb-rel 2 np-bw 3 ?); e.g., when did I move the Twitter block ?
        2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7))
           ((sub 1 (2 3 (4 5 (adv-e *h)))) ?)) (0 :ulf-recur)
     1 (when be 2 np-bw 3 verb-rel ?); e.g., when was the Twitter block moved ?
        2 (((lex-ulf! wh-pred 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v-pasv 6))
           ((sub 1 (2 (3 (adv-e *h)))) ?)) (0 :ulf-recur)
+    1 (when be 2 np-bw 3 not prep 2 np-bw 3 ?); e.g., when was the SRI block not on_top_of the Twitter block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5) (*pp-ulf-tree* 7 8 9 10))
+          ((sub 1 (3 (2 not 4 (adv-e *h)))) ?)) (0 :ulf-recur)
     1 (when be 2 np-bw 3 prep 2 np-bw 3 ?); e.g., when was the SRI block on_top_of the Twitter block ?
        2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5) (*pp-ulf-tree* 6 7 8 9))
           ((sub 1 (3 (2 4 (adv-e *h)))) ?)) (0 :ulf-recur)

@@ -272,7 +272,7 @@
     ; TODO: This is incomplete and needs to be updated in the future. Currently doesn't
     ; handle formula variables at all, or do anything with the proposition variables e.g. !r1
     (mapcar (lambda (type) (if (not (variable? type))
-      (store-fact type *context* :keys (list (car type))))) (cdr types))
+      (store-fact type *context* :keys (list (car type) (get-head-noun type))))) (cdr types))
 
     ; Find first action variable, should be a list like (:episodes ?a1. ...)
     (setq prop-var (second episodes))

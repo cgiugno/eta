@@ -266,7 +266,12 @@
     '((/ ((nquan one.a) (_! (plur _!1))) ((nquan one.a) (_! _!1)))
       (/ ((nquan one.a) (plur _!1)) ((nquan one.a) _!1))
       (/ (a.d (plur block.n)) (a.d block.n))
-      (/ (past perf) (pres perf)))
+      (/ (past perf) (pres perf))
+      ; not not on => on
+      (/ (_*1 not not _*2) (_*1 _*2))
+      ; do I not => I do not
+      (/ ((tense? do.aux-s) indiv? (not (verb-untensed? _*))) (indiv? ((tense? do.aux-s) not (verb-untensed? _*))))
+      )
   ulf)
 ) ; END normalize-output
 
@@ -319,14 +324,17 @@
           (/ ((tense? do.aux-s) (^* (verb-untensed? (no.d _!) _*))) ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*)))
           ; every blocks => all blocks
           (/ (every.d (! (^* (plur noun?)))) (all.d !))
-          ; not do not move any => move every
-          ;; (/ (not ))
           )
       ; something => nothing, some block => no block
       (ttt:apply-rules '((/ something.pro nothing.pro) (/ (some.d _!) (no.d _!))) ulf :max-n 1)))
     (t
-      (ttt:apply-rules
-        '((/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not _*)))
+      (ttt:apply-rules '(
+          ; be not on => be always on
+          (/ (_! ((tense? be.v) not _*))           ; NOTE: this is a little strange since 'always' is treated as adv-e
+             (_! ((tense? be.v) always.adv-s _*))) ; elsewhere, but is adv-s here so it's not removed during output                    
+          ; be on => be not on
+          (/ (_! ((tense? be.v) _*)) (_! ((tense? be.v) not _*)))
+          ; touch the Twitter block => do not touch the Twitter block
           (/ (_! ((tense? verb-untensed?) _*)) (_! ((tense? do.aux-s) not (verb-untensed? _*)))))
       ulf :max-n 1 :shallow t)))
 ) ; END negate-wh-question-presupposition

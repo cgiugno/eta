@@ -62,6 +62,7 @@
     ; NOTE: we currently assume no possibility of double negation
     (when (ttt:match-expr '(^* not) ulf)
       (setq neg t))
+    (format t "neg: ~a~%" neg) ; DEBUGGING
 
     ; Detect if question is a where-question, if so we want to find all relations that held at a time. Also,
     ; it seems to only make sense to use the most-recent quantifier with where-questions.
@@ -96,7 +97,7 @@
         (apply-to-times `(compute-relation ,relation ,coords ,neg) times quantifier when-question))
       ; Otherwise assume the question is about block moves
       (t
-        (apply-to-times `(compute-move ,obj) times quantifier when-question)))
+        (apply-to-times `(compute-move ,obj ,neg) times quantifier when-question)))
   )
 ) ; END recall-answer
 
@@ -477,14 +478,20 @@
 ) ; END compute-relation
 
 
-(defun compute-move (Ti obj)
-; `````````````````````````````
+(defun compute-move (Ti obj neg)
+; ```````````````````````````````
 ; Computes all moves at a particular time with the given object (may be a variable with/without
 ; restrictors).
 ; NOTE: this is a bit clunky code-style-wise.
 ;
   (let* ((moves (mapcar (lambda (move)
           (list (caar move) (cdar move) (cdadr move))) (extract-moves (gethash Ti *context*)))))
+    ; If negation, we need to access context to see all blocks (or more generally, 'movable entities'),
+    ; and remove all of the blocks which moved during Ti.
+    (if neg
+      (setq moves (set-difference (gethash 'block.n *context*) moves
+        :test (lambda (x y) (equal (car x) (car y))))))
+    ; Simplify form of relations and filter based on obj
     (mapcar (lambda (move) `(,(car move) (past move.v))) (find-cars-var obj moves)))
 ) ; END compute-move
 
