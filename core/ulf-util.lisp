@@ -202,6 +202,14 @@
 ) ; END adv-e-lex?
 
 
+(defun adv-e-existential? (ulf)
+; ```````````````````````````````
+; Checks if a ULF is an adv-e word other than universals such as 'always' and 'never'.
+;
+  (and (atom ulf) (adv-e-lex? ulf) (not (member ulf '(always.adv-e never.adv-e))))
+) ; END adv-e-existential?
+
+
 (defun adv-f-lex? (ulf)
 ; ```````````````````````
 ; Checks if a ULF is an adv-f word.
@@ -417,9 +425,10 @@
 (defun remove-adv-e (ulf)
 ; ````````````````````````
 ; Removes all adv-e modifiers from ULF.
+; TODO: is there a way to avoid removing always and never in responses in a less ad-hoc way?
 ;
   (ttt:apply-rules
-    '((/ (adv-e-lex? _!) _!)
+    '((/ (adv-e-existential? _!) _!)
       (/ (_*1 (adv-e _!) _*2) (_*1 _*2))) ulf)
 ) ; END remove-adv-e
 

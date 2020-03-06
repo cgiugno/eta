@@ -70,6 +70,11 @@
       (setq where-question t)
       (setq quantifier 'most-recent))
 
+    ; If quantifier is 'not-ever', this is essentially equal to 'always not'.
+    (when (equal quantifier 'not-ever)
+      (setq neg t)
+      (setq quantifier 'always))
+
     ; Detect if question is a when-question, if so we want to return times as the answer rather than
     ; spatial relation propositions.
     (when (and (ttt:match-expr '(^* (hist-prep-during? wh-np?)) ulf) (not where-question))
@@ -144,15 +149,15 @@
       ((or (ttt:match-expr '(_! ((tense? action-verb?) (! wh-pron? (det? (^* (plur noun?)))) _*)) ulf-base)
            (ttt:match-expr '(_! ((tense? aspect?) (action-verb? (! wh-pron? (det? (^* (plur noun?)))) _*))) ulf-base)
            (ttt:match-expr '(_! ((tense? action-verb?) ((nquan (how.mod-a many.a)) (plur noun?)) _*)) ulf-base))
-        (if (not times) (setq times (get-times-before *time* (diff-times *time* *time-prev*)))
+        (if (and (not times) (not quantifier)) (setq times (get-times-before *time* (diff-times *time* *time-prev*)))
           (setq times (time-inclusive times)))
-        (setq quantifier 'ever))
+        (if (not quantifier) (setq quantifier 'ever)))
       ; Singular
       ((ttt:match-expr '(_! ((tense? action-verb?) (det? (^* noun?)) _*)) ulf-base)
        (ttt:match-expr '(_! ((tense? aspect?) (action-verb? (det? (^* noun?)) _*))) ulf-base)
-        (if (not times) (setq times (get-times-before *time* 1))
+        (if (and (not times) (not quantifier)) (setq times (get-times-before *time* 1))
           (setq times (time-inclusive times)))
-        (setq quantifier 'most-recent)))
+        (if (not quantifier) (setq quantifier 'most-recent))))
     ; By default, look at all times before now, and quantifier is just the most recent.
     (if (not times) (setq times (get-times-before *time* -1)))
     (if (not times) (setq times (list *time*)))
@@ -535,9 +540,7 @@
       ((equal quantifier 'ever)
         (union1 answers))
       ((equal quantifier 'always)
-        (intersection1 answers))
-      ((equal quantifier 'not-ever)
-        nil)))
+        (intersection1 answers))))
 ) ; END apply-to-times
 
 
