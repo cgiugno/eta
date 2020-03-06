@@ -17,7 +17,9 @@
 '(
   1 (0 you 2 drink 1 alcohol 0)
     2 ((Do you drink alcohol ?) (substance)) (0 :gist)
-  1 (how often 3 you 2 drink 0)
+  1 (0 how often 3 you 2 drink 0)
+    2 ((How often do you drink ?) (substance)) (0 :gist)
+  1 (0 you 2 do 1 drugs 0)
     2 ((How often do you drink ?) (substance)) (0 :gist)
 ))
 

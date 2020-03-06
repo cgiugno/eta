@@ -26,8 +26,7 @@
       2 (*medicine-input*) (0 :subtrees)
    1 (Why isn\'t the pain medication working anymore ?)
       2 (*medicine-input*) (0 :subtrees)
-   1 (Can you tell me about the side effects ?)
-      2 (*side-effects-input*) (0 :subtrees)
+      
 
    ; The following two will need modification
    1 (I would like a refill of medicine \.)

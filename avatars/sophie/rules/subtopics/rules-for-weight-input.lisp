@@ -14,9 +14,9 @@
 
 (READRULES '*weight-question*
 '(
-    1 (0 you 2 lose 1 weight 0)
-        2 ((Have you lost any weight ?) (weight)) (0 :gist)
-    1 (0 you 2 lose 1 weight 0)
+    1 (0 have you 2 lose 1 weight 0)
+        2 ((Have you lost weight ?) (weight)) (0 :gist)
+    1 (0 be you 2 lose 1 weight 0)
         2 ((Have you lost weight ?) (weight)) (0 :gist)
 ))
 
