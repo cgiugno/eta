@@ -569,6 +569,9 @@
     1 (when do pron not verb-rel 2 np-bw 3 ?); e.g., when did I not move the Twitter block ?
        2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) ?)
           ((sub 1 (2 3 (not (4 5 (adv-e *h))))) ?)) (0 :ulf-recur)
+    1 (when do pron adv_ verb-rel 2 np-bw 3 ?); e.g., when did I recently move the Twitter block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (*adv-ulf-tree* 4) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) ?)
+          ((sub 1 (2 3 (4 (5 6 (adv-e *h))))) ?)) (0 :ulf-recur)
     1 (when do pron verb-rel 2 np-bw 3 ?); e.g., when did I move the Twitter block ?
        2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) ?)
           ((sub 1 (2 3 (4 5 (adv-e *h)))) ?)) (0 :ulf-recur)

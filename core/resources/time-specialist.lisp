@@ -25,6 +25,14 @@
 ) ; END get-time
 
 
+(defun to-universal-time (time-record)
+; ``````````````````````````````````````
+; Converts time record to universal time.
+;
+  (apply #'encode-universal-time (reverse (cddr time-record)))
+) ; END to-universal-time
+
+
 (defun store-time ()
 ; ````````````````````
 ; Gets and stores the date-time of the current time proposition.
@@ -32,6 +40,30 @@
   (let ((pred-time (list *time* 'at-about.p (get-time))))
     (store-fact pred-time *context* :keys (list (car pred-time))))
 ) ; END store-time
+
+
+(defun get-elapsed-time (time-record)
+; ````````````````````````````````````
+; Gets the elapsed time between time-record and the current time as a ULF noun phrase (up to hours).
+;
+  (let ((seconds (- (get-universal-time) (to-universal-time time-record))) minutes hours)
+    (if (> seconds 60)
+      (setq minutes (floor (/ seconds 60))))
+    (if (> seconds (* 60 60))
+      (setq hours (floor (/ seconds (* 60 60)))))
+    (cond
+      (hours (list (num-to-det hours) (if (> hours 1) '(plur hour.n) 'hour.n)))
+      (minutes (list (num-to-det minutes) (if (> minutes 1) '(plur minute.n) 'minute.n)))
+      (seconds (list (num-to-det seconds) (if (> seconds 1) '(plur second.n) 'second.n)))))
+) ; END get-elapsed-time
+
+
+(defun get-time-of-episode (ep-sym)
+; ``````````````````````````````````
+; Gets the time record corresponding to an episode symbol.
+;
+  (third (car (remove-if-not #'at-about-prop? (gethash ep-sym *context*))))
+) ; END get-time-of-episode
 
 
 (defun compare-time (Ti Tj)

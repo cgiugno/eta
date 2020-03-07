@@ -329,6 +329,8 @@
       (ttt:apply-rules '((/ something.pro nothing.pro) (/ (some.d _!) (no.d _!))) ulf :max-n 1)))
     (t
       (ttt:apply-rules '(
+          ; was moved => wasn't moved
+          (/ (_! (tense? (pasv verb-untensed?))) (_! not (tense? (pasv verb-untensed?))))
           ; be not on => be always on
           (/ (_! ((tense? be.v) not _*))           ; NOTE: this is a little strange since 'always' is treated as adv-e
              (_! ((tense? be.v) always.adv-s _*))) ; elsewhere, but is adv-s here so it's not removed during output                    
@@ -406,11 +408,18 @@
 ; ````````````````````````````````
 ; Creates a ULF from a list of times.
 ;
-  (make-set (mapcar (lambda (time) 
-    (intern (string-downcase (string time))))
-    ;; (let ((date-time (third (car (remove-if-not #'at-about-prop? (gethash time *context*))))))
-    ;;   (intern (format nil "~a\\:~a" (fourth date-time) (fifth date-time)))))
-    relations))
+  (make-set (remove-duplicates (mapcar (lambda (time) 
+    (intern (string-downcase (string time)))
+      (let ((last-move (caar (compute-move (get-next-time time) '?x nil))))
+        `(rep (*p ,(get-elapsed-time (get-time-of-episode time))) ago.p)
+        ; TODO: for now there are some issues with this (for instance, if "when was the Twitter
+        ; block touching the Starbucks block" is asked, it will return the move on the next turn
+        ; rather than the current turn). For now, only answer in terms of elapsed time.
+        ;; (if last-move
+        ;;   `(before.p (I.pro ((past move.v) ,(make-np last-move 'block.n))))
+        ;;   `(rep (*p ,(get-elapsed-time (get-time-of-episode time))) ago.p))
+        ))
+    relations) :test #'equal))
 ) ; END form-ans-time
 
 
@@ -583,7 +592,7 @@
   (ttt:match-expr '(! (AT.P (WHAT.D PLACE.N))) p))
 
 (defun time-flag? (p)
-  (ttt:match-expr '(! (WHAT.D time-word?)) p))
+  (ttt:match-expr '(! (AT.P (WHAT.D time-word?))) p))
 
 (defun exist-flag? (p)
   (ttt:match-expr '(! THERE.PRO) p))

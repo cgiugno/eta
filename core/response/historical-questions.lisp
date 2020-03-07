@@ -51,9 +51,14 @@
 ;
   (format t "object locations: ~a~%" object-locations) ; DEBUGGING
   (let* ((ulf-base (uninvert-question (remove-not (remove-adv-f (remove-adv-e ulf)))))
-         (coords (extract-coords object-locations)) (quant-times (get-referred-times coords ulf ulf-base))
+         (coords (extract-coords object-locations))
+         (where-question (ttt:match-expr '(^* (at.p (what.d place.n))) ulf))
+         (when-question (and (ttt:match-expr '(^* (hist-prep-during? wh-np?)) ulf) (not where-question)))
+         (quant-times (get-referred-times coords ulf ulf-base where-question when-question))
          (quantifier (first quant-times)) (times (second quant-times))
-         when-question where-question neg ans relation subj obj)
+         neg ans relation subj obj)
+    (format t "where question: ~a~%" where-question)
+    (format t "when question: ~a~%" when-question)
     (format t "base ulf: ~a~%" ulf-base)
     (format t "blocks at coordinates: ~a~%" coords)
     (format t "quantifier + referred times: ~a ~a~%" quantifier times) ; DEBUGGING
@@ -64,21 +69,10 @@
       (setq neg t))
     (format t "neg: ~a~%" neg) ; DEBUGGING
 
-    ; Detect if question is a where-question, if so we want to find all relations that held at a time. Also,
-    ; it seems to only make sense to use the most-recent quantifier with where-questions.
-    (when (ttt:match-expr '(^* (at.p (what.d place.n))) ulf)
-      (setq where-question t)
-      (setq quantifier 'most-recent))
-
     ; If quantifier is 'not-ever', this is essentially equal to 'always not'.
     (when (equal quantifier 'not-ever)
       (setq neg t)
       (setq quantifier 'always))
-
-    ; Detect if question is a when-question, if so we want to return times as the answer rather than
-    ; spatial relation propositions.
-    (when (and (ttt:match-expr '(^* (hist-prep-during? wh-np?)) ulf) (not where-question))
-      (setq when-question t))
 
     ; Extract subject (needed for where-questions) and/or object (needed for "what block did I move" questions)
     (setq subj (extract-subj ulf-base))
@@ -108,10 +102,12 @@
 ) ; END recall-answer
 
 
-(defun get-referred-times (coords ulf ulf-base)
-; ```````````````````````````````````````````````
+(defun get-referred-times (coords ulf ulf-base where-question when-question)
+; ````````````````````````````````````````````````````````````````````````````
 ; Given a historical question ULF, get the list of times referred to by the ULF (for instance,
 ; by the adv-e phrases/lexical words), and a quantifier over those times (by default, most-recent)
+; TODO: the whole quantifier selection is really messy and definitely needs to be rethought.
+; 
   (let (adv-e-phrase adv-e-word quantifier times-phrase times-word times)
     ; Retrieve any adv-e phrase and adv-e lexical word in ulf
     (setq adv-e-phrase (extract-adv-e-phrase ulf))
@@ -127,6 +123,10 @@
     ;; (format t "times-phrase: ~a~%" times-phrase)
     ;; (format t "times-word: ~a~%" times-word) ; DEBUGGING
 
+    ; When-question acts as an adv-e phrase referring to all times
+    (when when-question
+      (setq times-phrase (time-inclusive (get-times-before *time* -1))))
+
     (cond
       ; If lexical adv-e gives some special quantifier
       ((and times-word (not (listp times-word)))
@@ -139,6 +139,10 @@
       (times-word (setq times times-word))
       ; If only phrasal adv-e gives list of times
       (times-phrase (setq times times-phrase)))
+
+    ; For where-questions, it makes sense to use most-recent quantifier.
+    (when where-question
+      (setq quantifier 'most-recent))
 
     ; For simple questions about actions (e.g. "what block(s) did I move?"), the quantifier also seems to
     ; depend on the plurality of the subject, i.e. "what blocks did I move" looks over all times (if no
@@ -523,12 +527,10 @@
 ; Actually, might not be that tricky. I need to ask Georgiy how he currently handles "what block is not on the
 ; Twitter block" - "not-ever ..." is essentially equivalent to "always not ..."
 ;
-  ; If quantifier is most-recent, simply replace times with only the most recent time in the list
-  (when (equal quantifier 'most-recent)
-    (setq times (most-recent times)))
   ; Apply function to each time, and create a list of the time paired with all returned relation
-  (let* ((time-rels (remove-if (lambda (x) (null (second x))) (mapcar (lambda (time)
-          (list time (apply (car f) (cons time (cdr f))))) times)))
+  (let* ((time-rels (sort (copy-seq (remove-if (lambda (x) (null (second x)))
+                (mapcar (lambda (time) (list time (apply (car f) (cons time (cdr f))))) times)))
+              (lambda (x y) (> (compare-time (car x) (car y)) 0))))
          (answers (mapcar (lambda (time-rel)
           (if when-question
             (list (add-certainty (first time-rel) (first time-rel)))

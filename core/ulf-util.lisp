@@ -429,6 +429,8 @@
 ;
   (ttt:apply-rules
     '((/ (adv-e-existential? _!) _!)
+      (/ (_!1 (adv-e _!)) _!1)
+      (/ ((adv-e _!) _!1) _!1)
       (/ (_*1 (adv-e _!) _*2) (_*1 _*2))) ulf)
 ) ; END remove-adv-e
 
@@ -775,6 +777,24 @@
 ) ; END numerical-det?
 
 
+(defun num-to-det (num)
+; ````````````````````````
+; Converts a number to a ULF determiner (e.g. 5 => FIVE.D)
+; 
+  (cond
+    ((= num 0) 'zero.d) ((= num 1) 'one.d)  ((= num 2) 'two.d) ((= num 3) 'three.d)
+    ((= num 4) 'four.d) ((= num 5) 'five.d) ((= num 6) 'six.d) ((= num 7) 'seven.d)
+    ((= num 8) 'eight.d) ((= num 9) 'nine.d) ((= num 10) 'ten.d) ((= num 11) 'eleven.d)
+    ((= num 12) 'twelve.d) ((= num 13) 'thirteen.d) ((= num 14) 'fourteen.d)
+    ((= num 15) 'fifteen.d) ((= num 16) 'sixteen.d) ((= num 17) 'seventeen.d)
+    ((= num 18) 'eighteen.d) ((= num 19) 'nineteen.d) ((= num 20) 'twenty.d)
+    ((= num 30) 'thirty.d) ((= num 40) 'forty.d) ((= num 50) 'fifty.d)
+    ((= num 60) 'sixty.d) ((= num 70) 'seventy.d) ((= num 80) 'eighty.d)
+    ((= num 90) 'ninety.d) ((= num 100) 'one_hundred.d)
+    (t (intern (format nil "~a.D" num))))
+) ; END num-to-adj
+
+
 (defun tense? (ulf)
 ; ```````````````````
 ; Checks if ULF is a tense operator
@@ -892,6 +912,15 @@
 ) ; END loc-record?
 
 
+(defun date-time-record? (list)
+; `````````````````````````
+; Checks whether a list is a date-time record of form ($ date-time ?year ?month ?day ?hour ?minute ?second)
+;
+  (and (listp list) (= (length list) 8) (equal '$ (first list)) (equal 'date-time (second list))
+    (every #'numberp (cddr list)))
+) ; END date-time-record?
+
+
 (defun at-loc-prop? (prop)
 ; ```````````````````````````
 ; Checks whether a proposition is an at-loc.p formula.
@@ -899,6 +928,15 @@
 ;
   (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-loc.p) (loc-record? (third prop)))
 ) ; END at-loc-prop?
+
+
+(defun at-about-prop? (prop)
+; ```````````````````````````
+; Checks whether a proposition is an at-about.p formula.
+; i.e. (|Now1| at-about.p ($ date-time 2020 3 6 21 37 15))
+;
+  (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-about.p) (date-time-record? (third prop)))
+) ; END at-about-prop?
 
 
 (defun move-prop? (prop)
@@ -1018,6 +1056,7 @@
 ; Splits a symbol into two symbols at index n from the end.
 ; (or if :front t is given, n from the front)
 ;
+  (if (numberp sym) (setq sym (write-to-string sym))) ; if sym is a number
   (if (and (atom sym) (> (length (string sym)) n))
     (let ((lex (string sym)))
       (if front

@@ -92,7 +92,7 @@
 ;``````````````````
 ; The list of the characters making up symbol s
 ;
-  (coerce (string s) 'list)
+  (coerce (string (if (numberp s) (write-to-string s) s)) 'list)
 ) ; END explode
 
 
@@ -820,6 +820,8 @@
 ;
   (cond
     ((null sentence) nil)
+    ((numberp (car sentence))
+      (cons (car sentence) (dual (cdr sentence))))
     ((null (get (car sentence) 'subst))
       (cons (car sentence) (dual (cdr sentence))))
     (t (cons (get (car sentence) 'subst)
