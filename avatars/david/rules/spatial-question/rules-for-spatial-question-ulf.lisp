@@ -1034,6 +1034,28 @@
 ; Parses do questions.
 ;
 '(
+    ; Action verbs (historical)
+    1 (do pron verb-rel 2 np-bw 3 between 0 ?); e.g., did I put anything between the two red blocks ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) (*pp-between-ulf-tree* 7 8) ?)
+          ((1 2 (3 4 5)) ?)) (0 :ulf-recur)
+    1 (do pron verb-rel 2 np-bw 3 prep 2 np-bw 3 ?); e.g., did I put anything on the Twitter block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) (*pp-ulf-tree* 7 8 9 10) ?)
+          ((1 2 (3 4 5)) ?)) (0 :ulf-recur)
+    1 (do pron verb-rel 2 np-bw 3 between 0 adv-e 0 ?); e.g., did I put anything between the two red blocks initially ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) (*pp-between-ulf-tree* 7 8)
+           (*adv-ulf-tree* 9 10) ?)
+          ((1 2 (3 4 5 6)) ?)) (0 :ulf-recur)
+    1 (do pron verb-rel 2 np-bw 3 prep 2 np-bw 3 adv-e 0 ?); e.g., did I put anything on the Twitter block initially ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) (*pp-ulf-tree* 7 8 9 10)
+           (*adv-ulf-tree* 11 12) ?)
+          ((1 2 (3 4 5 6)) ?)) (0 :ulf-recur)
+    1 (do pron adv_ verb-rel 2 np-bw 3 between 0 ?); e.g., did I recently put anything between the two red blocks ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*adv-ulf-tree* 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) (*pp-between-ulf-tree* 8 9) ?)
+          ((1 2 (3 (4 5 6))) ?)) (0 :ulf-recur)
+    1 (do pron adv_ verb-rel 2 np-bw 3 prep 2 np-bw 3 ?); e.g., did I recently put anything on the Twitter block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*adv-ulf-tree* 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) (*pp-ulf-tree* 8 9 10 11) ?)
+          ((1 2 (3 (4 5 6))) ?)) (0 :ulf-recur)
+
     ; Negation (historical)
     1 (do np_ 2 not verb-rel 1 between 0 adv-e 0 ?); e.g., did anything not sit between the two red blocks initially ?
        2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 5) (*pp-between-ulf-tree* 7 8) (*adv-ulf-tree* 9 10) ?)
@@ -1068,14 +1090,14 @@
           ((1 2 (not (3 (adv-a 4)))) ?)) (0 :ulf-recur)
 
     ; Historical premodifier
-    1 (do np_ 2 adv-history verb-rel 1 between 0 ?); e.g., did anything recently sit between the two red blocks ?
-       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! adv-e 4) (lex-ulf! v- 5) (*pp-between-ulf-tree* 7 8) ?)
+    1 (do np_ 2 adv_ verb-rel 1 between 0 ?); e.g., did anything recently sit between the two red blocks ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*adv-ulf-tree* 4) (lex-ulf! v- 5) (*pp-between-ulf-tree* 7 8) ?)
           ((1 2 (3 (4 (adv-a 5)))) ?))
-    1 (do np_ 2 adv-history verb-rel 2 np-bw 3 ?); e.g., did any block initially touch the NVidia block ?
-       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! adv-e 4) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) ?)
+    1 (do np_ 2 adv_ verb-rel 2 np-bw 3 ?); e.g., did any block initially touch the NVidia block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*adv-ulf-tree* 4) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) ?)
           ((1 2 (3 (4 5))) ?)) (0 :ulf-recur)
-    1 (do np_ 2 adv-history verb-rel prep 2 np-bw 3 ?); e.g., did any block previously sit on the red NVidia block ?
-       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! adv-e 4) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9) ?)
+    1 (do np_ 2 adv_ verb-rel prep 2 np-bw 3 ?); e.g., did any block previously sit on the red NVidia block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*adv-ulf-tree* 4) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9) ?)
           ((1 2 (3 (4 (adv-a 5)))) ?)) (0 :ulf-recur)
 
     ; Standard

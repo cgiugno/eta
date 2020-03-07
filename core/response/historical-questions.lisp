@@ -84,14 +84,19 @@
     (setq relation (extract-relation ulf-base))
     (format t "extracted relation: ~a~%" relation) ; DEBUGGING
 
+    (setq action (extract-action ulf-base))
+    (format t "extracted action-verb: ~a~%" action) ; DEBUGGING
+
     ; Detect different types of historical questions which might be asked. Some are straightforward spatial questions
     ; but just asked about the past, whereas others have to do with the actions themselves, e.g. "what blocks did I move?"
-    ; TODO: this is currently all very simplistic (for both scenarios), and needs to be improved in the future.
-    ; It currently doesn't handle verbs other than move.v, for instance, "did the Twitter block touch the Texaco block?"
+    ; TODO: This is somewhat ad-hoc and likely needs to be generalized.
     (cond
       ; If asking a where-question
       (where-question
         (apply-to-times `(compute-relations ,subj ,coords) times quantifier when-question))
+      ; If asking about action plus relation, e.g. "what block did I put on the Twitter block"
+      ((and relation action)
+        (apply-to-times `(compute-move+relation ,relation ,coords ,obj ,neg) times quantifier when-question))
       ; If asking about spatial relation
       (relation
         (apply-to-times `(compute-relation ,relation ,coords ,neg) times quantifier when-question))
@@ -191,6 +196,18 @@
 ) ; END extract-adv-e-phrase
 
 
+(defun extract-action (ulf)
+; ``````````````````````````
+; Extracts a spatial action verb, e.g. put.v.
+;
+  (let ((action
+      (ttt:apply-rules '(
+        (/ (^* action-verb?) action-verb?))
+      ulf :shallow t)))
+    (if (action-verb? action) action nil))
+) ; END extract-action
+
+
 (defun extract-relation (ulf)
 ; `````````````````````````````
 ; Extracts a relation (e.g. (|Twitter| on.p |Texaco)) from a ULF.
@@ -214,6 +231,10 @@
         (/ (_! ((tense? verb-untensed?) _!1 (between.p (set-of _!2 _!3))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
         (/ (_! ((tense? verb-untensed?) _!1 (prep? _!2)))
+           ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
+        (/ (_!1 ((tense? (pasv verb-untensed?)) (between.p (set-of _!2 _!3))))
+           ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
+        (/ (_!1 ((tense? (pasv verb-untensed?)) (prep? _!2)))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
         ; "what block touches the Twitter block?" (TODO: needs to be generalized)
         (/ (_!1 ((tense? spatial-verb?) _!2))
@@ -479,6 +500,23 @@
 ) ; END compute-relations
 
 
+(defun compute-move+relation (Ti rel coords obj neg)
+; ````````````````````````````````````````````````````
+; Computes all moves of a block into a particular relation, i.e. all whether, at time Ti,
+; the given object was moved, and that the relation holds in time Ti+1. If neg is given,
+; either the object was not moved, or the relation didn't hold in time Ti+1.
+;
+  (let ((moves (get-moves-car-form Ti)) (relations (compute-relation (get-next-time Ti) rel coords nil)))
+    ; Get rid of any moves for which the relation does not hold in time Ti+1
+    (setq moves (remove-if-not (lambda (move) (find move relations
+                 :test (lambda (x y) (equal (car x) (car y))))) moves))
+    ; If negation, find complement of moves
+    (if neg (setq moves (negate-moves moves)))
+    ; Simplify form of relations and filter based on obj
+    (filter+process-moves moves obj))
+) ; END compute-move+relation
+
+
 (defun compute-relation (Ti rel coords neg)
 ; ```````````````````````````````````````````
 ; Computes a relation at a particular time (relation may include variables with/without
@@ -497,18 +535,40 @@
 ; ```````````````````````````````
 ; Computes all moves at a particular time with the given object (may be a variable with/without
 ; restrictors).
-; NOTE: this is a bit clunky code-style-wise.
 ;
-  (let* ((moves (mapcar (lambda (move)
-          (list (caar move) (cdar move) (cdadr move))) (extract-moves (gethash Ti *context*)))))
+  (let* ((moves (get-moves-car-form Ti)))
     ; If negation, we need to access context to see all blocks (or more generally, 'movable entities'),
     ; and remove all of the blocks which moved during Ti.
-    (if neg
-      (setq moves (set-difference (gethash 'block.n *context*) moves
-        :test (lambda (x y) (equal (car x) (car y))))))
+    (if neg (setq moves (negate-moves moves)))
     ; Simplify form of relations and filter based on obj
-    (mapcar (lambda (move) `(,(car move) (past move.v))) (find-cars-var obj moves)))
+    (filter+process-moves moves obj))
 ) ; END compute-move
+
+
+(defun filter+process-moves (moves obj)
+; ``````````````````````````````````````
+; Filters all moves to ones involving the given object, and processes to form (|Texaco| (past move.v))
+;
+  (mapcar (lambda (move) `(,(car move) (past move.v))) (find-cars-var obj moves))
+) ; END filter+process-moves
+
+
+(defun negate-moves (moves)
+; ``````````````````````````
+; Given a list of block moves, return the complement of that list by accessing context.
+;
+  (set-difference (gethash 'block.n *context*) moves
+    :test (lambda (x y) (equal (car x) (car y))))
+) ; END negate-moves
+
+
+(defun get-moves-car-form (Ti)
+; `````````````````````````````
+; Gets the moves at time Ti in a form with block name as car.
+;
+  (mapcar (lambda (move) (list (caar move) (cdar move) (cdadr move)))
+    (extract-moves (gethash Ti *context*)))
+) ; END get-moves-car-form
 
 
 (defun apply-to-times (f times quantifier when-question)
