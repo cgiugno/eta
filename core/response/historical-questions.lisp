@@ -370,6 +370,9 @@
     ; Apply predicate operation (before, after, during), along with any modifying
     ; adverb (e.g. "right before").
     (cond
+      ; No satisfying ref times
+      ((equal (car ref-times) 'None)
+        ref-times)
       ; "just before"
       ((and adv-a (hist-prep-prev? prep)) (set-difference (union1 (mapcar
         (lambda (ref-time) (get-times-before ref-time 1)) ref-times)) ref-times))
@@ -391,13 +394,17 @@
 ; Gets a list of times corresponding to a reified event.
 ;
   (let ((ke-funcall (ttt:apply-rules
-      `((/ (^* ((past move.v) (det? (nnp? noun?)))) (get-time-of-move nnp?))
+      `(
+        (/ (^* ((past action-verb?) (det? (nnp? noun?)) (prep? (det? (nnp?2 noun?)))))
+           (get-time-of-move+relation ,coords (nnp? prep? nnp?2)))
+        (/ (^* ((past action-verb?) (det? (nnp? noun?))))
+           (get-time-of-move nnp?))
         (/ (ke ((det? (nnp?1 noun?)) ((past be.v) (prep? (det? (nnp?2 noun?))))))
            (get-time-of-relation ,coords (nnp?1 prep? nnp?2)))
         (/ (ke _*) (identity nil)))
       ulf)) ke-result)
     (setq ke-result (apply (car ke-funcall) (cdr ke-funcall)))
-    (if ke-result (list ke-result)))
+    (if ke-result (list ke-result) (list 'None)))
 ) ; END get-times-from-ke
 
 
@@ -445,7 +452,7 @@
 ; coords should be a list of coordinates in the simplified form (|Name| ?x ?y ?z)
 ;
   (let* ((Ti (get-prev-time *time*)) (scene coords) moves)
-    (loop while (and Ti (> (compare-time Ti Tn) -1) (> (compare-time Ti 'NOW0) -1)) do
+    (loop while (and Ti Tn (> (compare-time Ti Tn) -1) (> (compare-time Ti 'NOW0) -1)) do
       (setq moves (extract-moves (gethash Ti *context*)))
       (mapcar (lambda (move)
         (setq scene (subst (first move) (second move) scene :test #'equal))) moves)
@@ -640,6 +647,27 @@
           (t (get-time-of-relation-recur rel (get-prev-time Ti)))))))
     (get-time-of-relation-recur rel (get-prev-time *time*)))
 ) ; END get-time-of-relation
+
+
+(defun get-time-of-move+relation (coords rel)
+; `````````````````````````````````````````````
+; Gets the most recent time at which an object of a given name was moved into a relation
+; with another object of a given name.
+;
+  (labels ((get-time-of-move+relation-recur (rel Ti)
+      (let* ((scene (reconstruct-scene coords (get-next-time Ti)))
+             (name1 (first rel)) (prep (second rel)) (name2 (third rel))
+             (coords1 (find-car name1 scene)) (coords2 (find-car name2 scene))
+             (rel-true (eval-relation-bool prep coords1 coords2))
+             (moves (extract-moves (gethash Ti *context*)))
+             (moved-blocks (mapcar #'caar moves)))
+        (cond
+          ((null Ti) nil)
+          ((and (member name1 moved-blocks) rel-true) Ti)
+          ((equal Ti 'NOW0) nil)
+          (t (get-time-of-move-recur name (get-prev-time Ti)))))))
+    (get-time-of-move-recur name (get-prev-time *time*)))
+) ; END get-time-of-move+relation
 
 
 (defun get-time-of-move (name)
