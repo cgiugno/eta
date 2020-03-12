@@ -123,6 +123,7 @@
     ;; (format t "adv-e-word: ~a~%" adv-e-word) ; DEBUGGING
     (when adv-e-phrase
       (setq times-phrase (get-times-from-adv-e-phrase coords adv-e-phrase)))
+    (if (equal (car times-phrase) 'None) (setq times-phrase nil))
     (when adv-e-word
       (setq times-word (get-times-from-adv-e-word coords adv-e-word)))
     (format t "times-phrase: ~a~%" times-phrase)

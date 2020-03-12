@@ -202,6 +202,8 @@
        2 ((lex-ulf! name 1) (lex-ulf! noun 2)) (0 :ulf)
     1 (adj corp noun); e.g., red NVidia block
        2 ((lex-ulf! adj 1) ((lex-ulf! name 2) (lex-ulf! noun 3))) (0 :ulf)
+    1 (corp); e.g., [the] Starbucks
+       2 (((lex-ulf! name 1)) (1 block.n)) (0 :ulf-recur)
 
     ; Superlative adj's, possibly followed by more adjectives and then any postmodifiers 
     1 (sup-adj noun 0); e.g., highest block on the stack
@@ -291,9 +293,11 @@
     1 (corp)
        2 (((lex-ulf! name 1)) (the.d (1 block.n))) (0 :ulf-recur)
    
-   ; Ungrammatical fallback rule
+   ; Ungrammatical fallback rules
     1 (corp noun); e.g., [touching] Starbucks block
        2 (((*n1-ulf-tree* 1 2)) (the.d 1)) (0 :ulf-recur)
+    1 (the corp); e.g., the Starbucks
+       2 (((lex-ulf! det 1) (*n1-ulf-tree* 2)) (1 2)) (0 :ulf-recur)
 
    ; Still need "There are...", "There is ..." sentence forms.
 )) ; END *np-ulf-tree*
@@ -324,8 +328,10 @@
        2 (((lex-ulf! prep 1) (*np-ulf-tree* 2 3)) (1 2)) (0 :ulf-recur)
     1 (prep pron); e.g., on it
        2 (((lex-ulf! prep 1) (*np-ulf-tree* 2)) (1 2)) (0 :ulf-recur)
-    1 (prep corp); e.g., on starbucks
+    1 (prep corp); e.g., on Starbucks
        2 (((lex-ulf! prep 1) (*np-ulf-tree* 2)) (1 2)) (0 :ulf-recur)
+    1 (prep det corp); e.g., on the Starbucks
+       2 (((lex-ulf! prep 1) (*np-ulf-tree* 2 3)) (1 2)) (0 :ulf-recur)
     1 (prep this); e.g., before this
        2 (((lex-ulf! prep 1) (*np-ulf-tree* 2)) (1 2)) (0 :ulf-recur)
     1 (prep that); e.g., before that
