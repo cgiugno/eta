@@ -6,8 +6,10 @@
 ;; so that the centroid coordinates of two blocks which are touching will differ by 1
 ;;
 
+; TODO: on_to in facing abutting between visible flush_with towards)
 (defvar *spatial-prep-list*
-  '(touching.p to_the_left_of.p to_the_right_of.p below.p above.p behind.p in_front_of.p on.p near.p next_to.p))
+  '(touching.p to_the_left_of.p to_the_right_of.p below.p under.p beneath.p above.p behind.p
+    in_front_of.p on.p near.p next_to.p close_to.p on_top_of.p adjacent_to.p))
 (defvar *blocksize* 1)
 (defvar *std-error* (/ *blocksize* 10))
 
@@ -140,6 +142,20 @@
 
 
 
+(defun under.p (x1 y1 z1 x2 y2 z2)
+; `````````````````````````````````````````````
+  (below.p x1 y1 z1 x2 y2 z2)
+) ; END under.p
+
+
+
+(defun beneath.p (x1 y1 z1 x2 y2 z2)
+; `````````````````````````````````````````````
+  (below.p x1 y1 z1 x2 y2 z2)
+) ; END beneath.p
+
+
+
 (defun above.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (abs (- y1 y2))) (diffz (- z1 z2)))
@@ -175,6 +191,13 @@
 
 
 
+(defun on_top_of.p (x1 y1 z1 x2 y2 z2)
+; ````````````````````````````````````
+  (on.p x1 y1 z1 x2 y2 z2)
+) ; END on_top_of.p
+
+
+
 ;; (defun near.p (x1 y1 z1 x2 y2 z2 size1 size2 context)
 (defun near.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````````````
@@ -184,9 +207,30 @@
 
 
 
+(defun close_to.p (x1 y1 z1 x2 y2 z2)
+; `````````````````````````````````````````````````````
+  (near.p x1 y1 z1 x2 y2 z2)
+) ; END close_to.p
+
+
+
+(defun near_to.p (x1 y1 z1 x2 y2 z2)
+; `````````````````````````````````````````````````````
+  (near.p x1 y1 z1 x2 y2 z2)
+) ; END near_to.p
+
+
+
 ;; (defun next_to.p (x1 y1 z1 x2 y2 z2 size1 size2)
 (defun next_to.p (x1 y1 z1 x2 y2 z2)
 ; ````````````````````````````````````````````````
   ;; (+ (* 0.5 (near.p x1 y1 z1 x2 y2 z2 size1 size2)) (* 0.5 (same-height z1 z2)))
   (+ (* 0.5 (near.p x1 y1 z1 x2 y2 z2)) (* 0.5 (same-height z1 z2)))
 ) ; END next_to.p
+
+
+
+(defun adjacent_to.p (x1 y1 z1 x2 y2 z2)
+; ````````````````````````````````````````````````
+  (next_to.p x1 y1 z1 x2 y2 z2)
+) ; END adjacent_to.p

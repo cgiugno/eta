@@ -66,7 +66,7 @@
       faced moved puts changed picked_up rotated placed)
 
   (prep-bw on on_to under in behind near touching facing abutting between from
-        below above next_to close_to near_to visible on_top_of to_the_left_of
+        below beneath above next_to close_to near_to visible on_top_of to_the_left_of
         to_the_right_of in_front_of adjacent_to flush_with towards)
 
   (rel-adj near close touching facing adjacent flush central)
