@@ -329,8 +329,8 @@
         (/ hist-adv-always? (identity always))
         (/ hist-adv-ever? (identity ever))
         (/ hist-adv-never? (identity not-ever))
-        (/ not-fbound? (identity nil)))
-      ulf)))
+        (/ (! symbol? (not-fbound? _*)) (identity nil)))
+      ulf :shallow t)))
     (apply (car time-funcall) (cdr time-funcall)))
 ) ; END get-times-from-adv-e-word
 

@@ -167,6 +167,15 @@
 
 
 
+(defun symbol? (x)
+;``````````````````
+; Returns t if x is a symbol, nil otherwise.
+;
+  (symbolp x)
+) ; END symbol?
+
+
+
 (defun fbound? (x)
 ;`````````````````````
 ; Returns t if x is a bound function, nil otherwise.
