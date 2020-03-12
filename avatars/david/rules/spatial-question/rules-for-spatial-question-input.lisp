@@ -12,7 +12,8 @@
     (spatial-beginning-pair spatial-beginning there)
     (spatial-beginning spatial-verb between prep conj-prep)
     (spatial-verb be modal wh_ do)
-    (spatial-ending noun adj there directions ana-pron prep conj-prep facing adv-e adv-f ago verb-rel that this)
+    (spatial-ending noun adj there directions ana-pron prep conj-prep facing
+      adv-e adv-f ago verb-rel that this those corp)
     (spatial-word noun ana-pron supporting corp adj
       uppermost under close touching farthest rotated)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
@@ -488,6 +489,15 @@
       2 (*asr-fix-tree* (1 some 3)) (0 :subtree+clause)
     1 (0 sun 0)
       2 (*asr-fix-tree* (1 some 3)) (0 :subtree+clause)
+    1 (0)
+      2 (*grammar-fix-tree* (1)) (0 :subtree+clause)
+  ))
+
+  ; Preprocess certain common but ungrammatical queries.
+  (READRULES '*grammar-fix-tree*
+  '(
+    1 (wh-det noun pron verb-rel 0)
+      2 (*grammar-fix-tree* (1 2 did 3 4 5)) (0 :subtree+clause)
     1 (0)
       2 (*detect-smalltalk-tree* (1)) (0 :subtree+clause)
   ))

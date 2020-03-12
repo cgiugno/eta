@@ -105,11 +105,11 @@
   ; Any word that signals that the following expression might be an adv-e (or adv-f)
   ; 'right' for e.g., right before this turn
   ; number determiners for e.g., two turns ago
-  (adv-e adv-f adv-history prep-history adj-history right one two three four five six seven eight nine ten)
+  (adv-e adv-f adv-history prep-history adj-history just right most one two three four five six seven eight nine ten)
   (adv_ adv adv-history adv-f)
   
   (prep prep-bw prep-history)
   (adj adj-bw adj-history)
   (noun noun-bw noun-history)
-  (np-bw np_ noun-bw)
+  (np-bw np_ noun-bw corp)
 ))

@@ -125,8 +125,8 @@
       (setq times-phrase (get-times-from-adv-e-phrase coords adv-e-phrase)))
     (when adv-e-word
       (setq times-word (get-times-from-adv-e-word coords adv-e-word)))
-    ;; (format t "times-phrase: ~a~%" times-phrase)
-    ;; (format t "times-word: ~a~%" times-word) ; DEBUGGING
+    (format t "times-phrase: ~a~%" times-phrase)
+    (format t "times-word: ~a~%" times-word) ; DEBUGGING
 
     ; When-question acts as an adv-e phrase referring to all times
     (when when-question
@@ -329,7 +329,7 @@
         (/ hist-adv-always? (identity always))
         (/ hist-adv-ever? (identity ever))
         (/ hist-adv-never? (identity not-ever))
-        (/ (not-fbound? _*) (identity nil)))
+        (/ not-fbound? (identity nil)))
       ulf)))
     (apply (car time-funcall) (cdr time-funcall)))
 ) ; END get-times-from-adv-e-word
@@ -773,7 +773,7 @@
 ; TTT flags and other preds are defined as follows
 ; ``````````````````````````````````````````````````
 (defun hist-adv-prev? (ulf)
-  (member ulf '(previously.adv-e before.adv-e)))
+  (member ulf '(previously.adv-e before.adv-e last.adv-e)))
 (defun hist-adv-next? (ulf)
   (member ulf '(since.adv-e)))
 (defun hist-adv-recent? (ulf)
@@ -781,7 +781,7 @@
 (defun hist-adv-just? (ulf)
   (member ulf '(just.adv-e)))
 (defun hist-adv-init? (ulf)
-  (member ulf '(originally.adv-e initially.adv-e)))
+  (member ulf '(originally.adv-e initially.adv-e first.adv-e)))
 (defun hist-adv-cur? (ulf)
   (member ulf '(currently.adv-e)))
 (defun hist-adv-always? (ulf)
