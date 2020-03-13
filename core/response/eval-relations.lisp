@@ -15,6 +15,32 @@
 
 
 
+(defun ~= (x y)
+; ``````````````````````
+; Approximately equal to
+;
+  (let ((eps *std-error*))
+    (< (abs (- x y)) eps))
+) ; END ~=
+
+
+
+(defun ~equal (l1 l2)
+; `````````````````````
+; List approximately equal to
+;
+  (cond
+    ((and (numberp l1) (numberp l2))
+      (~= l1 l2))
+    ((and (symbolp l1) (symbolp l2))
+      (equal l1 l2))
+    ((and (listp l1) (listp l2))
+      (let* ((padded (pad l1 l2)) (l1p (first padded)) (l2p (second padded)))
+        (every (lambda (x y) (~equal x y)) l1p l2p))))
+) ; END ~equal
+
+
+
 (defun eval-relation-bool (rel coords1 coords2 &optional coords3)
 ; `````````````````````````````````````````````````````````````````
 ; Evaluate whether relation rel holds between an object with centroid at coords1, and
@@ -39,16 +65,6 @@
     (let ((v (apply rel (append (cdr coords1) (cdr coords2) (cdr coords3)))))
       (if (numberp v) v (if v t nil))))
 ) ; END eval-relation
-
-
-
-(defun ~= (x y)
-; ``````````````````````
-; Approximately equal to
-;
-  (let ((eps *std-error*))
-    (< (abs (- x y)) eps))
-) ; END ~=
 
 
 

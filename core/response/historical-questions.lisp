@@ -456,7 +456,7 @@
     (loop while (and Ti Tn (> (compare-time Ti Tn) -1) (> (compare-time Ti 'NOW0) -1)) do
       (setq moves (extract-moves (gethash Ti *context*)))
       (mapcar (lambda (move)
-        (setq scene (subst (first move) (second move) scene :test #'equal))) moves)
+        (setq scene (subst (first move) (second move) scene :test #'~equal))) moves)
       (setq Ti (get-prev-time Ti)))
     scene)
 ) ; END reconstruct-scene
@@ -482,8 +482,8 @@
                   ; If neg, add negated tuple + certainty for all with zero certainty
                   (if (and (numberp certainty) (<= certainty 0))
                     (list (list (car coords1) 'not prep (car coords2)) (- 1.0 certainty)))
-                  ; Otherwise, if certainty is greater than zero, add tuple + certainty to pred-list
-                  (if (and (numberp certainty) (> certainty 0))
+                  ; Otherwise, if certainty is greater than threshold, add tuple + certainty to pred-list
+                  (if (and (numberp certainty) (> certainty *certainty-threshold*))
                     (list (list (car coords1) prep (car coords2)) certainty))
                 )))
             prep-list)))
@@ -685,90 +685,6 @@
           (t (get-time-of-move-recur name (get-prev-time Ti)))))))
     (get-time-of-move-recur name (get-prev-time *time*)))
 ) ; END get-time-of-move
-
-
-
-
-
-
-
-
-
-
-;; (defun get-moves-at-time (Ti)
-;; ; ````````````````````````````
-;; ; Gets the moves which happened during Ti
-;; ;
-;;   (mapcar (lambda (move) `((,(caar move) (past move.v)) 1)) (extract-moves (gethash Ti *context*)))
-;; ) ; END get-moves-at-time
-
-
-;; (defun get-moves-at-times (T-list)
-;; ; ```````````````````````````````
-;; ; Gets the moves which happened during the times in T-list.
-;; ;
-;;   (mapcan #'get-moves-at-time T-list)
-;; ) ; END get-moves-at-times
-
-
-;; (defun eval-relation-time (coords rel Ti &key neg)
-;; ; ``````````````````````````````````````````````````
-;; ; Determines whether a relation holds at a particular time.
-;; ; If neg is given as t, return t if the relation doesn't hold at that time.
-;; ;
-;;   (let* ((scene (reconstruct-scene coords Ti))
-;;          (coords1 (find-car (first rel) scene)) (coords2 (find-car (third rel) scene))
-;;          (rel-true (eval-relation (second rel) coords1 coords2)))
-;;     (if (or (and neg (not rel-true)) (and (not neg) rel-true)) t))
-;; ) ; END eval-relation-time
-
-
-;; (defun eval-relation-all-time (coords rel &key neg)
-;; ; ```````````````````````````````````````````````````
-;; ; Determines whether a relation holds over all times.
-;; ; If neg is given as t, return t if *the relation doesn't hold at all times*.
-;; ;
-;;   (labels ((eval-relation-all-time-recur (rel Ti)
-;;       (let ((rel-true (eval-relation-time coords rel Ti)))
-;;         (cond
-;;           ((equal Ti 'NOW0) rel-true)
-;;           (t (and rel-true (eval-relation-all-time-recur rel (get-prev-time Ti))))))))
-;;     (let ((result (eval-relation-all-time-recur rel (get-prev-time *time*))))
-;;       (if (or (and neg (not result)) (and (not neg) result)) t)))
-;; ) ; END eval-relation-all-time
-
-
-;; (defun eval-relation-no-time (coords rel &key neg)
-;; ; ```````````````````````````````````````````````````
-;; ; Determines whether a relation never holds at any time.
-;; ; If neg is given as t, return t if *the relation holds at some times*.
-;; ;
-;;   (labels ((eval-relation-no-time-recur (rel Ti)
-;;       (let ((rel-true (eval-relation-time coords rel Ti :neg t)))
-;;         (cond
-;;           ((equal Ti 'NOW0) rel-true)
-;;           (t (and rel-true (eval-relation-no-time-recur rel (get-prev-time Ti))))))))
-;;     (let ((result (eval-relation-no-time-recur rel (get-prev-time *time*))))
-;;       (if (or (and neg (not result)) (and (not neg) result)) t)))
-;; ) ; END eval-relation-no-time
-
-
-;; (defun count-moves (&key Ti block)
-;; ; ``````````````````````````````````
-;; ; Lists all moves.
-;; ; If Ti is given, lists all moves since Ti.
-;; ; If block is given, lists all moves with block as the subject.
-;; ; 
-;;   (if (null Ti) (setq Ti 'NOW0))
-  
-;; ) ; END count-moves
-
-
-
-
-
-
-
 
 
 ; TTT flags and other preds are defined as follows

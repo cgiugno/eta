@@ -44,6 +44,19 @@
 
 
 
+(defun pad (l1 l2)
+;``````````````````
+; Pads either l1 or l2 to make them both the same length
+;
+  (let ((len1 (length l1)) (len2 (length l2)))
+    (cond
+      ((= len1 len2) (list l1 l2))
+      ((> len1 len2) (pad l1 (append l2 '(nil))))
+      ((< len1 len2) (pad (append l1 '(nil)) l2))))
+) ; END pad
+
+
+
 (defun intersection1 (l)
 ;`````````````````````````
 ; Intersection of all sub-lists in l
