@@ -30,12 +30,13 @@
 
 (defun exact-match-c (de1 de2 ulf)
 ; `````````````````````````````````
-; If the references of de1 contains the exact ulf of de2, it is very likely
-; that the two corefer.
+; If the references of de1 contains a definite np which is the exact ulf of de2,
+; it is very likely that the two corefer.
 ; 
   (if (some (lambda (de2-ref)
-        (equal (reconstruct-ulf de2-ref)
-               (reconstruct-ulf (get de1 'ulf))))
+        (and (definite-np? de2-ref)
+          (equal (reconstruct-ulf de2-ref)
+                 (reconstruct-ulf (get de1 'ulf)))))
       (mapcar (lambda (ref) (get ref 'ulf)) (get de2 'references))) 1 0)
 ) ; END exact-match-c
 
