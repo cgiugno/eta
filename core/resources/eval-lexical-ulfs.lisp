@@ -71,6 +71,7 @@
                             (intern (format nil "~a.N" word-sym))
                             (list 'plur (intern (format nil "~a.N" stem)))))))
          ((p prep) (intern (format nil "~a.P" word-sym)))
+         ((ps) (intern (format nil "~a.PS" word-sym)))
          ((d det) (intern (format nil "~a.D" word-sym)))
          ; ** Here we should insert cases where the verb is known to be of
          ;    type (POS) VBZ, VBD, VB, VBG, VBN, VBEN; this is a generic stub:
@@ -122,6 +123,15 @@
                     (centermost 'centered.a) (shortest 'short.a) (backmost 'back.a)
                     (longest 'long.a) (fewest 'few.a) (frontmost 'front.a)
                     (t (intern (format nil "~a.A" (stem-superlative word-sym))))))
+         (adv-adj (case word-sym
+                    (just 'just.a) (previously 'previous.a)
+                    (before 'before.a) (originally 'original.a)
+                    (initially 'initial.a) (currently 'current.a)
+                    (now 'now.a) (recently 'recent.a) (ever 'ever.a)
+                    (since 'since.a) (first 'first.a) (second 'second.a)
+                    (third 'third.a) (last 'last.a) (always 'always.a)
+                    (never 'never.a) (once 'once.a) (twice 'twice.a) (thrice 'thrice.a)
+                    (t (intern (format nil "~a.A" word-sym)))))
          (adv-a (intern (format nil "~a.ADV-A" word-sym)))
          (adv-e (intern (format nil "~a.ADV-E" word-sym)))
          (adv-f (intern (format nil "~a.ADV-F" word-sym)))

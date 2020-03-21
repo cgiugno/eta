@@ -25,8 +25,10 @@
        2 (((*pp-between-ulf-tree* 2 3 4)) 1) (0 :ulf-recur)
     1 (deg-adv between 9 noun); e.g., directly between the Esso and NVidia blocks
        2 (((lex-ulf! adv-a 1) (*pp-between-ulf-tree* 2 3 4)) (1 2)) (0 :ulf-recur)
+    1 (deg-adv adv-history between 9 noun); e.g., just recently between the Esso and NVidia blocks
+       2 (((lex-ulf! mod-a 1) (*adv-ulf-tree* 2) (*pp-between-ulf-tree* 3 4 5)) (1 (2 3))) (0 :ulf-recur)
     1 (adv-history between 9 noun); e.g., ever between the Esso and NVidia blocks
-       2 (((lex-ulf! adv-e 1) (*pp-between-ulf-tree* 2 3 4)) (1 2)) (0 :ulf-recur)
+       2 (((*adv-ulf-tree* 1) (*pp-between-ulf-tree* 2 3 4)) (1 2)) (0 :ulf-recur)
     1 (nil between 9 noun); ignore non-adverb preceding "between"
        2 (((*pp-between-ulf-tree* 2 3 4)) 1) (0 :ulf-recur)
 
@@ -60,13 +62,13 @@
 '(
     ; Historical
     1 (be 0 between 0 block 0)
-       2 (be det 2 block 1 between 7 noun adv-e 0 ?); e.g., was the NVidia block between two red blocks previously ?
+       2 (be det 2 block 1 between 7 noun adv-hist-word 0 ?); e.g., was the NVidia block between two red blocks previously ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (*pp-between-ulf-tree* 5 6 7 8) (*adv-ulf-tree* 9 10) ?)
              ((1 2 3 4) ?)) (0 :ulf-recur) 
-    1 (be there adv-history 3 noun 1 between 7 noun ?); e.g., was there ever any red block between the SRI and NVidia blocks ?
-       2 (((lex-ulf! v 1) there.pro (*adv-ulf-tree* 3) (*np-ulf-tree* 4 5 6 7 8 9) ?) 
+    1 (be there 1 adv-history 3 noun 1 between 7 noun ?); e.g., was there ever any red block between the SRI and NVidia blocks ?
+       2 (((lex-ulf! v 1) there.pro (*adv-ulf-tree* 3 4) (*np-ulf-tree* 5 6 7 8 9 10) ?) 
           ((1 2 3 4) ?)) (0 :ulf-recur)
-    1 (be there 3 noun 1 between 7 noun adv-e 0 ?); e.g., were there any red blocks between a blue and a green block before this ?
+    1 (be there 3 noun 1 between 7 noun adv-hist-word 0 ?); e.g., were there any red blocks between a blue and a green block before this ?
        2 (((lex-ulf! v 1) there.pro (*np-ulf-tree* 3 4 5 6 7 8) (*adv-ulf-tree* 9 10) ?) 
           ((1 2 3 4) ?)) (0 :ulf-recur)
 
@@ -89,25 +91,25 @@
 ;
 '(
     ; Historical
-    1 (wh-det noun be 2 between 7 noun adv-e 0 ?); e.g., what/which block was there between the Nvidia block and a red block before ?
+    1 (wh-det noun be 2 between 7 noun adv-hist-word 0 ?); e.g., what/which block was there between the Nvidia block and a red block before ?
        2 (((lex-ulf! det 1) (lex-ulf! noun 2) (lex-ulf! v 3) (*pp-between-ulf-tree* 4 5 6 7)
           (*adv-ulf-tree* 8 9) ?) (((1 2) (3 4 5)) ?)) (0 :ulf-recur)
-    1 (what be 2 between 7 noun adv-e 0 ?); what was between the two red blocks previously ?
+    1 (what be 2 between 7 noun adv-hist-word 0 ?); what was between the two red blocks previously ?
        2 ((what.pro (lex-ulf! v 2) (*pp-between-ulf-tree* 3 4 5 6) (*adv-ulf-tree* 7 8) ?) 
           ((1 (2 3 4)) ?)) (0 :ulf-recur)
-    1 (wh-det 1 noun be 1 between 7 noun adv-e 0 ?); what red blocks were (there) between the Nvidia and Mercedes blocks initially ?
+    1 (wh-det 1 noun be 1 between 7 noun adv-hist-word 0 ?); what red blocks were (there) between the Nvidia and Mercedes blocks initially ?
        2 (((lex-ulf! det 1) (*n1-ulf-tree* 2 3) (lex-ulf! v 4) (*pp-between-ulf-tree* 5 6 7 8)
           (*adv-ulf-tree* 9 10) ?) (((1 2) (3 4 5)) ?)) (0 :ulf-recur)
-    1 (what color noun be 2 between 7 noun adv-e 0 ?); e.g., what color block was between a red and a blue block on the first turn ?
+    1 (what color noun be 2 between 7 noun adv-hist-word 0 ?); e.g., what color block was between a red and a blue block on the first turn ?
        2 (((lex-ulf! det 1) (lex-ulf! adj 2) (lex-ulf! noun 3) (lex-ulf! v 4) (*pp-between-ulf-tree* 5 6 7 8)
           (*adv-ulf-tree* 9 10) ?) (((1 (2 3)) (4 5 6)) ?)) (0 :ulf-recur)
-    1 (what color be the noun 1 between the 6 noun adv-e 0 ?); what color was the block between the NVidia and Mercedes blocks initially ?
+    1 (what color be the noun 1 between the 6 noun adv-hist-word 0 ?); what color was the block between the NVidia and Mercedes blocks initially ?
        2 (((lex-ulf! det 1) (lex-ulf! noun 2) (lex-ulf! v 3) the.d (lex-ulf! noun 5) (*pp-between-ulf-tree* 6 7 8 9 10)
           (*adv-ulf-tree* 11 12) ?) ((sub ({of}.p (1 2)) (3 (the.d (n+preds 5 6)) *h 7)) ?)) (0 :ulf-recur)
-    1 (wh-pron be the 2 noun 1 between 7 noun adv-e 0 ?); e.g., what was the block between the NVidia block and the SRI block before I moved it ?
+    1 (wh-pron be the 2 noun 1 between 7 noun adv-hist-word 0 ?); e.g., what was the block between the NVidia block and the SRI block before I moved it ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) the.d (*n1-ulf-tree* 4 5) 
           (*pp-between-ulf-tree* 6 7 8 9) (*adv-ulf-tree* 10 11) ?) ((1 (2 (= (the.d (n+preds 4 5))) 6)) ?)) (0 :ulf-recur)
-    1 (how many 1 block be 2 between 7 noun adv-e 0 ?); e.g., how many blocks were (there) between a red block and a blue block previously ?
+    1 (how many 1 block be 2 between 7 noun adv-hist-word 0 ?); e.g., how many blocks were (there) between a red block and a blue block previously ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-between-ulf-tree* 6 7 8 9) (*adv-ulf-tree* 10 11) ?)
           ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
 

@@ -13,7 +13,7 @@
     (spatial-beginning spatial-verb between prep conj-prep)
     (spatial-verb be modal wh_ do)
     (spatial-ending noun adj there directions ana-pron prep conj-prep facing
-      adv-e adv-f ago verb-rel that this those corp)
+      adv-hist-word ago verb-rel that this those corp)
     (spatial-word noun ana-pron supporting corp adj
       uppermost under close touching farthest rotated)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
@@ -496,8 +496,12 @@
   ; Preprocess certain common but ungrammatical queries.
   (READRULES '*grammar-fix-tree*
   '(
-    1 (wh-det noun pron verb-rel 0)
+    1 (wh-det noun pron verb-rel 0); e.g., what block I moved first ?
       2 (*grammar-fix-tree* (1 2 did 3 4 5)) (0 :subtree+clause)
+    1 (wh-det noun-history 0 prep 0); e.g., what turn was the Twitter block on the Texaco block ?
+       2 (*grammar-fix-tree* (at 1 2 3 4 5)) (0 :subtree+clause)
+    1 (wh-det noun-history 0 verb-rel 0); e.g., what turn did I move the Twitter block ?
+       2 (*grammar-fix-tree* (at 1 2 3 4 5)) (0 :subtree+clause)
     1 (0)
       2 (*detect-smalltalk-tree* (1)) (0 :subtree+clause)
   ))

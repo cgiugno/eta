@@ -50,151 +50,99 @@
 ; historical record of block moves stored in context.
 ;
   (format t "object locations: ~a~%" object-locations) ; DEBUGGING
-  (let* ((ulf-base (uninvert-question (remove-not (remove-adv-f (remove-adv-e ulf)))))
-         (coords (extract-coords object-locations))
-         (where-question (ttt:match-expr '(^* (at.p (what.d place.n))) ulf))
-         (when-question (and (ttt:match-expr '(^* (hist-prep-during? wh-np?)) ulf) (not where-question)))
-         (quant-times (get-referred-times coords ulf ulf-base where-question when-question))
-         (quantifier (first quant-times)) (times (second quant-times))
-         neg ans relation subj obj)
-    (format t "where question: ~a~%" where-question)
-    (format t "when question: ~a~%" when-question)
-    (format t "base ulf: ~a~%" ulf-base)
-    (format t "blocks at coordinates: ~a~%" coords)
-    (format t "quantifier + referred times: ~a ~a~%" quantifier times) ; DEBUGGING
-
-    ; Flag question if negation is present
-    ; NOTE: we currently assume no possibility of double negation
-    (when (ttt:match-expr '(^* not) ulf)
-      (setq neg t))
-    (format t "neg: ~a~%" neg) ; DEBUGGING
-
-    ; If quantifier is 'not-ever', this is essentially equal to 'always not'.
-    (when (equal quantifier 'not-ever)
-      (setq neg t)
-      (setq quantifier 'always))
-
-    ; Extract subject (needed for where-questions) and/or object (needed for "what block did I move" questions)
-    (setq subj (extract-subj ulf-base))
-    (setq obj (extract-obj ulf-base))
-    (format t "subj: ~a~%" subj)
-    (format t "obj: ~a~%" obj) ; DEBUGGING
-
-    ; Extract relation from question, possibly including variables & restrictors for the subject and/or object.
-    (setq relation (extract-relation ulf-base))
-    (format t "extracted relation: ~a~%" relation) ; DEBUGGING
-
-    (setq action (extract-action ulf-base))
-    (format t "extracted action-verb: ~a~%" action) ; DEBUGGING
-
-    ; Detect different types of historical questions which might be asked. Some are straightforward spatial questions
-    ; but just asked about the past, whereas others have to do with the actions themselves, e.g. "what blocks did I move?"
-    ; TODO: This is somewhat ad-hoc and likely needs to be generalized.
-    (cond
-      ; If asking a where-question
-      (where-question
-        (apply-to-times `(compute-relations ,subj ,coords) times quantifier when-question))
-      ; If asking about action plus relation, e.g. "what block did I put on the Twitter block"
-      ((and relation action)
-        (apply-to-times `(compute-move+relation ,relation ,coords ,obj ,neg) times quantifier when-question))
-      ; If asking about spatial relation
-      (relation
-        (apply-to-times `(compute-relation ,relation ,coords ,neg) times quantifier when-question))
-      ; Otherwise assume the question is about block moves
-      (t
-        (apply-to-times `(compute-move ,obj ,neg) times quantifier when-question)))
-  )
+  (let ((coords (extract-coords object-locations))
+        (when-question (extract-when-question ulf)))
+    ; If when question, remove when adv-e from ulf
+    (setq ulf (remove-when-adv-e ulf))
+    ; TODO: split off times (and add certainties) or return rels depending on whether when-question or not
+    (find-answer-time+props coords ulf))
 ) ; END recall-answer
 
 
-(defun get-referred-times (coords ulf ulf-base where-question when-question)
-; ````````````````````````````````````````````````````````````````````````````
-; Given a historical question ULF, get the list of times referred to by the ULF (for instance,
-; by the adv-e phrases/lexical words), and a quantifier over those times (by default, most-recent)
-; TODO: the whole quantifier selection is really messy and definitely needs to be rethought.
-; 
-  (let (adv-e-phrase adv-e-word quantifier times-phrase times-word times)
-    ; Retrieve any adv-e phrase and adv-e lexical word in ulf
-    (setq adv-e-phrase (extract-adv-e-phrase ulf))
-    (setq adv-e-word (extract-adv-e-word ulf))
-    ; Resolve adv-e phrase and adv-e word to times (or quantifier over times in
-    ; the case of the latter)
-    ;; (format t "adv-e-phrase: ~a~%" adv-e-phrase)
-    ;; (format t "adv-e-word: ~a~%" adv-e-word) ; DEBUGGING
-    (when adv-e-phrase
-      (setq times-phrase (get-times-from-adv-e-phrase coords adv-e-phrase)))
-    (if (equal (car times-phrase) 'None) (setq times-phrase nil))
-    (when adv-e-word
-      (setq times-word (get-times-from-adv-e-word coords adv-e-word)))
-    (format t "times-phrase: ~a~%" times-phrase)
-    (format t "times-word: ~a~%" times-word) ; DEBUGGING
-
-    ; When-question acts as an adv-e phrase referring to all times
-    (when when-question
-      (setq times-phrase (time-inclusive (get-times-before *time* -1))))
+(defun find-answer-time+props (coords ulf)
+; ``````````````````````````````````````````
+; Given coordinates and a query ulf, return a list of lists of the form (time (prop1 prop2 ...)).
+;
+  (let* ((ulf-base (uninvert-question (remove-not (remove-adv-e (remove-adv-f ulf)))))
+         (where-question (extract-where-question ulf))
+         (neg (extract-neg ulf))
+         (adv-e (extract-adv-e ulf))
+         (adv-e-unary (resolve-adv-unary (first adv-e)))
+         (adv-e-binary (resolve-adv-binary coords (second adv-e)))
+         (adv-f (extract-adv-f ulf))
+         (subj (extract-subj ulf-base))
+         (obj (extract-obj ulf-base))
+         (relation (extract-relation ulf-base))
+         (action (extract-action ulf-base))
+         func ans-time+props)
+    (format t "where question: ~a~%" where-question)
+    (format t "neg: ~a~%" neg)
+    (format t "adv-e: ~a~%" adv-e)
+    (format t "adv-e-unary: ~a~%" adv-e-unary)
+    (format t "adv-e-binary: ~a~%" adv-e-binary)
+    (format t "adv-f: ~a~%" adv-f)
+    (format t "base ulf: ~a~%" ulf-base)
+    (format t "subj: ~a~%" subj)
+    (format t "obj: ~a~%" obj)
+    (format t "extracted relation: ~a~%" relation)
+    (format t "extracted action-verb: ~a~%" action)
+    (format t "blocks at coordinates: ~a~%" coords)
+    ;; (format t "quantifier + referred times: ~a ~a~%" quantifier times) ; DEBUGGING
 
     (cond
-      ; If lexical adv-e gives some special quantifier
-      ((and times-word (not (listp times-word)))
-        (setq quantifier times-word)
-        (setq times times-phrase))
-      ; If both phrasal adv-e and lexical adv-e give list of times
-      ((and times-word times-phrase)
-        (setq times (intersection times-word times-phrase)))
-      ; If only lexical adv-e gives list of times
-      (times-word (setq times times-word))
-      ; If only phrasal adv-e gives list of times
-      (times-phrase (setq times times-phrase)))
+      (where-question
+        (setq func `(compute-relations ,subj)))
+      ((and relation action)
+        (setq func `(compute-move+relation ,relation ,obj ,neg)))
+      (relation
+        (setq func `(compute-relation ,relation ,neg)))
+      (action
+        (setq func `(compute-move ,obj ,neg))))
 
-    ; For where-questions, it makes sense to use most-recent quantifier.
-    (when where-question
-      (setq quantifier 'most-recent))
-
-    ; For simple questions about actions (e.g. "what block(s) did I move?"), the quantifier also seems to
-    ; depend on the plurality of the subject, i.e. "what blocks did I move" looks over all times (if no
-    ; adv-e is specified, the times between the previous utterance and the current utterance), whereas
-    ; "what block did I move" looks only at the most recent time (since times correspond to individual moves).
-    (cond
-      ; Plural or "how many"
-      ((or (ttt:match-expr '(_! ((tense? action-verb?) (! wh-pron? (det? (^* (plur noun?)))) _*)) ulf-base)
-           (ttt:match-expr '(_! ((tense? aspect?) (action-verb? (! wh-pron? (det? (^* (plur noun?)))) _*))) ulf-base)
-           (ttt:match-expr '(_! ((tense? action-verb?) ((nquan (how.mod-a many.a)) (plur noun?)) _*)) ulf-base))
-        (if (and (not times) (not quantifier)) (setq times (get-times-before *time* (diff-times *time* *time-prev*)))
-          (setq times (time-inclusive times)))
-        (if (not quantifier) (setq quantifier 'ever)))
-      ; Singular
-      ((ttt:match-expr '(_! ((tense? action-verb?) (det? (^* noun?)) _*)) ulf-base)
-       (ttt:match-expr '(_! ((tense? aspect?) (action-verb? (det? (^* noun?)) _*))) ulf-base)
-        (if (and (not times) (not quantifier)) (setq times (get-times-before *time* 1))
-          (setq times (time-inclusive times)))
-        (if (not quantifier) (setq quantifier 'most-recent))))
-    ; By default, look at all times before now, and quantifier is just the most recent.
-    (if (not times) (setq times (get-times-before *time* -1)))
-    (if (not times) (setq times (list *time*)))
-    (if (not quantifier) (setq quantifier 'most-recent))
-
-  (list quantifier times))
-) ; END get-referred-times
+    (setq ans-time+props (find+constrain-times func adv-e-unary adv-e-binary adv-f coords))
+    (format t "ans-time+props: ~a~%" ans-time+props)
+    
+  ;; ans-time+props
+  nil
+  )
+) ; END find-answer-time+props
 
 
-(defun extract-adv-e-phrase (ulf)
-; `````````````````````````````````
-; Extracts an adv-e phrase from a ULF, and applies any sub macros in the phrase.
+(defun extract-where-question (ulf)
+; ```````````````````````````````````
+; Returns t if ULF contains an 'at what place' phrase, nil otherwise.
 ;
-  (let ((adv-e-phrase
-      (ttt:apply-rule '(/ (^* (adv-e _!)) (adv-e _!))
-        (apply-sub-macro ulf) :shallow t)))
-    (if (adv-e? adv-e-phrase) adv-e-phrase nil))
-) ; END extract-adv-e-phrase
+  (ttt:match-expr '(^* (at.p (what.d place.n))) ulf)
+) ; END extract-where-question
 
 
-(defun extract-adv-e-word (ulf)
-; `````````````````````````````````
-; Extracts an adv-e word from a ULF.
+(defun extract-when-question (ulf)
+; ```````````````````````````````````
+; Returns t if ULF contains a phrase like 'at what time' (and isn't a where question), nil otherwise.
 ;
-  (let ((adv-e-word (ttt:apply-rule '(/ (^* adv-e-lex?) adv-e-lex?) ulf :shallow t)))
-    (if (adv-e? adv-e-word) adv-e-word nil))
-) ; END extract-adv-e-phrase
+  (and (ttt:match-expr '(^* (hist-prep-during? wh-np?)) ulf) (not (extract-where-question ulf)))
+) ; END extract-when-question
+
+
+(defun remove-when-adv-e (ulf)
+; ``````````````````````````````
+; Removes an adv-e such as "(at.p (what.d time.n))" from a ULF.
+;
+  (ttt:apply-rules '(
+    (/ (sub (prep? wh-np?) _!) _!)
+    (/ (_! (adv-e (! hole? (prep? wh-np?)))) _!)
+    (/ (_*1 (adv-e (! hole? (prep? wh-np?))) _*2) (_*1 _*2))
+  ) ulf)
+) ; END remove-when-adv-e
+
+
+(defun extract-neg (ulf)
+; ````````````````````````
+; Returns t if ULF is in a negative environment.
+;
+  (or (ttt:match-expr '(^* not) ulf)
+      (ttt:match-expr '(^* never.adv-f) ulf))
+) ; END extract-neg
 
 
 (defun extract-action (ulf)
@@ -253,6 +201,7 @@
 ; Extracts a subject (e.g. |Twitter|) of a ULF.
 ; If subject is not definite, use variables with restrictors, e.g.
 ; ?x or (?x red.a).
+;
   (let ((subj
       (ttt:apply-rules '(
         (/ (_!1 (! (^* (tense? verb-untensed?)))) (resolve-rel-np! _!1)))
@@ -266,11 +215,11 @@
 ; Extracts an object (e.g. |Twitter|) of a ULF.
 ; If object is not definite, use variables with restrictors, e.g.
 ; ?x or (?x red.a).
+;
   (let ((obj
     (ttt:apply-rules '(
       (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1)))))) (resolve-rel-np! !))
-      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))))))) (resolve-rel-np! !))
-    )
+      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))))))) (resolve-rel-np! !)))
     ulf)))
   (if (or (nnp? obj) (variable? obj) (restricted-variable? obj)) obj nil))
 ) ; END extract-obj
@@ -302,12 +251,23 @@
 ) ; END extract-coords
 
 
+(defun extract-questions (prop-list)
+; ```````````````````````````````````
+; Extracts all questions from a list of propositions, returned in the form:
+; (you 'ulf)
+;
+  (mapcar (lambda (prop)
+      (list (first prop) (second (second prop))))
+    (remove-if-not #'ask-prop? prop-list))
+) ; END extract-questions
+
+
 (defun extract-moves (prop-list)
 ; ```````````````````````````````
 ; Extracts all moves from a list of propositions, returned in the form:
-; ((|Name| ?x1 ?y1 ?z1) (|Name| ?x2 ?y2 ?z2))
-; Although the |Name| is duplicated here, it makes it easy to process later on.
+; (|Name| (?x1 ?y1 ?z1) (?x2 ?y2 ?z2))
 ; NOTE: assuming that all move.v propositions use explicit location record, i.e. ($ loc ?x1 ?y1 ?z1)
+;
   (mapcar (lambda (prop)
       (list (append (list (first prop)) (cddr (second (second (second prop)))))
             (append (list (first prop)) (cddr (second (third (second prop)))))))
@@ -315,151 +275,118 @@
 ) ; END extract-moves
 
 
-(defun get-times-from-adv-e-word (coords ulf)
-; ````````````````````````````````````````````
-; Resolves a lexical adv-e into either a list of times (for example,
-; something like "previously"), or an operator over times (e.g. "ever").
+(defun extract-adv-e (ulf)
+; ``````````````````````````
+; Extracts all adv-e phrases from ULF (dividing into two sublists, one for unary preds,
+; e.g. recent.a, and one for binary preds, e.g. before.p).
 ;
-  (let ((time-funcall (ttt:apply-rules
-      `((/ hist-adv-prev? (get-times-before ,*time* -1))
-        (/ hist-adv-next? (get-times-after ,*time* -1))
-        (/ hist-adv-init? (get-times-init 1))
-        (/ hist-adv-cur? (list ,*time*))
-        (/ hist-adv-recent? (identity most-recent))
-        (/ hist-adv-just? (identity most-recent))
-        (/ hist-adv-always? (identity always))
-        (/ hist-adv-ever? (identity ever))
-        (/ hist-adv-never? (identity not-ever))
-        (/ (! symbol? (not-fbound? _*)) (identity nil)))
-      ulf :shallow t)))
-    (apply (car time-funcall) (cdr time-funcall)))
-) ; END get-times-from-adv-e-word
+  (setq ulf (apply-sub-macro ulf))
+  (let (adv-e-unary adv-e-binary)
+    (labels ((extract-adv-e-recur (ulf-part)
+        (cond
+          ; If ULF is an adv-e with a unary pred, cons to adv-e-unary
+          ((ttt:match-expr '(! (adv-e adj?) (adv-e (mod-a? adj?))) ulf-part)
+            (setq adv-e-unary (cons ulf-part adv-e-unary)))
+          ; If ULF is an adv-e with a binary pred, cons to adv-e-binary
+          ((ttt:match-expr '(! (adv-e prep-phrase?) (adv-e (mod-a? prep-phrase?))) ulf-part)
+            (setq adv-e-binary (cons ulf-part adv-e-binary)))
+          ((ttt:match-expr '(! (sent-prep? _!) (mod-a? (sent-prep? _!))) ulf-part)
+            (setq adv-e-binary (cons ulf-part adv-e-binary)))
+          ; Otherwise, if ULF is atom, do nothing
+          ((atom ulf-part) nil)
+          ; Otherwise, if ULF is list, recur on each sub-part
+          (t (mapcar #'extract-adv-e-recur ulf-part)))))
+      (extract-adv-e-recur ulf))
+    (list adv-e-unary adv-e-binary))
+) ; END extract-adv-e
 
 
-(defun get-times-from-adv-e-phrase (coords ulf)
+(defun extract-adv-f (ulf)
+; ``````````````````````````
+; Extracts all adv-f phrases from ULF.
+;
+  (setq ulf (apply-sub-macro ulf))
+  (let (adv-f)
+    (labels ((extract-adv-f-recur (ulf-part)
+        (cond
+          ; If ULF is an adv-f, cons to adv-f
+          ((ttt:match-expr '(adv-f _!) ulf-part)
+            (setq adv-f (cons ulf-part adv-f)))
+          ; Otherwise, if ULF is atom, do nothing
+          ((atom ulf-part) nil)
+          ; Otherwise, if ULF is list, recur on each sub-part
+          (t (mapcar #'extract-adv-f-recur ulf-part)))))
+      (extract-adv-f-recur ulf))
+    adv-f)
+) ; END extract-adv-f
+
+
+(defun resolve-adv-unary (adv-e-unary)
+; ``````````````````````````````````````
+; Resolves each adv-e in adv-e-unary, currently just to the unary adjective
+; (possibly with a mod-a before it).
+;
+  (mapcar #'second adv-e-unary)
+) ; END resolve-adv-unary
+
+
+(defun resolve-adv-binary (coords adv-e-binary)
 ; ```````````````````````````````````````````````
-; Resolves a phrasal adv-e (e.g. "before I moved it") into a list of times.
+; Resolves each adv-e in adv-e-binary to a simple binary predicate involving a
+; time individual or set of time individuals.
+; e.g. (adv-e (before.p (the.d (last.a turn.n)))) => (adv-e (before.p |Now3|))
 ;
-  (let ((adv-e (cadr (extract-adv-e-phrase ulf))))
-    (cond
-      ((prep-conjunction? adv-e)
-        (intersection (get-times-from-pp coords (first adv-e)) (get-times-from-pp coords (third adv-e))))
-      (t (get-times-from-pp coords adv-e))))
-) ; END get-times-from-adv-e-phrase
+  (mapcar (lambda (adv-e)
+    (ttt:apply-rules `(
+      (/ (prep? det-np?) (prep? (resolve-time-np! det-np?)))
+      (/ (sent-prep? _!) ((ps-to-p! sent-prep?) (resolve-time-s! ,coords det-np?)))
+    ) adv-e))
+  adv-e-binary)
+) ; END resolve-adv-binary
 
 
-(defun get-times-from-pp (coords ulf)
-; `````````````````````````````````````
-; Gets a list of times corresponding to a prepositional phrase,
-; given the embedded noun phrase or reified event.
-; NOTE: this function could use some cleaning.
+(defun resolve-time-np! (np)
+; ```````````````````````````
+; Resolves a temporal noun phrase to a corresponding time individual, or set
+; of time individuals.
 ;
-  (let* ((adv-a (if (hist-adv-directly? (first ulf)) (first ulf)))
-         (prep (progn (when adv-a (setq ulf (second ulf))) (first ulf)))
-         ; Get reference times denoted by the reified event/noun phrase, which are
-         ; to be modified by the preposition.
-         (ref-times (cond
-          ((reified-event? (second ulf))
-            (get-times-from-ke coords (second ulf)))
-          ((indexical-np? (second ulf))
-            (list *time*))
-          ((quant-np? (second ulf))
-            (last (get-times-before *time*
-              (numerical-det! (first (second ulf))))))
-          ((definite-np? (second ulf))
-            (get-times-from-np coords (second ulf))))))
-    ; Apply predicate operation (before, after, during), along with any modifying
-    ; adverb (e.g. "right before").
-    (cond
-      ; No satisfying ref times
-      ((equal (car ref-times) 'None)
-        ref-times)
-      ; "just before"
-      ((and adv-a (hist-prep-prev? prep)) (set-difference (union1 (mapcar
-        (lambda (ref-time) (get-times-before ref-time 1)) ref-times)) ref-times))
-      ; "before"
-      ((hist-prep-prev? prep)
-        (set-difference (get-times-before (car ref-times) -1) ref-times))
-      ; "just after"
-      ((and adv-a (hist-prep-next? prep)) (set-difference (union1 (mapcar
-        (lambda (ref-time) (get-times-after ref-time 1)) ref-times)) ref-times))
-      ; "after"
-      ((hist-prep-next? prep)
-        (set-difference (get-times-after (car ref-times) -1) ref-times))
-      (t ref-times)))
-) ; END get-times-from-pp
+  'NOW0
+) ; END resolve-time-np!
 
 
-(defun get-times-from-ke (coords ulf)
-; `````````````````````````````````````
-; Gets a list of times corresponding to a reified event.
+(defun resolve-time-s! (coords s)
+; `````````````````````````````````
+; Resolves a sentence to the time at which the sentence was true, or set of times.
+; NOTE: in general this is going to be more tricky, because a sentential preposition
+; clause may itself have adverbials, e.g. "where was the Twitter block before I moved
+; it twice in a row", or "where was the Twitter block before I recently moved it". We
+; do not consider these currently.
 ;
-  (let ((ke-funcall (ttt:apply-rules
-      `(
-        (/ (^* ((past action-verb?) (det? (nnp? noun?)) (prep? (det? (nnp?2 noun?)))))
-           (get-time-of-move+relation ,coords (nnp? prep? nnp?2)))
-        (/ (^* ((past action-verb?) (det? (nnp? noun?))))
-           (get-time-of-move nnp?))
-        (/ (ke ((det? (nnp?1 noun?)) ((past be.v) (prep? (det? (nnp?2 noun?))))))
-           (get-time-of-relation ,coords (nnp?1 prep? nnp?2)))
-        (/ (ke _*) (identity nil)))
-      ulf)) ke-result)
-    (setq ke-result (apply (car ke-funcall) (cdr ke-funcall)))
-    (if ke-result (list ke-result) (list 'None)))
-) ; END get-times-from-ke
+  'NOW0
+  ;; (let (ps-result
+  ;;     (ps-funcall (ttt:apply-rules `(
+  ;;       ; before I put the Twitter block on the Texaco block
+  ;;       (/ (^* ((past action-verb?) (det? (nnp? noun?)) (prep? (det? (nnp?2 noun?)))))
+  ;;         (get-time-of-move+relation ,coords (nnp? prep? nnp?2)))
+  ;;       ; before I moved the Twitter block
+  ;;       (/ (^* ((past action-verb?) (det? (nnp? noun?))))
+  ;;         (get-time-of-move nnp?))
+  ;;       ; before the Twitter block was on the Texaco block
+  ;;       (/ ((det? (nnp?1 noun?)) ((past be.v) (prep? (det? (nnp?2 noun?)))))
+  ;;         (get-time-of-relation ,coords (nnp?1 prep? nnp?2)))
+  ;;       (/ (not-fbound? _*) (identity nil)))
+  ;;     s)))
+  ;;   (setq ps-result (apply (car ps-funcall) (cdr ps-funcall)))
+  ;;   (cond
+  ;;     ((null ps-result) (list 'None))
+  ;;     (t (make-set ps-result))))
+) ; END resolve-time-s!
 
 
-(defun get-times-from-np (coords ulf)
-; `````````````````````````````````````
-; Gets a list of times corresponding to a definite noun phrase.
-; TODO: This will need updating once support for n+preds (e.g. "the
-; turn where I moved the SRI block") is added.
-;
-  (let ((time-funcall (ttt:apply-rules
-      `((/ (det? (adj? hist-noun-turn?)) (hist-adj! adj? 1))
-        (/ (det? (adj? (? numerical-adj?) (plur hist-noun-turn?))) (hist-adj! adj? ?))
-        (/ (det? (adj? hist-noun-prev?)) (get-times-before ,*time* 3))
-        (/ (det? (adj? hist-noun-next?)) (get-times-after ,*time* 3))
-        (/ (det? hist-noun-prev?) (get-times-before ,*time* -1))
-        (/ (det? hist-noun-next?) (get-times-after ,*time* -1))
-        (/ (det? hist-noun-init?) (get-times-init 1))
-        (/ (not-fbound? _*) (identity nil)))
-      ulf)))
-    (apply (car time-funcall) (cdr time-funcall)))
-) ; END get-times-from-np
+; ---------------------------------------
 
 
-(defun hist-adj! (adj &optional num)
-; ````````````````````````````````````
-; Maps a temporal adjective + n ("window size" of time period) to a
-; function application to retrieve corresponding (discrete) times.
-;
-  (let ((n (cond ((null num) 3) ((numberp num) num) (t (numerical-adj! num)))))
-    (ttt:apply-rules
-    `((/ hist-adj-prev? (get-times-before ,*time* ,n))
-      (/ hist-adj-next? (get-times-after ,*time* ,n))
-      (/ hist-adj-init? (get-times-init ,n))
-      (/ hist-adj-final? (get-times-final ,n))
-      (/ hist-adj-cur? (list ,*time*))
-      (/ numerical-adj? (get-time-nth ,(numerical-adj! adj))))
-    adj))
-) ; END hist-adj!
 
-
-(defun reconstruct-scene (coords Tn)
-; `````````````````````````````````````
-; Reconstruct the scene (i.e. a list of coordinates for each block)
-; at the time denoted by Tn, given current coordinates.
-; coords should be a list of coordinates in the simplified form (|Name| ?x ?y ?z)
-;
-  (let* ((Ti (get-prev-time *time*)) (scene coords) moves)
-    (loop while (and Ti Tn (> (compare-time Ti Tn) -1) (> (compare-time Ti 'NOW0) -1)) do
-      (setq moves (extract-moves (gethash Ti *context*)))
-      (mapcar (lambda (move)
-        (setq scene (subst (first move) (second move) scene :test #'~equal))) moves)
-      (setq Ti (get-prev-time Ti)))
-    scene)
-) ; END reconstruct-scene
 
 
 (defun form-pred-list (coords-list1 prep-list coords-list2 &key neg)
@@ -470,6 +397,7 @@
 ; If neg is given as t, return negated predicates.
 ; NOTE: preds are returned in decreasing order of certainty.
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
+; TODO: this is kind of messy, could use some cleaning.
 ;
   (let ((pred-list (remove nil
         ; Check all combination of blocks between coords-list1 and coords-list2
@@ -477,7 +405,7 @@
           (if (not (equal (car coords1) (car coords2)))
             ; Evaluate all prepositions in prep-list
             (mapcar (lambda (prep)
-              (let ((certainty (eval-relation prep coords1 coords2)))
+              (let ((certainty (eval-spatial-relation prep coords1 coords2)))
                 (if neg
                   ; If neg, add negated tuple + certainty for all with zero certainty
                   (if (and (numberp certainty) (<= certainty 0))
@@ -493,29 +421,28 @@
 ) ; END form-pred-list
 
 
-(defun compute-relations (Ti subj coords)
-; `````````````````````````````````````````
-; Computes all spatial relations that hold at a particular time, for a particular
+(defun compute-relations (scene moves scene1 subj)
+; ``````````````````````````````````````````````````
+; Computes all spatial relations that hold at a particular scene, for a particular
 ; subject (may be a variable with or without restrictors).
 ; NOTE: we assume uniqueness of coords in the scene, or else this will break.
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
-  (let* ((scene (reconstruct-scene coords Ti))
-        ; Find all possible pairs of subject + object in the scene, and check if relation holds
-        (relations (form-pred-list scene *spatial-prep-list* scene)))
+  ; Find all possible pairs of subject + object in the scene, and check if relation holds
+  (let ((relations (form-pred-list scene *spatial-prep-list* scene)))
     ; Filter relations
     (last (reverse (find-cars-var subj relations)) 2))
 ) ; END compute-relations
 
 
-(defun compute-move+relation (Ti rel coords obj neg)
-; ````````````````````````````````````````````````````
-; Computes all moves of a block into a particular relation, i.e. all whether, at time Ti,
-; the given object was moved, and that the relation holds in time Ti+1. If neg is given,
-; either the object was not moved, or the relation didn't hold in time Ti+1.
+(defun compute-move+relation (scene moves scene1 rel obj neg)
+; `````````````````````````````````````````````````````````````
+; Computes all moves of a block into a particular relation, i.e. whether the
+; given object was moved, and that the relation holds in the resulting scene.
+; If neg is given, either the object was not moved, or the relation didn't hold in the scene.
 ;
-  (let ((moves (get-moves-car-form Ti)) (relations (compute-relation (get-next-time Ti) rel coords nil)))
-    ; Get rid of any moves for which the relation does not hold in time Ti+1
+  (let ((relations (compute-relation scene1 rel nil)))
+    ; Get rid of any moves for which the relation does not hold in scene1
     (setq moves (remove-if-not (lambda (move) (find move relations
                  :test (lambda (x y) (equal (car x) (car y))))) moves))
     ; If negation, find complement of moves
@@ -525,31 +452,28 @@
 ) ; END compute-move+relation
 
 
-(defun compute-relation (Ti rel coords neg)
-; ```````````````````````````````````````````
-; Computes a relation at a particular time (relation may include variables with/without
+(defun compute-relation (scene moves scene1 rel neg)
+; ````````````````````````````````````````````````````
+; Computes a relation at a particular scene (relation may include variables with/without
 ; restrictors, in which case it returns a list of all relations satisfying that form).
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
-; TODO: figure out what to do with negation.
 ;
   (let* ((subj (first rel)) (prep (second rel)) (obj (third rel)) (obj2 (fourth rel))
-        (scene (reconstruct-scene coords Ti))
         (coords-list1 (find-cars-var subj scene)) (coords-list2 (find-cars-var obj scene)))
     (form-pred-list coords-list1 (list prep) coords-list2 :neg neg))
 ) ; END compute-relation
 
 
-(defun compute-move (Ti obj neg)
-; ```````````````````````````````
+(defun compute-move (scene moves scene1 obj neg)
+; ````````````````````````````````````````````````
 ; Computes all moves at a particular time with the given object (may be a variable with/without
 ; restrictors).
 ;
-  (let* ((moves (get-moves-car-form Ti)))
-    ; If negation, we need to access context to see all blocks (or more generally, 'movable entities'),
-    ; and remove all of the blocks which moved during Ti.
-    (if neg (setq moves (negate-moves moves)))
-    ; Simplify form of relations and filter based on obj
-    (filter+process-moves moves obj))
+  ; If negation, we need to access context to see all blocks (or more generally, 'movable entities'),
+  ; and remove all of the blocks which moved during Ti.
+  (if neg (setq moves (negate-moves moves)))
+  ; Simplify form of relations and filter based on obj
+  (filter+process-moves moves obj)
 ) ; END compute-move
 
 
@@ -570,48 +494,109 @@
 ) ; END negate-moves
 
 
-(defun get-moves-car-form (Ti)
-; `````````````````````````````
-; Gets the moves at time Ti in a form with block name as car.
+(defun apply-binary-constraint (constraint time)
+; ```````````````````````````````````````````````
+; Applies a binary constraint (e.g. (BEFORE.P NOW2)) to time and returns t or nil.
 ;
-  (mapcar (lambda (move) (list (caar move) (cdar move) (cdadr move)))
-    (extract-moves (gethash Ti *context*)))
-) ; END get-moves-car-form
+  (let ((constraint-eval (ttt:apply-rule `(/ (! (prep? _!) (mod-a? (prep? _!)))
+          (eval-temporal-relation 'prep? ',time '_! '?)) constraint)))
+    (eval constraint-eval))
+) ; END apply-binary-constraint
 
 
-(defun apply-to-times (f times quantifier when-question)
-; `````````````````````````````````````````````````````````
-; Given a list f consisting of a function call plus arguments which returns a list of relations,
-; apply it to a list of times based on the given quantifier, and combine the resulting relations
-; in some way based on the quantifier (e.g. 'ever' is union whereas 'always' is intersection).
-; If when-question is given, return times rather than relations. If neg is given, use negated
-; relation.
-; NOTE: currently certainties are added in at this step, and are just set equal to 1. It seems like
-; there are two options here for the future: either certainties might reflect the "distance" of the
-; time from the present, i.e. answers from earlier times are more uncertain, or the uncertainties might
-; reflect something from the calculation of the relations themselves.
-; TODO: "not-ever" is going to be a bigger challenge than I anticipated - what relations is it even supposed
-; to return if e.g. the Twitter block was never on the Starbucks block?
-; Actually, might not be that tricky. I need to ask Georgiy how he currently handles "what block is not on the
-; Twitter block" - "not-ever ..." is essentially equivalent to "always not ..."
+(defun find+constrain-times (func adv-e-unary adv-e-binary adv-f coords)
+; ```````````````````````````````````````````````````````````````````````
+; Finds all times, constrained by the given adverbials, at which func holds. Return all
+; satisfying times conjoined with the relevant propositions given by func.
+; 
+  (let ((f (car func)) (args (cdr func)) (Ti *time*) (scene coords) moves scene1 props times)
+    ; Backtrack through times until the initial time is reached
+    (loop while Ti do
+
+      ; Get moves and 'backup' current scene (so we can use the scene of the consecutive turn)
+      (setq moves (extract-moves (gethash Ti *context*)))
+      (setq scene1 scene)
+
+      ; Undo all moves that happened at current time to get new scene
+      (mapcar (lambda (move)
+        (setq scene (subst-move-scene move scene))) moves)
+
+      ; Only consider this time if it satisfies all binary relations given by the binary adv-e phrases
+      (when (every (lambda (adv-e) (apply-binary-constraint adv-e Ti) adv-e-binary))
+      
+        ; Call func using current scene, any moves, result scene, and any special args
+        (setq props (apply f (append (list scene moves scene1) args)))
+        ; If this gives a result, cons list of time and props to result list
+        (when props
+          (setq times (cons (list Ti props) times))))
+
+      ; Go to previous time
+      (setq Ti (get-prev-time Ti)))
+
+    ; Apply all unary adv-e phrases to further constrain times
+    'TODO
+
+    ; Apply all adv-f phrases to select times which satisfy frequency
+    'TODO
+
+  times)
+) ; END find+constrain-times
+
+
+;; (defun reconstruct-scene (coords Tn)
+;; ; `````````````````````````````````````
+;; ; Reconstruct the scene (i.e. a list of coordinates for each block)
+;; ; at the time denoted by Tn, given current coordinates.
+;; ; coords should be a list of coordinates in the simplified form (|Name| ?x ?y ?z)
+;; ;
+;;   (let* ((Ti (get-prev-time *time*)) (scene coords) moves)
+;;     (loop while (and Ti Tn (> (compare-time Ti Tn) -1) (> (compare-time Ti 'NOW0) -1)) do
+;;       (setq moves (extract-moves (gethash Ti *context*)))
+;;       (mapcar (lambda (move)
+;;         (setq scene )) moves)
+;;       (setq Ti (get-prev-time Ti)))
+;;     scene)
+;; ) ; END reconstruct-scene
+
+
+;; (defun apply-to-times (f times quantifier when-question)
+;; ; `````````````````````````````````````````````````````````
+;; ; Given a list f consisting of a function call plus arguments which returns a list of relations,
+;; ; apply it to a list of times based on the given quantifier, and combine the resulting relations
+;; ; in some way based on the quantifier (e.g. 'ever' is union whereas 'always' is intersection).
+;; ; If when-question is given, return times rather than relations. If neg is given, use negated
+;; ; relation.
+;; ; NOTE: currently certainties are added in at this step, and are just set equal to 1. It seems like
+;; ; there are two options here for the future: either certainties might reflect the "distance" of the
+;; ; time from the present, i.e. answers from earlier times are more uncertain, or the uncertainties might
+;; ; reflect something from the calculation of the relations themselves.
+;; ;
+;;   ; Apply function to each time, and create a list of the time paired with all returned relation
+;;   (let* ((time-rels (sort (copy-seq (remove-if (lambda (x) (null (second x)))
+;;                 (mapcar (lambda (time) (list time (apply (car f) (cons time (cdr f))))) times)))
+;;               (lambda (x y) (> (compare-time (car x) (car y)) 0))))
+;;          (answers (mapcar (lambda (time-rel)
+;;           (if when-question
+;;             (list (add-certainty (first time-rel) (first time-rel)))
+;;             (add-certainty-list (second time-rel) (first time-rel)))) time-rels)))
+;;     ; Combine answers depending on the quantifier given
+;;     (cond
+;;       ((equal quantifier 'most-recent)
+;;         (car answers))
+;;       ((equal quantifier 'ever)
+;;         (union1 answers))
+;;       ((equal quantifier 'always)
+;;         (intersection1 answers))))
+;; ) ; END apply-to-times
+
+
+(defun subst-move-scene (move scene)
+; ````````````````````````````````````
+; Substitutes the from.p coordinates into the to.p coordinates of a move in a given scene,
+; effectively undoing the move.
 ;
-  ; Apply function to each time, and create a list of the time paired with all returned relation
-  (let* ((time-rels (sort (copy-seq (remove-if (lambda (x) (null (second x)))
-                (mapcar (lambda (time) (list time (apply (car f) (cons time (cdr f))))) times)))
-              (lambda (x y) (> (compare-time (car x) (car y)) 0))))
-         (answers (mapcar (lambda (time-rel)
-          (if when-question
-            (list (add-certainty (first time-rel) (first time-rel)))
-            (add-certainty-list (second time-rel) (first time-rel)))) time-rels)))
-    ; Combine answers depending on the quantifier given
-    (cond
-      ((equal quantifier 'most-recent)
-        (car answers))
-      ((equal quantifier 'ever)
-        (union1 answers))
-      ((equal quantifier 'always)
-        (intersection1 answers))))
-) ; END apply-to-times
+  (subst (cons (first move) (second move)) (cons (first move) (third move)) scene :test #'~equal)
+) ; END subst-move-scene
 
 
 (defun add-certainty (rel time)
@@ -632,59 +617,102 @@
 ) ; END add-certainty-list
 
 
-(defun get-time-of-relation (coords rel &key neg)
-; `````````````````````````````````````````````````
-; Get the most recent time at which a given relation held.
-; If neg is given as t, get the most recent time at which the relation was not present.
-;
-  (labels ((get-time-of-relation-recur (rel Ti)
-      (let* ((scene (reconstruct-scene coords Ti))
-             (coords1 (find-car (first rel) scene)) (coords2 (find-car (third rel) scene))
-             (rel-true (eval-relation-bool (second rel) coords1 coords2)))
-        (cond
-          ((and neg (not rel-true)) Ti)
-          ((and (not neg) rel-true) Ti)
-          ((equal Ti 'NOW0) nil)
-          (t (get-time-of-relation-recur rel (get-prev-time Ti)))))))
-    (get-time-of-relation-recur rel (get-prev-time *time*)))
-) ; END get-time-of-relation
 
 
-(defun get-time-of-move+relation (coords rel)
-; `````````````````````````````````````````````
-; Gets the most recent time at which an object of a given name was moved into a relation
-; with another object of a given name.
-;
-  (labels ((get-time-of-move+relation-recur (rel Ti)
-      (let* ((scene (reconstruct-scene coords (get-next-time Ti)))
-             (name1 (first rel)) (prep (second rel)) (name2 (third rel))
-             (coords1 (find-car name1 scene)) (coords2 (find-car name2 scene))
-             (rel-true (eval-relation-bool prep coords1 coords2))
-             (moves (extract-moves (gethash Ti *context*)))
-             (moved-blocks (mapcar #'caar moves)))
-        (cond
-          ((null Ti) nil)
-          ((and (member name1 moved-blocks) rel-true) Ti)
-          ((equal Ti 'NOW0) nil)
-          (t (get-time-of-move-recur name (get-prev-time Ti)))))))
-    (get-time-of-move-recur name (get-prev-time *time*)))
-) ; END get-time-of-move+relation
 
 
-(defun get-time-of-move (name)
-; ``````````````````````````````
-; Gets the most recent time at which an object of a given name was moved.
-;
-  (labels ((get-time-of-move-recur (name Ti)
-      (let* ((moves (extract-moves (gethash Ti *context*)))
-             (moved-blocks (mapcar #'caar moves)))
-        (cond
-          ((null Ti) nil)
-          ((member name moved-blocks) Ti)
-          ((equal Ti 'NOW0) nil)
-          (t (get-time-of-move-recur name (get-prev-time Ti)))))))
-    (get-time-of-move-recur name (get-prev-time *time*)))
-) ; END get-time-of-move
+
+
+;; (defun get-time-of-relation (coords rel &key neg)
+;; ; `````````````````````````````````````````````````
+;; ; Get the time(s) at which a given relation held.
+;; ; If neg is given as t, get the time(s) at which the relation did not hold.
+;; ;
+;;   (labels ((get-time-of-relation-recur (rel Ti)
+;;       (let* ((scene (reconstruct-scene coords Ti))
+;;              (coords1 (find-car (first rel) scene)) (coords2 (find-car (third rel) scene))
+;;              (rel-true (eval-spatial-relation-bool (second rel) coords1 coords2)))
+;;         (cond
+;;           ((and neg (not rel-true)) Ti)
+;;           ((and (not neg) rel-true) Ti)
+;;           ((equal Ti 'NOW0) nil)
+;;           (t (get-time-of-relation-recur rel (get-prev-time Ti)))))))
+;;     (get-time-of-relation-recur rel (get-prev-time *time*)))
+;; ) ; END get-time-of-relation
+
+
+;; (defun get-time-of-move+relation (coords rel)
+;; ; `````````````````````````````````````````````
+;; ; Gets the most recent time at which an object of a given name was moved into a relation
+;; ; with another object of a given name.
+;; ;
+;;   (labels ((get-time-of-move+relation-recur (rel Ti)
+;;       (let* ((scene (reconstruct-scene coords (get-next-time Ti)))
+;;              (name1 (first rel)) (prep (second rel)) (name2 (third rel))
+;;              (coords1 (find-car name1 scene)) (coords2 (find-car name2 scene))
+;;              (rel-true (eval-spatial-relation-bool prep coords1 coords2))
+;;              (moves (extract-moves (gethash Ti *context*)))
+;;              (moved-blocks (mapcar #'caar moves)))
+;;         (cond
+;;           ((null Ti) nil)
+;;           ((and (member name1 moved-blocks) rel-true) Ti)
+;;           ((equal Ti 'NOW0) nil)
+;;           (t (get-time-of-move-recur name (get-prev-time Ti)))))))
+;;     (get-time-of-move-recur name (get-prev-time *time*)))
+;; ) ; END get-time-of-move+relation
+
+
+;; (defun get-time-of-move (name)
+;; ; ``````````````````````````````
+;; ; Gets the most recent time at which an object of a given name was moved.
+;; ;
+;;   (labels ((get-time-of-move-recur (name Ti)
+;;       (let* ((moves (extract-moves (gethash Ti *context*)))
+;;              (moved-blocks (mapcar #'caar moves)))
+;;         (cond
+;;           ((null Ti) nil)
+;;           ((member name moved-blocks) Ti)
+;;           ((equal Ti 'NOW0) nil)
+;;           (t (get-time-of-move-recur name (get-prev-time Ti)))))))
+;;     (get-time-of-move-recur name (get-prev-time *time*)))
+;; ) ; END get-time-of-move
+
+
+;; (defun get-time-n-moves-before (Ti n)
+;; ; ````````````````````````````````````
+;; ; Gets the time of the nth most recent move.
+;; ;
+;;   (labels ((get-time-n-moves-before-recur (Tj j)
+;;       (let* ((moves (extract-moves (gethash Tj *context*)))
+;;              (k (- j (length moves))))
+;;         (cond
+;;           ((null Tj) nil)
+;;           ((<= k 0) Tj)
+;;           ((equal Tj 'NOW0) nil)
+;;           (t (get-time-n-moves-before-recur (get-prev-time Tj) k))))))
+;;     (get-time-n-moves-before-recur (get-prev-time Ti) n))
+;; ) ; END get-time-n-moves-before
+
+
+;; (defun get-time-n-moves-after (Ti n)
+;; ; ````````````````````````````````````
+;; ; Gets the time of the nth most recent move.
+;; ;
+;;   (labels ((get-time-n-moves-after-recur (Tj j)
+;;       (let* ((moves (extract-moves (gethash Tj *context*)))
+;;              (k (- j (length moves))))
+;;         (cond
+;;           ((null Tj) nil)
+;;           ((<= k 0) Tj)
+;;           ((equal Tj 'NOW0) nil)
+;;           (t (get-time-n-moves-after-recur (get-next-time Tj) k))))))
+;;     (get-time-n-moves-after-recur (get-next-time Ti) n))
+;; ) ; END get-time-n-moves-after
+
+
+
+
+
 
 
 ; TTT flags and other preds are defined as follows
@@ -700,13 +728,21 @@
 (defun hist-adv-init? (ulf)
   (member ulf '(originally.adv-e initially.adv-e first.adv-e)))
 (defun hist-adv-cur? (ulf)
-  (member ulf '(currently.adv-e)))
-(defun hist-adv-always? (ulf)
-  (member ulf '(always.adv-e)))
+  (member ulf '(currently.adv-e now.adv-e)))
 (defun hist-adv-ever? (ulf)
   (member ulf '(ever.adv-e)))
-(defun hist-adv-never? (ulf)
-  (member ulf '(never.adv-e)))
+
+;; (defun hist-adv-once? (ulf)
+;;   (member ulf '(once.adv-f)))
+;; (defun hist-adv-twice? (ulf)
+;;   (member ulf '(twice.adv-f)))
+;; (defun hist-adv-always? (ulf)
+;;   (member ulf '(always.adv-f)))
+;; (defun hist-adv-never? (ulf)
+;;   (member ulf '(never.adv-f)))
+
+(defun hist-adv-directly? (ulf)
+  (member ulf '(directly.adv-a just.adv-a right.adv-a)))
 
 (defun hist-noun-turn? (ulf)
   (member ulf '(turn.n stage.n step.n question.n iteration.n move.n period.n)))
@@ -724,6 +760,13 @@
 (defun hist-prep-next? (ulf)
   (member ulf '(after.p following.p since.p from.p)))
 
+(defun hist-ps-prev? (ulf)
+  (member ulf '(before.ps prior_to.ps preceding.ps until.ps)))
+(defun hist-ps-next? (ulf)
+  (member ulf '(after.ps following.ps since.ps from.ps)))
+(defun hist-ps-while? (ulf)
+  (member ulf '(while.ps when.ps)))
+
 (defun hist-adj-prev? (ulf)
   (member ulf '(last.a previous.a preceding.a recent.a)))
 (defun hist-adj-next? (ulf)
@@ -734,5 +777,3 @@
   (member ulf '(final.a)))
 (defun hist-adj-cur? (ulf)
   (member ulf '(current.a)))
-(defun hist-adv-directly? (ulf)
-  (member ulf '(directly.adv-a just.adv-a right.adv-a)))

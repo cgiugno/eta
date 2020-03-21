@@ -155,10 +155,10 @@
 
 (defun find-car (x list)
 ;`````````````````````````
-; Finds a sublist of list which has x as its car.
+; Finds a sublist of list which has x as its car (or matches x if atom)
 ;
-  (if (every #'listp list)
-    (find x list :test (lambda (y l) (equal y (car l)))))
+  (find x list :test (lambda (y l)
+    (or (and (atom l) (equal y l)) (and (listp l) (equal y (car l))))))
 ) ; END find-car
 
 
