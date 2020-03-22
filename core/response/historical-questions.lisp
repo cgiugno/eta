@@ -522,10 +522,10 @@
         (setq scene (subst-move-scene move scene))) moves)
 
       ; Only consider this time if it satisfies all binary relations given by the binary adv-e phrases
-      (when (every (lambda (adv-e) (apply-binary-constraint adv-e Ti) adv-e-binary))
+      (when (every (lambda (adv-e) (apply-binary-constraint adv-e Ti)) adv-e-binary)
       
         ; Call func using current scene, any moves, result scene, and any special args
-        (setq props (apply f (append (list scene moves scene1) args)))
+        (if f (setq props (apply f (append (list scene moves scene1) args))))
         ; If this gives a result, cons list of time and props to result list
         (when props
           (setq times (cons (list Ti props) times))))

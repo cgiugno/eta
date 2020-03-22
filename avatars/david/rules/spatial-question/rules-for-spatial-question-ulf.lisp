@@ -195,6 +195,28 @@
 ; Parses premodified nouns
 ;
 '(
+    ; Historical nouns
+    ; NOTE: there is a little disparity between how superlatives (e.g. "most recent turn")
+    ; are handled here, in part to create consistency with adverbial handling (e.g. "most recently"),
+    ; in which case "most" is a mod-a. I'm not sure what the best way to deal with this is.
+    1 (most adj-history 0)
+       2 (((lex-ulf! mod-a 1) (lex-ulf! adj 2) (*n1-ulf-tree* 3)) ((1 2) 3)) (0 :ulf-recur)
+    
+
+
+;;   '(first.a second.a third.a last.a current.a
+;;     recent.a ago.a ever.a)
+
+;;   (noun-history turn time stage step question utterance iteration move action period start beginning while past
+;;       now second minute hour)
+;;   (prep-history at in on prep-history-simple)
+;;   (prep-history-simple during within before after when while prior_to following preceding since from until)
+;;   (prep-history-adj ago before previously)
+;;   (adj-history-number one two three four five six seven eight nine ten twenty thirty forty fifty sixty seventy
+;;       eighty ninety hundred)
+;;   (adj-history previous next current initial first original following preceding future last final recent
+;;       few couple adj-history-number)
+
     ; Straightforward noun, possibly with a corporation and maybe a premodifying adj 
     1 (noun)
        2 (lex-ulf! noun 1) (0 :ulf)
