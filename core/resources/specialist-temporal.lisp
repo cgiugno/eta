@@ -291,19 +291,6 @@
 ) ; END is-recent
 
 
-<<<<<<< HEAD
-(defun is-before (time1 time2)
-; `````````````````````````````
-; Checks if time1 is before time2.
-;
-  (let ((utime1 (to-universal-time (get-time-of-episode time1)))
-        (utime2 (to-universal-time (get-time-of-episode time2))))
-    (and (<= utime1 utime2) (not (equal time1 time2))))
-) ; END is-before
-
-
-=======
->>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 (defun is-prev (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is the previous time to time2.
@@ -312,16 +299,6 @@
 ) ; END is-prev
 
 
-<<<<<<< HEAD
-(defun is-after (time1 time2)
-; `````````````````````````````
-; Checks if time1 is after time2.
-;
-  (let ((utime1 (to-universal-time (get-time-of-episode time1)))
-        (utime2 (to-universal-time (get-time-of-episode time2))))
-    (and (>= utime1 utime2) (not (equal time1 time2))))
-) ; END is-after
-=======
 (defun is-before (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is before time2.
@@ -330,7 +307,6 @@
         (utime2 (to-universal-time (get-time-of-episode time2))))
     (or (< utime1 utime2) (is-prev time1 time2)))
 ) ; END is-before
->>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 
 
 (defun is-next (time1 time2)
@@ -341,8 +317,6 @@
 ) ; END is-next
 
 
-<<<<<<< HEAD
-=======
 (defun is-after (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is after time2.
@@ -353,7 +327,6 @@
 ) ; END is-after
 
 
->>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 (defun time-inclusive (times)
 ; ````````````````````````````
 ; Makes list of times inclusive by including previous time, e.g. (NOW1 NOW2 NOW3) => (NOW0 NOW1 NOW3 NOW4)
@@ -373,17 +346,11 @@
 ;
   (let* ((prep-lookup (find-car rel *temporal-prep-list*))
          (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
-<<<<<<< HEAD
-    (if (fboundp prep)
-      (funcall prep time1 time2 mod-a)
-      t))
-=======
     (cond
       ((or (null time1) (null time2)) nil)
       ((fboundp prep)
         (funcall prep time1 time2 mod-a))
       (t t)))
->>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 ) ; END eval-temporal-relation
 
 
