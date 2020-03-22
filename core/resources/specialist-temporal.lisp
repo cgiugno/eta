@@ -12,12 +12,8 @@
     before.p (prior_to.p before.p) (preceding.p before.p) (until.p before.p)
     after.p (following.p after.p) (since.p after.p) (from.p after.p)))
 (defvar *temporal-adj-list*
-  '(first.a (original.a first.a) (initial.a first.a) second.a third.a current.a (now.a current.a)
-    recent.a ago.a (previous.a ago.a) (before.a ago.a)
-     )
-)
-
-  (adv-e recently ever since last adv-e-number)
+  '(first.a (original.a first.a) (initial.a first.a) second.a third.a last.a (final.a last.a) current.a (now.a current.a)
+    recent.a ago.a (previous.a ago.a) (before.a ago.a) ever.a))
 
 ; Possible temporal nouns of different categories
 (defun temporal-unit-noun? (ulf)
@@ -295,6 +291,7 @@
 ) ; END is-recent
 
 
+<<<<<<< HEAD
 (defun is-before (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is before time2.
@@ -305,6 +302,8 @@
 ) ; END is-before
 
 
+=======
+>>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 (defun is-prev (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is the previous time to time2.
@@ -313,6 +312,7 @@
 ) ; END is-prev
 
 
+<<<<<<< HEAD
 (defun is-after (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is after time2.
@@ -321,6 +321,16 @@
         (utime2 (to-universal-time (get-time-of-episode time2))))
     (and (>= utime1 utime2) (not (equal time1 time2))))
 ) ; END is-after
+=======
+(defun is-before (time1 time2)
+; `````````````````````````````
+; Checks if time1 is before time2.
+;
+  (let ((utime1 (to-universal-time (get-time-of-episode time1)))
+        (utime2 (to-universal-time (get-time-of-episode time2))))
+    (or (< utime1 utime2) (is-prev time1 time2)))
+) ; END is-before
+>>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 
 
 (defun is-next (time1 time2)
@@ -331,6 +341,19 @@
 ) ; END is-next
 
 
+<<<<<<< HEAD
+=======
+(defun is-after (time1 time2)
+; `````````````````````````````
+; Checks if time1 is after time2.
+;
+  (let ((utime1 (to-universal-time (get-time-of-episode time1)))
+        (utime2 (to-universal-time (get-time-of-episode time2))))
+    (or (> utime1 utime2) (is-next time1 time2)))
+) ; END is-after
+
+
+>>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 (defun time-inclusive (times)
 ; ````````````````````````````
 ; Makes list of times inclusive by including previous time, e.g. (NOW1 NOW2 NOW3) => (NOW0 NOW1 NOW3 NOW4)
@@ -350,9 +373,17 @@
 ;
   (let* ((prep-lookup (find-car rel *temporal-prep-list*))
          (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
+<<<<<<< HEAD
     (if (fboundp prep)
       (funcall prep time1 time2 mod-a)
       t))
+=======
+    (cond
+      ((or (null time1) (null time2)) nil)
+      ((fboundp prep)
+        (funcall prep time1 time2 mod-a))
+      (t t)))
+>>>>>>> 3cf2508ff8b60b9892de0f33df54411abf1758aa
 ) ; END eval-temporal-relation
 
 

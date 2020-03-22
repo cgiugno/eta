@@ -101,7 +101,7 @@
   (aux-bw do modal)
   
   (adv-e-number first second third)
-  (adv-e previously before originally initially currently now recently ever since last adv-e-number)
+  (adv-e previously before originally initially currently now recently ever since last finally adv-e-number)
   (adv-f-number once twice thrice)
   (adv-f always never adv-f-number)
   (adv-history adv-f adv-e)
