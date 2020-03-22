@@ -202,12 +202,13 @@
 ) ; END adv-e-lex?
 
 
-(defun adv-e-existential? (ulf)
-; ```````````````````````````````
-; Checks if a ULF is an adv-e word other than universals such as 'always' and 'never'.
+(defun adv-f? (ulf)
+; ``````````````````
+; Checks if a ULF is an adv-f word or phrase.
 ;
-  (and (atom ulf) (adv-e-lex? ulf) (not (member ulf '(always.adv-e never.adv-e))))
-) ; END adv-e-existential?
+  (or (adv-f-lex? ulf)
+      (and (listp ulf) (equal (car ulf) 'ADV-F)))
+) ; END adv-f?
 
 
 (defun adv-f-lex? (ulf)
@@ -216,6 +217,23 @@
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-F))
 ) ; END adv-f-lex?
+
+
+(defun adv-s? (ulf)
+; ``````````````````
+; Checks if a ULF is an adv-s word or phrase.
+;
+  (or (adv-s-lex? ulf)
+      (and (listp ulf) (equal (car ulf) 'ADV-S)))
+) ; END adv-s?
+
+
+(defun adv-s-lex? (ulf)
+; ```````````````````````
+; Checks if a ULF is an adv-s word.
+;
+  (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-S))
+) ; END adv-s-lex?
 
 
 (defun adv-a? (ulf)
@@ -233,6 +251,32 @@
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-A))
 ) ; END adv-a-lex?
+
+
+(defun mod-a? (ulf)
+; ```````````````````
+; Checks if a ULF is a mod-a constituent.
+;
+  (or (mod-a-lex? ulf)
+      (and (listp ulf) (equal (car ulf) 'MOD-A)))
+) ; END mod-a?
+
+
+(defun mod-a-lex? (ulf)
+; ```````````````````
+; Checks if a ULF is a mod-a word.
+;
+  (and (atom ulf) (equal (second (sym-split ulf 6)) '.MOD-A))
+) ; END mod-a-lex?
+
+
+(defun non-adv? (ulf)
+; ````````````````````
+; Checks if a ULF is not an adv word (or a mod-a modifier).
+;
+  (and (not (adv-a? ulf)) (not (adv-e? ulf)) (not (adv-f? ulf)) (not (adv-s? ulf))
+       (not (mod-a? ulf)))
+) ; END non-adv?
 
 
 (defun non-neg? (ulf)
@@ -396,6 +440,22 @@
 ) ; END remove-question-do
 
 
+(defun hole? (p)
+; ````````````````
+; Matches hole/placeholder.
+;
+  (or (equal p '*H) (equal p '*P))
+) ; END hole?
+
+
+(defun qmark? (p)
+; `````````````````
+; Matches question mark.
+;
+  (equal p '?)
+) ; END qmark?
+
+
 (defun remove-question-mark (ulf)
 ; `````````````````````````````````
 ; Removes question mark in ULF.
@@ -422,27 +482,51 @@
 ) ; END uninvert-question
 
 
-(defun remove-adv-e (ulf)
-; ````````````````````````
-; Removes all adv-e modifiers from ULF.
-; TODO: is there a way to avoid removing always and never in responses in a less ad-hoc way?
-;
-  (ttt:apply-rules
-    '((/ (adv-e-existential? _!) _!)
-      (/ (_!1 (adv-e _!)) _!1)
-      (/ ((adv-e _!) _!1) _!1)
-      (/ (_*1 (adv-e _!) _*2) (_*1 _*2))) ulf)
-) ; END remove-adv-e
-
-
 (defun remove-adv-f (ulf)
 ; ````````````````````````
 ; Removes all adv-f modifiers from ULF.
 ;
   (ttt:apply-rules
-    '((/ (adv-f-lex? _!) _!)
-      (/ (_*1 (adv-f _!) _*2) (_*1 _*2))) ulf)
+    '((/ (non-adv? freq-adverbial-phrase?) non-adv?)
+      (/ (freq-adverbial-phrase? non-adv?) non-adv?)
+      (/ (_*1 freq-adverbial-phrase? _*2) (_*1 _*2))
+      (/ (_*1 freq-adverbial-phrase?) (_*1))
+    ) ulf)
 ) ; END remove-adv-f
+
+
+(defun remove-adv-e (ulf)
+; ````````````````````````````````````
+; Removes all adv-e modifiers from ULF.
+;
+  (ttt:apply-rules
+    '((/ (non-adv? time-adverbial-phrase?) non-adv?)
+      (/ (time-adverbial-phrase? non-adv?) non-adv?)
+      (/ (_*1 time-adverbial-phrase? _*2) (_*1 _*2))
+      (/ (_*1 time-adverbial-phrase?) (_*1))
+    ) ulf)
+) ; END remove-adv-e
+
+
+(defun freq-adverbial-phrase? (ulf)
+; ``````````````````````````````````
+; Checks if a ULF is a frequency adverbial, i.e. (adv-f ...)
+;
+  (or
+    (ttt:match-expr '(adv-f _!) ulf))
+) ; END freq-adverbial-phrase?
+
+
+(defun time-adverbial-phrase? (ulf)
+; ``````````````````````````````````
+; Checks if a ULF is a time adverbial phrase, i.e. either (adv-e ...), (word.ps ...),
+; or (word.mod-a (word.ps ...))
+;
+  (or
+    (ttt:match-expr '(mod-a? (sent-prep? _!)) ulf)
+    (ttt:match-expr '(sent-prep? _!) ulf)
+    (ttt:match-expr '(adv-e _!) ulf))
+) ; END time-adverbial-phrase?
 
 
 (defun remove-not (ulf)
@@ -517,12 +601,20 @@
 ) ; END prep-conjunction?
 
 
-(defun sentential-preposition? (ulf)
+(defun sent-prep? (ulf)
 ; ````````````````````````````````````
 ; Checks if a ULF is a sentential preposition (because.ps, while.ps, etc.).
 ;
   (and (atom ulf) (equal (second (sym-split ulf 3)) '.PS))
-) ; END sentential-preposition?
+) ; END sent-prep?
+
+
+(defun ps-to-p! (ulf)
+; `````````````````````
+; Converts a sentential preposition, e.g. before.ps, to a normal preposition, e.g. before.p
+;
+  (if (sent-prep? ulf) (first (sym-split ulf 1)) ulf)
+) ; END ps-to-p!
 
 
 (defun discourse-entity? (ulf)
@@ -703,6 +795,8 @@
 ; If ULF is a numerical adjective (e.g. "5.a" or "five.a"), return the corresponding
 ; number, or nil otherwise.
 ; 
+  (let ((num (read-from-string (format nil "~a" (first (sym-split ulf 2))))))
+    (if (numberp num) (return-from numerical-adj! num)))
   (if (numberp ulf) (return-from numerical-adj! ulf))
   (if (not (adj? ulf)) (return-from numerical-adj! nil))
   (let ((adj (read-from-string (string (first (sym-split ulf 2))))))
@@ -728,7 +822,9 @@
                   eighteen.a nineteen.a twenty.a thirty.a forty.a fifty.a sixty.a seventy.a
                   eighty.a ninety.a one_hundred.a first.a second.a third.a fourth.a fifth.a
                   sixth.a seventh.a eighth.a ninth.a tenth.a))
-    (numberp (read-from-string (format nil "~a" (car (sym-split ulf 2))))))) t)
+    (let ((split (sym-split ulf 2)))
+      (and (numberp (read-from-string (format nil "~a" (first split)))) (equal '.A (second split))))))
+  t)
 ) ; END numerical-adj?
 
 
@@ -755,6 +851,8 @@
 ; If ULF is a numerical determiner (e.g. "two.d"), return the corresponding
 ; number, or nil otherwise.
 ; 
+  (let ((num (read-from-string (format nil "~a" (first (sym-split ulf 2))))))
+    (if (numberp num) (return-from numerical-det! num)))
   (if (not (det? ulf)) (return-from numerical-det! nil))
   (cond
     ((equal ulf 'zero.d) 0) ((equal ulf 'one.d) 1) ((equal ulf 'two.d) 2)
@@ -768,12 +866,15 @@
 ; ``````````````````````````
 ; Check if ULF is a numerical determiner.
 ;
-  (and (symbolp ulf)
+  (if (and (symbolp ulf) (or
     (member ulf '(zero.d one.d two.d three.d four.d five.d six.d
                   seven.d eight.d nine.d ten.d eleven.d twelve.d
                   thirteen.d fourteen.d fifteen.d sixteen.d seventeen.d
                   eighteen.d nineteen.d twenty.d thirty.d forty.d fifty.d
-                  sixty.d seventy.d eighty.d ninety.d one_hundred.d)))
+                  sixty.d seventy.d eighty.d ninety.d one_hundred.d))
+    (let ((split (sym-split ulf 2)))
+      (and (numberp (read-from-string (format nil "~a" (first split)))) (equal '.D (second split))))))
+  t)
 ) ; END numerical-det?
 
 
@@ -860,6 +961,15 @@
     (let ((tmp (remove nil (mapcar #'remove-quan ulf))))
       (if (and (listp tmp) (= (length tmp) 1)) (car tmp) tmp)))
 ) ; END remove-quan
+
+
+(defun make-set (list)
+; `````````````````````
+; Makes a set ULF (SET-OF ...) of the elements of a list, if multiple elements.
+; If list has only a single element, just return that element.
+;
+  (if (<= (length list) 1) (car list) (cons 'SET-OF list))
+) ; END make-set
 
 
 (defun copulative? (v)
@@ -950,6 +1060,16 @@
 ) ; END move-prop?
 
 
+(defun ask-prop? (prop)
+; `````````````````````````
+; Checks whether a proposition is a ask.v formula.
+; i.e. (you ((past ask.v) '((sub (at.p (what.d place.n)) ...) ?)))
+;
+  (and (listp prop) (= (length prop) 2) (listp (second prop)) (= (length (second prop)) 2)
+    (equal (first (second prop)) '(past ask.v)))
+) ; END ask-prop?
+
+
 (defun same-sentence? (de1 de2 ulf)
 ; ``````````````````````````````````
 ; Checks whether de1 and de2 are in the same ulf sentence.
@@ -1028,7 +1148,7 @@
           ; If the current ulf-part matches phrase2, we have a match
           ((equal ulf-part phrase2) t)
           ; If a clause-forming operator is found (n+preds/np+preds due to relative clauses), do not search any deeper
-          ((and (listp ulf-part) (or (sentential-preposition? (first ulf-part)) (member (first ulf-part) '(n+preds np+preds that tht ans-to))))
+          ((and (listp ulf-part) (or (sent-prep? (first ulf-part)) (member (first ulf-part) '(n+preds np+preds that tht ans-to))))
             nil)
           ; If an action/event reifer is found, return true only if no blocker has been found
           ((and (listp ulf-part) (member (first ulf-part) '(to ka ke)))

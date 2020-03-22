@@ -322,8 +322,14 @@
           ; does touch nothing => does not touch anything
           (/ ((tense? do.aux-s) (^* (verb-untensed? nothing.pro _*))) ((tense? do.aux-s) not (verb-untensed? anything.pro _*)))
           (/ ((tense? do.aux-s) (^* (verb-untensed? (no.d _!) _*))) ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*)))
+          ; do I move nothing => I do not move anything
+          (/ ((tense? do.aux-s) _!1 (^* (verb-untensed? nothing.pro _*))) (_!1 ((tense? do.aux-s) not (verb-untensed? anything.pro _*))))
+          (/ ((tense? do.aux-s) _!1 (^* (verb-untensed? (no.d _!) _*))) (_!1 ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*))))
           ; every blocks => all blocks
           (/ (every.d (! (^* (plur noun?)))) (all.d !))
+          ; never did not move anything => move everything
+          (/ (never.adv-f ((tense? do.aux-s) not (verb-untensed? anything.pro _*))) ((tense? verb-untensed?) everything.pro _*))
+          (/ (never.adv-f ((tense? do.aux-s) not (verb-untensed? (any.d _!) _*))) ((tense? verb-untensed?) (every.d _!) _*))
           )
       ; something => nothing, some block => no block
       (ttt:apply-rules '((/ something.pro nothing.pro) (/ (some.d _!) (no.d _!))) ulf :max-n 1)))
@@ -564,15 +570,6 @@
 ) ; END make-color-np
 
 
-(defun make-set (list)
-; `````````````````````
-; Makes a set ULF (SET-OF ...) of the elements of a list, if multiple elements.
-; If list has only a single element, just return that element.
-;
-  (if (<= (length list) 1) (car list) (cons 'SET-OF list))
-) ; END make-set
-
-
 ; TTT flags and other preds are defined as follows
 ; ``````````````````````````````````````````````````
 (defun yn-flag? (p)
@@ -611,9 +608,6 @@
 
 (defun color-word? (p)
   (member p '(RED.A ORANGE.A YELLOW.A GREEN.A BLUE.A PURPLE.A PINK.A WHITE.A BLACK.A MAGENTA.A GRAY.A GREY.A VIOLET.A INDIGO.A BROWN.A)))
-
-(defun qmark? (p)
-  (equal p '?))
 
 (defun poss-ques? (ulf)
   (and (listp ulf) (equal (car ulf) 'poss-ques)))

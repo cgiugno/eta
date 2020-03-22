@@ -34,12 +34,17 @@
   (stage stages)
   (step steps)
   (question questions)
+  (utterance utterances)
   (iteration iterations)
   (move moves)
+  (action actions)
   (period periods)
   (start starts)
   (beginning beginnings)
   (while whiles)
+  (second seconds)
+  (minute minutes)
+  (hour hours)
 
   (under underneath supporting support)
   (close next)
@@ -95,18 +100,25 @@
 
   (aux-bw do modal)
   
-  (adv-history previously before originally initially currently recently ever since always first never)
-  (adv-f once twice)
-  (noun-history turn time stage step question iteration move period start beginning while past)
+  (adv-e-number first second third)
+  (adv-e previously before originally initially currently now recently ever since last adv-e-number)
+  (adv-f-number once twice thrice)
+  (adv-f always never adv-f-number)
+  (adv-history adv-f adv-e)
+  (noun-history turn time stage step question utterance iteration move action period start beginning while past
+      now second minute hour)
   (prep-history at in on prep-history-simple)
-  (prep-history-simple during before after prior_to following preceding since from until)
-  (adj-history previous next current initial first original following preceding future last final recent)
+  (prep-history-simple during within before after when while prior_to following preceding since from until)
+  (prep-history-adj ago before previously)
+  (adj-history-number one two three four five six seven eight nine ten twenty thirty forty fifty sixty seventy
+      eighty ninety hundred)
+  (adj-history previous next current initial first original following preceding future last final recent
+      few couple adj-history-number)
 
-  ; Any word that signals that the following expression might be an adv-e (or adv-f)
-  ; 'right' for e.g., right before this turn
-  ; number determiners for e.g., two turns ago
-  (adv-e adv-f adv-history prep-history adj-history just right most one two three four five six seven eight nine ten)
-  (adv_ adv adv-history adv-f)
+  (adv-hist-modifier just right directly most)
+  (adv-hist-number one two three four five six seven eight nine ten)
+  (adv-hist-word adv-history prep-history adj-history adv-hist-modifier adv-hist-number)
+  (adv_ adv adv-history adv-hist-modifier)
   
   (prep prep-bw prep-history)
   (adj adj-bw adj-history)

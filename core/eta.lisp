@@ -1142,8 +1142,10 @@
       ;````````````````````````````
       ; Eta: Perceiving world
       ;````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(me perceive-world.v _! _!1) wff))
+      ((setq bindings (bindings-from-ttt-match '(me perceive-world.v _! _!1 _!2) wff))
         (setq system (get-single-binding bindings))
+        (setq bindings (cdr bindings))
+        (setq user-ulf (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
         (cond
@@ -1167,10 +1169,25 @@
             (setq *time-prev* *time*)
             (mapcar (lambda (perception)
                 (let ((perception1 (list perception '@ *time*)))
+                  (update-time)
                   (store-fact perception1 *context*)
                   (store-fact (first perception1) *context* :keys (list (third perception1)) :no-self t)
-                  (update-time)))
+                ))
               action-perceptions)))
+
+        ; Store ULF of user utterance in context, deindexed at the current time
+        ; TODO: COME BACK TO THIS
+        ; This should probably be done elsewhere (e.g. at the time of Eta processing the say-to.v episode),
+        ; but then the utterance would come temporally before any block moves, whereas it should be the other
+        ; way around. The perceive-world.v action in general needs to be rethought (since really observing a
+        ; user say-to.v action, much like a move.v action or any other action, IS a perceive world action).
+        ; Update Eta's current time
+        (when user-ulf
+          (let ((utterance-prop `((you ((past ask.v) ,user-ulf)) @ ,*time*)))
+            (update-time)
+            (store-fact utterance-prop *context*)
+            (store-fact (first utterance-prop) *context* :keys (list (third utterance-prop)) :no-self t)
+        ))
         
         (delete-current-episode {sub}plan-name)
       )

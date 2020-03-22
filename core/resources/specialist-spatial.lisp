@@ -6,10 +6,13 @@
 ;; so that the centroid coordinates of two blocks which are touching will differ by 1
 ;;
 
+; List of supported spatial prepositions (potentially aliased in the case of prepositions
+; with multiple senses or ones that are essentially synonyms)
 ; TODO: on_to in facing abutting between visible flush_with towards)
 (defvar *spatial-prep-list*
-  '(touching.p to_the_left_of.p to_the_right_of.p below.p under.p beneath.p above.p behind.p
-    in_front_of.p on.p near.p next_to.p close_to.p on_top_of.p adjacent_to.p))
+  '(touching.p to_the_left_of.p to_the_right_of.p below.p (under.p below.p) (beneath.p below.p) above.p behind.p
+    in_front_of.p on.p (on_top_of.p on.p) near.p (near-to.p near.p) (close-to.p near.p) next_to.p (adjacent_to.p next-to.p)))
+    
 (defvar *blocksize* 1)
 (defvar *std-error* (/ *blocksize* 10))
 
@@ -41,30 +44,34 @@
 
 
 
-(defun eval-relation-bool (rel coords1 coords2 &optional coords3)
-; `````````````````````````````````````````````````````````````````
+(defun eval-spatial-relation-bool (rel coords1 coords2 &optional coords3)
+; `````````````````````````````````````````````````````````````````````````
 ; Evaluate whether relation rel holds between an object with centroid at coords1, and
 ; an object with centroid at coords2 (plus an additional object at coords3 for between.p)
 ; Returns boolean value.
 ; NOTE: coords is a list of the form e.g. (|Texaco| 2 3 0)
 ;
-  (if (fboundp rel)
-    (let ((v (apply rel (append (cdr coords1) (cdr coords2) (cdr coords3)))))
-      (if (numberp v) (>= v *certainty-threshold*) v)))
-) ; END eval-relation-bool
+  (let* ((prep-lookup (find-car rel *spatial-prep-list*))
+         (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
+    (if (fboundp prep)
+      (let ((v (apply prep (append (cdr coords1) (cdr coords2) (cdr coords3)))))
+        (if (numberp v) (>= v *certainty-threshold*) v))))
+) ; END eval-spatial-relation-bool
 
 
 
-(defun eval-relation (rel coords1 coords2 &optional coords3)
-; ````````````````````````````````````````````````````````````
+(defun eval-spatial-relation (rel coords1 coords2 &optional coords3)
+; ```````````````````````````````````````````````````````````````````
 ; Returns a certainty value for the relation rel between coords1 and coords2 (and
 ; coords3 in the case of between).
 ; NOTE: coords is a list of the form e.g. (|Texaco| 2 3 0)
 ;
-  (if (fboundp rel)
-    (let ((v (apply rel (append (cdr coords1) (cdr coords2) (cdr coords3)))))
-      (if (numberp v) v (if v t nil))))
-) ; END eval-relation
+  (let* ((prep-lookup (find-car rel *spatial-prep-list*))
+         (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
+    (if (fboundp prep)
+      (let ((v (apply prep (append (cdr coords1) (cdr coords2) (cdr coords3)))))
+        (if (numberp v) v (if v t nil)))))
+) ; END eval-spatial-relation
 
 
 
@@ -158,20 +165,6 @@
 
 
 
-(defun under.p (x1 y1 z1 x2 y2 z2)
-; `````````````````````````````````````````````
-  (below.p x1 y1 z1 x2 y2 z2)
-) ; END under.p
-
-
-
-(defun beneath.p (x1 y1 z1 x2 y2 z2)
-; `````````````````````````````````````````````
-  (below.p x1 y1 z1 x2 y2 z2)
-) ; END beneath.p
-
-
-
 (defun above.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (abs (- y1 y2))) (diffz (- z1 z2)))
@@ -207,13 +200,6 @@
 
 
 
-(defun on_top_of.p (x1 y1 z1 x2 y2 z2)
-; ````````````````````````````````````
-  (on.p x1 y1 z1 x2 y2 z2)
-) ; END on_top_of.p
-
-
-
 ;; (defun near.p (x1 y1 z1 x2 y2 z2 size1 size2 context)
 (defun near.p (x1 y1 z1 x2 y2 z2)
 ; `````````````````````````````````````````````````````
@@ -223,30 +209,9 @@
 
 
 
-(defun close_to.p (x1 y1 z1 x2 y2 z2)
-; `````````````````````````````````````````````````````
-  (near.p x1 y1 z1 x2 y2 z2)
-) ; END close_to.p
-
-
-
-(defun near_to.p (x1 y1 z1 x2 y2 z2)
-; `````````````````````````````````````````````````````
-  (near.p x1 y1 z1 x2 y2 z2)
-) ; END near_to.p
-
-
-
 ;; (defun next_to.p (x1 y1 z1 x2 y2 z2 size1 size2)
 (defun next_to.p (x1 y1 z1 x2 y2 z2)
 ; ````````````````````````````````````````````````
   ;; (+ (* 0.5 (near.p x1 y1 z1 x2 y2 z2 size1 size2)) (* 0.5 (same-height z1 z2)))
   (+ (* 0.5 (near.p x1 y1 z1 x2 y2 z2)) (* 0.5 (same-height z1 z2)))
 ) ; END next_to.p
-
-
-
-(defun adjacent_to.p (x1 y1 z1 x2 y2 z2)
-; ````````````````````````````````````````````````
-  (next_to.p x1 y1 z1 x2 y2 z2)
-) ; END adjacent_to.p
