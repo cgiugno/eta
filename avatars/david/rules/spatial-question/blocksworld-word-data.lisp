@@ -100,20 +100,22 @@
 
   (aux-bw do modal)
   
-  (adv-e-number first second third)
+  (adv-e-number first second third fourth fifth sixth seventh eighth ninth tenth)
   (adv-e previously before originally initially currently now recently ever since last finally adv-e-number)
   (adv-f-number once twice thrice)
   (adv-f always never adv-f-number)
   (adv-history adv-f adv-e)
   (noun-history turn time stage step question utterance iteration move action period start beginning while past
-      now second minute hour)
+      now second minute hour moment present future)
   (prep-history at in on prep-history-simple)
-  (prep-history-simple during within before after when while prior_to following preceding since from until)
-  (prep-history-adj ago before previously)
-  (adj-history-number one two three four five six seven eight nine ten twenty thirty forty fifty sixty seventy
+  (prep-history-simple during within before after when where while prior_to following preceding since from until)
+  (prep-history-adj ago before previously after later)
+  (adj-history-modifier-number one two three four five six seven eight nine ten twenty thirty forty fifty sixty seventy
       eighty ninety hundred)
-  (adj-history previous next current initial first original following preceding future last final recent
-      few couple adj-history-number)
+  (adj-history-modifier few couple adj-history-modifier-number)
+  (adj-history-number first second third fourth fifth sixth seventh eighth ninth tenth)
+  (adj-history previous next current initial original following preceding future last final recent
+      adj-history-number adj-history-modifier)
 
   (adv-hist-modifier just right directly most)
   (adv-hist-number one two three four five six seven eight nine ten)

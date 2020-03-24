@@ -3,27 +3,34 @@
 ;;
 ;; Functions to help Eta work with time, such as comparisons, relation-checking,
 ;; and maintaining/updating knowledge of time.
+;; TODO: clean up preposition/adverb definitions by factoring out mod-a conditional into
+;; function, and passing all functions as keyword arguments.
 ;;
 
 ; List of supported temporal prepositions (potentially aliased in the case of prepositions
 ; with multiple senses or ones that are essentially synonyms)
 (defvar *temporal-prep-list*
-  '(during.p (at.p during.p) (in.p during.p) (on.p during.p) (when.p during.p) (while.p during.p) (within.p during.p)
+  '(during.p (at.p during.p) (in.p during.p) (on.p during.p) (when.p during.p) (where.p during.p) (while.p during.p) (within.p during.p)
     before.p (prior_to.p before.p) (preceding.p before.p) (until.p before.p)
     after.p (following.p after.p) (since.p after.p) (from.p after.p)))
 (defvar *temporal-adj-list*
   '(first.a (original.a first.a) (initial.a first.a) second.a third.a last.a (final.a last.a) current.a (now.a current.a)
-    recent.a ago.a (previous.a ago.a) (before.a ago.a) ever.a))
+    recent.a previous.a (ago.a previous.a) (before.a previous.a) (preceding.a previous.a)
+    next.a (after.a next.a) (following.a next.a) (future.a next.a) (later.a next.a) ever.a))
 
 ; Possible temporal nouns of different categories
 (defun temporal-unit-noun? (ulf)
-  (member ulf '(second.n minute.n hour.n)))
+  (member ulf '(second.n minute.n hour.n while.n)))
 (defun temporal-turn-noun? (ulf)
-  (member ulf '(turn.n time.n stage.n iteration.n period.n)))
+  (member ulf '(turn.n time.n stage.n iteration.n period.n moment.n past.n)))
 (defun temporal-question-noun? (ulf)
   (member ulf '(question.n utterance.n)))
 (defun temporal-move-noun? (ulf)
   (member ulf '(move.n action.n step.n)))
+(defun temporal-start-noun? (ulf)
+  (member ulf '(start.n beginning.n)))
+(defun temporal-now-noun? (ulf)
+  (member ulf '(now.n present.n)))
 
 ; Possible temporal mod-a words of different categories
 (defun temporal-recent-mod-a? (ulf)
@@ -34,14 +41,25 @@
   (member ulf '(just.mod-a only.mod-a exactly.mod-a precisely.mod-a right.mod-a directly.mod-a immediately.mod-a)))
 (defun temporal-most-mod-a? (ulf)
   (member ulf '(most.mod-a very.mod-a)))
+(defun temporal-few-mod-a? (ulf)
+  (member ulf '(few.mod-a couple.mod-a)))
+(defun temporal-count-mod-a? (ulf)
+  (numerical-mod-a? ulf))
+
+; "Few" and "couple" resolve to 3 and 2, respectively
+(defun few-value! (mod-a)
+  (case mod-a (few.mod-a 3) (couple.mod-a 2)))
+
+; Plural noun without any sort of modifier resolves to 3 by default
+(defvar *plur-value* 3)
 
 ; "Recently" is considered anything within a 2 minute threshold
 (defvar *recently-threshold* 120)
 
-; "n hour ago" is +- 20 mins, "n minute ago" is +- 60 secs, "n seconds ago" is +- 10 secs
+; "n hour ago" is +- 30 mins, "n minute ago" is +- 60 secs, "n seconds ago" is +- 10 secs
 (defvar *delta-seconds* 10)
 (defvar *delta-minutes* 60)
-(defvar *delta-hours* 1200)
+(defvar *delta-hours* 1800)
 
 
 (defun update-time ()
@@ -147,57 +165,37 @@
 ) ; END get-prev-time
 
 
-;; (defun get-times-final (n)
-;; ; ``````````````````````````
-;; ; Gets a list of all times, going backward n hops.
-;; ;
-;;   (get-times-before *time* n)
-;; ) ; END get-times-final
+(defun all-times (&optional type)
+; `````````````````````````````````
+; Gets a list of all times (excluding the current time, unless the current time is 'NOW0).
+; NOTE: if type is given, restrict to turns of only that type.
+;
+  (let ((type-pred (case type (turn #'identity) (question #'ask-prop?) (move #'move-prop?) (otherwise #'identity))))
+    (labels ((all-times-recur (time)
+        (cond
+          ((null time) nil)
+          ((remove-if-not type-pred (gethash time *context*)) (cons time (all-times-recur (get-prev-time time))))
+          (t (all-times-recur (get-prev-time time))))))
+      (all-times-recur (get-prev-time *time*))))
+) ; END all-times
 
 
-;; (defun get-times-init (&optional n)
-;; ; ```````````````````````````````````
-;; ; Gets the initial time(s), going forward n hops.
-;; ; NOTE: should this assume initial time always 'NOW0, or
-;; ; use recursive method from *time* to find initial time?
-;; ;
-;;   (if (null n) (setq n 1))
-;;   (cons 'NOW0 (get-times-after 'NOW0 (- n 1)))
-;; ) ; END get-times-init
-
-
-;; (defun get-time-nth (n)
-;; ; ``````````````````````
-;; ; Gets the nth time since the beginning.
-;; ;
-;;   (last (get-times-init (+ 1 n)))
-;; ) ; END get-time-nth
-
-
-;; (defun get-time-current ()
-;; ; `````````````````````````
-;; ; Gets the current time.
-;; ; NOTE: for now, this is just the value of the parameter *time*.
-;; ;
-;;   *time*
-;; ) ; END get-time-current
-
-
-;; (defun get-times-all ()
-;; ; ```````````````````````
-;; ; Gets a list of all times (excluding the current time, unless the current time is 'NOW0).
-;; ;
-;;   (let ((times-before (get-times-before *time* -1)))
-;;     (if times-before times-before (append times-before (list *time*))))
-;; ) ; END get-times-all
+(defun nth-time (times n)
+; `````````````````````````
+; Gets the nth time in times (in temporal order).
+;
+  (let ((sorted (sort (copy-seq times) (lambda x y) (is-before x y))))
+    (nth n sorted))
+) ; END nth-time
 
 
 (defun latest-time (times &optional n)
 ; `````````````````````````````````````
 ; Gets the most recent time (or n most recent times, if n is given).
 ;
-  (if (null n) (setq n 1))
-  (subseq (sort (copy-seq times) (lambda (x y) (> (compare-time x y) 0))) 0 n)
+  (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
+    (if (null n) (car (last sorted))
+      (reverse (last sorted n))))
 ) ; END latest-time
 
 
@@ -205,8 +203,9 @@
 ; ```````````````````````````````````````
 ; Gets the least recent time (or n least recent times, if n is given).
 ;
-  (if (null n) (setq n 1))
-  (subseq (sort (copy-seq times) (lambda (x y) (< (compare-time x y) 0))) 0 n)
+  (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
+    (if (null n) (car sorted)
+      (reverse (last (reverse sorted) n))))
 ) ; END earliest-time
 
 
@@ -215,7 +214,7 @@
 ; Converts an np such as "three turns" to the number 3.
 ;
   (let ((det (first np)) (noun (second np)) count type)
-    (setq count (if (numerical-det? det) (numerical-det! det) 1))
+    (setq count (count-np np))
     (setq type (get-head-noun noun))
     count)
 ) ; END time-np-to-num
@@ -227,7 +226,7 @@
 ; (210 150), i.e. between 210 and 150 seconds)
 ;
   (let ((det (first np)) (noun (second np)) count type)
-    (setq count (if (numerical-det? det) (numerical-det! det) 1))
+    (setq count (count-np np))
     (setq type (get-head-noun noun))
     (cond
       ((equal type 'second.n)
@@ -235,7 +234,10 @@
       ((equal type 'minute.n)
         (list (+ (* count 60) *delta-minutes*) (- (* count 60) *delta-minutes*)))
       ((equal type 'hour.n)
-        (list (+ (* count 3600) *delta-hours*) (- (* count 3600) *delta-hours*)))))
+        (list (+ (* count 3600) *delta-hours*) (- (* count 3600) *delta-hours*)))
+      ((equal type 'while.n) 
+        (list 7200 1800); for now we treat "while" as being between 2 hours & 30 minutes ago, though this is arbitrary
+      )))
 ) ; END time-np-to-seconds
 
 
@@ -250,11 +252,22 @@
 ) ; END is-apart
 
 
+(defun is-apart-now (time interval)
+; ````````````````````````````````````
+; Checks whether the time difference between time and the present time lies within some interval.
+; 
+  (let* ((utime1 (to-universal-time (get-time-of-episode time)))
+         (utime2 (get-universal-time))
+         (diff (abs (- utime2 utime1))))
+    (and (<= diff (first interval)) (>= diff (second interval))))
+) ; END is-apart-now
+
+
 (defun is-apart-type (time1 time2 type n)
 ; ````````````````````````````````````````
 ; Checks whether time1 and time2 are apart by n instances of some prop.
 ;
-  (let ((type-pred (case type (turn #'identity) (question #'ask-prop?) (move #'move-prop?))))
+  (let ((type-pred (case type (turn #'identity) (question #'ask-prop?) (move #'move-prop?) (otherwise #'identity))))
     (labels
       ; Past direction
       ((is-apart-type-prev (time-prev n)
@@ -291,6 +304,16 @@
 ) ; END is-recent
 
 
+(defun is-recent-now (time)
+; ```````````````````````````
+; Checks if time is recent to the current time.
+;
+  (let ((utime1 (to-universal-time (get-time-of-episode time)))
+        (utime2 (get-universal-time)))
+    (< (abs (- utime2 utime1)) *recently-threshold*))
+) ; END is-recent-now
+
+
 (defun is-prev (time1 time2)
 ; `````````````````````````````
 ; Checks if time1 is the previous time to time2.
@@ -307,6 +330,16 @@
         (utime2 (to-universal-time (get-time-of-episode time2))))
     (or (< utime1 utime2) (is-prev time1 time2)))
 ) ; END is-before
+
+
+(defun is-before-now (time)
+; `````````````````````````````````
+; Checks if time is before the present time.
+;
+  (let ((utime1 (to-universal-time (get-time-of-episode time)))
+        (utime2 (get-universal-time)))
+    (or (< utime1 utime2)))
+) ; END is-before-now
 
 
 (defun is-next (time1 time2)
@@ -336,6 +369,29 @@
 ) ; END time-inclusive
 
 
+(defun eval-temporal-noun (noun)
+; ```````````````````````````````
+; Evaluates a noun to a list of times it can denote.
+; TODO: need to figure out what to do with the temporal-unit-noun? case.
+; If someone asks something like "within the last five minutes", "minutes"
+; shouldn't simply resolve to a list of all times (in this case, "last five"
+; will modify the noun to select the last five turns, which isn't correct...)
+;
+  (cond
+    ((temporal-now-noun? noun)
+      (list *time*))
+    ((temporal-start-noun? noun)
+      (list 'NOW0))
+    ((temporal-move-noun? noun)
+      (all-times 'move))
+    ((temporal-question-noun? noun)
+      (all-times 'question))
+    ((temporal-unit-noun? noun)
+      (all-times))
+    (t (all-times)))
+) ; END eval-temporal-noun
+
+
 (defun eval-temporal-relation (rel time1 time2 &optional mod-a)
 ; ```````````````````````````````````````````````````````````````````
 ; Returns a boolean value for the relation rel between time1 and time2.
@@ -348,10 +404,26 @@
          (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
     (cond
       ((or (null time1) (null time2)) nil)
-      ((fboundp prep)
+      ((and (symbolp prep) (fboundp prep))
         (funcall prep time1 time2 mod-a))
       (t t)))
 ) ; END eval-temporal-relation
+
+
+(defun eval-temporal-modifier (adj times &optional mod-a)
+; `````````````````````````````````````````````````````````
+; Applies an adjectival modifier to times to retrieve a subset of times.
+; If mod-a is given, this is passed to the predicate.
+; NOTE: if relation is not found, return times by default.
+;
+  (let* ((mod-lookup (find-car adj *temporal-adj-list*))
+         (mod (if (atom mod-lookup) mod-lookup (second mod-lookup))))
+    (cond
+      ((or (null times) (not (listp times))) nil)
+      ((and (symbolp mod) (fboundp mod))
+        (funcall mod times mod-a))
+      (t times)))
+) ; END eval-temporal-modifier
 
 
 (defun during.p (time1 time2 mod-a)
@@ -427,3 +499,284 @@
       (t (is-after time1 time2))
     ))
 ) ; END after.p
+
+
+(defun first.a (times mod-a)
+; ```````````````````````````
+; Select the first time(s) in times, applying any mod-a as appropriate.
+; Synonyms: original.a, initial.a
+;
+  (cond
+    ; not first
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (earliest-time times 1)))
+    ; just first
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      (earliest-time times 1))
+    ; most first
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      (earliest-time times 1))
+    ; few first
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      (earliest-time times (few-value! mod-a)))
+    ; two first
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      (earliest-time times (numerical-mod-a! mod-a)))
+    ; first + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      (earliest-time times *plur-value*))
+    ; no/unknown mod-a
+    (t (earliest-time times 1)))
+) ; END first.a
+
+
+(defun second.a (times mod-a)
+; ````````````````````````````
+; Select the first time(s) in times, applying any mod-a as appropriate.
+;
+  (cond
+    ; not adj
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (list (nth-time times 2))))
+    ; no/unknown mod-a
+    (t (list (nth-time times 2))))
+) ; END second.a
+
+
+(defun third.a (times mod-a)
+; ````````````````````````````
+; Select the first time(s) in times, applying any mod-a as appropriate.
+;
+  (cond
+    ; not adj
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (list (nth-time times 3))))
+    ; no/unknown mod-a
+    (t (list (nth-time times 3))))
+) ; END third.a
+
+
+(defun last.a (times mod-a)
+; ```````````````````````````````
+; Select the last time(s) in times, applying any mod-a as appropriate.
+; Synonyms: final.a
+;
+  (cond
+    ; not last
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (latest-time times 1)))
+    ; just last
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      (latest-time times 1))
+    ; most last
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      (latest-time times 1))
+    ; few last
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      (latest-time times (few-value! mod-a)))
+    ; two last
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      (latest-time times (numerical-mod-a! mod-a)))
+    ; last + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      (latest-time times *plur-value*))
+    ; no/unknown mod-a
+    (t (latest-time times 1)))
+) ; END last.a
+
+
+(defun current.a (times mod-a)
+; ```````````````````````````````
+; Select the time corresponding to the current time, applying any mod-a as appropriate.
+; NOTE: the only mod-a that matters here is 'not', e.g. "not now"
+; Synonyms: now.a
+;
+  (cond
+    ; not current
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (list *time*)))
+    ; no/unknown mod-a
+    (t (list *time*)))
+) ; END current.a
+
+
+(defun recent.a (times mod-a)
+; ```````````````````````````````
+; Select the recent time(s) in times, applying any mod-a as appropriate.
+;
+  (cond
+    ; not recent
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (remove-if-not #'is-recent-now times)))
+    ; just recent
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      (remove-if-not #'is-recent-now times))
+    ; most recent
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      (latest-time times 1))
+    ; few recent
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      (latest-time times (few-value! mod-a)))
+    ; two recent
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      (latest-time times (numerical-mod-a! mod-a)))
+    ; recent + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      (remove-if-not #'is-recent-now times))
+    ; no/unknown mod-a
+    (t nil))
+) ; END recent.a
+
+
+(defun previous.a (times mod-a)
+; ```````````````````````````````
+; Select the previous time(s) in times, applying any mod-a as appropriate.
+; NOTE: if mod-a is some measure, e.g. in "two turns ago", this selects any time
+; in times which is two turns previously from the present time, or nil if none exists.
+; Synonyms: ago.a, before.a, preceding.a
+;
+  (cond
+    ; recently previous
+    ((ttt:match-expr 'temporal-recent-mod-a? mod-a)
+      (remove-if-not #'is-recent-now times))
+    ; not previous
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (remove-if-not #'is-recent-now times))
+    ; just previous
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      (latest-time times 1))
+    ; most previous
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      (earliest-time times 1))
+    ; few previous
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      (latest-time times (few-value! mod-a)))
+    ; two previous
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      (latest-time times (numerical-mod-a! mod-a)))
+    ; two seconds/minutes/hours previous
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-unit-noun?))) mod-a)
+      (remove-if-not (lambda (time)
+        (is-apart-now time (time-np-to-seconds (cadadr mod-a)))) times))
+    ; two turns previous
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-turn-noun?))) mod-a)
+      (remove-if-not (lambda (time)
+        (is-apart-type time *time* 'turn (time-np-to-num (cadadr mod-a)))) times))
+    ; two questions previous
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-question-noun?))) mod-a)
+      (remove-if-not (lambda (time)
+        (is-apart-now time *time* 'question (time-np-to-num (cadadr mod-a)))) times))
+    ; two moves previous
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-move-noun?))) mod-a)
+      (remove-if-not (lambda (time)
+        (is-apart-now time *time* 'move (time-np-to-num (cadadr mod-a)))) times))
+    ; previous + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      (latest-time times *plur-value*))
+    ; no/unknown mod-a
+    (t (latest-time times 3)))
+) ; END previous.a
+
+
+(defun next.a (times mod-a)
+; ```````````````````````````````
+; Select the next time(s) in times, applying any mod-a as appropriate.
+; NOTE: if mod-a is some measure, e.g. in "two turns ago", this selects any time
+; in times which is two turns next from the present time, or nil if none exists.
+; Synonyms: after.a, later.a, following.a, future.a
+; TODO: the meaning of "two turns later" isn't yet captured properly here, since
+; this relies on an aspectual shift to some reference point in the past.
+;
+  (cond
+    ; just next
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      (earliest-time times 1))
+    ; most next
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      (latest-time times 1))
+    ; few next
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      (earliest-time times (few-value! mod-a)))
+    ; two next
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      (earliest-time times (numerical-mod-a! mod-a)))
+    ;; ; two seconds/minutes/hours next
+    ;; ((ttt:match-expr '(mod-a (by.p (^* temporal-unit-noun?))) mod-a)
+    ;;   (remove-if-not (lambda (time)
+    ;;     (is-apart-now time (time-np-to-seconds (cadadr mod-a)))) times))
+    ;; ; two turns next
+    ;; ((ttt:match-expr '(mod-a (by.p (^* temporal-turn-noun?))) mod-a)
+    ;;   (remove-if-not (lambda (time)
+    ;;     (is-apart-type time *time* 'turn (time-np-to-num (cadadr mod-a)))) times))
+    ;; ; two questions next
+    ;; ((ttt:match-expr '(mod-a (by.p (^* temporal-question-noun?))) mod-a)
+    ;;   (remove-if-not (lambda (time)
+    ;;     (is-apart-now time *time* 'question (time-np-to-num (cadadr mod-a)))) times))
+    ;; ; two moves next
+    ;; ((ttt:match-expr '(mod-a (by.p (^* temporal-move-noun?))) mod-a)
+    ;;   (remove-if-not (lambda (time)
+    ;;     (is-apart-now time *time* 'move (time-np-to-num (cadadr mod-a)))) times))
+    ; next + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      (earliest-time times *plur-value*))
+    ; no/unknown mod-a
+    (t (earliest-time times 3)))
+) ; END next.a
+
+
+(defun ever.a (times mod-a)
+; ```````````````````````````````
+; Select all time(s) in times, applying any mod-a as appropriate.
+; Synonyms:
+;
+  (cond
+    ; recently ever
+    ((ttt:match-expr 'temporal-recent-mod-a? mod-a)
+      (remove-if-not #'is-recent-now times))
+    ; no/unknown mod-a
+    (t times))
+) ; END ever.a
+
+
+(defun template.a (times mod-a)
+; ```````````````````````````````
+; Select the [] time(s) in times, applying any mod-a as appropriate.
+; Synonyms: []
+;
+  (cond
+    ; recently template
+    ((ttt:match-expr 'temporal-recent-mod-a? mod-a)
+      nil)
+    ; not template
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      nil)
+    ; just template
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      nil)
+    ; most template
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      nil)
+    ; few template
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      nil)
+    ; two template
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      nil)
+    ; two seconds/minutes/hours template
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-unit-noun?))) mod-a)
+      nil)
+    ; two turns template
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-turn-noun?))) mod-a)
+      nil)
+    ; two questions template
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-question-noun?))) mod-a)
+      nil)
+    ; two moves template
+    ((ttt:match-expr '(mod-a (by.p (^* temporal-move-noun?))) mod-a)
+      nil)
+    ; template + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      )
+    ; no/unknown mod-a
+    (t nil))
+) ; END template.a

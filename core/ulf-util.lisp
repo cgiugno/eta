@@ -680,8 +680,16 @@
 ) ; END proper-name?
 
 
+(defun np? (ulf)
+; ```````````````
+; Checks if a ULF is a noun phrase starting with either a determiner or a type reifier.
+;
+  (or (det-np? ulf) (kind? ulf))
+) ; END np?
+
+
 (defun det-np? (ulf)
-; ````````````````
+; ```````````````````
 ; Checks if a ULF is a noun phrase starting with a determiner.
 ;
   (and (listp ulf) (det? (car ulf)))
@@ -706,6 +714,19 @@
 ) ; END quant-np?
 
 
+(defun count-np (np)
+; ```````````````````
+; Converts an np such as "three turns", "a turn", "a few turns" to a number.
+;
+  (cond
+    ((ttt:match-expr '(numerical-det? _!) np) ; three turns
+      (numerical-det! (first np)))
+    ((ttt:match-expr '(det? (! (plur _!) (adj? (plur _!)))) np) ; a few turns
+      3)
+    (t 1)) ; a turn
+) ; END count-np 
+
+
 (defun indexical-np? (ulf)
 ; `````````````````````````
 ; Checks if a ULF is an indexical noun phrase (e.g. "that block")
@@ -716,12 +737,20 @@
 ) ; END indexical-np?
 
 
+(defun wh-det? (ulf)
+; ````````````````````
+; Checks if a ULF is a wh-determiner.
+;
+  (and (det? ulf) (member ulf '(which.d what.d whichever.d whatever.d)))
+) ; END wh-det?
+
+
 (defun wh-np? (ulf)
 ; `````````````````````````
 ; Checks if a ULF is an wh-question noun phrase (e.g. "what block")
 ;
   (and (det-np? ulf) (or
-    (member (first ulf) '(which.d what.d whichever.d whatever.d))
+    (wh-det? (first ulf))
     (and (equal (first ulf) 'np+preds) (wh-np? (second ulf)))))
 ) ; END wh-np?
 
@@ -788,6 +817,14 @@
     (let ((tmp (remove nil (mapcar #'remove-plur ulf))))
       (if (and (listp tmp) (= (length tmp) 1)) (car tmp) tmp)))
 ) ; END remove-plur
+
+
+(defun n+preds? (ulf)
+; ````````````````````
+; Checks if ULF is an n+preds.
+;
+  (and (listp ulf) (>= (length ulf) 3) (equal (first ulf) 'n+preds))
+) ; END n+preds?
 
 
 (defun numerical-adj! (ulf)
@@ -876,6 +913,38 @@
       (and (numberp (read-from-string (format nil "~a" (first split)))) (equal '.D (second split))))))
   t)
 ) ; END numerical-det?
+
+
+(defun numerical-mod-a! (ulf)
+; ``````````````````````````
+; If ULF is a numerical mod-a (e.g. "two.mod-a"), return the corresponding
+; number, or nil otherwise.
+; 
+  (let ((num (read-from-string (format nil "~a" (first (sym-split ulf 6))))))
+    (if (numberp num) (return-from numerical-mod-a! num)))
+  (if (not (mod-a? ulf)) (return-from numerical-mod-a! nil))
+  (cond
+    ((equal ulf 'zero.mod-a) 0) ((equal ulf 'one.mod-a) 1) ((equal ulf 'two.mod-a) 2)
+    ((equal ulf 'three.mod-a) 3) ((equal ulf 'four.mod-a) 4) ((equal ulf 'five.mod-a) 5)
+    ((equal ulf 'six.mod-a) 6) ((equal ulf 'seven.mod-a) 7) ((equal ulf 'eight.mod-a) 8)
+    ((equal ulf 'nine.mod-a) 9) ((equal ulf 'ten.mod-a) 10))
+) ; END numerical-mod-a!
+
+
+(defun numerical-mod-a? (ulf)
+; ``````````````````````````
+; Check if ULF is a numerical mod-a.
+;
+  (if (and (symbolp ulf) (or
+    (member ulf '(zero.mod-a one.mod-a two.mod-a three.mod-a four.mod-a five.mod-a six.mod-a
+                  seven.mod-a eight.mod-a nine.mod-a ten.mod-a eleven.mod-a twelve.mod-a
+                  thirteen.mod-a fourteen.mod-a fifteen.mod-a sixteen.mod-a seventeen.mod-a
+                  eighteen.mod-a nineteen.mod-a twenty.mod-a thirty.mod-a forty.mod-a fifty.mod-a
+                  sixty.mod-a seventy.mod-a eighty.mod-a ninety.mod-a one_hundred.mod-a))
+    (let ((split (sym-split ulf 6)))
+      (and (numberp (read-from-string (format nil "~a" (first split)))) (equal '.MOD-A (second split))))))
+  t)
+) ; END numerical-mod-a?
 
 
 (defun num-to-det (num)

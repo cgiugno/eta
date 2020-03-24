@@ -378,6 +378,15 @@
 
 
 
+(defun ensure-bound! (x)
+; ```````````````````````
+; Ensures that x isn't a TTT pred (i.e. any symbol with ? as the last character).
+;
+  (if (and (symbolp x) (char-equal (car (last (explode x))) #\?)) nil x)
+) ; END ensure-bound!
+
+
+
 (defun ttt-match-vars (patt)
 ;````````````````````````````
 ; Form a list of distinct TTT match-variables that occur in 'patt';
