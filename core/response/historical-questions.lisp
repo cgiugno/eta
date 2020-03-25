@@ -53,14 +53,11 @@
   (let ((coords (extract-coords object-locations))
         (when-question (extract-when-question ulf)) answer)
 
-    ; Generate any pragmatic inferences for underspecified queries
-    (setq ulf (infer-temporal-adverbials ulf))
-
     ; If when question, remove when adv-e from ulf
     (setq ulf (remove-when-adv-e ulf))
 
     ; TODO: split off times (and add certainties) or return rels depending on whether when-question or not
-    (setq answer (find-answer-times coords ulf :debug t))
+    (setq answer (find-answer-times coords ulf :when-question when-question))
 
     (if when-question
       (mapcar (lambda (time) (add-certainty time time)) answer)
@@ -72,22 +69,29 @@
 ) ; END recall-answer
 
 
-(defun find-answer-times (coords ulf &key debug)
-; ````````````````````````````````````````````````
+(defun find-answer-times (coords ulf &key when-question embedded)
+; `````````````````````````````````````````````````````````````````
 ; Given coordinates and a query ulf, return a list of time/event symbols corresponding to the ULF.
 ;
   (let* ((ulf-base (uninvert-question (remove-not (remove-adv-e (remove-adv-f ulf)))))
          (where-question (extract-where-question ulf))
          (neg (extract-neg ulf))
          (adv-e (extract-adv-e ulf))
-         (constraints-unary (resolve-unary-constraint (first adv-e)))
-         (constraints-binary (resolve-binary-constraint coords (second adv-e)))
-         (constraints-freq (extract-adv-f ulf))
+         (adv-f (extract-adv-f ulf))
+         constraints-unary constraints-binary constraints-freq
          (subj (extract-subj ulf-base))
          (obj (extract-obj ulf-base))
          (relation (extract-relation ulf-base))
          (action (extract-action ulf-base))
          func ans-times)
+
+    ; Generate any pragmatic inferences for underspecified queries
+    (setq adv-e (infer-temporal-adverbials adv-e adv-f when-question where-question subj obj relation action embedded))
+
+    ; Resolve constraints
+    (setq constraints-unary (resolve-unary-constraint (first adv-e)))
+    (setq constraints-binary (resolve-binary-constraint coords (second adv-e)))
+    (setq constraints-freq adv-f)
 
     ; Select appropriate function depending on whether it's a where-question, asking about a relation,
     ; asking about an action, or both (e.g. "when did I put the Twitter block on the Starbucks block")
@@ -105,7 +109,7 @@
     ; and constrain by any given temporal adverbials
     (setq ans-times (find+constrain-times func constraints-unary constraints-binary constraints-freq coords))
 
-    (when debug
+    (when (not embedded)
       (format t "where question: ~a~%" where-question)
       (format t "neg: ~a~%" neg)
       (format t "adv-e: ~a~%" adv-e)
@@ -124,14 +128,31 @@
 ) ; END find-answer-times
 
 
-(defun infer-temporal-adverbials (ulf)
-; ``````````````````````````````````````
+(defun infer-temporal-adverbials (adv-e adv-f when-question where-question subj obj relation action embedded)
+; `````````````````````````````````````````````````````````````````````````````````````````````````````````````
 ; Given an underspecified query (e.g. "what blocks did I move"), we want to generate temporal adverbials
 ; corresponding to the likely intended scope of the question (e.g. in this case, the speaker likely means
-; something like "since the last utterance").
+; something like "recently"). This uses the various ULF features extracted by the calling function. Currently
+; the inferences are simple (either adding 'recently' or 'most recently'), but they can be improved as we encounter
+; more pragmatic issues.
 ;
-  'TODO
-  ulf
+  (let ((unary-constraints (append (first adv-e) adv-f)) (binary-constraints (second adv-e)))
+    (cond
+      (embedded adv-e)
+      (when-question adv-e)
+      ((and where-question (null unary-constraints) (null binary-constraints))
+        (format t "where question with underspecified unary & binary constraints: adding 'most recently' and 'before the last move'~%")
+        (list (cons '(most.mod-a recent.a) (first adv-e)) (cons '(before.p (the.d (last.a move.n))) (second adv-e))))
+      ((and where-question (null unary-constraints))
+        (format t "where question with underspecified unary constraints: adding 'most recently'~%")
+        (list (cons '(most.mod-a recent.a) (first adv-e)) (second adv-e)))
+      ((and (null action) (null unary-constraints) (null binary-constraints))
+        (format t "relation question with underspecified unary & binary constraints: adding 'recently' and 'before the last move'~%")
+        (list (cons 'recent.a (first adv-e)) (cons '(before.p (the.d (last.a move.n))) (second adv-e))))
+      ((null unary-constraints)
+        (format t "historical question with underspecified unary constraints: adding 'recently'~%")
+        (list (cons 'recent.a (first adv-e)) (second adv-e)))
+      (t adv-e)))
 ) ; END infer-temporal-adverbials
 
 
@@ -436,7 +457,7 @@
 ; though this isn't supported on the parsing side yet.
 ;
   (make-set (mapcar (lambda (time) (setf (get time '@) nil) time)
-    (find-answer-times coords s)))
+    (find-answer-times coords s :embedded t)))
 ) ; END resolve-time-s!
 
 
@@ -467,7 +488,7 @@
                 )))
             prep-list)))
           coords-list2)) coords-list1))))
-    ; Sort by certainty
+    ; Sort by certainty and remove certainties
     (mapcar #'first (sort (copy-seq pred-list) #'> :key #'second)))
 ) ; END form-pred-list
 
@@ -477,12 +498,13 @@
 ; Computes all spatial relations that hold at a particular scene, for a particular
 ; subject (may be a variable with or without restrictors).
 ; NOTE: we assume uniqueness of coords in the scene, or else this will break.
+; NOTE: we ensure that the top-2 relations returned do not have duplicate objects.
 ; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
   ; Find all possible pairs of subject + object in the scene, and check if relation holds
   (let ((relations (form-pred-list scene *spatial-prep-list* scene)))
-    ; Filter relations
-    (last (reverse (find-cars-var subj relations)) 2))
+    ; Filter relations and return the top-2 relations with unique objects
+    (last (remove-duplicates (reverse (find-cars-var subj relations)) :key #'third) 2))
 ) ; END compute-relations
 
 

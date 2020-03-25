@@ -434,6 +434,8 @@
   (if (ttt:match-expr '(^* ((tense? do.aux-s) not _*)) ulf)
     ulf
     (ttt:apply-rules '(
+        (/ ((tense? do.aux-s) _* (_! (verb-untensed? _*1))) (_* (_! ((tense? verb-untensed?) _*1))))
+        (/ ((tense? do.aux-s) _* (_! (non-neg? (verb-untensed? _*1)))) (_* (_! (non-neg? ((tense? verb-untensed?) _*1)))))
         (/ ((tense? do.aux-s) _* (verb-untensed? _*1)) (_* ((tense? verb-untensed?) _*1)))
         (/ ((tense? do.aux-s) _* (non-neg? (verb-untensed? _*1))) (_* (non-neg? ((tense? verb-untensed?) _*1)))))
     ulf))
@@ -477,8 +479,9 @@
 ; Uninvert a ULF question by removing the question mark, applying sub macros, and removing auxiliary verbs such as "do".
 ;
   (setq ulf (remove-question-mark ulf))
+  (setq ulf (apply-sub-macro ulf))
   (setq ulf (remove-question-do ulf))
-  (apply-sub-macro ulf)
+  ulf
 ) ; END uninvert-question
 
 

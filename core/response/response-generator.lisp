@@ -108,7 +108,6 @@
 
     ; Make appropriate substitutions of answer ULF into query ULF,
     ; and uninvert form of question to get output ULF.
-    ; (I.PRO ((PAST MOVE.V) ((NQUAN ONE.A) (PLUR BLOCK.N))))
     (setq output-ulf (uninvert-question (cond
       ; Query is CONFIRM type
       ((equal query-type 'CONFIRM)

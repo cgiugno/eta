@@ -16,7 +16,7 @@
 (defvar *temporal-adj-list*
   '(first.a (original.a first.a) (initial.a first.a) second.a third.a last.a (final.a last.a) current.a (now.a current.a)
     recent.a previous.a (ago.a previous.a) (before.a previous.a) (preceding.a previous.a)
-    next.a (after.a next.a) (following.a next.a) (future.a next.a) (later.a next.a) ever.a))
+    next.a (after.a next.a) (following.a next.a) (future.a next.a) (later.a next.a) ever.a just.a))
 
 ; Possible temporal nouns of different categories
 (defun temporal-unit-noun? (ulf)
@@ -379,7 +379,7 @@
 ;
   (cond
     ((temporal-now-noun? noun)
-      (list *time*))
+      (list (get-prev-time *time*)))
     ((temporal-start-noun? noun)
       (list 'NOW0))
     ((temporal-move-noun? noun)
@@ -588,15 +588,16 @@
 (defun current.a (times mod-a)
 ; ```````````````````````````````
 ; Select the time corresponding to the current time, applying any mod-a as appropriate.
+; NOTE: at the time of utterance being evaluated, the time of "now" is one step earlier than *time*
 ; NOTE: the only mod-a that matters here is 'not', e.g. "not now"
 ; Synonyms: now.a
 ;
   (cond
     ; not current
     ((ttt:match-expr 'temporal-not-mod-a? mod-a)
-      (set-difference times (list *time*)))
+      (set-difference times (list (get-prev-time *time*))))
     ; no/unknown mod-a
-    (t (list *time*)))
+    (t (list (get-prev-time *time*))))
 ) ; END current.a
 
 
@@ -624,7 +625,7 @@
     ((ttt:match-expr 'plur.mod-a mod-a)
       (remove-if-not #'is-recent-now times))
     ; no/unknown mod-a
-    (t nil))
+    (t (remove-if-not #'is-recent-now times)))
 ) ; END recent.a
 
 
@@ -727,7 +728,6 @@
 (defun ever.a (times mod-a)
 ; ```````````````````````````````
 ; Select all time(s) in times, applying any mod-a as appropriate.
-; Synonyms:
 ;
   (cond
     ; recently ever
@@ -736,6 +736,17 @@
     ; no/unknown mod-a
     (t times))
 ) ; END ever.a
+
+
+(defun just.a (times mod-a)
+; ```````````````````````````````
+; Select the time in times that happens to be the previous turn, or nil of none exist,
+; applying any mod-a as appropriate.
+;
+  (cond
+    ; no/unknown mod-a
+    (t (remove-if-not (lambda (time) (is-prev time (get-prev-time *time*))) times)))
+) ; END just.a
 
 
 (defun template.a (times mod-a)
@@ -776,7 +787,7 @@
       nil)
     ; template + plural noun
     ((ttt:match-expr 'plur.mod-a mod-a)
-      )
+      nil)
     ; no/unknown mod-a
     (t nil))
 ) ; END template.a
