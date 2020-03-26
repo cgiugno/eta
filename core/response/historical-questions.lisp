@@ -41,6 +41,8 @@
 ; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 1 0 0)) (to.p-arg ($ loc 0 2 0))))  )
 ; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Twitter| ((past move.v) (from.p-arg ($ loc 2 0 0)) (to.p-arg ($ loc 0 4 0)))) )
 ; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
+; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 0 1)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 5 0 1)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 0 2 0)) (to.p-arg ($ loc 0 0 1)))) (|McDonalds| ((past move.v) (from.p-arg ($ loc 4 0 0)) (to.p-arg ($ loc 5 0 1))))  )
+; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 0 1)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 5 0 1)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
 ;
 
 
@@ -56,16 +58,15 @@
     ; If when question, remove when adv-e from ulf
     (setq ulf (remove-when-adv-e ulf))
 
-    ; TODO: split off times (and add certainties) or return rels depending on whether when-question or not
+    ; Get answer times which satisfy ULF and current coords
     (setq answer (find-answer-times coords ulf :when-question when-question))
 
+    ; Return either times or corresponding props depending on if when-question or not.
+    ; TODO: check if next time, if so return BEFORE.P <prop> as answer relation, resolved into S by response generator
     (if when-question
       (mapcar (lambda (time) (add-certainty time time)) answer)
       (mapcan (lambda (time)
-        (mapcar (lambda (prop) (add-certainty prop time)) (get time '@))) answer))
-        ; check if next time, if so return BEFORE.P <prop> as answer relation, resolved into S by response generator
-    
-  )
+        (mapcar (lambda (prop) (add-certainty prop time)) (get time '@))) answer)))
 ) ; END recall-answer
 
 
@@ -91,7 +92,7 @@
     ; Resolve constraints
     (setq constraints-unary (resolve-unary-constraint (first adv-e)))
     (setq constraints-binary (resolve-binary-constraint coords (second adv-e)))
-    (setq constraints-freq adv-f)
+    (setq constraints-freq (resolve-frequency-constraint adv-f))
 
     ; Select appropriate function depending on whether it's a where-question, asking about a relation,
     ; asking about an action, or both (e.g. "when did I put the Twitter block on the Starbucks block")
@@ -149,7 +150,7 @@
       ((and (null action) (null unary-constraints) (null binary-constraints))
         (format t "relation question with underspecified unary & binary constraints: adding 'recently' and 'before the last move'~%")
         (list (cons 'recent.a (first adv-e)) (cons '(before.p (the.d (last.a move.n))) (second adv-e))))
-      ((null unary-constraints)
+      ((and (null unary-constraints) binary-constraints)
         (format t "historical question with underspecified unary constraints: adding 'recently'~%")
         (list (cons 'recent.a (first adv-e)) (second adv-e)))
       (t adv-e)))
@@ -392,6 +393,16 @@
 ) ; END resolve-binary-constraint
 
 
+(defun resolve-frequency-constraint (constraints-freq)
+; ``````````````````````````````````````````````````````
+; Resolves each constraint in constraints-freq to a simple adjective, combining prepositions
+; like (at.p (two.d (plur time.n))) to an adjective predicate like two-time.a.
+;
+  (mapcar (lambda (constraint) (if (prep-phrase? constraint)
+    (freq-np-to-adj (second constraint)) constraint)) constraints-freq)
+) ; END resolve-frequency-constraint
+
+
 (defun plur-as-mod-a (np)
 ; `````````````````````````
 ; This removes any plur in a np and adds it as a mod-a to any temporal adjectives, unless it
@@ -587,6 +598,14 @@
 ) ; END apply-binary-constraint
 
 
+(defun apply-frequency-constraint (constraint times)
+; ````````````````````````````````````````````````````
+; Applies a frequency constraint (e.g. ALWAYS.A) to a list of times.
+;
+  (eval-frequency-modifier constraint times)
+) ; END apply-frequency-constraint
+
+
 (defun find+constrain-times (func constraints-unary constraints-binary constraints-freq coords)
 ; ```````````````````````````````````````````````````````````````````````````````````````````````
 ; Finds all times, constrained by the given adverbials, at which func holds. Return all
@@ -618,7 +637,7 @@
     (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
 
     ; Apply all frequency constraints phrases to select times which satisfy frequency
-    'TODO
+    (mapcar (lambda (constraint) (setq times (apply-frequency-constraint constraint times))) constraints-freq)
 
     ; Remove any times with no props
     (setq times (remove-if-not (lambda (time) (get time '@)) times))

@@ -503,7 +503,8 @@
 ; Removes all adv-e modifiers from ULF.
 ;
   (ttt:apply-rules
-    '((/ (non-adv? time-adverbial-phrase?) non-adv?)
+    '((/ (time-adverbial-phrase? freq-adverbial-phrase?) freq-adverbial-phrase?)
+      (/ (non-adv? time-adverbial-phrase?) non-adv?)
       (/ (time-adverbial-phrase? non-adv?) non-adv?)
       (/ (_*1 time-adverbial-phrase? _*2) (_*1 _*2))
       (/ (_*1 time-adverbial-phrase?) (_*1))

@@ -5,6 +5,8 @@
 ;; and maintaining/updating knowledge of time.
 ;; TODO: clean up preposition/adverb definitions by factoring out mod-a conditional into
 ;; function, and passing all functions as keyword arguments.
+;; TODO: the numerical predicates in here should eventually be replaced with general versions
+;; so that any number is recognized and processed correctly. I have to think more about how to do this.
 ;;
 
 ; List of supported temporal prepositions (potentially aliased in the case of prepositions
@@ -13,10 +15,21 @@
   '(during.p (at.p during.p) (in.p during.p) (on.p during.p) (when.p during.p) (where.p during.p) (while.p during.p) (within.p during.p)
     before.p (prior_to.p before.p) (preceding.p before.p) (until.p before.p)
     after.p (following.p after.p) (since.p after.p) (from.p after.p)))
+
+; List of supported temporal adjectives (potentially aliased in case of synonyms)
 (defvar *temporal-adj-list*
   '(first.a (original.a first.a) (initial.a first.a) second.a third.a last.a (final.a last.a) current.a (now.a current.a)
     recent.a previous.a (ago.a previous.a) (before.a previous.a) (preceding.a previous.a)
     next.a (after.a next.a) (following.a next.a) (future.a next.a) (later.a next.a) ever.a just.a))
+
+; List of frequency adjectives (potentially aliased in case of synonyms)
+; NOTE: never.a is here aliased to always.a because, once the negative context is extracted for relation checking in the
+; historical questions, it is for all intents and purposes the same as always - e.g. "What block did I never move?" seems to
+; be the same as asking "What block did I always not move?". If this turns out to not always hold, this can be changed in
+; the future.
+(defvar *frequency-adj-list*
+  '(always.a (never.a always.a) one-time.a (once.a one-time.a) two-time.a (twice.a two-time.a) three-time.a (thrice.a three-time.a)
+    four-time.a five-time.a))
 
 ; Possible temporal nouns of different categories
 (defun temporal-unit-noun? (ulf)
@@ -46,9 +59,6 @@
 (defun temporal-count-mod-a? (ulf)
   (numerical-mod-a? ulf))
 
-; "Few" and "couple" resolve to 3 and 2, respectively
-(defun few-value! (mod-a)
-  (case mod-a (few.mod-a 3) (couple.mod-a 2)))
 
 ; Plural noun without any sort of modifier resolves to 3 by default
 (defvar *plur-value* 3)
@@ -60,6 +70,23 @@
 (defvar *delta-seconds* 10)
 (defvar *delta-minutes* 60)
 (defvar *delta-hours* 1800)
+
+
+(defun few-value! (mod-a)
+; ``````````````````````````
+; "Few" and "couple" resolve to 3 and 2, respectively.
+;
+  (case mod-a (few.mod-a 3) (couple.mod-a 2))
+) ; END few-value!
+
+
+(defun freq-np-to-adj (np)
+; ``````````````````````````
+; Turns an np like (three.d (plur turn.n)) into an adjective three-turn.a.
+;
+  (if (and (det-np? np) (numerical-det? (car np)))
+    (intern (format nil "~a-TIME.A" (implode (butlast (explode (car np)) 2)))))
+) ; END freq-np-to-adj
 
 
 (defun update-time ()
@@ -360,13 +387,35 @@
 ) ; END is-after
 
 
-(defun time-inclusive (times)
-; ````````````````````````````
-; Makes list of times inclusive by including previous time, e.g. (NOW1 NOW2 NOW3) => (NOW0 NOW1 NOW3 NOW4)
+(defun limit-props-by-freq (times n)
+; ```````````````````````````````````````
+; Given a list of times, each one having a list of propositions associated, and some
+; frequency n, go through list of times and filter out any propositions which don't
+; occur n times. Return only the times which still have propositions associated.
+; NOTE: scalar implicatures are observed here - e.g. "what block did I move one time"
+; implies no more than one time.
 ;
-  (let* ((least (least-recent times)) (prev (get-prev-time (car least))))
-    (append (if prev (list prev)) times))
-) ; END time-inclusive
+  (let ((props-table (make-hash-table :test #'equal)))
+    ; Loop through times and propositions for each time
+    (dolist (time times)
+      (dolist (prop (get time '@))
+        (cond
+          ; If prop found, increment count
+          ((gethash prop props-table)
+            (setf (gethash prop props-table) (1+ (gethash prop props-table))))
+          ; If new prop, set count to 1
+          (t (setf (gethash prop props-table) 1)))))
+    
+    ; Now that we have counts of all propositions, loop through
+    ; times again and filter all propositions that don't occur n times
+    (dolist (time times)
+      (setf (get time '@)
+        (remove-if-not (lambda (prop) (= n (gethash prop props-table))) (get time '@))))
+
+    ; Filter only the times which have props left, and return the last one
+    ; (there might be multiple prop combinations which happened n times, )
+    (remove-if-not (lambda (time) (get time '@)) times))
+) ; END limit-props-by-freq
 
 
 (defun eval-temporal-noun (noun)
@@ -408,22 +457,6 @@
         (funcall prep time1 time2 mod-a))
       (t t)))
 ) ; END eval-temporal-relation
-
-
-(defun eval-temporal-modifier (adj times &optional mod-a)
-; `````````````````````````````````````````````````````````
-; Applies an adjectival modifier to times to retrieve a subset of times.
-; If mod-a is given, this is passed to the predicate.
-; NOTE: if relation is not found, return times by default.
-;
-  (let* ((mod-lookup (find-car adj *temporal-adj-list*))
-         (mod (if (atom mod-lookup) mod-lookup (second mod-lookup))))
-    (cond
-      ((or (null times) (not (listp times))) nil)
-      ((and (symbolp mod) (fboundp mod))
-        (funcall mod times mod-a))
-      (t times)))
-) ; END eval-temporal-modifier
 
 
 (defun during.p (time1 time2 mod-a)
@@ -499,6 +532,22 @@
       (t (is-after time1 time2))
     ))
 ) ; END after.p
+
+
+(defun eval-temporal-modifier (adj times &optional mod-a)
+; `````````````````````````````````````````````````````````
+; Applies an adjectival modifier to times to retrieve a subset of times.
+; If mod-a is given, this is passed to the predicate.
+; NOTE: if relation is not found, return times by default.
+;
+  (let* ((mod-lookup (find-car adj *temporal-adj-list*))
+         (mod (if (atom mod-lookup) mod-lookup (second mod-lookup))))
+    (cond
+      ((or (null times) (not (listp times))) nil)
+      ((and (symbolp mod) (fboundp mod))
+        (funcall mod times mod-a))
+      (t times)))
+) ; END eval-temporal-modifier
 
 
 (defun first.a (times mod-a)
@@ -791,3 +840,68 @@
     ; no/unknown mod-a
     (t nil))
 ) ; END template.a
+
+
+(defun eval-frequency-modifier (adj times)
+; ``````````````````````````````````````````
+; Applies an adjectival frequency modifier to times (with props attached) to
+; retrieve a subset of times which have props satisfying the given frequency,
+; and the props limited to only those props.
+;
+  (let* ((mod-lookup (find-car adj *frequency-adj-list*))
+         (mod (if (atom mod-lookup) mod-lookup (second mod-lookup))))
+    (cond
+      ((or (null times) (not (listp times))) nil)
+      ((and (symbolp mod) (fboundp mod))
+        (funcall mod times))
+      (t times)))
+) ; END eval-frequency-modifier
+
+
+(defun always.a (times)
+; ``````````````````````
+; Select the times & props such that each prop occurs at every time. This is the same
+; as ensuring that each prop occurs n times, where n is the length of times.
+;
+  (limit-props-by-freq times (length times))
+) ; END always.a
+
+
+(defun one-time.a (times)
+; ``````````````````````
+; Select the times & props that occur one time (and no more than once).
+;
+  (limit-props-by-freq times 1)
+) ; END one-time.a
+
+
+(defun two-time.a (times)
+; ``````````````````````
+; Select the times & props that occur two times (and no more).
+;
+  (limit-props-by-freq times 2)
+) ; END two-time.a
+
+
+(defun three-time.a (times)
+; ``````````````````````
+; Select the times & props that occur three times (and no more).
+;
+  (limit-props-by-freq times 3)
+) ; END three-time.a
+
+
+(defun four-time.a (times)
+; ``````````````````````
+; Select the times & props that occur four times (and no more).
+;
+  (limit-props-by-freq times 4)
+) ; END four-time.a
+
+
+(defun five-time.a (times)
+; ``````````````````````
+; Select the times & props that occur five times (and no more).
+;
+  (limit-props-by-freq times 5)
+) ; END five-time.a

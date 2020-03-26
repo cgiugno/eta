@@ -418,7 +418,9 @@
     1 (adv-e); e.g., previously
        2 (((lex-ulf! adv-adj 1)) (adv-e 1)) (0 :ulf-recur)
     1 (adv-e adv-f); e.g., recently always
-       2 (((lex-ulf! mod-a 1) (lex-ulf! adv-adj 2)) (adv-f (1 2))) (0 :ulf-recur)
+       2 (((lex-ulf! adv-adj 1) (lex-ulf! adv-adj 2)) ((adv-e 1) (adv-f 2))) (0 :ulf-recur); TODO: this isn't really correct
+                                                                                           ; ULF syntax, but not sure how to
+                                                                                           ; deal with it otherwise.
     1 (deg-adv adv-e); e.g., right now
        2 (((lex-ulf! mod-a 1) (lex-ulf! adv-adj 2)) (adv-e (1 2))) (0 :ulf-recur)
 
