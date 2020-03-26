@@ -190,7 +190,7 @@
 ; Returns t if ULF is in a negative environment.
 ;
   (or (ttt:match-expr '(^* not) ulf)
-      (ttt:match-expr '(^* never.adv-f) ulf))
+      (ttt:match-expr '(^* (adv-f never.a)) ulf))
 ) ; END extract-neg
 
 
@@ -635,6 +635,8 @@
 
     ; Apply all unary constraints to further constrain times
     (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
+
+    (mapcar (lambda (time) (format t "::~a~%" (get time '@))) times)
 
     ; Apply all frequency constraints phrases to select times which satisfy frequency
     (mapcar (lambda (constraint) (setq times (apply-frequency-constraint constraint times))) constraints-freq)
