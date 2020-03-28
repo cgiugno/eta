@@ -21,35 +21,54 @@
 ;
 '(
     ; Recursive if there's some premodifier or other item preceding preposition
-    1 (there between 9 noun); e.g., there between the Esso and NVidia blocks
-       2 (((*pp-between-ulf-tree* 2 3 4)) 1) (0 :ulf-recur)
-    1 (deg-adv between 9 noun); e.g., directly between the Esso and NVidia blocks
-       2 (((lex-ulf! adv-a 1) (*pp-between-ulf-tree* 2 3 4)) (1 2)) (0 :ulf-recur)
-    1 (deg-adv adv-history between 9 noun); e.g., just recently between the Esso and NVidia blocks
-       2 (((lex-ulf! mod-a 1) (*adv-ulf-tree* 2) (*pp-between-ulf-tree* 3 4 5)) (1 (2 3))) (0 :ulf-recur)
-    1 (adv-history between 9 noun); e.g., ever between the Esso and NVidia blocks
-       2 (((*adv-ulf-tree* 1) (*pp-between-ulf-tree* 2 3 4)) (1 2)) (0 :ulf-recur)
-    1 (nil between 9 noun); ignore non-adverb preceding "between"
-       2 (((*pp-between-ulf-tree* 2 3 4)) 1) (0 :ulf-recur)
+    1 (there between 0); e.g., there between the Esso and NVidia blocks
+       2 (((*pp-between-ulf-tree* 2 3)) 1) (0 :ulf-recur)
+    1 (deg-adv between 0); e.g., directly between the Esso and NVidia blocks
+       2 (((lex-ulf! adv-a 1) (*pp-between-ulf-tree* 2 3)) (1 2)) (0 :ulf-recur)
+    1 (deg-adv adv-history between 0); e.g., just recently between the Esso and NVidia blocks
+       2 (((lex-ulf! mod-a 1) (*adv-ulf-tree* 2) (*pp-between-ulf-tree* 3 4)) (1 (2 3))) (0 :ulf-recur)
+    1 (adv-history not between 0); e.g., ever not between the Esso and NVidia blocks
+       2 (((*adv-ulf-tree* 1) not (*pp-between-ulf-tree* 3 4)) (1 2 3)) (0 :ulf-recur)
+    1 (adv-history between 0); e.g., ever between the Esso and NVidia blocks
+       2 (((*adv-ulf-tree* 1) (*pp-between-ulf-tree* 2 3)) (1 2)) (0 :ulf-recur)
+    1 (nil between 0); ignore non-adverb preceding "between"
+       2 (((*pp-between-ulf-tree* 2 3)) 1) (0 :ulf-recur)
 
     ; Simple between prepositions
     1 (between det 2 noun); e.g., between two red blocks; between what blocks
        2 ((between.p (*np-ulf-tree* 2 3 4)) (1 2)) (0 :ulf-recur)
     1 (between det 2 noun and det 2 noun); e.g., between a red block and a blue block
-       2 ((between.p (*np-ulf-tree* 2 3 4) and.cc (*np-ulf-tree* 6 7 8)) 
-          (1 (2 and.cc 4))) (0 :ulf-recur)
+       2 ((between.p (*np-ulf-tree* 2 3 4) (*np-ulf-tree* 6 7 8)) 
+          (1 (set-of 2 3))) (0 :ulf-recur)
     1 (between det adj and det adj noun); e.g., between a red and a blue block
-       2 ((between.p (lex-ulf! det 2) (lex-ulf! adj 3) and.cc (lex-ulf! det 5)
-          (lex-ulf! adj 6) (lex-ulf! noun 7)) (1 ((2 (3 7)) 4 (5 (6 7))))) (0 :ulf-recur)
-    1 (between det name and det name block); e.g., between the NVidia and the Mercedes blocks
-       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) and.cc (lex-ulf! det 5)
-          (lex-ulf! name 6) block.n) (1 ((2 (3 7)) 4 (5 (6 7))))) (0 :ulf-recur)
-    1 (between det name and name block); e.g., between the NVidia and Mercedes blocks
-       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) and.cc (lex-ulf! name 5) block.n)
-          (1 ((2 (3 6)) 4 (the.d (5 6))))) (0 :ulf-recur)
-    1 (between det name block and name block); e.g., between the SRI block and NVidia block
-       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) block.n and.cc (lex-ulf! name 6) block.n)
-          (1 ((2 (3 4)) 5 (the.d (6 7))))) (0 :ulf-recur)
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! adj 3) (lex-ulf! det 5) (lex-ulf! adj 6) (lex-ulf! noun 7))
+          (1 (set-of (2 (3 6)) (4 (5 6))))) (0 :ulf-recur)
+    1 (between det corp and det corp block); e.g., between the NVidia and the Mercedes blocks
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) (lex-ulf! det 5) (lex-ulf! name 6) block.n)
+          (1 (set-of (2 (3 6)) (4 (5 6))))) (0 :ulf-recur)
+    1 (between det corp and corp block); e.g., between the NVidia and Mercedes blocks
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) (lex-ulf! name 5) block.n)
+          (1 (set-of (2 (3 5)) (the.d (4 5))))) (0 :ulf-recur)
+    1 (between det corp block and corp block); e.g., between the SRI block and NVidia block
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) block.n (lex-ulf! name 6) block.n)
+          (1 (set-of (2 (3 4)) (the.d (5 6))))) (0 :ulf-recur)
+
+    ; Less-grammatical fallbacks
+    1 (between corp and corp); e.g., between Starbucks and Twitter
+       2 ((between.p (lex-ulf! name 2) (lex-ulf! name 4))
+          (1 (set-of (the.d (2 block.n)) (the.d (3 block.n))))) (0 :ulf-recur)
+    1 (between corp and corp block); e.g., between Starbucks and Twitter blocks
+       2 ((between.p (lex-ulf! name 2) (lex-ulf! name 4) block.n)
+          (1 (set-of (the.d (2 4)) (the.d (3 4))))) (0 :ulf-recur)
+    1 (between det corp and det corp); e.g., between Starbucks and Twitter
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) (lex-ulf! det 5) (lex-ulf! name 6))
+          (1 (set-of (2 (3 block.n)) (4 (5 block.n))))) (0 :ulf-recur)
+    1 (between det corp and det corp); e.g., between the Starbucks and the Twitter
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) (lex-ulf! det 5) (lex-ulf! name 6))
+          (1 (set-of (2 (3 block.n)) (4 (5 block.n))))) (0 :ulf-recur)
+    1 (between det corp and corp); e.g., between the Starbucks and Twitter
+       2 ((between.p (lex-ulf! det 2) (lex-ulf! name 3) (lex-ulf! name 5))
+          (1 (set-of (2 (3 block.n)) (2 (4 block.n))))) (0 :ulf-recur)
 
 )) ; END *pp-between-ulf-tree*
 
@@ -62,24 +81,24 @@
 '(
     ; Historical
     1 (be 0 between 0 block 0)
-       2 (be det 2 block 1 between 7 noun adv-hist-word 0 ?); e.g., was the NVidia block between two red blocks previously ?
+       2 (be det 2 block 2 between 7 noun adv-hist-word 0 ?); e.g., was the NVidia block between two red blocks previously ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (*pp-between-ulf-tree* 5 6 7 8) (*adv-ulf-tree* 9 10) ?)
-             ((1 2 3 4) ?)) (0 :ulf-recur) 
-    1 (be there 1 adv-history 3 noun 1 between 7 noun ?); e.g., was there ever any red block between the SRI and NVidia blocks ?
+             ((2 (1 3 4)) ?)) (0 :ulf-recur) 
+    1 (be there 1 adv-history 3 noun 2 between 7 noun ?); e.g., was there ever any red block between the SRI and NVidia blocks ?
        2 (((lex-ulf! v 1) there.pro (*adv-ulf-tree* 3 4) (*np-ulf-tree* 5 6 7 8 9 10) ?) 
-          ((1 2 3 4) ?)) (0 :ulf-recur)
-    1 (be there 3 noun 1 between 7 noun adv-hist-word 0 ?); e.g., were there any red blocks between a blue and a green block before this ?
+          ((2 (1 3 4)) ?)) (0 :ulf-recur)
+    1 (be there 3 noun 2 between 7 noun adv-hist-word 0 ?); e.g., were there any red blocks between a blue and a green block before this ?
        2 (((lex-ulf! v 1) there.pro (*np-ulf-tree* 3 4 5 6 7 8) (*adv-ulf-tree* 9 10) ?) 
-          ((1 2 3 4) ?)) (0 :ulf-recur)
+          ((2 (1 3 4)) ?)) (0 :ulf-recur)
 
     ; Standard
     1 (be 0 between 0 block 0)
-       2 (be det 2 block 1 between 7 noun ?); e.g., is the NVidia block (directly) between two red blocks ?
+       2 (be det 2 block 2 between 7 noun ?); e.g., is the NVidia block (directly) between two red blocks ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (*pp-between-ulf-tree* 5 6 7 8) ?)
-             ((1 2 3) ?)) (0 :ulf-recur) 
-    1 (be there 3 noun 1 between 7 noun ?); e.g., is there a red block between a blue and a green block ?
+             ((2 (1 3)) ?)) (0 :ulf-recur) 
+    1 (be there 3 noun 2 between 7 noun ?); e.g., is there a red block between a blue and a green block ?
        2 (((lex-ulf! v 1) there.pro (*np-ulf-tree* 3 4 5 6 7 8) ?) 
-          ((1 2 3) ?)) (0 :ulf-recur)
+          ((2 (1 3)) ?)) (0 :ulf-recur)
 
 )) ; END *yn-between-question-ulf-tree*
 

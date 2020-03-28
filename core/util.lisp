@@ -169,7 +169,7 @@
 ; where x may be either a specific symbol, or a variable (possibly
 ; with a restrictor).
 ;
-  (if (every #'listp list) (cond
+  (if (and x (every #'listp list)) (cond
     ((nnp? x) (remove-if-not (lambda (l) (equal x (car l))) list))
     ((variable? x) list)
     ((restricted-variable? x)

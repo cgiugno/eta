@@ -409,6 +409,8 @@
     ; Now that we have counts of all propositions, loop through
     ; times again and filter all propositions that don't occur n times
     (dolist (time times)
+      ;; (format t "time: ~a~%" time)
+      ;; (lambda (prop) (format t " > prop ~a occurs with freq ~a~%" prop (gethash prop props-table)) (get time '@)) ; DEBUGGING
       (setf (get time '@)
         (remove-if-not (lambda (prop) (= n (gethash prop props-table))) (get time '@))))
 

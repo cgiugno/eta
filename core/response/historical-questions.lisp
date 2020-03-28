@@ -472,14 +472,34 @@
 ) ; END resolve-time-s!
 
 
-(defun form-pred-list (coords-list1 prep-list coords-list2 &key neg)
-; ```````````````````````````````````````````````````````````````````
-; Form predicates from all relations that are satisfied having
-; things from coords-list1 as the subject, a preposition from
-; prep-list, and coords-list2 as the object.
+(defun eval-prep-with-certainty (prep coords1 coords2 coords3 neg)
+; `````````````````````````````````````````````````````````````````
+; Evaluates some preposition with coords1 as the subject and coords2 (and coords3
+; if between.p) as the object. Determine certainty, and return relations for which
+; the certainty is above the threshold (or zero in the case of neg).
+;
+  (let ((certainty (eval-spatial-relation prep coords1 coords2 coords3)))
+    (if neg
+      ; If neg, add negated tuple + certainty for all with zero certainty
+      (if (and (numberp certainty) (<= certainty 0))
+        (if coords3
+          `((,(car coords1) not ,prep (set-of ,(car coords2) ,(car coords3))) ,(- 1.0 certainty))
+          `((,(car coords1) not ,prep ,(car coords2)) ,(- 1.0 certainty))))
+      ; Otherwise, if certainty is greater than threshold, add tuple + certainty to pred-list
+      (if (and (numberp certainty) (> certainty *certainty-threshold*))
+        (if coords3
+          `((,(car coords1) ,prep (set-of ,(car coords2) ,(car coords3))) ,certainty)
+          `((,(car coords1) ,prep ,(car coords2)) ,certainty)))))
+) ; END eval-prep-with-certainty
+
+
+(defun form-pred-list (coords-list1 prep-list coords-list2 coords-list3 &key neg)
+; `````````````````````````````````````````````````````````````````````````````````
+; Form predicates from all relations that are satisfied having things from coords-list1
+; as the subject, a preposition from prep-list, and coords-list2 as the object.
+; coords-list3 is only used in the case of a between.p predicate, nil otherwise.
 ; If neg is given as t, return negated predicates.
 ; NOTE: preds are returned in decreasing order of certainty.
-; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ; TODO: this is kind of messy, could use some cleaning.
 ;
   (let ((pred-list (remove nil
@@ -487,16 +507,13 @@
         (mapcan (lambda (coords1) (mapcan (lambda (coords2)
           (if (not (equal (car coords1) (car coords2)))
             ; Evaluate all prepositions in prep-list
-            (mapcar (lambda (prep)
-              (let ((certainty (eval-spatial-relation prep coords1 coords2)))
-                (if neg
-                  ; If neg, add negated tuple + certainty for all with zero certainty
-                  (if (and (numberp certainty) (<= certainty 0))
-                    (list (list (car coords1) 'not prep (car coords2)) (- 1.0 certainty)))
-                  ; Otherwise, if certainty is greater than threshold, add tuple + certainty to pred-list
-                  (if (and (numberp certainty) (> certainty *certainty-threshold*))
-                    (list (list (car coords1) prep (car coords2)) certainty))
-                )))
+            (mapcan (lambda (prep)
+              ; If between.p, also need to check all possible third blocks
+              (if (equal prep 'between.p)
+                (mapcar (lambda (coords3)
+                    (eval-prep-with-certainty prep coords1 coords2 coords3 neg))
+                  coords-list3)
+                (list (eval-prep-with-certainty prep coords1 coords2 nil neg))))
             prep-list)))
           coords-list2)) coords-list1))))
     ; Sort by certainty and remove certainties
@@ -510,10 +527,9 @@
 ; subject (may be a variable with or without restrictors).
 ; NOTE: we assume uniqueness of coords in the scene, or else this will break.
 ; NOTE: we ensure that the top-2 relations returned do not have duplicate objects.
-; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
   ; Find all possible pairs of subject + object in the scene, and check if relation holds
-  (let ((relations (form-pred-list scene *spatial-prep-list* scene)))
+  (let ((relations (form-pred-list scene *spatial-prep-list* scene scene)))
     ; Filter relations and return the top-2 relations with unique objects
     (last (remove-duplicates (reverse (find-cars-var subj relations)) :key #'third) 2))
 ) ; END compute-relations
@@ -540,11 +556,11 @@
 ; ````````````````````````````````````````````````````
 ; Computes a relation at a particular scene (relation may include variables with/without
 ; restrictors, in which case it returns a list of all relations satisfying that form).
-; TODO: if between.p is added to the spatial-prep-list, this function will need adjusting.
 ;
   (let* ((subj (first rel)) (prep (second rel)) (obj (third rel)) (obj2 (fourth rel))
-        (coords-list1 (find-cars-var subj scene)) (coords-list2 (find-cars-var obj scene)))
-    (form-pred-list coords-list1 (list prep) coords-list2 :neg neg))
+        (coords-list1 (find-cars-var subj scene)) (coords-list2 (find-cars-var obj scene))
+        (coords-list3 (find-cars-var obj2 scene)))
+    (form-pred-list coords-list1 (list prep) coords-list2 coords-list3 :neg neg))
 ) ; END compute-relation
 
 
@@ -635,8 +651,6 @@
 
     ; Apply all unary constraints to further constrain times
     (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
-
-    (mapcar (lambda (time) (format t "::~a~%" (get time '@))) times)
 
     ; Apply all frequency constraints phrases to select times which satisfy frequency
     (mapcar (lambda (constraint) (setq times (apply-frequency-constraint constraint times))) constraints-freq)
