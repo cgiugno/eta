@@ -451,19 +451,19 @@
        2 (((*np-ulf-tree* 1 2) (*psp-ulf-tree* 3 4 5 6)) ((mod-a ({by}.p 1)) 2)) (0 :ulf-recur)
 
     ; Ellipsis (sentential preposition)
-    1 (prep the 1 noun-bw); e.g., before the Twitter block ("did I move the Target block before the Twitter block?")
+    1 (prep-history-simple the 1 noun-bw); e.g., before the Twitter block ("did I move the Target block before the Twitter block?")
        2 (*psp-ulf-tree* (1 I moved 2 3 4)) (0 :subtree+clause)
-    1 (recently prep the 1 noun-bw); e.g., recently before the Twitter block
+    1 (recently prep-history-simple the 1 noun-bw); e.g., recently before the Twitter block
        2 (((lex-ulf! mod-a 1) (*psp-ulf-tree* 2 I moved 3 4 5)) (1 2)) (0 :ulf-recur)
-    1 (deg-adv prep the 1 noun-bw); e.g., right before the Twitter block
+    1 (deg-adv prep-history-simple the 1 noun-bw); e.g., right before the Twitter block
        2 (((lex-ulf! mod-a 1) (*psp-ulf-tree* 2 I moved 3 4 5)) (1 2)) (0 :ulf-recur)
-    1 (det noun-history prep the 1 noun-bw); e.g., two minutes before the Twitter block
+    1 (det noun-history prep-history-simple the 1 noun-bw); e.g., two minutes before the Twitter block
        2 (((*np-ulf-tree* 1 2) (*psp-ulf-tree* 3 I moved 4 5 6)) ((mod-a ({by}.p 1)) 2)) (0 :ulf-recur)
-    1 (prep corp); e.g., before Twitter
+    1 (prep-history-simple corp); e.g., before Twitter
        2 (*psp-ulf-tree* (1 I moved 2)) (0 :subtree+clause)
-    1 (deg-adv prep corp); e.g., right before Twitter
+    1 (deg-adv prep-history-simple corp); e.g., right before Twitter
        2 (((lex-ulf! mod-a 1) (*psp-ulf-tree* 2 I moved 3)) (1 2)) (0 :ulf-recur)
-    1 (det noun-history prep corp); e.g., two minutes before Twitter
+    1 (det noun-history prep-history-simple corp); e.g., two minutes before Twitter
        2 (((*np-ulf-tree* 1 2) (*psp-ulf-tree* 3 I moved 4)) ((mod-a ({by}.p 1)) 2)) (0 :ulf-recur)
 
     ; Ellipsis (other)
@@ -488,8 +488,8 @@
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! adj 8) (*adv-ulf-tree* 9 10) ?)
              (((set-of 2 3) (1 4 5)) ?)) (0 :ulf-recur)
        2 (be np-bw 3 and np-bw 2 noun 1 rel-adj adv-hist-word 0 ?); e.g., were the NVidia block and the SRI block directly touching previously ?
-          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! mod-a 8) (lex-ulf! adj 9) (*adv-ulf-tree* 10 11) ?)
-             (((set-of 2 3) (1 (4 5) 6)) ?)) (0 :ulf-recur)
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! adv-a 8) (lex-ulf! adj 9) (*adv-ulf-tree* 10 11) ?)
+             (((set-of 2 3) (1 4 5 6)) ?)) (0 :ulf-recur)
        2 (be np-bw 3 and np-bw 2 noun 1 prep each other adv-hist-word 0 ?); e.g., were the NVidia block and the SRI block (directly) touching each other ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (*pp-ulf-tree* 8 9 10 11) (*adv-ulf-tree* 12 13) ?)
              (((set-of 2 3) (1 4 5)) ?)) (0 :ulf-recur)
@@ -498,8 +498,8 @@
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! adj 8) ?)
              (((set-of 2 3) (1 4)) ?)) (0 :ulf-recur)
        2 (be np-bw 3 and np-bw 2 noun 1 rel-adj ?); e.g., are the NVidia block and the SRI block directly touching ?
-          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! mod-a 8) (lex-ulf! adj 9) ?)
-             (((set-of 2 3) (1 (4 5))) ?)) (0 :ulf-recur)
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! adv-a 8) (lex-ulf! adj 9) ?)
+             (((set-of 2 3) (1 4 5)) ?)) (0 :ulf-recur)
        2 (be np-bw 3 and np-bw 2 noun 1 prep each other ?); e.g., are the NVidia block and the SRI block (directly) touching each other ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (*pp-ulf-tree* 8 9 10 11) ?)
              (((set-of 2 3) (1 4)) ?)) (0 :ulf-recur)
@@ -796,13 +796,13 @@
           ((((nquan (how.mod-a many.a)) 1) (2 there.pro 3)) ?))  (0 :ulf-recur)
     1 (how many 1 noun 3 be not adj adv-hist-word 0 ?); how many blocks (on the table) were not red before this turn ?
        2 (((*n1-ulf-tree* 3 4 5) (lex-ulf! v 6) (lex-ulf! adj 8) (*adv-ulf-tree* 9 10) ?)
-          ((((nquan (how.mod-a many.a)) 1) (2 (not.mod-a 3) 4)) ?)) (0 :ulf-recur)
+          ((((nquan (how.mod-a many.a)) 1) (2 not 3 4)) ?)) (0 :ulf-recur)
     1 (how many 1 noun 3 be adj adv-hist-word 0 ?); how many blocks (on the table) were red previously ?
        2 (((*n1-ulf-tree* 3 4 5) (lex-ulf! v 6) (lex-ulf! adj 7) (*adv-ulf-tree* 8 9) ?)
           ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
     1 (how many be not adj adv-hist-word 0 ?); how many were not red initially ?
        2 (((lex-ulf! noun blocks) (lex-ulf! v 3) (lex-ulf! adj 5) (*adv-ulf-tree* 6 7) ?)
-          ((((nquan (how.mod-a many.a)) 1) (2 (not.mod-a 3) 4)) ?)) (0 :ulf-recur)
+          ((((nquan (how.mod-a many.a)) 1) (2 not 3 4)) ?)) (0 :ulf-recur)
     1 (how many be adj adv-hist-word 0 ?); how many were red initially ?
        2 (((lex-ulf! noun blocks) (lex-ulf! v 3) (lex-ulf! adj 4) (*adv-ulf-tree* 5 6) ?)
           ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
@@ -827,13 +827,13 @@
           ((((nquan (how.mod-a many.a)) 1) (2 there.pro)) ?))  (0 :ulf-recur)
     1 (how many 1 noun 3 be not adj ?); how many blocks (on the table) are not red ?
        2 (((*n1-ulf-tree* 3 4 5) (lex-ulf! v 6) (lex-ulf! adj 8) ?)
-          ((((nquan (how.mod-a many.a)) 1) (2 (not.mod-a 3))) ?)) (0 :ulf-recur)
+          ((((nquan (how.mod-a many.a)) 1) (2 not 3)) ?)) (0 :ulf-recur)
     1 (how many 1 noun 3 be adj ?); how many blocks (on the table) are red ?
        2 (((*n1-ulf-tree* 3 4 5) (lex-ulf! v 6) (lex-ulf! adj 7) ?)
           ((((nquan (how.mod-a many.a)) 1) (2 3)) ?)) (0 :ulf-recur)
     1 (how many be not adj ?); how many are not red ?
        2 (((lex-ulf! noun blocks) (lex-ulf! v 3) (lex-ulf! adj 5) ?)
-          ((((nquan (how.mod-a many.a)) 1) (2 (not.mod-a 3))) ?)) (0 :ulf-recur)
+          ((((nquan (how.mod-a many.a)) 1) (2 not 3)) ?)) (0 :ulf-recur)
     1 (how many be adj ?); how many are red ?
        2 (((lex-ulf! noun blocks) (lex-ulf! v 3) (lex-ulf! adj 4) ?)
           ((((nquan (how.mod-a many.a)) 1) (2 3)) ?)) (0 :ulf-recur)

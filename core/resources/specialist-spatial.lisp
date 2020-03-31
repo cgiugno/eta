@@ -8,7 +8,7 @@
 
 ; List of supported spatial prepositions (potentially aliased in the case of prepositions
 ; with multiple senses or ones that are essentially synonyms)
-; TODO: on_to in facing abutting between visible flush_with towards)
+; TODO: on_to in facing abutting visible flush_with towards)
 (defvar *spatial-prep-list*
   '(touching.p to_the_left_of.p to_the_right_of.p below.p (under.p below.p) (beneath.p below.p) above.p behind.p
     in_front_of.p on.p (on_top_of.p on.p) near.p (near-to.p near.p) (close-to.p near.p) next_to.p (adjacent_to.p next-to.p)
@@ -16,6 +16,10 @@
     
 (defvar *blocksize* 1)
 (defvar *std-error* (/ *blocksize* 10))
+
+(defun spatial-deg-adv? (ulf)
+  (member ulf '(just.adv-a very.adv-a only.adv-a exactly.adv-a precisely.adv-a immediately.adv-a right.adv-a slightly.adv-a
+    directly.adv-a flush.adv-a up.adv-a)))
 
 
 (defun ~= (x y)
@@ -42,32 +46,33 @@
 ) ; END ~equal
 
 
-(defun eval-spatial-relation-bool (rel coords1 coords2 &optional coords3)
-; `````````````````````````````````````````````````````````````````````````
+(defun eval-spatial-relation-bool (rel coords1 coords2 coords3 &optional deg-adv)
+; ``````````````````````````````````````````````````````````````````````````````````
 ; Evaluate whether relation rel holds between an object with centroid at coords1, and
 ; an object with centroid at coords2 (plus an additional object at coords3 for between.p)
 ; Returns boolean value.
+; If deg-adv is given as true (e.g. "directly"), also check if the blocks are touching.
 ; NOTE: coords is a list of the form e.g. (|Texaco| 2 3 0)
 ;
-  (let* ((prep-lookup (find-car rel *spatial-prep-list*))
-         (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
-    (if (fboundp prep)
-      (let ((v (apply prep (append (cdr coords1) (cdr coords2) (cdr coords3)))))
-        (if (numberp v) (>= v *certainty-threshold*) v))))
+  (>= (eval-spatial-relation rel coords1 coords2 coords3 deg-adv) *certainty-threshold*)
 ) ; END eval-spatial-relation-bool
 
 
-(defun eval-spatial-relation (rel coords1 coords2 &optional coords3)
-; ```````````````````````````````````````````````````````````````````
+(defun eval-spatial-relation (rel coords1 coords2 coords3 &optional deg-adv)
+; `````````````````````````````````````````````````````````````````````````````
 ; Returns a certainty value for the relation rel between coords1 and coords2 (and
 ; coords3 in the case of between).
+; If deg-adv is given as true (e.g. "directly"), also check if the blocks are touching.
 ; NOTE: coords is a list of the form e.g. (|Texaco| 2 3 0)
 ;
   (let* ((prep-lookup (find-car rel *spatial-prep-list*))
          (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
     (if (fboundp prep)
       (let ((v (apply prep (append (cdr coords1) (cdr coords2) (cdr coords3)))))
-        (if (numberp v) v (if v t nil)))))
+        (if (not (numberp v)) (setq v 0))
+        (if deg-adv
+          (+ (* 0.5 v) (* 0.5 (apply 'touching.p (append (cdr coords1) (cdr coords2)))))
+          v))))
 ) ; END eval-spatial-relation
 
 

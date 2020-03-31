@@ -77,6 +77,7 @@
   (let* ((ulf-base (uninvert-question (remove-not (remove-adv-e (remove-adv-f ulf)))))
          (where-question (extract-where-question ulf))
          (neg (extract-neg ulf))
+         (deg-adv (extract-deg-adv ulf))
          (adv-e (extract-adv-e ulf))
          (adv-f (extract-adv-f ulf))
          constraints-unary constraints-binary constraints-freq
@@ -98,11 +99,11 @@
     ; asking about an action, or both (e.g. "when did I put the Twitter block on the Starbucks block")
     (cond
       (where-question
-        (setq func `(compute-relations ,subj)))
+        (setq func `(compute-relations ,subj ,deg-adv)))
       ((and relation action)
-        (setq func `(compute-move+relation ,relation ,obj ,neg)))
+        (setq func `(compute-move+relation ,relation ,obj ,neg ,deg-adv)))
       (relation
-        (setq func `(compute-relation ,relation ,neg)))
+        (setq func `(compute-relation ,relation ,neg ,deg-adv)))
       (action
         (setq func `(compute-move ,obj ,neg))))
 
@@ -113,6 +114,7 @@
     (when (not embedded)
       (format t "where question: ~a~%" where-question)
       (format t "neg: ~a~%" neg)
+      (format t "deg-adv: ~a~%" deg-adv)
       (format t "adv-e: ~a~%" adv-e)
       (format t "constraint-unary: ~a~%" constraints-unary)
       (format t "constraint-binary: ~a~%" constraints-binary)
@@ -189,9 +191,19 @@
 ; ````````````````````````
 ; Returns t if ULF is in a negative environment.
 ;
-  (or (ttt:match-expr '(^* not) ulf)
-      (ttt:match-expr '(^* (adv-f never.a)) ulf))
+  (if (or
+    (ttt:match-expr '(^* not) ulf)
+    (ttt:match-expr '(^* (adv-f never.a)) ulf)) t)
 ) ; END extract-neg
+
+
+(defun extract-deg-adv (ulf)
+; ````````````````````````````
+; Extracts any deg-adv modifying a spatial question.
+;
+  (if 
+    (ttt:match-expr '(^* spatial-deg-adv?) ulf) t)
+) ; END extract-deg-adv
 
 
 (defun extract-action (ulf)
@@ -214,25 +226,25 @@
 ;
   (let ((relation
       (ttt:apply-rules '(
-        ; Straightforward predicative cases
-        (/ (_!1 ((tense? be.v) (^* (between.p (set-of _!2 _!3)))))
+        ; Straightforward preposition cases
+        (/ (_!1 ((tense? be.v) _* (^* (between.p (set-of _!2 _!3)))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
-        (/ (_!1 ((tense? be.v) (^* (prep? _!2))))
+        (/ (_!1 ((tense? be.v) _* (^* (prep? _!2))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
-        (/ (_!1 ((tense? aspect?) (be.v (^* (between.p (set-of _!2 _!3))))))
+        (/ (_!1 ((tense? aspect?) (be.v _* (^* (between.p (set-of _!2 _!3))))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
-        (/ (_!1 ((tense? aspect?) (be.v (^* (prep? _!2)))))
+        (/ (_!1 ((tense? aspect?) (be.v _* (^* (prep? _!2)))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
         ; "what block did I put on the Twitter block?" (TODO: currently this is just treated as
         ; meaning the same as "what block was on the Twitter block", but it really is asking about
         ; this PLUS some block that I actually moved recently).
-        (/ (_! ((tense? verb-untensed?) _!1 (between.p (set-of _!2 _!3))))
+        (/ (_! ((tense? verb-untensed?) _!1 (^* (between.p (set-of _!2 _!3)))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
-        (/ (_! ((tense? verb-untensed?) _!1 (prep? _!2)))
+        (/ (_! ((tense? verb-untensed?) _!1 (^* (prep? _!2))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
-        (/ (_!1 ((tense? (pasv verb-untensed?)) (between.p (set-of _!2 _!3))))
+        (/ (_!1 ((tense? (pasv verb-untensed?)) (^* (between.p (set-of _!2 _!3)))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
-        (/ (_!1 ((tense? (pasv verb-untensed?)) (prep? _!2)))
+        (/ (_!1 ((tense? (pasv verb-untensed?)) (^* (prep? _!2))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
         ; "what block touches the Twitter block?" (TODO: needs to be generalized)
         (/ (_!1 ((tense? spatial-verb?) _!2))
@@ -472,13 +484,13 @@
 ) ; END resolve-time-s!
 
 
-(defun eval-prep-with-certainty (prep coords1 coords2 coords3 neg)
-; `````````````````````````````````````````````````````````````````
+(defun eval-prep-with-certainty (prep coords1 coords2 coords3 neg deg-adv)
+; ``````````````````````````````````````````````````````````````````````````
 ; Evaluates some preposition with coords1 as the subject and coords2 (and coords3
 ; if between.p) as the object. Determine certainty, and return relations for which
 ; the certainty is above the threshold (or zero in the case of neg).
 ;
-  (let ((certainty (eval-spatial-relation prep coords1 coords2 coords3)))
+  (let ((certainty (eval-spatial-relation prep coords1 coords2 coords3 deg-adv)))
     (if neg
       ; If neg, add negated tuple + certainty for all with zero certainty
       (if (and (numberp certainty) (<= certainty 0))
@@ -493,8 +505,8 @@
 ) ; END eval-prep-with-certainty
 
 
-(defun form-pred-list (coords-list1 prep-list coords-list2 coords-list3 &key neg)
-; `````````````````````````````````````````````````````````````````````````````````
+(defun form-pred-list (coords-list1 prep-list coords-list2 coords-list3 &key neg deg-adv)
+; `````````````````````````````````````````````````````````````````````````````````````````
 ; Form predicates from all relations that are satisfied having things from coords-list1
 ; as the subject, a preposition from prep-list, and coords-list2 as the object.
 ; coords-list3 is only used in the case of a between.p predicate, nil otherwise.
@@ -511,9 +523,9 @@
               ; If between.p, also need to check all possible third blocks
               (if (equal prep 'between.p)
                 (mapcar (lambda (coords3)
-                    (eval-prep-with-certainty prep coords1 coords2 coords3 neg))
+                    (eval-prep-with-certainty prep coords1 coords2 coords3 neg deg-adv))
                   coords-list3)
-                (list (eval-prep-with-certainty prep coords1 coords2 nil neg))))
+                (list (eval-prep-with-certainty prep coords1 coords2 nil neg deg-adv))))
             prep-list)))
           coords-list2)) coords-list1))))
     ; Sort by certainty and remove certainties
@@ -535,13 +547,13 @@
 ) ; END compute-relations
 
 
-(defun compute-move+relation (scene moves scene1 rel obj neg)
-; `````````````````````````````````````````````````````````````
+(defun compute-move+relation (scene moves scene1 rel obj neg deg-adv)
+; ````````````````````````````````````````````````````````````````````
 ; Computes all moves of a block into a particular relation, i.e. whether the
 ; given object was moved, and that the relation holds in the resulting scene.
 ; If neg is given, either the object was not moved, or the relation didn't hold in the scene.
 ;
-  (let ((relations (compute-relation scene moves scene1 rel nil)))
+  (let ((relations (compute-relation scene moves scene1 rel nil deg-adv)))
     ; Get rid of any moves for which the relation does not hold in scene1
     (setq moves (remove-if-not (lambda (move) (find move relations
                  :test (lambda (x y) (equal (car x) (car y))))) moves))
@@ -552,15 +564,15 @@
 ) ; END compute-move+relation
 
 
-(defun compute-relation (scene moves scene1 rel neg)
-; ````````````````````````````````````````````````````
+(defun compute-relation (scene moves scene1 rel neg deg-adv)
+; ````````````````````````````````````````````````````````````
 ; Computes a relation at a particular scene (relation may include variables with/without
 ; restrictors, in which case it returns a list of all relations satisfying that form).
 ;
   (let* ((subj (first rel)) (prep (second rel)) (obj (third rel)) (obj2 (fourth rel))
         (coords-list1 (find-cars-var subj scene)) (coords-list2 (find-cars-var obj scene))
         (coords-list3 (find-cars-var obj2 scene)))
-    (form-pred-list coords-list1 (list prep) coords-list2 coords-list3 :neg neg))
+    (form-pred-list coords-list1 (list prep) coords-list2 coords-list3 :neg neg :deg-adv deg-adv))
 ) ; END compute-relation
 
 
