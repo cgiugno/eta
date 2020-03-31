@@ -249,6 +249,21 @@
        2 (((*n1-ulf-tree* 1 2) that.rel (lex-ulf! v 4) (*pp-ulf-tree* 5 6 7 8 9))
           (n+preds 1 (2 (3 4)))) (0 :ulf-recur)
 
+    ; Historical postmodifier
+    ; TODO: a relative clause can have adverbs, such as in "what is the first block that I just recently moved?"
+    1 (2 noun 1 pron verb-rel prep 2 np-bw 3); e.g, first block that I put on the Twitter block
+       2 (((*n1-ulf-tree* 1 2) that.rel (*np-ulf-tree* 4) (lex-ulf! v 5) (*pp-ulf-tree* 6 7 8 9))
+          (n+preds 1 (sub 2 (3 (4 *h 5))))) (0 :ulf-recur)
+    1 (2 noun 1 pron verb-rel); e.g., second block that I moved
+       2 (((*n1-ulf-tree* 1 2) that.rel (*np-ulf-tree* 4) (lex-ulf! v 5))
+          (n+preds 1 (sub 2 (3 (4 *h))))) (0 :ulf-recur)
+    1 (2 noun 1 verb-rel prep 2 np-bw 3); e.g., blocks that were put on the Twitter block
+       2 (((*n1-ulf-tree* 1 2) that.rel (lex-ulf! v-pasv 4) (*pp-ulf-tree* 5 6 7 8))
+          (n+preds 1 (2 (3 4)))) (0 :ulf-recur)
+    1 (2 noun 1 verb-rel); e.g., blocks that were moved
+       2 (((*n1-ulf-tree* 1 2) that.rel (lex-ulf! v-pasv 4))
+          (n+preds 1 (2 3))) (0 :ulf-recur)
+
     ; PP after rel-clause might be a pred complement to "be", so we try this last 
     1 (2 noun that be 1 prep det 1 noun 1 prep 2 np-bw 3); e.g., block that is on the table near the red block
        2 (((*n1-ulf-tree* 1 2) that.rel (lex-ulf! v 4) (*pp-ulf-tree* 5 6 7 8 9 10)
@@ -516,6 +531,12 @@
        2 (be det 2 block adj adv-hist-word 0 ?); e.g., was the NVidia block clear/red/visible before I moved it ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (lex-ulf! adj 5) (*adv-ulf-tree* 6 7) ?)
              ((2 (1 3 4)) ?)) (0 :ulf-recur)
+       2 (be det 2 block 4 det 2 noun 4 adv-hist-word 0 ?); e.g., was the Twitter block the leftmost block before I moved it ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4 5) (*np-ulf-tree* 6 7 8 9) (*adv-ulf-tree* 10 11) ?)
+             ((2 (1 (= 3) 4)) ?)) (0 :ulf-recur)
+       2 (be det 2 block 4 adv-history 1 det 2 noun 4 ?); e.g., was the Twitter block recently the leftmost block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4 5) (*adv-ulf-tree* 6 7) (*np-ulf-tree* 8 9 10 11) ?)
+             ((2 (1 3 (= 4))) ?)) (0 :ulf-recur)
        ; Standard
        2 (be det 2 block 1 prep np-bw 3 conj np-bw 3 ?); e.g., is the NVidia block above the SRI block and the Texaco block ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (*pp-ulf-tree* 5 6 7 8 9 10 11) ?)
@@ -526,6 +547,9 @@
        2 (be det 2 block adj ?); e.g., is the NVidia block clear/red/visible ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (lex-ulf! adj 5) ?)
              ((2 (1 3)) ?)) (0 :ulf-recur)
+       2 (be det 2 block 4 det 2 noun 4 ?); e.g., is the Twitter block the leftmost block?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4 5) (*np-ulf-tree* 6 7 8 9) ?)
+             ((2 (1 (= 3))) ?)) (0 :ulf-recur)
 
     ; Asking about a single block (by proper name)
     1 (be corp 0)
@@ -539,6 +563,12 @@
        2 (be corp adj adv-hist-word 0 ?); e.g., was NVidia clear/red/visible before I moved it ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! adj 3) (*adv-ulf-tree* 4 5) ?)
              ((2 (1 3 4)) ?)) (0 :ulf-recur)
+       2 (be corp det 2 noun 4 adv-hist-word 0 ?); e.g., was Twitter the leftmost block before I moved it ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*np-ulf-tree* 3 4 5 6) (*adv-ulf-tree* 7 8) ?)
+             ((2 (1 (= 3) 4)) ?)) (0 :ulf-recur)
+       2 (be corp adv-history 1 det 2 noun 4 ?); e.g., was Twitter recently the leftmost block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*adv-ulf-tree* 3 4) (*np-ulf-tree* 5 6 7 8) ?)
+             ((2 (1 3 (= 4))) ?)) (0 :ulf-recur)
        ; Standard
        2 (be corp 1 prep np-bw 3 conj np-bw 3 ?); e.g., is NVidia above the SRI block and the Texaco block ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*pp-ulf-tree* 3 4 5 6 7 8 9) ?)
@@ -549,6 +579,9 @@
        2 (be corp adj ?); e.g., is NVidia clear/red/visible ?
           3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! adj 3) ?)
              ((2 (1 3)) ?)) (0 :ulf-recur)
+       2 (be corp det 2 noun 4 ?); e.g., is Twitter the leftmost block?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (*np-ulf-tree* 3 4 5 6) ?)
+             ((2 (1 (= 3))) ?)) (0 :ulf-recur)
 
     ; Asking about a pronoun
     1 (be pron 0)
@@ -894,6 +927,9 @@
     1 (wh-pron be the 2 noun prep np-bw 3 adv-hist-word 0 ?); e.g., what was the block next_to the farthest blue block initially ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6 7 8) (*adv-ulf-tree* 9 10) ?)
           ((1 (2 (= 3) 4)) ?)) (0 :ulf-recur)
+    1 (wh-pron be the 2 noun 8 adv-hist-word 0 ?); e.g., what was the first block that I put on the Twitter block previously ?
+       2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6) (*adv-ulf-tree* 9 10) ?)
+          ((1 (2 (= 3) 4)) ?)) (0 :ulf-recur)
     ; Past perf (historical)
     1 (wh_ 2 have pron adv_ 1 verb-rel adv-hist-word 0 ?); e.g., what blocks have I just moved before I moved the Twitter block ?
       2 (((*np-ulf-tree* 1 2) (*np-ulf-tree* 4) (*adv-ulf-tree* 5 6) (lex-ulf! v- 7) (*adv-ulf-tree* 8 9) ?)
@@ -975,6 +1011,9 @@
           ((1 (2 (= (the.d 4)))) ?)) (0 :ulf-recur)
     1 (wh-pron be the 2 noun prep np-bw 3 ?); e.g., what is the block next_to the farthest blue block ?
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6 7 8) ?)
+          ((1 (2 (= 3))) ?)) (0 :ulf-recur)
+    1 (wh-pron be the 2 noun 8 ?); e.g., what is the third block to the left of the Twitter block ?
+       2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6) ?)
           ((1 (2 (= 3))) ?)) (0 :ulf-recur)
     ; Non-be verb
     1 (wh_ 2 do not verb-rel 1 prep 2 np-bw 3 ?); e.g., what block doesn't sit on the table ?

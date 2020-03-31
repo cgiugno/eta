@@ -1058,7 +1058,8 @@
 ; Checks whether a proposition is a relation, i.e. (|Twitter| on.p |Texaco|).
 ;
   (and (listp prop) (or (nnp? (first prop)) (restricted-variable? (first prop)))
-    (or (nnp? (third prop)) (restricted-variable? (third prop))) (prep? (second prop)))
+    (or (nnp? (third prop)) (restricted-variable? (third prop)))
+    (or (prep? (second prop)) (equal '= (second prop))))
 ) ; END relation-prop?
 
 
@@ -1240,7 +1241,9 @@
 ; ``````````````````````````````````````
 ; Checks whether phrase1 c-commands phrase2 in a given ulf.
 ;
-  (ttt:match-expr `(^* (_*1 ,phrase1 _*2 (^* ,phrase2) _*3)) ulf)
+  (let ((phrase1-base (apply-sub-macro phrase1)) (phrase2-base (apply-sub-macro phrase2))
+        (ulf-base (apply-sub-macro ulf)))
+    (ttt:match-expr `(^* (_*1 ,phrase1-base _*2 (^* ,phrase2-base) _*3)) ulf-base))
 ) ; END c-command?
 
 

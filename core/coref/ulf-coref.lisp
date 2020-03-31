@@ -229,7 +229,7 @@
 (defun preprocess-ulf (ulf)
 ; ``````````````````````````
 ; Preprocess ulf. Steps:
-; 1. Apply macros [NOT DONE YET]
+; 1. Apply macros [NOT DONE ATM]
 ; 2. Replace ellipsis
 ; 3. Convert possessives to poss-by form, e.g. (the.d ((poss-by |Mary|) (small.a dog.n))) [NOT DONE YET]
 ; 4. Other necessary transformations?

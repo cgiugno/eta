@@ -235,9 +235,12 @@
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
         (/ (_!1 ((tense? aspect?) (be.v _* (^* (prep? _!2)))))
            ((resolve-rel-np! _!1) prep? (resolve-rel-np! _!2)))
-        ; "what block did I put on the Twitter block?" (TODO: currently this is just treated as
-        ; meaning the same as "what block was on the Twitter block", but it really is asking about
-        ; this PLUS some block that I actually moved recently).
+        ; Equality relation, e.g. "what is the leftmost block?"
+        (/ (_!1 ((tense? be.v) (= _!2)))
+           ((resolve-rel-np! _!1) = (resolve-rel-np! _!2)))
+        (/ (_!1 ((tense? aspect?) (= _!2)))
+           ((resolve-rel-np! _!1) = (resolve-rel-np! _!2)))
+        ; "what block did I put on the Twitter block?"
         (/ (_! ((tense? verb-untensed?) _!1 (^* (between.p (set-of _!2 _!3)))))
            ((resolve-rel-np! _!1) between.p (resolve-rel-np! _!2) (resolve-rel-np! _!3)))
         (/ (_! ((tense? verb-untensed?) _!1 (^* (prep? _!2))))
@@ -251,6 +254,11 @@
            ((resolve-rel-np! _!1) (spatial-verb-to-prep! spatial-verb?) (resolve-rel-np! _!2)))
         (/ (_!1 ((tense? aspect?) (spatial-verb? _!2)))
            ((resolve-rel-np! _!1) (spatial-verb-to-prep! spatial-verb?) (resolve-rel-np! _!2)))
+        ; "what blocks were clear?"
+        (/ (_!1 ((tense? be.v) _* adj?))
+           ((resolve-rel-np! _!1) adj?))
+        (/ (_!1 ((tense? aspect?) _* adj?))
+           ((resolve-rel-np! _!1) adj?))
       )
       ulf)))
     (if (relation-prop? relation) relation nil))
