@@ -270,6 +270,10 @@
       (/ (_*1 not not _*2) (_*1 _*2))
       ; do I not => I do not
       (/ ((tense? do.aux-s) indiv? (not (verb-untensed? _*))) (indiv? ((tense? do.aux-s) not (verb-untensed? _*))))
+      ; pron verb that => that pron verb
+      (/ (pron? ((tense? verb?) relative?)) (sub relative? (pron? ((tense? verb?) *h))))
+      ; TODO: temporary fix for "toppest"
+      (/ (most-n top.a _*) (topmost.a _*))
       )
   ulf)
 ) ; END normalize-output
@@ -537,16 +541,6 @@
   (make-np (make-set (remove-duplicates (remove nil
     (mapcar (lambda (rel) (third rel)) relations)) :test #'equal)) 'block.n)
 ) ; END make-plur-np-obj
-
-
-(defun get-color (name)
-; ```````````````````````
-; Gets the color of a given name.
-; e.g. (get-color '|Twitter|) => red.a
-;
-  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context name)))))
-    (caadr color-prop))
-) ; END get-color
 
 
 (defun make-np (name type)

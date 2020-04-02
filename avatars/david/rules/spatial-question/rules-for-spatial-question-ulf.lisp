@@ -215,16 +215,6 @@
        2 ((lex-ulf! adj 1) ((lex-ulf! name 2) (lex-ulf! noun 3))) (0 :ulf)
     1 (corp); e.g., [the] Starbucks
        2 (((lex-ulf! name 1)) (1 block.n)) (0 :ulf-recur)
-
-    ; Superlative adj's, possibly followed by more adjectives and then any postmodifiers 
-    1 (sup-adj noun 0); e.g., highest block on the stack
-       2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3)) (most-n 1 2)) (0 :ulf-recur)
-    1 (sup-adj adj noun 0); e.g., highest red block on the table
-       2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3 4)) (most-n 1 2)) (0 :ulf-recur)
-    1 (most sup-adj-base noun 0); e.g., highest block on the stack
-       2 (((lex-ulf! adj 2) (*n1-ulf-tree* 3 4)) (most-n 1 2)) (0 :ulf-recur)
-    1 (most sup-adj-base adj noun 0); e.g., highest red block on the table
-       2 (((lex-ulf! adj 2) (*n1-ulf-tree* 3 4 5)) (most-n 1 2)) (0 :ulf-recur)
     
     ; Postmodifiers (allow two, i.e., 2 PPs or a PP and a relative clause (either order) 
     1 (2 noun 1 prep det 1 noun 1 prep 2 np-bw 3); e.g., blocks near each other on the table
@@ -268,6 +258,16 @@
     1 (2 noun that be 1 prep det 1 noun 1 prep 2 np-bw 3); e.g., block that is on the table near the red block
        2 (((*n1-ulf-tree* 1 2) that.rel (lex-ulf! v 4) (*pp-ulf-tree* 5 6 7 8 9 10)
           (*pp-ulf-tree* 10 11 12 13)) (n+preds 1 (2 (3 4)) 5)) (0 :ulf-recur)
+
+    ; Superlative adj's, possibly followed by more adjectives and then any postmodifiers 
+    1 (sup-adj noun 0); e.g., highest block on the stack
+       2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3)) (most-n 1 2)) (0 :ulf-recur)
+    1 (sup-adj adj noun 0); e.g., highest red block on the table
+       2 (((lex-ulf! sup-adj 1) (*n1-ulf-tree* 2 3 4)) (most-n 1 2)) (0 :ulf-recur)
+    1 (most sup-adj-base noun 0); e.g., highest block on the stack
+       2 (((lex-ulf! adj 2) (*n1-ulf-tree* 3 4)) (most-n 1 2)) (0 :ulf-recur)
+    1 (most sup-adj-base adj noun 0); e.g., highest red block on the table
+       2 (((lex-ulf! adj 2) (*n1-ulf-tree* 3 4 5)) (most-n 1 2)) (0 :ulf-recur)
 
     ; Ordinary premodifying adj's 
     1 (adj noun 0); e.g., red block that is to_the_left_of a blue block
@@ -928,7 +928,7 @@
        2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6 7 8) (*adv-ulf-tree* 9 10) ?)
           ((1 (2 (= 3) 4)) ?)) (0 :ulf-recur)
     1 (wh-pron be the 2 noun 8 adv-hist-word 0 ?); e.g., what was the first block that I put on the Twitter block previously ?
-       2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6) (*adv-ulf-tree* 9 10) ?)
+       2 (((lex-ulf! pro 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5 6) (*adv-ulf-tree* 7 8) ?)
           ((1 (2 (= 3) 4)) ?)) (0 :ulf-recur)
     ; Past perf (historical)
     1 (wh_ 2 have pron adv_ 1 verb-rel adv-hist-word 0 ?); e.g., what blocks have I just moved before I moved the Twitter block ?

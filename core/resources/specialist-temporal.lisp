@@ -61,7 +61,7 @@
 
 
 ; Plural noun without any sort of modifier resolves to 3 by default
-(defvar *plur-value* 3)
+(defvar *temporal-plur-value* 3)
 
 ; "Recently" is considered anything within a 2 minute threshold
 (defvar *recently-threshold* 120)
@@ -211,7 +211,7 @@
 ; `````````````````````````
 ; Gets the nth time in times (in temporal order).
 ;
-  (let ((sorted (sort (copy-seq times) (lambda x y) (is-before x y))))
+  (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
     (nth n sorted))
 ) ; END nth-time
 
@@ -232,7 +232,7 @@
 ;
   (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
     (if (null n) (car sorted)
-      (reverse (last (reverse sorted) n))))
+      (front sorted n)))
 ) ; END earliest-time
 
 
@@ -575,7 +575,7 @@
       (earliest-time times (numerical-mod-a! mod-a)))
     ; first + plural noun
     ((ttt:match-expr 'plur.mod-a mod-a)
-      (earliest-time times *plur-value*))
+      (earliest-time times *temporal-plur-value*))
     ; no/unknown mod-a
     (t (earliest-time times 1)))
 ) ; END first.a
@@ -630,7 +630,7 @@
       (latest-time times (numerical-mod-a! mod-a)))
     ; last + plural noun
     ((ttt:match-expr 'plur.mod-a mod-a)
-      (latest-time times *plur-value*))
+      (latest-time times *temporal-plur-value*))
     ; no/unknown mod-a
     (t (latest-time times 1)))
 ) ; END last.a
@@ -724,7 +724,7 @@
         (is-apart-now time *time* 'move (time-np-to-num (cadadr mod-a)))) times))
     ; previous + plural noun
     ((ttt:match-expr 'plur.mod-a mod-a)
-      (latest-time times *plur-value*))
+      (latest-time times *temporal-plur-value*))
     ; no/unknown mod-a
     (t (latest-time times 3)))
 ) ; END previous.a
@@ -770,7 +770,7 @@
     ;;     (is-apart-now time *time* 'move (time-np-to-num (cadadr mod-a)))) times))
     ; next + plural noun
     ((ttt:match-expr 'plur.mod-a mod-a)
-      (earliest-time times *plur-value*))
+      (earliest-time times *temporal-plur-value*))
     ; no/unknown mod-a
     (t (earliest-time times 3)))
 ) ; END next.a

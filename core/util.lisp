@@ -168,6 +168,7 @@
 ; Finds a list of sublists of list which have x as its car,
 ; where x may be either a specific symbol, or a variable (possibly
 ; with a restrictor).
+; NOTE: Currently unused
 ;
   (if (and x (every #'listp list)) (cond
     ((nnp? x) (remove-if-not (lambda (l) (equal x (car l))) list))
@@ -177,6 +178,27 @@
         (lambda (l) (equal (funcall (first r) (car l)) (second r))) list)))
     (t list)))
 ) ; END find-car-var
+
+
+
+(defun find-cars-list (x list)
+;```````````````````````````````
+; Finds a list of sublists of list which have x as its car (if x is an atom),
+; or have some member of x as its car (if x is a list).
+;
+  (if (and x (every #'listp list)) (cond
+    ((atom x) (remove-if-not (lambda (l) (equal (car l) x)) list))
+    (t (remove-if-not (lambda (l) (member (car l) x)) list))))
+) ; END find-cars-list
+
+
+
+(defun front (x &optional (n 1))
+;````````````````````````````````
+; Does the opposite of last.
+;
+  (reverse (last (reverse x) n))
+) ; END front
 
 
 

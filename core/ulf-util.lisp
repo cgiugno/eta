@@ -667,8 +667,7 @@
 ; TODO: See comment on proper-name?
 ;
   (and (symbolp ulf)
-    (member ulf '(|Adidas| |Burger King| |Esso| |Heineken| |HP | |HP| |McDonalds| |Mercedes|
-                  |NVidia| |Pepsi| |SRI | |SRI| |Starbucks| |Texaco| |Target| |Toyota| |Shell| |Twitter|)))
+    (block-name? ulf))
 ) ; END nnp?
 
 
@@ -686,9 +685,9 @@
 
 (defun np? (ulf)
 ; ```````````````
-; Checks if a ULF is a noun phrase starting with either a determiner or a type reifier.
+; Checks if a ULF is a noun phrase starting with either a determiner or a type reifier, or a pronoun.
 ;
-  (or (det-np? ulf) (kind? ulf))
+  (or (det-np? ulf) (kind? ulf) (pron? ulf))
 ) ; END np?
 
 
@@ -969,6 +968,40 @@
 ) ; END num-to-adj
 
 
+(defun split-np-modifiers (ulf)
+; ```````````````````````````````
+; Splits a complex np ulf into postmodifiers, premodifiers, and the head noun respectively (along
+; with any mod-a/most-n preceding them).
+;
+  (let (premods postmods noun)
+    (labels ((split-np-modifiers-recur (ulf-part)
+        (cond
+          ; noun
+          ((noun? ulf-part)
+            (setq noun (if (listp ulf-part) (second ulf-part) ulf-part)))
+          ; normal adj
+          ((adj? ulf-part)
+            (setq premods (cons ulf-part premods)))
+          ; other atom
+          ((atom ulf-part) nil)
+          ; n+preds or np+preds
+          ((or (equal (car ulf-part) 'n+preds) (equal (car ulf-part) 'np+preds))
+            (setq postmods (mapcar #'apply-sub-macro (cddr ulf-part)))
+            (split-np-modifiers-recur (second ulf-part)))
+          ; most-n
+          ((equal (car ulf-part) 'most-n)
+            (setq premods (cons (list 'most-n (second ulf-part)) premods))
+            (split-np-modifiers-recur (cddr ulf-part)))
+          ; some mod-a + adj
+          ((mod-a? (car ulf-part))
+            (setq premods (cons ulf-part premods)))
+          ; other list structure
+          (t (mapcar #'split-np-modifiers-recur ulf-part)))))
+      (split-np-modifiers-recur ulf))
+  (list premods postmods noun))
+) ; END split-np-modifiers
+
+
 (defun tense? (ulf)
 ; ```````````````````
 ; Checks if ULF is a tense operator
@@ -1057,9 +1090,14 @@
 ; ````````````````````````````
 ; Checks whether a proposition is a relation, i.e. (|Twitter| on.p |Texaco|).
 ;
-  (and (listp prop) (or (nnp? (first prop)) (restricted-variable? (first prop)))
-    (or (nnp? (third prop)) (restricted-variable? (third prop)))
-    (or (prep? (second prop)) (equal '= (second prop))))
+  (and (listp prop) (or
+    (and
+      (or (np? (first prop)) (nnp? (first prop)) (restricted-variable? (first prop)))
+      (adj? (second prop)))
+    (and
+      (or (np? (first prop)) (nnp? (first prop)) (restricted-variable? (first prop)))
+      (or (np? (first prop)) (nnp? (third prop)) (restricted-variable? (third prop)))
+      (or (prep? (second prop)) (equal '= (second prop))))))
 ) ; END relation-prop?
 
 
