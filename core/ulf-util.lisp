@@ -431,7 +431,9 @@
 ; ``````````````````````````````
 ; Removes any 'do' auxiliaries in a question ULF, unless followed by a negation.
 ; 
-  (if (ttt:match-expr '(^* ((tense? do.aux-s) not _*)) ulf)
+  (if (or
+        (ttt:match-expr '(^* ((tense? do.aux-s) not _*)) ulf)
+        (ttt:match-expr '(^* ((tense? do.aux-s) _? (not _!))) ulf))
     ulf
     (ttt:apply-rules '(
         (/ ((tense? do.aux-s) _* (_! (verb-untensed? _*1))) (_* (_! ((tense? verb-untensed?) _*1))))

@@ -63,10 +63,12 @@
 
     ; Return either times or corresponding props depending on if when-question or not.
     ; TODO: check if next time, if so return BEFORE.P <prop> as answer relation, resolved into S by response generator
-    (if when-question
-      (mapcar (lambda (time) (add-certainty time time)) answer)
-      (mapcan (lambda (time)
-        (mapcar (lambda (prop) (add-certainty prop time)) (get time '@))) answer)))
+    (remove-duplicates
+      (if when-question
+        (mapcar (lambda (time) (add-certainty time time)) answer)
+        (mapcan (lambda (time)
+          (mapcar (lambda (prop) (add-certainty prop time)) (get time '@))) answer))
+      :test (lambda (x y) (equal (car x) (car y)))))
 ) ; END recall-answer
 
 
@@ -88,7 +90,12 @@
          func ans-times)
 
     ; Generate any pragmatic inferences for underspecified queries
-    (setq adv-e (infer-temporal-adverbials adv-e adv-f when-question where-question subj obj relation action embedded))
+    (let ((adv-inferred (infer-temporal-adverbials adv-e adv-f neg when-question where-question subj obj relation action embedded)))
+      (setq adv-e (list
+        (remove-duplicates (append (first adv-inferred) (first adv-e)) :test #'equal)
+        (remove-duplicates (append (second adv-inferred) (second adv-e)) :test #'equal)))
+      (setq adv-f
+        (remove-duplicates (append (third adv-inferred) adv-f) :test #'equal)))
 
     ; Resolve constraints
     (setq constraints-unary (resolve-unary-constraint (first adv-e)))
@@ -179,31 +186,38 @@
 ) ; END find+constrain-times
 
 
-(defun infer-temporal-adverbials (adv-e adv-f when-question where-question subj obj relation action embedded)
-; `````````````````````````````````````````````````````````````````````````````````````````````````````````````
+(defun infer-temporal-adverbials (adv-e adv-f neg when-question where-question subj obj relation action embedded)
+; ````````````````````````````````````````````````````````````````````````````````````````````````````````````````
 ; Given an underspecified query (e.g. "what blocks did I move"), we want to generate temporal adverbials
 ; corresponding to the likely intended scope of the question (e.g. in this case, the speaker likely means
 ; something like "recently"). This uses the various ULF features extracted by the calling function. Currently
 ; the inferences are simple (either adding 'recently' or 'most recently'), but they can be improved as we encounter
 ; more pragmatic issues.
 ;
-  (let ((unary-constraints (append (first adv-e) adv-f)) (binary-constraints (second adv-e)))
+  (let ((unary-constraints (append (first adv-e) adv-f)) (binary-constraints (second adv-e))
+        adv-e-unary-inferred adv-e-binary-inferred adv-f-inferred)
+    (when (and neg action)
+      (format t "action question in a negative context: adding 'never'~%")
+      (setq adv-f-inferred (list 'never.a)))
     (cond
-      (embedded adv-e)
-      (when-question adv-e)
+      (embedded nil)
+      (when-question nil)
       ((and where-question (null unary-constraints) (null binary-constraints))
         (format t "where question with underspecified unary & binary constraints: adding 'most recently' and 'before the last move'~%")
-        (list (cons '(most.mod-a recent.a) (first adv-e)) (cons '(before.p (the.d (last.a move.n))) (second adv-e))))
+        (setq adv-e-unary-inferred (cons '(most.mod-a recent.a) adv-e-unary-inferred))
+        (setq adv-e-binary-inferred (cons '(before.p (the.d (last.a move.n))) adv-e-binary-inferred)))
       ((and where-question (null unary-constraints))
         (format t "where question with underspecified unary constraints: adding 'most recently'~%")
-        (list (cons '(most.mod-a recent.a) (first adv-e)) (second adv-e)))
+        (setq adv-e-unary-inferred (cons '(most.mod-a recent.a) adv-e-unary-inferred)))
       ((and (null action) (null unary-constraints) (null binary-constraints))
         (format t "relation question with underspecified unary & binary constraints: adding 'recently' and 'before the last move'~%")
-        (list (cons 'recent.a (first adv-e)) (cons '(before.p (the.d (last.a move.n))) (second adv-e))))
+        (setq adv-e-unary-inferred (cons 'recent.a adv-e-unary-inferred))
+        (setq adv-e-binary-inferred (cons '(before.p (the.d (last.a move.n))) adv-e-binary-inferred)))
       ((and (null unary-constraints) binary-constraints)
         (format t "historical question with underspecified unary constraints: adding 'recently'~%")
-        (list (cons 'recent.a (first adv-e)) (second adv-e)))
-      (t adv-e)))
+        (setq adv-e-unary-inferred (cons 'recent.a adv-e-unary-inferred)))
+      (t nil))
+    (list adv-e-unary-inferred adv-e-binary-inferred adv-f-inferred))
 ) ; END infer-temporal-adverbials
 
 
