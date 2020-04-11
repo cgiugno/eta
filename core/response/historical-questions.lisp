@@ -55,6 +55,8 @@
   (let ((coords (extract-coords object-locations))
         (when-question (extract-when-question ulf)) answer)
 
+    (format t "when question: ~a~%" when-question) ; DEBUGGING
+
     ; If when question, remove when adv-e from ulf
     (setq ulf (remove-when-adv-e ulf))
 
@@ -65,11 +67,38 @@
     ; TODO: check if next time, if so return BEFORE.P <prop> as answer relation, resolved into S by response generator
     (remove-duplicates
       (if when-question
-        (mapcar (lambda (time) (add-certainty time time)) answer)
+        ; If when question, get either time(s) or temporal relation
+        (mapcar (lambda (prop) (add-certainty prop nil))
+          (find-relation-to-next-time answer coords))
+        ; Otherwise, get spatial relations
         (mapcan (lambda (time)
           (mapcar (lambda (prop) (add-certainty prop time)) (get time '@))) answer))
       :test (lambda (x y) (equal (car x) (car y)))))
 ) ; END recall-answer
+
+
+(defun find-relation-to-next-time (times scene)
+; ```````````````````````````````````````````````
+; Given a time (or list of times), check if the time directly after contains a move event, and if so, return
+; a relation to the (reified) event. Otherwise, simply return the time/list of times.
+;
+  (let* ((latest (latest-time times))
+         (move-before-answers (find+constrain-times '(compute-move (what.d block.n) nil)
+                                               nil `((just.mod-a (after.p ,latest))) nil scene))
+         (moved-before-block (if (and move-before-answers (listp move-before-answers) (get (car move-before-answers) '@))
+            (make-np (caar (get (car move-before-answers) '@)) 'block.n)))
+         (move-after-answers (find+constrain-times '(compute-move (what.d block.n) nil)
+                                               nil `((just.mod-a (before.p ,latest))) nil scene))
+         (moved-after-block (if (and move-after-answers (listp move-after-answers) (get (car move-after-answers) '@))
+            (make-np (caar (get (car move-after-answers) '@)) 'block.n))))
+    ; If next turn has some move action, return a relation to that move, otherwise just return the original time(s).
+    (cond
+      (moved-before-block
+        (list `(before.ps (I.pro ((past move.v) ,moved-before-block)))))
+      (moved-after-block
+        (list `(after.ps (I.pro ((past move.v) ,moved-after-block)))))
+      (t (mapcar (lambda (time) (add-certainty time time)) times))))
+) ; END find-relation-to-next-time
 
 
 (defun find-answer-times (coords ulf &key when-question embedded)
@@ -233,7 +262,8 @@
 ; ```````````````````````````````````
 ; Returns t if ULF contains a phrase like 'at what time' (and isn't a where question), nil otherwise.
 ;
-  (if (and (ttt:match-expr '(^* (hist-prep-during? wh-np?)) ulf) (not (extract-where-question ulf))) t)
+  (if (and (ttt:match-expr '(^* ((! at.p in.p on.p during.p ago.p) wh-np?)) ulf)
+           (not (extract-where-question ulf))) t)
 ) ; END extract-when-question
 
 

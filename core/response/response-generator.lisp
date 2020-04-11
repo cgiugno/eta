@@ -272,6 +272,8 @@
       (/ ((tense? do.aux-s) indiv? (not (verb-untensed? _*))) (indiv? ((tense? do.aux-s) not (verb-untensed? _*))))
       ; pron verb that => that pron verb
       (/ (pron? ((tense? verb?) relative?)) (sub relative? (pron? ((tense? verb?) *h))))
+      ; fix adv-e with sentential preposition
+      (/ (adv-e (sent-prep? _!)) (sent-prep? _!))
       ; TODO: temporary fix for "toppest"
       (/ (most-n top.a _*) (topmost.a _*))
       )
@@ -416,18 +418,14 @@
 (defun form-ans-time (relations)
 ; ````````````````````````````````
 ; Creates a ULF from a list of times.
+; TODO: this isn't using the right ULF for 'ago.p' due to issue with not omitting
+; curly brackets in output. Should be fixed at some point.
 ;
-  (make-set (remove-duplicates (mapcar (lambda (time) 
-    (intern (string-downcase (string time)))
-      (let ((last-move (caar (compute-move (get-next-time time) '?x nil))))
-        `(rep (*p ,(get-elapsed-time (get-time-of-episode time))) ago.p)
-        ; TODO: for now there are some issues with this (for instance, if "when was the Twitter
-        ; block touching the Starbucks block" is asked, it will return the move on the next turn
-        ; rather than the current turn). For now, only answer in terms of elapsed time.
-        ;; (if last-move
-        ;;   `(before.p (I.pro ((past move.v) ,(make-np last-move 'block.n))))
-        ;;   `(rep (*p ,(get-elapsed-time (get-time-of-episode time))) ago.p))
-        ))
+  (make-set (remove-duplicates (mapcar (lambda (rel)
+      (cond
+        ((atom rel)
+          `(rep (*p ,(get-elapsed-time (get-time-of-episode rel))) ago.p))
+        (t rel)))
     relations) :test #'equal))
 ) ; END form-ans-time
 
