@@ -864,6 +864,7 @@
         ; to see if question has already been answered. If so, omit action.
         (when (not (null (obviated-question expr episode-name)))
           (delete-current-episode {sub}plan-name)
+          (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
         (cond
           ; Primitive say-to.v act: drop the quote, say it, increment the
