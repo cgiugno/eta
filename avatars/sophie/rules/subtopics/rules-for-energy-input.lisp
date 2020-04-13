@@ -8,8 +8,6 @@
 
 (READRULES '*energy-input*
 '(
-  1 (0 concentrate 0)
-    2 (*energy-question* (have you had trouble concentrating ?)) (0 :subtree+clause)
   1 (0)
     2 *general-input* (0 :subtree)
 ))
@@ -23,6 +21,8 @@
     2 ((How is your energy ?) (energy)) (0 :gist)
   1 (0 trouble 1 energy 0)
     2 ((How is your energy ?) (energy)) (0 :gist)
+  1 (0)
+    2 ((NIL Gist)) (0 :gist)
 ))
 
 

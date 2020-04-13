@@ -10,6 +10,9 @@
   (pain-med-other ibuprofen aleve)
   (med-narcotic narcotic oxycodone morphine)
   (blood-pressure-med cozar)
+  (drive drove driving)
+  (diagnosis-symptom symptom symptoms weight skinny skinnier appetite eating)
+  (diagnosis-non-symptom headache headaches chill chills fever fevers nausea eyesight eyes)
 ))
 
 
@@ -20,14 +23,20 @@
     2 ((It is nice to meet you \.)) (0 :gist)
   ; If asked if anyone is here with you
   1 (0 here anyone-here-with-you 0)
-    2 *anyone-here-with-you-question* (0 :subtree)
+    2 *appointment-question* (0 :subtree)
   1 (0 come anyone-here-with-you 0)
-    2 *anyone-here-with-you-question* (0 :subtree)
+    2 *appointment-question* (0 :subtree)
+  1 (0 drive 0)
+    2 *appointment-question* (0 :subtree)
   ; If asked to elaborate about pain
   1 (0 pain 0)
     2 *pain-question* (0 :subtree)
   ; If asked about diagnosis details
   1 (0 diagnosis 0)
+    2 *diagnosis-details-question* (0 :subtree)
+  1 (0 diagnosis-symptom 0)
+    2 *diagnosis-details-question* (0 :subtree)
+  1 (0 diagnosis-non-symptom 0)
     2 *diagnosis-details-question* (0 :subtree)
   ; If asked about radiation treatment
   1 (0 radiation 0)
@@ -60,8 +69,14 @@
 
   1 (0 ?)
     2 ((NIL Question ?)) (0 :gist)
-  1 (0)
-    2 ((NIL Gist)) (0 :gist)
+  1 (wh_ 0)
+    2 ((NIL Question ?)) (0 :gist)
+  1 (aux np_ 0)
+    2 ((NIL Question ?)) (0 :gist)
+  1 (0 aux np_ 1); tag question
+    2 ((NIL Question ?)) (0 :gist)
+  ;; 1 (0)
+  ;;   2 ((NIL Gist)) (0 :gist)
 ))
 
 
@@ -77,7 +92,10 @@
   1 (0 ?)
     2 (*have-subdialogue* ((I\'m sorry\, I didn\'t quite understand\. Can you say it again ?) nil)) (3 :schema+args)
     2 (*have-subdialogue* ((Would you mind rephrasing ?) nil)) (3 :schema+args)
-    2 (Sorry\, you still didn\'t quite understand\. Let you see if you can fill in some more details \.) (0 :out)
+    2 (Sorry\, you still didn\'t quite understand\. You have some more questions\, maybe we can come back to it\.) (0 :out)
   1 (0)
-    2 () (0 :out)
+    2 (You see\.) (8 :out)
+    2 (Okay\.) (8 :out)
+    2 (Sure\.) (8 :out)
+    2 (Uh huh\.) (0 :out)
 ))

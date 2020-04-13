@@ -10,6 +10,26 @@
 ; Will have to figure out whether to make those questions beforehand through some preprocessing step (I think
 ; this makes more sense) or deal with them here somehow.
 '(
+  1 ()
+    2 (*sleep-reaction*) (0 :subtrees)
+  1 ()
+    2 (*medicine-reaction*) (0 :subtrees)
+  1 ()
+    2 (*medicine-reaction*) (0 :subtrees)
+  1 ()
+    2 (*diagnosis-details-reaction*) (0 :subtrees)
+  1 ()
+    2 (*treatment-choices-reaction*) (0 :subtrees)
+  1 ()
+    2 (*prognosis-reaction*) (0 :subtrees)
+  1 ()
+    2 (*chemotherapy-reaction*) (0 :subtrees)
+  1 ()
+    2 (*hospice-reaction*) (0 :subtrees)
+  1 ()
+    2 (*tell-family-reaction*) (0 :subtrees)
+
+  ; The following might need changing
   1 (I am sorry that your daughter couldn\'t come today \.)
     2 (That\'s okay\. We\'ll have to discuss it with her some other time\.) (0 :out)
   ; Chemotherapy
@@ -23,6 +43,7 @@
   1 (I think you should take med-narcotic \.)
     2 (*have-subdialogue* ((Could you tell me about some of the side effects of that ?)
                            ((Can you tell me about the side effects ?)))) (100 :schema+args)
+
   1 (0)
     2 *general-reaction* (0 :subtree)
 ))

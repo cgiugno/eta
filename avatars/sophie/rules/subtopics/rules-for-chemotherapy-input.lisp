@@ -16,13 +16,17 @@
     2 ((I do not think you need chemotherapy \.) (chemotherapy)) (0 :gist)
   1 (0 NEG 1 chemotherapy-thoughts 0)
     2 ((I do not think you need chemotherapy \.) (chemotherapy)) (0 :gist)
+
   1 (0)
     2 *general-input* (0 :subtree)
+  1 (0)
+    2 ((NIL Gist \: nothing found for chemotherapy \.)) (0 :gist)
 ))
 
 
 (READRULES '*chemotherapy-question*
 '(
+
   1 (0 did 8 you 4 about chemotherapy 0)
     2 ((Did your doctor mention chemotherapy ?) (chemotherapy)) (0 :gist)
   1 (0 mention 3 chemotherapy 0)

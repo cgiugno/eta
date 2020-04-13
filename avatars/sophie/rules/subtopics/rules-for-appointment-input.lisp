@@ -3,7 +3,7 @@
   ))
 
 
-(READRULES '*anyone-here-with-you-input*
+(READRULES '*appointment-input*
 '(
   ; Asking about where your daughter works
   1 (0 where does 3 work 0)
@@ -26,8 +26,13 @@
 ))
 
 
-(READRULES '*anyone-here-with-you-question*
+(READRULES '*appointment-question*
 '(
+  ; Did you drive here?
+  1 (0 drive 0)
+    2 ((Did you drive here ?)) (0 :gist)
+
+  ; Is anyone here with you?
   1 (0 be you here 1 with 0)
     2 ((Is anyone here with you ?)) (0 :gist)
   1 (0 anyone be here 1 with you 0)
@@ -51,7 +56,7 @@
 ))
 
 
-(READRULES '*anyone-here-with-you-reaction*
+(READRULES '*appointment-reaction*
 '(
 
 ))

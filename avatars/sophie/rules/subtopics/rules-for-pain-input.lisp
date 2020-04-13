@@ -7,6 +7,7 @@
   (part parts section sections area areas)
   (pain-bad bad much strongly intensely badly)
   (take taking)
+  (pain-return come back return)
 ))
 
 
@@ -34,13 +35,19 @@
   ; If doctor asks what you're taking for the pain
   1 (0 what 1 you 1 take 0)
     2 (*medicine-question* (what are you taking for the pain ?)) (0 :subtree+clause)
+
   1 (0)
     2 *general-input* (0 :subtree)
+  1 (0)
+    2 ((NIL Gist \: nothing found for pain \.)) (0 :gist)
 ))
 
 
 (READRULES '*pain-question*
 '(
+  ; Did the pain come back?
+  1 (0 do 1 pain 1 pain-return 0)
+    2 ((Did your pain come back ?) (pain-return)) (0 :gist)
   ; How do you rate your pain?
   1 (0 scale 0)
     2 ((How do you rate your pain ?) (pain-description)) (0 :gist)
