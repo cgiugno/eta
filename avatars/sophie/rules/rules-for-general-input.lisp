@@ -1,11 +1,14 @@
 (MAPC 'ATTACHFEAT
 '(
+  (palliative comfort)
   (meet meeting)
   (come came)
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
   (energy mood concentrate concentration concentrating depression depressed)
-  (medicine pain-med pain-med-other blood-pressure-med med-narcotic drug drugs pill pills)
+  (medicine medication drug drugs pill pills)
+  (medicine-gen medicine pain-med pain-med-other blood-pressure-med med-narcotic)
+  (medicine-taking medicine pain-med)
   (pain-med lortab vicodin norco)
   (pain-med-other ibuprofen aleve)
   (med-narcotic narcotic oxycodone morphine)
@@ -50,12 +53,17 @@
   ; If doctor asks something about patient's energy (or mood)
   1 (0 energy 0)
     2 *energy-question* (0 :subtree)
-
-  ; The following two will need modification
-  1 (0 medicine 0)
+  ; If doctor asks something about medicine
+  1 (0 medicine-gen 0)
     2 *medicine-question* (0 :subtree)
+  ; If doctor asks something about prognosis
   1 (0 prognosis 0)
     2 *prognosis-question* (0 :subtree)
+  ; If doctor says something about comfort care/hospice/pal
+  1 (0 palliative care 0)
+    2 *comfort-care-question* (0 :subtree)
+  1 (0 hospice 0)
+    2 *comfort-care-question* (0 :subtree)
     
   ; Interjections/prompts to continue
   1 (2 okay 2)

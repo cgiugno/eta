@@ -639,7 +639,7 @@
 ; Remove user gist clauses identical with '(NIL GIST), unless this is the only gist clause.
 ;
   (let ((purified-gist-clauses (remove-if (lambda (x) (nil-gist-clause? x)) user-gist-clauses)))
-    (if purified-gist-clauses purified-gist-clauses '((NIL GIST))))
+    (if purified-gist-clauses purified-gist-clauses (list (car user-gist-clauses))))
 ) ; END purify-func
 
 

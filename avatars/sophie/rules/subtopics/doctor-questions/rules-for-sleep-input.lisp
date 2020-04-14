@@ -7,15 +7,19 @@
   (often frequent frequently much)
   (wake waking)
   (day daytime)
+  (sleep-medication ambien nyquil lunesta )
 ))
 
 
 (READRULES '*sleep-input*
 '(
+  
+
   1 (0 sleep 2 during 3 day 0)
     2 (*sleep-question* (do you sleep during the day ?)) (0 :subtree+clause)
   1 (0 how 1 often 0 wake)
     2 (*sleep-question* (how often are you waking up at night ?)) (0 :subtree+clause)
+
   1 (0)
     2 *general-input* (0 :subtree)
   1 (0)

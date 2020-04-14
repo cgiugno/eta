@@ -38,5 +38,7 @@
 
 (READRULES '*chemotherapy-reaction*
 '(
-
+  1 (0)
+    2 (*have-subdialogue* ((I hear about people getting sick and losing hair during chemotherapy \. What are some of the side effects?)
+                           ((What are the side effects of chemotherapy ?)))) (0 :schema+args)
 ))

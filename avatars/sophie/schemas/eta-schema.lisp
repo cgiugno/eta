@@ -23,14 +23,43 @@
 ; 7. I ended the conversation with a positive note without giving false hope.
 ; 8. I think SOPHIE understood her prognosis.
 ;
-; A couple low cognitive load questions to start with
-; Medicine/addition concerns, "how do I know if it's working?"
-; "Pain medicine doesn't work, need something stronger?"
-; "What are my choices at this point?"
-; If chemotherapy not mentioned, ask about it
-; "Be honest - what kind of time are we looking at?"
-; If hospice not mentioned, ask about it
-; What to tell family?
+;
+; palleative care
+;
+; doctor gives scan result, choice between chemotherapy A or chemotherapy B
+; doesn't give choice of just focusing on comfort
+; patients whose doctors offer comfort care as option more likely to take it
+; should give the doctor an opportunity to present it as an option
+; "what happens if I don't do chemotherapy?"
+; "do you think chemotherapy's really going to help?"
+; "do you think it's time for me to start thinking about comfort care?"
+;
+; prognosis:
+; patient asks "what does this mean?"
+; doctor says "let's try chemo" => doesn't even address question
+; "how much of a difference do you think it'll make in terms of how long I live?"
+; "how long do you think I have?"
+;
+;
+; 1. Haven't slept well, have to take medication, keep waking up at night.
+;
+; 2. Just started on new pain medication recently, how long until I know if it's working?
+;
+; 3. In a lot of pain, Lortab isn't working. Need something stronger.
+;
+; 4. What do test results show, how do I interpret them?
+;
+; 5. What are my choices at this point?
+;
+; 6. What kind of time do you think we're looking at?
+;
+; 7. Previous doctor mentioned chemotherapy, mentioned to wait until after radiation. Do you think I need it?
+;
+; 8. I prefer to be comfortable at this point. Is hospice an option?
+;
+; 9. Haven't told family everything yet. What should I say to them?
+;
+; 10. Follow up
 ;
 
 :episodes 
@@ -45,7 +74,8 @@
 
 ?a10. (Me say-to.v you '(One thing I\'ve noticed in the last few weeks is that I haven\'t been sleeping very well\. Most nights I
                         have to take medication for my pain\. I\'m not sure if it\'s only the pain\, but I keep waking up at night\.
-                        Do you know why that is?))
+                        Do you know why I keep waking up like this?))
+; doctor might reply saying that cancer has gotten worse, or something.
 
 ?a11. (You reply-to.v ?a10.)
 
@@ -71,24 +101,25 @@
 ?a32. (Me react-to.v ?a31.)
 
 
-; Should I have this? As a way to transition into the "harder" topics?
-?a35. (Me say-to.v you '(Can you explain to me what my test results show? How should I interpret them?))
+?a35. (Me say-to.v you '(Can you explain to me what my test results mean?))
+; doctor might say something irrelevant to prognosis, or they might get into it
 
 ?a36. (You reply-to.v ?a35.)
 
 ?a37. (Me react-to.v ?a36.)
 
 
-?a40. (Me say-to.v you '(What are my choices at this point?))
-; doctor might reply something about prognosis in response here
+; if not obviated by "can you explain to me what my test results mean"
+?a40. (Me say-to.v you '(I want you to be honest with me\. How long do you think I have?))
+; doctor might lay out a "best case/worst case" scenario, e.g. Transcript 2
 
 ?a41. (You reply-to.v ?a40.)
 
 ?a42. (Me react-to.v ?a41.)
 
 
-?a50. (Me say-to.v you '(I want you to be honest with me\. What kind of time do you think we\'re looking at?))
-; doctor might lay out a "best case/worst case" scenario, e.g. Transcript 2
+?a50. (Me say-to.v you '(What are my choices at this point?))
+; doctor might reply something about prognosis in response here
 
 ?a51. (You reply-to.v ?a50.)
 
@@ -105,7 +136,8 @@
 
 
 ; if hospice not already mentioned by doctor
-?a70. (Me say-to.v you '(You know\, I really just prefer to be comfortable at this point\. Is hospice care an option?))
+?a70. (Me say-to.v you '(You know\, I really just prefer to be comfortable at this point\. Do you think I should
+                         start considering comfort care?))
 
 ?a71. (You reply-to.v ?a70.)
 
@@ -119,81 +151,8 @@
 ?a82. (Me react-to.v ?a81.)
 
 
-?a300. (Me say-to.v you '(Thank you for taking the time to meet with me today\. It was helpful to learn more
-                          about my options\. I hope we can meet again soon to discuss further\. Bye\.))
-
-
-
-
-
-
-; A couple low cognitive load questions to start with
-; Medicine/addition concerns, "how do I know if it's working?"
-; "Pain medicine doesn't work, need something stronger?"
-; "What are my choices at this point?"
-; If chemotherapy not mentioned, ask about it
-; "Be honest - what kind of time are we looking at?"
-; If hospice not mentioned, ask about it
-; What to tell family?
-
-
-
-;; ?a2. (You reply-to.v ?a1.)
-
-;; ?a3. (Me react-to.v ?a2.)
-
-;; ?a4. (Me have-subdialogue.v you (The pain was pretty much under control for a while\, but in the past week it has been more difficult.
-;;                                  It used to be in my back and left side of my chest\, but now it\'s in my shoulder blade too\, and on
-;;                                  the other side from where it started\.)
-;;                                 ((My pain has recently been getting worse \.)))
-
-;; ?a5. (Me have-subdialogue.v you (I\'ll never forget what happened before this\. When the pain got really bad\, I first went to my regular doctor
-;;                                  but he didn\'t find anything and he thought I just had a bad cold\. But the pain and cough got so bad
-;;                                  over the next few days\, I went to the E.R. on the weekend\. At the E.R. they thought it was just pneumonia
-;;                                  and gave me antibiotics and the Lortab for pain\. When they told me how much I weighed\, I realized that
-;;                                  I had lost fifteen pounds over the course of the past six months\. A couple of days after I went to the ER\,
-;;                                  I made appointments to go for a bunch of tests\. That took a couple of weeks\. I had to get a bone scan\,
-;;                                  and I was sent to a lung doctor for a biopsy\. After all that\, the lung doctor told me I had lung cancer\.)
-;;                                 ((The E.R. gave me Lortab for pain \.) (I got my diagnosis after visiting a lung doctor \.)))
-
-;; ?a6. (Me have-subdialogue.v you (I had radiation treatment for about five weeks\, except weekends\. That finished six weeks ago\.)
-;;                                 ((I had radiation treatment for five weeks \.)))
-
-;; ?a7. (Me have-subdialogue.v you (Recently\, I haven\'t been sleeping very well\. I am waking up at night\. Most nights I have to take my pain medication
-;;                                 before falling back to sleep\.)
-;;                                 ((I have not been sleeping well \.)))
-
-;; ?a8. (Me have-subdialogue.v you (I\'m a little bit worried because the medication doesn\'t really seem to be working anymore\. Do you know why ?)
-;;                                 ((Why isn\'t the pain medication working anymore ?)))
-
-;; ?a100. (Me say-to.v you '(I would like to go through some questions with you now\, if that\'s okay\.))
-
-;; ?a101. (Me have-subdialogue.v you (What are my choices at this point ?)
-;;                                   ((What are my options ?))) ;*
-
-;; ?a102. (Me have-subdialogue.v you (What kind of time are we looking at ?)
-;;                                   ((What is my prognosis ?))) ;*
-
-;; ?a103. (Me have-subdialogue.v you (While I\’m here\, can I get a refill on my cholesterol medicine ?)
-;;                                   ((Can I have a refill of my cholesterol medicine ?))) ;*
-
-;; ?a200. (Me have-subdialogue.v you (What should I do to schedule and prepare for a follow up appointment ?)
-;;                                   ((How should I schedule a follow up appointment ?))) ;*
-
-;; ;; ?a5. (Me have-subdialogue.v you (I would like a refill of my medicine \.)
-;; ;;                                 ((I would like a refill of medicine \.)))
-
-;; ;; ?a6. (Me have-subdialogue.v you (Can you tell me what you think my prognosis is going to be ?)
-;;                                 ;; ((What is my prognosis ?)))
-
-;; ;; ?a5. (Me discuss-medicine.v you)
-
-;; ;; ?a6. (Me discuss-prognosis.v you)
-
-;; ; Discuss steps for future contact
-
-;; ?a300. (Me say-to.v you '(Thank you for taking the time to meet with me today\. It was helpful to learn more
-;;                           about my options\. I hope we can meet again soon to discuss further\. Bye\.))
+?a300. (Me say-to.v you '(Thank you for taking the time to meet with me today\. It was difficult to talk about my future\, but comforting to
+                          learn more about my options\. I hope we can meet again soon to discuss further\. Bye\.))
 
 )) ; END defparameter *eta-schema*
 
@@ -235,14 +194,12 @@
     (?a10. ((Why have I not been sleeping well ?)))
     (?a20. ((How will I know if my pain medication is working ?)))
     (?a30. ((Can I have a stronger pain medication ?)))
-    (?a35. ((How should I interpret my test results ?)))
-    (?a40. ((What are my choices for treatment ?)))
-    (?a50. ((What is my prognosis ?)))
+    (?a35. ((What do my test results mean ?)))
+    (?a40. ((What is my prognosis ?)))
+    (?a50. ((What are my options for treatment ?)))
     (?a60. ((Do I need chemotherapy ?)))
-    (?a70. ((Should I get hospice care ?)))
+    (?a70. ((Should I get comfort care ?)))
     (?a80. ((What should I tell my family ?)))
-    ;; (?a1.  ((It is nice to meet you \.) (I\'ve just moved back to Rochester \.)
-    ;;         (My pain has recently been getting worse \.)))
   )
 ) ; END mapcar #'store-output-gist-clauses
 
@@ -254,20 +211,14 @@
 (mapcar #'(lambda (x) 
       (store-topic-keys (first x) (second x) '*eta-schema*))
   '(
-    (?a10. (sleep))
+    (?a10. (sleep-poorly))
     (?a20. (medicine-working))
-    (?a30. (stronger-medicine))
+    (?a30. (medicine-request))
     (?a35. (test-results))
-    (?a40. (choices))
     (?a50. (prognosis))
+    (?a40. (treatment-option))
     (?a60. (chemotherapy))
-    (?a70. (hospice))
-    (?a80. (inform-family))
-    ;; (?a1.  (introduce))
-    ;; (?a4.  (pain-description))
-    ;; (?a5.  (diagnosis-details))
-    ;; (?a6.  (radiation-treatment))
-    ;; (?a7.  (sleep))
-    ;; (?a8.  (physical-dependence))
+    (?a70. (comfort-care))
+    (?a80. (tell-family))
   )
 ) ; END mapcar #'store-topic-keys

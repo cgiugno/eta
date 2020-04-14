@@ -44,16 +44,16 @@
   1 (0 what medicine 3 you 2 med-take 0)
     2 ((What medicine are you taking ?) (medicine)) (0 :gist)
 
-  1 (0 be 0 pain-med 3 doing anything 0)
-    2 ((Is the pain medication working at all ?) (physical-dependence)) (0 :gist)
-  1 (0 be 0 pain-med 0 work 3 at all 0)
-    2 ((Is the pain medication working at all ?) (physical-dependence)) (0 :gist)
-  1 (0 be 0 pain-med 0 work 0)
-    2 ((Is the pain medication working ?) (physical-dependence)) (0 :gist)
-  1 (0 how 0 medicine 0 work 0)
-    2 ((Is the pain medication working ?) (physical-dependence)) (0 :gist)
+  1 (0 be 0 medicine-taking 3 doing anything 0)
+    2 ((Is the pain medication working at all ?) (medicine-working)) (0 :gist)
+  1 (0 be 0 medicine-taking 0 work 3 at all 0)
+    2 ((Is the pain medication working at all ?) (medicine-working)) (0 :gist)
+  1 (0 be 0 medicine-taking 0 work 0)
+    2 ((Is the pain medication working ?) (medicine-working)) (0 :gist)
+  1 (0 how 0 medicine-taking 0 work 0)
+    2 ((Is the pain medication working ?) (medicine-working)) (0 :gist)
 
-  1 (0 how are you 1 medicine ?); e.g., how are you on medicine?
+  1 (0 how are you 1 medicine-taking ?); e.g., how are you on medicine?
     2 ((Do you need more medicine ?) (medicine-refill)) (0 :gist)
 ))
 
