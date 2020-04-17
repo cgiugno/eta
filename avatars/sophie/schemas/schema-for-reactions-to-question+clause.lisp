@@ -52,7 +52,7 @@
 ?a2. (Me react-to.v ?a1.)
 
 ; This feels sort of unnatural most of the time.
-;; ?a3. (Me say-to.v you '(As for your question \,))
+?a3. (Me say-to.v you '(As for your question \,))
 
 ?a4. (You paraphrase.v '?question)
 

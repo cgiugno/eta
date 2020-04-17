@@ -64,7 +64,6 @@
 
 :episodes 
 
-; Should feedback be explicitly mentioned here?
 ?a1. (Me say-to.v you '(Hi\, my name is Sophie\. I am a computer character\. I may sound choppy\, but I am still able to have
                         a conversation with you\. I just moved back into the area from Florida about two weeks ago\. I was recently
                         diagnosed with lung cancer\, and finished radiation about a month ago\. My pain seemed to be under
@@ -75,12 +74,8 @@
 ?a10. (Me say-to.v you '(One thing I\'ve noticed in the last few weeks is that I haven\'t been sleeping very well\. Most nights I
                         have to take medication for my pain\. I\'m not sure if it\'s only the pain\, but I keep waking up at night\.
                         Do you know why I keep waking up like this?))
-; doctor might reply saying that cancer has gotten worse, or something.
-
 ?a11. (You reply-to.v ?a10.)
-
 ?a12. (Me react-to.v ?a11.)
-; hmm, I see.
 
 
 ?a20. (Me say-to.v you '(I just started on my new pain medication recently\. How long will it be before I know if it\'s working?))
@@ -92,7 +87,7 @@
 
 
 ; if doctor doesn't give satisfying answer before
-?a30. (Me say-to.v you '(Doctor\, I\'m in a lot of pain\, and the Lortab just isn\'t working\. I think maybe I need something
+?a30. (Me say-to.v you '(You know\, I\'m in a lot of pain\, and the Lortab just isn\'t working\. I think maybe I need something
                      stronger for my pain\.))
 ; "So my recommendation is you take a stronger medicine and that there is no ceiling on the dose of narcotic"
 

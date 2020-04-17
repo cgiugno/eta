@@ -32,6 +32,8 @@
     2 *medicine-working-reaction* (0 :subtree)
   1 (0 stronger 1 medication 0 \.)
     2 *medicine-request-reaction* (0 :subtree)
+  1 (0 med-narcotic 0 \.)
+    2 *medicine-request-reaction* (0 :subtree)
   1 (0 test results 0 \.)
     2 *test-results-reaction* (0 :subtree)
   1 (0 prognosis 0 \.)

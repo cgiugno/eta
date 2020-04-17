@@ -9,10 +9,14 @@
 
 (READRULES '*medicine-working-input*
 '(
-  ; Yes. I think that with time you are probably going to need a stronger medication.
-  ; And that’s just because the nature of the disease, sometimes it’s really hard on certain parts of the body,
-  ; especially the bone in the back. So it’s not unreasonable that you are having more pain.
-  ; When you use the Lortab more frequently is it helpful?  And do you have it with you by any chance?
+
+  ; What medicine are you taking?
+  1 (4 wh_ 1 medicine-gen 0)
+    2 (*medicine-question* (what medicine are you taking ?)) (0 :subtree+clause)
+  
+  ; The Lortab?
+  1 (4 medicine-gen 8)
+    2 (*medicine-question* (are you taking 2 ?)) (0 :subtree+clause)
 
   ; Do you want something better / stronger pain medication
   1 (0 do 1 you 3 want 3 med-better medicine-taking 0)
@@ -30,19 +34,12 @@
   1 (0 you 5 want 1 something 1 med-better 0)
     2 ((You should take stronger pain medication \.) (medicine-request)) (0 :gist)
 
-  ; You need something stronger than Vicodin. I can give you ((      )) or I can give you a pain patch called ((      )).  
+  ; You should take morphine
+  1 (0 med-narcotic 0)
+    2 ((You should take a narcotic \.) (medicine-request)) (0 :gist)
+
   ;
-  ; Because the only thing is that the pill, you can adjust. Let’s say I give you a pill starting at the lowest dose, ((15))
-  ; milligrams twice a day.  And if you feel good but I need a little bit more we can immediately go up on it.
-  ; ((The patch)), it takes two days to tell us if it’s working or not. And you can increase the patch with another ((      ))
-  ; or increase the ((      )),  it will take another two days to see whether it is helping or not. It’s easier
-  ; to work with pills but once you control your pain with the right dose it’s easy to be on a patch because ((      )). 
-  ; But it’s up to you. I can write either one.
-  ;
-  ; So what we’ll do is we’ll start with the long acting morphine which works for 12 hours.  So I'm going to write for 15 milligrams
-  ; every 8 hours so that you will get 90 pills because they only give you one month at a time.  But I want you to start
-  ; taking only every 12 hours and if it is helping and you want one more extra you can take every 8 hours.
-  ; And then in between for pain you can still take Vicodin. Do you have enough Vicodin?  You know, Vicodin is not ((      )).
+  ; So what we’ll do is we’ll start with the long acting morphine which works for 12 hours.  So I'm going to write for 15 milligrams every 8 hours so that you will get 90 pills because they only give you one month at a time.  But I want you to start taking only every 12 hours and if it is helping and you want one more extra you can take every 8 hours. And then in between for pain you can still take Vicodin. Do you have enough Vicodin?  You know, Vicodin is not ((      )).
   ;
   ; When you take it does it take care of the pain, though? Even if it is only temporarily?
   ;
@@ -96,6 +93,10 @@
 
 (READRULES '*medicine-working-reaction*
 '(
+  1 (You should take med-narcotic \.)
+    2 (*have-subdialogue* ((Usually when I hear about narcotics\, it\'s people getting addicted to them\. Is that a possibility here?)
+                           ((Can I get addicted to narcotics ?)))) (100 :schema+args)
+    2 (You think having the stronger pain medication would help\.) (0 :out)
   1 (You should take stronger pain medication \.)
     2 (*have-subdialogue* ((Yeah\, I think I should take a stronger pain medication\. The current one isn\'t working well\.
                             What are the side effects?)

@@ -7,8 +7,10 @@
   (pain hurt hurting)
   (energy mood concentrate concentration concentrating depression depressed)
   (medicine medicines medication drug drugs pill pills med meds)
-  (medicine-gen medicine pain-med pain-med-other blood-pressure-med med-narcotic)
+  (medicine-gen medicine medicine-particular)
+  (medicine-particular pain-med pain-med-other blood-pressure-med med-narcotic)
   (medicine-taking medicine pain-med)
+  (medicine-not-taking pain-med-other med-narcotic)
   (pain-med lortab vicodin norco)
   (pain-med-other ibuprofen aleve)
   (med-narcotic narcotic oxycodone morphine)
@@ -24,6 +26,7 @@
   (chemotherapy chemo)
   (tell say inform notify)
   (be-aux be aux)
+  (frequently frequent often more)
 ))
 
 
@@ -85,7 +88,9 @@
 
   1 (0 ?)
     2 ((NIL Question ?)) (0 :gist)
-  1 (1 wh_ 0)
+  1 (1 wh_ 2 be 0)
+    2 ((NIL Question ?)) (0 :gist)
+  1 (1 wh_ aux 0)
     2 ((NIL Question ?)) (0 :gist)
   1 (1 aux np_ 0)
     2 ((NIL Question ?)) (0 :gist)

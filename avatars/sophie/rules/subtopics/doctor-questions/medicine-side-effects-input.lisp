@@ -2,14 +2,33 @@
 '(
   (effect effects)
 
-  (side-effect-fatigue fatigue fatigued exhaustion exhausted sleepiness sleepy tiredness tired energy)
+  (side-effect-addiction addiction addicted high)
+
+  (side-effect-fatigue fatigue fatigued exhaustion exhausted sleepiness sleepy sleep tiredness tired energy drowsy insomnia)
   (side-effect-appetite appetite eating eat hunger hungry)
   (side-effect-nausea nausea vomiting vomit sick sickness)
   (side-effect-neuropathy neuropathy numb numbness tingle tingling)
 
   (side-effects-insignificant side-effect-fatigue side-effect-appetite)
   (side-effects-moderate side-effects-nausea diarrhea)
-  (side-effects-significant hair side-effect-neuropathy)
+  (side-effects-significant hair side-effect-neuropathy side-effect-addiction)
+))
+
+
+(READRULES '*medicine-side-effects-addiction-input*
+'(
+  1 (0 low 1 risk 0)
+    2 ((Addiction is not a side effect of the medication \.) (medicine-addiction)) (0 :gist)
+  1 (3 NEG 0)
+    2 ((Addiction is not a side effect of the medication \.) (medicine-addiction)) (0 :gist)
+  1 (0 NEG 2 side-effect-addition 0)
+    2 ((Addiction is not a side effect of the medication \.) (medicine-addiction)) (0 :gist)
+  1 (3 POS 0)
+    2 ((A side effect of the medication is addiction \.) (medicine-addiction)) (0 :gist)
+  1 (0 high 1 risk 0)
+    2 ((A side effect of the medication is addiction \.) (medicine-addiction)) (0 :gist)
+  1 (0 may 1 side-effect-addition 0)
+    2 ((A side effect of the medication is addiction \.) (medicine-addiction)) (0 :gist)
 ))
 
 
@@ -41,6 +60,8 @@
 
 (READRULES '*medicine-side-effects-reaction*
 '(
+  1 (Addiction is not a side effect of the medication \.)
+    2 (You didn\'t know that\. It\'s good to know that stronger pain medication is an option without risking addiction \.) (0 :out)
   1 (A side effect of the medication be 2 side-effects-significant 2 \.)
     2 (You think you should hold off for now and think about it more \.) (0 :out)
   1 (A side effect of the medication be 2 side-effects-moderate 2 \.)

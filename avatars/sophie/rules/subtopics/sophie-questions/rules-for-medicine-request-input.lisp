@@ -9,6 +9,8 @@
 
 (READRULES '*medicine-request-input*
 '(
+  ;; "So my recommendation is you take a stronger medicine and that there is no ceiling on the dose of narcotic"
+
   ; Do you want something better / stronger pain medication
   1 (0 do 1 you 3 want 3 med-better medicine-taking 0)
     2 (*medicine-question* (do you want stronger pain medication ?)) (0 :subtree+clause)
@@ -39,8 +41,12 @@
 
 (READRULES '*medicine-request-reaction*
 '(
+  1 (You should take 1 med-narcotic \.)
+    2 (*have-subdialogue* ((Usually when I hear about narcotics\, it\'s people getting addicted to them\. Is that a possibility here?)
+                           ((Can I get addicted to narcotics ?)))) (100 :schema+args)
+    2 (You think having the stronger pain medication would help\.) (0 :out)
   1 (You should take stronger pain medication \.)
-    2 (*have-subdialogue* ((Yes\, you think you should take a stronger pain medication\. The current one isn\'t working well\.
+    2 (*have-subdialogue* ((Yeah\, I think I should take a stronger pain medication\. The current one isn\'t working well\.
                             What are the side effects?)
                            ((I want a stronger pain medication \.) (What are the side effects of stronger pain medication ?)))) (100 :schema+args)
     2 (You think having the stronger pain medication would help\.) (0 :out)

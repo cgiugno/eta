@@ -17,6 +17,10 @@
 '(
   1 (0 medicine-gen 1 neg 1 work 0)
     2 ((You are sleeping poorly because the pain medication is no longer working \.) (sleeping-poorly)) (0 :gist)
+
+  1 (6 side 1 effect 0)
+    2 ((You are sleeping poorly because of a side effect from a medication \.) (sleeping-poorly)) (0 :gist)
+
   1 (0 illness 2 spread 0)
     2 ((You are sleeping poorly because the cancer has spread \.) (test-results)) (0 :gist)
   1 (0 illness 2 worse 0)
@@ -46,6 +50,8 @@
 
 (READRULES '*sleep-poorly-reaction*
 '(
+  1 (You are sleeping poorly because of a side effect from a medication \.)
+    2 (You see\. If the medicine is going to make you tired no matter what\, you\'d rather at least have the pain controlled\.) (0 :out)
   1 (You are sleeping poorly because the cancer has spread \.)
     2 (*have-subdialogue* ((Does that mean that the cancer has gotten worse?)
                            ((Has the cancer gotten worse ?)))) (0 :schema+args)

@@ -627,19 +627,31 @@
 
 (defun nil-gist-clause? (gist-clause)
 ;`````````````````````````````````````
-; Return t if gist-clause is the nil gist clause (i.e. '(NIL GIST : ...)).
+; Return t if gist-clause is the nil gist clause (i.e. '(NIL Gist ...))
 ;
   (and (>= (length gist-clause) 2) (equal (subseq gist-clause 0 2) '(NIL GIST)))
 ) ; END nil-gist-clause?
 
 
 
+(defun nil-gist-question? (gist-clause)
+;`````````````````````````````````````
+; Return t if gist-clause is the nil gist question (i.e. '(NIL Question ...))
+;
+  (and (>= (length gist-clause) 2) (equal (subseq gist-clause 0 2) '(NIL QUESTION)))
+) ; END nil-gist-question"
+
+
+
 (defun purify-func (user-gist-clauses)
 ;````````````````````````````````````````
-; Remove user gist clauses identical with '(NIL GIST), unless this is the only gist clause.
+; Remove user gist clauses identical with '(NIL Gist ...) or '(NIL Question ...), unless it is the only
+; gist clause (note: prefer nil question to nil gist).
 ;
-  (let ((purified-gist-clauses (remove-if (lambda (x) (nil-gist-clause? x)) user-gist-clauses)))
-    (if purified-gist-clauses purified-gist-clauses (list (car user-gist-clauses))))
+  (let ((purified-gist-clauses (remove-if (lambda (x) (or (nil-gist-clause? x) (nil-gist-question? x))) user-gist-clauses)))
+    (if purified-gist-clauses purified-gist-clauses
+      (let ((purified-gist-questions (remove-if (lambda (y) (not (nil-gist-question? y))) user-gist-clauses)))
+        (if purified-gist-questions (list (car purified-gist-questions)) (list (car user-gist-clauses))))))
 ) ; END purify-func
 
 
