@@ -669,11 +669,14 @@
 ;````````````````````````````````````````
 ; Remove user gist clauses identical with '(NIL Gist ...) or '(NIL Question ...), unless it is the only
 ; gist clause (note: prefer nil question to nil gist).
+; Also remove duplicate gist clauses
 ;
+  (remove-duplicates
   (let ((purified-gist-clauses (remove-if (lambda (x) (or (nil-gist-clause? x) (nil-gist-question? x))) user-gist-clauses)))
     (if purified-gist-clauses purified-gist-clauses
       (let ((purified-gist-questions (remove-if (lambda (y) (not (nil-gist-question? y))) user-gist-clauses)))
         (if purified-gist-questions (list (car purified-gist-questions)) (list (car user-gist-clauses))))))
+  :test #'equal)
 ) ; END purify-func
 
 
