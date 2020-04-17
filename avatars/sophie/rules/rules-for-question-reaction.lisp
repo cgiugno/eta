@@ -148,11 +148,15 @@
                             What are the side effects?)
                            ((I want a stronger pain medication \.) (What are the side effects of stronger pain medication ?)))) (100 :schema+args)
     2 (You think having the stronger pain medication would help\.) (0 :out)
-
-  ; The following two will need modification
   1 (Do you need more medicine ?)
     2 (*have-subdialogue* ((I need a refill of my Lortab \.)
                            ((I would like a refill of medicine \.)))) (0 :schema+args)
+  ; Comfort care
+  1 (Have you considered comfort care ?)
+    2 (*have-subdialogue* ((I haven\'t thought about it\, but it sounds like what I really need\. A way to maintain quality of life
+                            during the time I have left\. Can you tell me about it?)
+                           ((How does comfort care work ?)))) (0 :schema+args)
+
 
   1 (0)
     2 *reaction-to-question-minor* (0 :subtree)

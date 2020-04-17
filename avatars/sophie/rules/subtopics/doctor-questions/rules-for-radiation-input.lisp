@@ -8,6 +8,21 @@
 ))
 
 
+(READRULES '*radiation-verification-input*
+'(
+  1 (0 POS 0)
+    2 ((I think you need radiation \.) (radiation)) (0 :gist)
+  1 (0 I 1 think-gen so 0)
+    2 ((I think you need radiation \.) (radiation)) (0 :gist)
+  1 (0 no 0)
+    2 ((I do not think you need radiation \.) (radiation)) (0 :gist)
+  1 (0 NEG 1 think-gen 0)
+    2 ((I do not think you need radiation \.) (radiation)) (0 :gist)
+  1 (0)
+    2 ((NIL Gist \: nothing found for radiation \.)) (0 :gist)
+))
+
+
 (READRULES '*radiation-input*
 '(
   1 (0 do it 1 pain-return 0)
@@ -40,5 +55,7 @@
 
 (READRULES '*radiation-reaction*
 '(
-
+  1 (0)
+    2 (*have-subdialogue* ((What about chemotherapy?)
+                           ((Do you think chemotherapy will help ?)))) (0 :schema+args)
 ))

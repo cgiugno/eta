@@ -5,12 +5,7 @@
 
 (READRULES '*chemotherapy-input*
 '(
-  ; Yeah, you’re ((gonna need it)) because radiation works only where it (( hits     )).
-  ; And it doesn’t work on the whole body. But once the lung cancer has gone from the lung to
-  ; the bone we know it’s in other areas and we might be able to pick up if it’s in other areas.
-  ; The only way we can catch those is by ((chemotherapy)).  So, but I need to see your brain ((      )).
-  ; The pain is mainly in the back, no? And the chest.
-
+  ; TODO: see if any of this should be incorporated
   ; The worst thing that can happen – that’s a very good question – the worst thing that could happen is two things.
   ; One is that either it doesn’t work at all which means you tried all that for nothing. Or that despite it working
   ; it will be too toxic for you, meaning you can get so sick that you’ll say I don't know that this is worth it.
@@ -24,7 +19,11 @@
   ; advocate argument is always well we won’t know until we try. We can always try one or two and if it doesn't work say thank
   ; you, I gave it my best shot. But at least you can look back and say I tried.
 
-
+  1 (0 palliative care 0)
+    2 *comfort-care-input* (0 :subtree)
+  1 (0 hospice 0)
+    2 *comfort-care-input* (0 :subtree)
+    
   1 (0 POS 0)
     2 ((I think you need chemotherapy \.) (chemotherapy)) (0 :gist)
   1 (0 I 1 think-gen so 0)
@@ -58,5 +57,7 @@
 '(
   1 (0)
     2 (*have-subdialogue* ((I hear about people getting sick and losing hair during chemotherapy\. What are some of the side effects?)
-                           ((What are the side effects of chemotherapy ?)))) (0 :schema+args)
+                           ((What are the side effects of chemotherapy ?)))) (100 :schema+args)
+    2 (*have-subdialogue* ((How does chemotherapy usually work?)
+                           ((How does chemotherapy work ?)))) (0 :schema+args)            
 ))

@@ -25,7 +25,6 @@
 ;
 ;
 ; palleative care
-;
 ; doctor gives scan result, choice between chemotherapy A or chemotherapy B
 ; doesn't give choice of just focusing on comfort
 ; patients whose doctors offer comfort care as option more likely to take it
@@ -71,6 +70,7 @@
                         get some questions answered about my options and my future\.))
 
 
+;; 1. (sleep-poorly)
 ?a10. (Me say-to.v you '(One thing I\'ve noticed in the last few weeks is that I haven\'t been sleeping very well\. Most nights I
                         have to take medication for my pain\. I\'m not sure if it\'s only the pain\, but I keep waking up at night\.
                         Do you know why I keep waking up like this?))
@@ -78,73 +78,63 @@
 ?a12. (Me react-to.v ?a11.)
 
 
+;; 2. (medicine-working)
 ?a20. (Me say-to.v you '(I just started on my new pain medication recently\. How long will it be before I know if it\'s working?))
 ?a21. (You reply-to.v ?a20.)
 ?a22. (Me react-to.v ?a21.)
 
 
-; if doctor doesn't give satisfying answer before
+;; 3. (medicine-request)
+;; NOTE: may be obviated by previous replies.
 ?a30. (Me say-to.v you '(You know\, I\'m in a lot of pain\, and the Lortab just isn\'t working\. I think maybe I need something
                      stronger for my pain\.))
-; "So my recommendation is you take a stronger medicine and that there is no ceiling on the dose of narcotic"
-
 ?a31. (You reply-to.v ?a30.)
-
 ?a32. (Me react-to.v ?a31.)
 
 
+;; 4. (test-results)
 ?a35. (Me say-to.v you '(Can you explain to me what my test results mean?))
-; doctor might say something irrelevant to prognosis, or they might get into it
-
 ?a36. (You reply-to.v ?a35.)
-
 ?a37. (Me react-to.v ?a36.)
 
 
-; if not obviated by "can you explain to me what my test results mean"
+;; 5. (prognosis)
+;; NOTE: may be obviated by previous replies.
 ?a40. (Me say-to.v you '(I want you to be honest with me\. How long do you think I have?))
-; doctor might lay out a "best case/worst case" scenario, e.g. Transcript 2
-
 ?a41. (You reply-to.v ?a40.)
-
 ?a42. (Me react-to.v ?a41.)
 
 
+;; 6. (treatment-option)
 ?a50. (Me say-to.v you '(What are my choices at this point?))
-; doctor might reply something about prognosis in response here
-
 ?a51. (You reply-to.v ?a50.)
-
 ?a52. (Me react-to.v ?a51.)
 
 
-; if chemotherapy not already mentioned by doctor
+;; 7. (chemotherapy)
+;; NOTE: may be obviated by previous replies.
 ?a60. (Me say-to.v you '(My previous doctor mentioned something about chemotherapy\, but he said to wait to see how
        things go after the radiation\. Do you think I need chemotherapy?))
-
 ?a61. (You reply-to.v ?a60.)
-
 ?a62. (Me react-to.v ?a61.)
 
 
-; if hospice not already mentioned by doctor
+;; 8. (comfort-care)
+;; NOTE: may be obviated by previous replies.
 ?a70. (Me say-to.v you '(You know\, I really just prefer to be comfortable at this point\. Do you think I should
                          start considering comfort care?))
-
 ?a71. (You reply-to.v ?a70.)
-
 ?a72. (Me react-to.v ?a71.)
 
 
+;; 9. (tell-family)
 ?a80. (Me say-to.v you '(I haven\'t told my family everything yet\. I wanted to wait to talk to you first\. What should I say to them?))
-
 ?a81. (You reply-to.v ?a80.)
-
 ?a82. (Me react-to.v ?a81.)
 
 
 ?a300. (Me say-to.v you '(Thank you for taking the time to meet with me today\. It was difficult to talk about my future\, but comforting to
-                          learn more about my options\. I hope we can meet again soon to discuss further\. Bye\.))
+                          learn more about my options\. You\'ve given me a lot to think about and to discuss with my family\. Goodbye\.))
 
 )) ; END defparameter *eta-schema*
 

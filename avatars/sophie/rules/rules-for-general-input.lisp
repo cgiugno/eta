@@ -1,6 +1,7 @@
 (MAPC 'ATTACHFEAT
 '(
   (palliative comfort)
+  (care treatment treatments)
   (meet meeting)
   (come came)
   (anyone-here-with-you here with alone by)
@@ -14,6 +15,7 @@
   (pain-med lortab vicodin norco)
   (pain-med-other ibuprofen aleve)
   (med-narcotic narcotic oxycodone morphine)
+  (med-chemotherapy carboplatin gemcitabine denosumab zometa)
   (blood-pressure-med cozar)
   (drive drove driving)
   (diagnosis-symptom symptom symptoms weight skinny skinnier appetite eating constipation constipated)
@@ -23,7 +25,7 @@
   (know-gen know sure)
   (think-gen think thoughts thought feel feelings feeling believe)
   (mention say)
-  (chemotherapy chemo)
+  (chemotherapy chemo chemotherapies)
   (tell say inform notify)
   (be-aux be aux)
   (frequently frequent often more)
