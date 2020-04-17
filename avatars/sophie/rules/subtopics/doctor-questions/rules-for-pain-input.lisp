@@ -1,6 +1,6 @@
 (MAPC 'ATTACHFEAT
 '(
-  (pain-info learn hear tell say more additional elaborate)
+  (more-info learn hear tell say more additional elaborate)
   (elaborate continue describe)
   (can could)
   (scale rate rating)
@@ -14,7 +14,7 @@
 (READRULES '*pain-input*
 '(
   ; If doctor inquires for more information
-  1 (0 pain-info 2 pain-info 0)
+  1 (0 more-info 2 more-info 0)
     2 (*pain-question* (can you tell me about your pain ?)) (0 :subtree+clause)
   1 (0 go on 0)
     2 (*pain-question* (can you tell me about your pain ?)) (0 :subtree+clause)
@@ -36,6 +36,11 @@
   1 (0 what 1 you 1 take 0)
     2 (*medicine-question* (what are you taking for the pain ?)) (0 :subtree+clause)
 
+  1 (0 medicine-gen 0)
+    2 *medicine-working-input* (0 :subtree)
+  1 (0 something 1 med-better 0)
+    2 *medicine-working-input* (0 :subtree)
+
   1 (0)
     2 *general-input* (0 :subtree)
   1 (0)
@@ -54,7 +59,9 @@
   1 (0 how pain-bad 0)
     2 ((How do you rate your pain ?) (pain-description)) (0 :gist)
   ; Can you tell me about your pain?
-  1 (0 pain-info 1 about 2 pain 0)
+  1 (0 how be 2 pain 0)
+    2 ((Can you tell me about your pain ?) (pain-description)) (0 :gist)
+  1 (0 more-info 1 about 2 pain 0)
     2 ((Can you tell me about your pain ?) (pain-description)) (0 :gist)
   1 (0 what pain 1 be you 0)
     2 ((Can you tell me about your pain ?) (pain-description)) (0 :gist)

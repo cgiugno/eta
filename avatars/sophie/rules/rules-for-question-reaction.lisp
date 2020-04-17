@@ -60,6 +60,9 @@
   1 (Do you have the symptom of 2 ?)
     2 (*have-subdialogue* ((No\, I haven\'t had problems with that \.)
                            ((I do not have the symptom you mentioned \.)))) (0 :schema+args)
+  1 (Do you know what the tests say ?)
+    2 (*have-subdialogue* ((I don\'t really understand the test results\. Can you explain them?)
+                           ((I do not understand the test results \.) (What do my test results mean ?)))) (0 :schema+args)
   ; Questions about radiation treatment
   1 (Did you get radiation treatment ?)
     2 (*have-subdialogue* ((I did get radiation treatment\, for about five weeks\. I finished about six weeks ago\.)
@@ -131,14 +134,16 @@
     2 (*have-subdialogue* ((No\, it\'s not really working anymore\. So I\'ve been taking the pills
                             every three hours instead of every four\.)
                            ((Why isn\'t the pain medication working anymore ?)))) (0 :schema+args)
+  1 (Do you want stronger pain medication ?)
+    2 (*have-subdialogue* ((I think I could use a stronger pain medication\. Something to help make me more comfortable\.
+                            What are the side effects?)
+                           ((I want a stronger pain medication \.) (What are the side effects of stronger pain medication ?)))) (100 :schema+args)
+    2 (You think having the stronger pain medication would help\.) (0 :out)
 
   ; The following two will need modification
   1 (Do you need more medicine ?)
-    2 (*have-subdialogue* ((I need a refill \.)
+    2 (*have-subdialogue* ((I need a refill of my Lortab \.)
                            ((I would like a refill of medicine \.)))) (0 :schema+args)
-  1 (What is your prognosis ?)
-    2 (*have-subdialogue* ((Can you tell me what kind of time we\'re looking at ?)
-                           ((What is my prognosis ?)))) (0 :schema+args)
 
   1 (0)
     2 *reaction-to-question-minor* (0 :subtree)

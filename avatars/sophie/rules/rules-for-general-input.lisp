@@ -6,7 +6,7 @@
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
   (energy mood concentrate concentration concentrating depression depressed)
-  (medicine medication drug drugs pill pills)
+  (medicine medicines medication drug drugs pill pills med meds)
   (medicine-gen medicine pain-med pain-med-other blood-pressure-med med-narcotic)
   (medicine-taking medicine pain-med)
   (pain-med lortab vicodin norco)
@@ -14,8 +14,16 @@
   (med-narcotic narcotic oxycodone morphine)
   (blood-pressure-med cozar)
   (drive drove driving)
-  (diagnosis-symptom symptom symptoms weight skinny skinnier appetite eating)
+  (diagnosis-symptom symptom symptoms weight skinny skinnier appetite eating constipation constipated)
   (diagnosis-non-symptom headache headaches chill chills fever fevers nausea eyesight eyes)
+  (diagnosis-tests diagnosis test tests result results)
+  (illness cancer disease condition)
+  (know-gen know sure)
+  (think-gen think thoughts thought feel feelings feeling believe)
+  (mention say)
+  (chemotherapy chemo)
+  (tell say inform notify)
+  (be-aux be aux)
 ))
 
 
@@ -35,7 +43,7 @@
   1 (0 pain 0)
     2 *pain-question* (0 :subtree)
   ; If asked about diagnosis details
-  1 (0 diagnosis 0)
+  1 (0 diagnosis-tests 0)
     2 *diagnosis-details-question* (0 :subtree)
   1 (0 diagnosis-symptom 0)
     2 *diagnosis-details-question* (0 :subtree)
@@ -77,11 +85,13 @@
 
   1 (0 ?)
     2 ((NIL Question ?)) (0 :gist)
-  1 (wh_ 0)
+  1 (1 wh_ 0)
     2 ((NIL Question ?)) (0 :gist)
-  1 (aux np_ 0)
+  1 (1 aux np_ 0)
     2 ((NIL Question ?)) (0 :gist)
   1 (0 aux np_ 1); tag question
+    2 ((NIL Question ?)) (0 :gist)
+  1 (0 tell me 0); declarative question
     2 ((NIL Question ?)) (0 :gist)
   ;; 1 (0)
   ;;   2 ((NIL Gist)) (0 :gist)

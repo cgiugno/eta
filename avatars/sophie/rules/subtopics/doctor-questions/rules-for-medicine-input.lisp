@@ -4,6 +4,9 @@
     (work working help helping treat treating effective)
     (often frequent frequently much)
     (med-time every time times hour hours minute minutes day days week weeks)
+    (want need)
+    (med-better better stronger effective heavier)
+    (med-for for work)
   ))
 
 
@@ -53,7 +56,12 @@
   1 (0 how 0 medicine-taking 0 work 0)
     2 ((Is the pain medication working ?) (medicine-working)) (0 :gist)
 
-  1 (0 how are you 1 medicine-taking ?); e.g., how are you on medicine?
+  1 (0 do 1 you 3 want 3 med-better 1 medicine-taking 0)
+    2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
+
+  1 (0 do 1 you 3 want 2 medicine-taking 0)
+    2 ((Do you need more medicine ?) (medicine-refill)) (0 :gist)
+  1 (0 how are you 1 medicine-taking 0); e.g., how are you on medicine?
     2 ((Do you need more medicine ?) (medicine-refill)) (0 :gist)
 ))
 

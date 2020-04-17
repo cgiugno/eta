@@ -1,5 +1,6 @@
 (READRULES '*gist-clause-trees-for-input*
 '(
+   ; Direct gist clauses from schema
    1 (Why 1 I not 1 sleeping well ?)
       2 (*sleep-poorly-input*) (0 :subtrees)
    1 (How will I know if my pain medication is working ?)
@@ -19,8 +20,7 @@
    1 (What should I tell my family ?)
       2 (*tell-family-input*) (0 :subtrees)
 
-   ; The following are from the initial dialogue attempt; may still be useful
-   ; for responding to things in subschemas.
+   ; Gist clauses from potential sub-dialogues
    1 (My pain has recently been getting worse \.)
       2 (*pain-input*) (0 :subtrees)
    1 (I am here alone \.)
@@ -51,10 +51,14 @@
       2 (*medicine-input*) (0 :subtrees)
    1 (Why isn\'t the pain medication working anymore ?)
       2 (*medicine-working-input*) (0 :subtrees)
-   1 (Can you tell me about the side effects ?)
-      2 (*side-effects-input*) (0 :subtrees)
+   1 (What are the side effects of stronger pain medication ?)
+      2 (*medicine-side-effects-input*) (0 :subtrees)
    1 (I would like a refill of medicine \.)
       2 (*medicine-request-input*) (0 :subtrees)
+   1 (Has the cancer gotten worse ?)
+      2 (*cancer-worse-input*) (0 :subtrees)
+   1 (Are you sure the cancer has not gotten worse ?)
+      2 (*cancer-worse-verification-input*) (0 :subtrees)
    1 (What is my prognosis ?)
       2 (*prognosis-input*) (0 :subtrees)
       

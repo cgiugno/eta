@@ -20,6 +20,13 @@
     2 *reaction-to-question* (0 :subtree)
   1 (0 ?); anything ending with ?
     2 *reaction-to-question* (0 :subtree)
+  1 (wh_ 0); wh or how question
+    2 *reaction-to-question* (0 :subtree)
+  1 (aux np_ 0); modal question
+    2 *reaction-to-question* (0 :subtree)
+  1 (0 aux np_ 1); tag question
+    2 *reaction-to-question* (0 :subtree)
+  
   1 (0); by default, it's a statement
     2 *reaction-to-statement* (0 :subtree)
 ))
