@@ -79,10 +79,7 @@
 
 
 ?a20. (Me say-to.v you '(I just started on my new pain medication recently\. How long will it be before I know if it\'s working?))
-; doctor might ask for clarification of what medicine patient is using
-
 ?a21. (You reply-to.v ?a20.)
-
 ?a22. (Me react-to.v ?a21.)
 
 

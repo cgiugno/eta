@@ -30,6 +30,8 @@
     2 *sleep-poorly-reaction* (0 :subtree)
   1 (0 medication 4 working 0 \.)
     2 *medicine-working-reaction* (0 :subtree)
+  1 (0 take 3 different \.)
+    2 *medicine-working-reaction* (0 :subtree)
   1 (0 stronger 1 medication 0 \.)
     2 *medicine-request-reaction* (0 :subtree)
   1 (0 med-narcotic 0 \.)

@@ -331,6 +331,28 @@
 
 
 
+(defun question? (sentence)
+;```````````````````````````````````````
+; Is sentence of form (quote (<word> ... <word> ?)), or with the
+; question mark attached to the last word? (One could make more
+; elaborate checks that would also work w/o a question mark, using
+; patterns (... <aux> you{r} ...), (... <wh-word> <word> you{r} ...),
+; etc.). But we assume we have ensured that output questions end in
+; "?".
+;
+  (let (word)
+    ;; (format t "~% ****** quoted-question? first line = ~a **** ~%" (listp sentence))
+    ;; (format t "~% ****** quoted-question? third line = ~a **** ~%" sentence) ; DEBUGGING
+    (if (and (listp sentence) (every #'atom sentence))
+      (setq word (car (last sentence)))
+      (return-from quoted-question? nil))
+    (or
+      (eq word '?)
+      (char-equal #\? (car (last (explode word))))))
+) ; END question?
+
+
+
 (defun quoted-question? (sentence)
 ;```````````````````````````````````````
 ; Is sentence of form (quote (<word> ... <word> ?)), or with the

@@ -7,7 +7,7 @@
     (want need)
     (med-better better stronger effective heavier)
     (med-for for work)
-    (med-help help helping helpful better effective work working)
+    (med-help care help helping helpful better effective work working)
   ))
 
 
@@ -20,7 +20,7 @@
 
   ; Possibly too general, might need refining
   1 (0 med-narcotic 0)
-    2 ((I think you should take 2 \.) (medicine)) (0 :gist)
+    2 ((You should take a narcotic \.) (medicine-request)) (0 :gist)
 
   1 (0)
     2 *general-input* (0 :subtree)
@@ -58,13 +58,15 @@
     2 ((What medicine are you taking ?) (medicine)) (0 :gist)
 
   ; Is the pain medication working?
-  1 (0 be 0 medicine-taking 3 doing anything 0)
+  1 (0 be-aux 3 medicine-taking 3 med-help 3 pain 0)
     2 ((Is the pain medication working at all ?) (medicine-working)) (0 :gist)
-  1 (0 be 0 medicine-taking 0 work 3 at all 0)
+  1 (0 be-aux 0 medicine-taking 3 do anything 0)
     2 ((Is the pain medication working at all ?) (medicine-working)) (0 :gist)
-  1 (0 be 0 medicine-taking 0 work 0)
+  1 (0 be-aux 0 medicine-taking 0 med-help 3 at all 0)
+    2 ((Is the pain medication working at all ?) (medicine-working)) (0 :gist)
+  1 (0 be-aux 0 medicine-taking 0 med-help 0)
     2 ((Is the pain medication working ?) (medicine-working)) (0 :gist)
-  1 (0 how 0 medicine-taking 0 work 0)
+  1 (0 how 0 medicine-taking 0 med-help 0)
     2 ((Is the pain medication working ?) (medicine-working)) (0 :gist)
 
   ; Do you want stronger pain medication?

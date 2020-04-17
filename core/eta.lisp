@@ -592,11 +592,15 @@
 ; seem to provide an answer to the gist-version of the question,
 ; which will be the last gist clause stored under property
 ; 'gist-clauses' of 'eta-action-name'.
+; NOTE: modified to check if gist clause contains question rather than surface
+; sentence (B.K. 4/17/2020)
 ;
-  (let (topic-keys facts)
+  (let (gist-clauses topic-keys facts)
     ;; (format t "~% ****** input sentence: ~a~%" sentence)
-    ;; (format t "~% ****** quoted question returns ~a **** ~%" (quoted-question? sentence)) ; DEBUGGING
-    (if (not (quoted-question? sentence))
+    (setq gist-clauses (get eta-action-name 'gist-clauses))
+    ;; (format t "~% ****** gist clauses are ~a **** ~%" gist-clauses)
+    ;; (format t "~% ****** quoted question returns ~a **** ~%" (some #'question? gist-clauses)) ; DEBUGGING
+    (if (not (some #'question? gist-clauses))
       (return-from obviated-question nil))
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING

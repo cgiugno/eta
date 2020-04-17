@@ -6,7 +6,7 @@
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
   (energy mood concentrate concentration concentrating depression depressed)
-  (medicine medicines medication drug drugs pill pills med meds)
+  (medicine medicines medication drug drugs pill pills med meds dose doses)
   (medicine-gen medicine medicine-particular)
   (medicine-particular pain-med pain-med-other blood-pressure-med med-narcotic)
   (medicine-taking medicine pain-med)
