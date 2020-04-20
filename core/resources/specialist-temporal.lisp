@@ -717,11 +717,11 @@
     ; two questions previous
     ((ttt:match-expr '(mod-a (by.p (^* temporal-question-noun?))) mod-a)
       (remove-if-not (lambda (time)
-        (is-apart-now time *time* 'question (time-np-to-num (cadadr mod-a)))) times))
+        (is-apart-type time *time* 'question (time-np-to-num (cadadr mod-a)))) times))
     ; two moves previous
     ((ttt:match-expr '(mod-a (by.p (^* temporal-move-noun?))) mod-a)
       (remove-if-not (lambda (time)
-        (is-apart-now time *time* 'move (time-np-to-num (cadadr mod-a)))) times))
+        (is-apart-type time *time* 'move (time-np-to-num (cadadr mod-a)))) times))
     ; previous + plural noun
     ((ttt:match-expr 'plur.mod-a mod-a)
       (latest-time times *temporal-plur-value*))
