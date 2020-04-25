@@ -97,7 +97,7 @@
         (list `(before.ps (I.pro ((past move.v) ,moved-before-block)))))
       (moved-after-block
         (list `(after.ps (I.pro ((past move.v) ,moved-after-block)))))
-      (t (mapcar (lambda (time) (add-certainty time time)) times))))
+      (t times)))
 ) ; END find-relation-to-next-time
 
 
