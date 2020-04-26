@@ -222,12 +222,15 @@
 ; something like "recently"). This uses the various ULF features extracted by the calling function. Currently
 ; the inferences are simple (either adding 'recently' or 'most recently'), but they can be improved as we encounter
 ; more pragmatic issues.
+; TODO: clean function.
 ;
   (let ((unary-constraints (append (first adv-e) adv-f)) (binary-constraints (second adv-e))
         adv-e-unary-inferred adv-e-binary-inferred adv-f-inferred)
+
     (when (and neg action)
       (format t "action question in a negative context: adding 'never'~%")
       (setq adv-f-inferred (list 'never.a)))
+
     (cond
       (embedded nil)
       (when-question nil)
@@ -243,9 +246,18 @@
         (setq adv-e-unary-inferred (cons 'recent.a adv-e-unary-inferred))
         (setq adv-e-binary-inferred (cons '(before.p (the.d (last.a move.n))) adv-e-binary-inferred)))
       ((and (null unary-constraints) binary-constraints)
-        (format t "historical question with underspecified unary constraints: adding 'recently'~%")
-        (setq adv-e-unary-inferred (cons 'recent.a adv-e-unary-inferred)))
-      (t nil))
+        (cond
+          ((some (lambda (binary-constraint)
+                (let* ((prep-lookup (find-car (car binary-constraint) *temporal-prep-list*))
+                       (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
+                  (equal prep 'after.p)))
+              binary-constraints)
+            (format t "historical question with underspecified unary constraints involving 'after' predicate: adding 'ever'~%")
+            (setq adv-e-unary-inferred (cons 'ever.a adv-e-unary-inferred)))
+          (t
+            (format t "historical question with underspecified unary constraints: adding 'recently'~%")
+            (setq adv-e-unary-inferred (cons 'recent.a adv-e-unary-inferred))))))
+            
     (list adv-e-unary-inferred adv-e-binary-inferred adv-f-inferred))
 ) ; END infer-temporal-adverbials
 
