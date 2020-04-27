@@ -385,7 +385,7 @@
   (let ((obj
     (ttt:apply-rules '(
       (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1)))))) !)
-      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))))))) _!))
+      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))))))) !))
     ulf)))
   (if (or (np? obj) (nnp? obj) (variable? obj) (restricted-variable? obj)) obj nil))
 ) ; END extract-obj
