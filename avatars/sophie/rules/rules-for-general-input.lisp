@@ -29,6 +29,7 @@
   (tell say inform notify)
   (be-aux be aux)
   (frequently frequent often more)
+  (sleep sleeping wake waking awake insomnia)
 ))
 
 

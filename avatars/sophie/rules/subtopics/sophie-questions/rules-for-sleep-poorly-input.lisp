@@ -10,11 +10,29 @@
   (sleep-medication ambien nyquil lunesta)
   (work working effective help helping)
   (spread spreading metastasized metastatic)
+  (sleep-thought thought thoughts head mind brain)
 ))
 
 
 (READRULES '*sleep-poorly-input*
 '(
+
+  ; What medicine are you taking?
+  1 (8 wh_ 1 medicine-gen 0)
+    2 (*medicine-question* (what medicine are you taking ?)) (0 :subtree+clause)
+  1 (8 wh_ 2 med-take 0)
+    2 (*medicine-question* (what medicine are you taking ?)) (0 :subtree+clause)
+
+  ; When you take it does it take care of the pain?
+  1 (0 be-aux 3 med-help 3 pain 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  1 (0 be-aux 3 med-help 1 at all 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  1 (0 be-aux 3 med-help 1 little 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  1 (0 be-aux 1 it 3 do anything 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+
   1 (0 medicine-gen 1 neg 1 work 0)
     2 ((You are sleeping poorly because the pain medication is no longer working \.) (sleeping-poorly)) (0 :gist)
 
@@ -35,6 +53,10 @@
     2 (*sleep-question* (do you sleep during the day ?)) (0 :subtree+clause)
   1 (0 how 1 often 0 wake)
     2 (*sleep-question* (how often are you waking up at night ?)) (0 :subtree+clause)
+
+  ; What's going through your head/what are you thinking
+  1 (0 wh_ 3 sleep-thought 0)
+    2 (*sleep-question* (what is on your mind when you try to sleep ?)) (0 :subtree+clause)
 
   1 (0)
     2 *general-input* (0 :subtree)

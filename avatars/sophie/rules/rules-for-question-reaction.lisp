@@ -98,6 +98,10 @@
   1 (Do you sleep during the day ?)
     2 (*have-subdialogue* ((I usually take a nap during the day\. About one hour to two hours \.)
                            ((I usually take a nap during the day \.)))) (0 :schema+args)
+  1 (What is on your mind when you try to sleep ?)
+    2 (*have-subdialogue* ((When I actually sleep\, I don\'t really have anything on my mind\. When I have trouble sleeping I usually can\'t think
+                           of anything except for the pain\.)
+                           ((The pain is on my mind when I try to sleep \.)))) (0 :schema+args)
   ; Questions about energy
   1 (How is your energy ?)
     2 (*have-subdialogue* ((I\'ve been fatigued most days for the past month\. If I\'m just doing something normal\, I\'m fine\, but I don\'t

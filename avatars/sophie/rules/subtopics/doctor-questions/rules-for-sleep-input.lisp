@@ -1,6 +1,5 @@
 (MAPC 'ATTACHFEAT
 '(
-  (sleep sleeping)
   (okay alright well good fine)
   (problem problems issue issues hard)
   (lot much)
@@ -29,6 +28,7 @@
 
 (READRULES '*sleep-question*
 '(
+  ; Have you been sleeping okay?
   1 (0 be you 2 sleep 1 okay 0)
     2 ((Have you been sleeping okay ?) (sleep)) (0 :gist)
   1 (0 have you 2 sleep 1 okay 0)
@@ -37,10 +37,18 @@
     2 ((Have you been sleeping okay ?) (sleep)) (0 :gist)
   1 (0 you 2 sleep 1 lot 0)
     2 ((Have you been sleeping okay ?) (sleep)) (0 :gist)
+
+  ; How often are you waking up at night?
   1 (0 how often 0)
     2 ((How often are you waking up at night ?) (waking-frequency)) (0 :gist)
+
+  ; Do you sleep during the daya?
   1 (0 sleep 2 during 3 day 0)
     2 ((Do you sleep during the day ?) (sleep)) (0 :gist)
+
+  ; What's going through your head while you're sleeping
+  1 (0 wh_ 5 sleep-thought 5 sleep)
+    2 ((What is on your mind when you try to sleep ?) (sleep)) (0 :gist)
 ))
 
 

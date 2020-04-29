@@ -33,8 +33,21 @@
   1 (0 how 0 find out 0)
     2 (*diagnosis-details-question* (what lead to your diagnosis ?)) (0 :subtree+clause)
   ; If doctor asks what you're taking for the pain
-  1 (0 what 1 you 1 take 0)
+  1 (0 wh_ 1 medicine-gen 0)
     2 (*medicine-question* (what are you taking for the pain ?)) (0 :subtree+clause)
+  1 (0 wh_ 2 med-take 0)
+    2 (*medicine-question* (what medicine are you taking ?)) (0 :subtree+clause)
+  ; When you take it does it take care of the pain?
+  1 (0 be-aux 3 med-help 3 pain 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  1 (0 be-aux 3 med-help 1 at all 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  1 (0 be-aux 3 med-help 1 little 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  1 (0 be-aux 1 it 3 do anything 0)
+    2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+
+
 
   1 (0 medicine-gen 0)
     2 *medicine-working-input* (0 :subtree)
