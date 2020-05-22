@@ -23,7 +23,7 @@
   !r5 (|Starbucks| (green.a block.n))
   !r6 (|Twitter| (red.a block.n))
   !r7 (|Texaco| (blue.a block.n))
-  !r8 (|McDonalds| (green.a block.n))
+  !r8 (|McDonald's| (green.a block.n))
   !r9 (|Mercedes| (red.a block.n))
   !r10 (|Toyota| (blue.a block.n))
   !r11 (|Burger King| (green.a block.n))

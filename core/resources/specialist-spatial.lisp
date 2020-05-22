@@ -48,7 +48,7 @@
 (defvar *central-threshold* 3)
 
 (defun block-name? (ulf)
-  (member ulf '(|Adidas| |Burger King| |Esso| |Heineken| |HP | |HP| |McDonalds| |Mercedes|
+  (member ulf '(|Adidas| |Burger King| |Esso| |Heineken| |HP | |HP| |McDonalds| |McDonald's| |Mercedes|
                 |NVidia| |Pepsi| |SRI | |SRI| |Starbucks| |Texaco| |Target| |Toyota| |Shell| |Twitter|)))
 
 (defun spatial-deg-adv? (ulf)
