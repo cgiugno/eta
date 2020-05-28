@@ -162,6 +162,18 @@
   ; at the level of gist clauses, and will refrain from fully answering spatial questions.
   (defparameter *responsive* nil)
 
+  ; If terminal mode and perceptive, keep list of block coordinates mimicking actual BW system.
+  (defparameter *block-coordinates* '(
+    (|Target|      at-loc.p ($ loc -3.289 -2.454 0.488))
+    (|Starbucks|   at-loc.p ($ loc -2.262 -2.438 0.493))
+    (|Twitter|     at-loc.p ($ loc -1.254 -2.43  0.493))
+    (|Texaco|      at-loc.p ($ loc -0.27  -2.415 0.493))
+    (|McDonald's|  at-loc.p ($ loc  0.713 -2.412 0.493))
+    (|Mercedes|    at-loc.p ($ loc  1.696 -2.396 0.493))
+    (|Toyota|      at-loc.p ($ loc  2.728 -2.346 0.493))
+    (|Burger King| at-loc.p ($ loc  3.753 -2.323 0.493))
+  ))
+
 ) ; END init
 
 
@@ -1153,23 +1165,29 @@
         (setq user-ulf (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
+        ; Get perceptions
         (cond
           ((null *perceptive*) (setq perceptions nil))
           ((null *live*) (setq perceptions (get-perceptions-offline)))
           ((eq system '|Blocks-World-System|) (setq perceptions (get-perceptions)))
           (t (setq perceptions (get-perceptions))))
-        (if (and perceptions (listp perceptions) (every #'listp perceptions))
-          (setq perceptions `(quote ,perceptions))
+
+        ; Ensure perceptions are in correct format, i.e. a list of lists, otherwise set to nil
+        (if (or (not perceptions) (not (listp perceptions)) (not (every #'listp perceptions)))
           (setq perceptions nil))
+        ; When in terminal mode and perceptive mode, update block coordinates after user gives move and add to perceptions
+        (when (and (null *live*) *perceptive*)
+          (setq perceptions (update-block-coordinates (remove-if-not #'verb-phrase? perceptions))))
+        ; Substitute quoted perceptions for var in plan
+        (nsubst-variable {sub}plan-name `(quote ,perceptions) expr)
+
         (format t "received perceptions: ~a~% (for variable ~a)~%" perceptions expr) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans+alternatives) in plan
-        (nsubst-variable {sub}plan-name perceptions expr)
-        
+
         ; Store move.v facts in context, deindexed at the current time
         ; TODO: COME BACK TO THIS
         ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
         ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
-        (let ((action-perceptions (remove-if-not #'verb-phrase? (eval perceptions))))
+        (let ((action-perceptions (remove-if-not #'verb-phrase? perceptions)))
           (when action-perceptions
             (setq *time-prev* *time*)
             (mapcar (lambda (perception)

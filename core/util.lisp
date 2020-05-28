@@ -1397,13 +1397,29 @@
 
 
 (defun get-perceptions-offline () 
-;`````````````````````````````
+;``````````````````````````````````
 ; This is the perceptions reader when ETA is used with argument live =
 ; nil (hence also *live* = nil)
 ;
   (finish-output)
   (read-from-string (read-line))
 ) ; END get-perceptions-offline
+
+
+
+(defun update-block-coordinates (moves)
+;````````````````````````````````````````
+; Given a list of moves (in sequential order), update *block-coordinates*. Return a list of
+; perceptions, i.e. the given moves combined with the current block coordinates.
+;
+  (mapcar (lambda (move)
+    (setq *block-coordinates* (mapcar (lambda (coordinate)
+        (if (equal (car move) (car coordinate))
+          (list (car coordinate) 'at-loc.p (cadar (cddadr move)))
+          coordinate))
+      *block-coordinates*))) moves)
+  (append *block-coordinates* moves)
+) ; END update-block-coordinates
 
 
 
