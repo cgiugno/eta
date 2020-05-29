@@ -1,0 +1,192 @@
+Code for successively stacking blocks to achieve a goal schema:
+```````````````````````````````````````````````````````````````
+The main code, for finding the next block to place, is in 
+
+    "planning-via-schemas.lisp", 
+
+and a few simple tests (successfully tried) are in the files sating with "test..."
+The most "ambitious" is
+     "test-arch-construction-with-eq-neq-constraints.lisp",
+building an "arch" using two stacks of two red blocks each, with a blue
+block straddling them. An equality constraint forces use of a red block
+that's assumed to be initially partially supporting another red block,
+and an inequality constraint forces a choice of one of the two blue blocks
+that would otherwise not be used. The construction without equality/inequality
+constraints is tested in "test-arch-construction.lisp".
+
+The assumption is that building a goal structure will proceed in steps
+where (1) a still-to-be-placed block is found in the goal schema that
+has all of its supports in place; in general this is a variable for
+which an instance must be found among availabe blocks that satisfies
+specified nonfluent constraints; and (2) a conveniently located block
+with the (permanent) properties specified in the goal schema is selected
+among the available blocks. The schema variable that was selected, its
+binding to a specific named block, and the already-in-place supporting
+blocks are returned, and 'place-block' will do the state and goal-schema
+updates corresponding to successful placement. ("Loads" on blocks -- how
+many blocks are directly or indirectly supported by a block -- are not
+automatically updated; a call to 'mark-objects-with-load', applied to
+the hash table for the state representation, will do that.)
+
+The main limitations are that
+
+- Only "on"-relations are considered in the bottom-up construction; this
+  isn't a big limitation if a prototype is being used for the goal schema,
+  and physical blocks placement ensures conformity with relations such
+  as a 1/2 unit separation between side-by-side blocks (e.g., for an arch).
+
+- There is no "construction materials reasoning" in advance of placement
+  reasoning; a simple example where this would lead to trouble is this:
+  Suppose we have 3 blocks available, where one is red and two are blue;
+  the goal is a stack of 3 blocks, where the only other constraint is
+  that the top block should be red; then since there are no constaints
+  on the color of the bottom block, the block selection might pick the 
+  red block as bottom block -- leading to failure after 2 blocks have
+  been stacked up. An "unthinking" remedy would be random restarts
+  under certain conditions. A general systematic solution could be tricky,
+  though the extant code for finding instances of complex lambda-predicates
+  might well make this feasible. This didn't seem like an immediate high
+  priority.
+
+- Related to the previous point, I haven't tested if the code works if 
+  we use nonfluent relational constraints, like (bigger-than ?x ?y), even
+  though the subroutines for finding variable bindings for a multi-argument
+  lambda predicate, given a set of ground predications, is used. One could
+  fake such relational constraints e.g., by using absolute monadic 
+  predicates like 'big', 'mid-sized', and 'small'.
+
+- There is no provision for "digging up" blocks needed for the goal
+  configuration, when these blocks have others on top of them. The
+  'place-object' function assumes that whatever object was selected as
+  the one to be placed next can in fact be put in place directly. The code
+  does identify candidates that have as few objects on top as possible,
+  and planning for clearing them off would be pretty simple. The only 
+  relevant property at a given "obstruction removal" step would be 
+  whether the block being removed is "clear" -- not supporting anything;
+  using the current marking of blocks with "loads", a block B is clear
+  iff (get B 'load) = 0. ('Mark-objects-with-load' would nedd to be used
+  for updates if a block has bee moved.)
+
+- There is no attempt to make use of partial pre-existing structures to
+  efficiently build a desired structure. 
+
+- There is no automatic relational reasoning, e.g., that a block with nothing
+  on it is clear. (The CSC 291 code for bounded inference could be used for
+  this.)
+
+"Physically" retrieving and placing a block is left to whatever 
+executive system is performing the higher-level action/interaction.
+The 'place-block' function updates the goal schema instance and world
+state on the assumption that the physical placement succeeds.
+
+We assume a schema syntax for BW goal specifications; e.g., a simple 
+example from the "test..." files is the following, where the goal is
+to create a 3-block red stack; the main current oddity is that type 
+predications are assumed to be in infix form, while all others are in 
+prefix form (this arose from preexisting planning code using "standard"
+prefix form, that I half-heartedly began to adapt to obj-schema syntax):
+
+  (setq *goal-schema*
+   ; Should perhaps switch to infix syntax, consistently with LISSA, etc.
+   ; or else switch :types to be prefix as well
+   '(rel-schema (red-stack ?s)
+     "for testing find-a-block-to-place"
+     :vars ?x ?y ?z
+     :types (?x block) (?y block) (?z block)
+     :comment: currently only types are assumed to be in infix form!
+     :nonfluent-conds (red ?x) (red ?y) (red ?z)
+     :static-conds
+       (on ?x ?y) (on ?y ?z) (on ?z table) (loose-part-of ?x ?s)
+       (loose-part-of ?y ?s) (loose-part-of ?z ?s)
+     :end))
+
+The literals in a goal schema can be positive or negative (e.g., (not (red ?b))).
+The can include (in)equalities like (eq ?v B3), (not (= ?w B4)), (equal ?x B1).
+THE BLOCKS TO BE PLACED ARE ASSUMED TO BE REPRESENTED BY VARIABLES IN THE
+:vars LIST. However, we can specify the identity of specific blocks by
+including equative conditions like (eq ?z B1) in the nonfluent-conds. When
+a block has been placed, it is paired on the :vars list with its binding,
+e.g., (?z B1). Any constants used directly in the constraints in predications
+other than equative ones are assumed to be already in place, e.g., 'table'.
+
+For concept teaching, such goal schemas (with syntax brought up to date) would 
+be generated from object schemas. Originally, I was thinking of the construction
+of block arrangements to satisfy a goal schema as occurring in the context
+of executing a "collaborative schema", as tentatively coded in
+  "./collab-schema.lisp"
+(see also notes in "./collab-schema-notes"). The idea in this schema is that
+the user ?x repeatedly requests simple or complex types of actions from a
+computational agent ?y (a robot, or physically aided by an "arm-supplier").
+"Simple" action types are immediately executable ones, while complex ones
+can specify something like "Make an arch consisting of a stack of three blue
+blocks and a stack of three red blocks, with a green block straddling the
+stacks". When ?y is the system, it would map this to a goal schema, and 
+proceed with realizing it step by step, with success monitoring at each step.
+
+Use of the code:
+````````````````
+The use of the code is partially illustrated in the "test-schema.lisp" file.
+The general usage is as follows:
+
+0. (load "planning-via-schemas.lisp")
+
+1. Define a hash-table for storing a world model, i.e., a set of positive
+   ground literals (treating "absence" as negation); e.g.,
+   (defparameter *kb-ht* (make-hash-table :test #'equal))
+
+2. Define the set of facts comprising the current world model; e.g.,
+   (setq *facts* '((on B1 B2) (on B1 B3) (on B4 B5) (on B2 table) (on B3 table)
+    (on B5 B6) (on B6 table) (block b1) (block b2) (block b3) (block b4) (block b5)
+    (block b6) (red b1) (red b4) (red b5) (blue b2) (blue b3) (blue b6)
+    (between B3 B2 B6) (between B3 B1 B6) (between B1 B2 B3) (between B5 B4 B6) ))
+   ; NB: I haven't put in symmetry versions, like (between B3 B6 B2); could do so.
+
+3. Store the world model, e.g.,
+   (store-facts *facts* *kb-ht*)
+
+4. Mark object with the number of objects it supports (fully or partially,
+   directly or indirectly); can be re-used for post-action updates any time;
+   (mark-objects-with-load *kb-ht*)
+
+5. Declare what objects are currently available for structure building; e.g.,
+   (declare-as-available '(table B1 B2 B3 B4 B5 B6) '*facts* *kb-ht*)
+
+6. Create a goal schema, and a copy of it that can be progressively instantiated,
+   e.g., as in the preamble above,
+   (setq *goal-schema* ; a stack of 3 red blocks on the table
+    ; Should perhaps switch to infix syntax, consistently with LISSA, etc.
+    ; or else switch :types to be prefix as well. Note that 'req-properties'
+    ; reverses infixed type predications to get prefix form.
+    '(rel-schema (red-stack ?s)
+      "for testing find-a-block-to-place"
+      :vars ?x ?y ?z
+      :types (?x block) (?y block) (?z block)
+      :nonfluent-conds (red ?x) (red ?y) (red ?z)
+      :static-conds
+        (on ?x ?y) (on ?y ?z) (on ?z table) ; block off 'loose-part-of' 5/15/2020
+       ;(loose-part-of ?x ?s) (loose-part-of ?y ?s) (loose-part-of ?z ?s)
+      :end))
+
+    (setq goal-schema-inst (copy-schema *goal-schema*))
+
+Repeat steps 7 & 8 till all variables on the :vars list of goal-schema-inst
+are paired with bindings:
+
+7. Find an on-relation in the (progressively changing copy of the) goal schema,
+   that can be realized next, and find an available block that can realize it;
+   e.g.,
+   (setq obj+bind+supports (find-a-block-to-place goal-schema-inst *kb-ht*))
+   ==> ((?Z B1) (TABLE)) {for the above examples}
+
+8. Place the block selected in the previous step, e.g.,
+   (place-block (car obj+bind+supports) 
+                (second obj+bind+supports)  goal-schema-inst *kb-ht*)
+
+   For display of the full goal-schema-inst and KB, I use the following:
+   (defun f (x) (format t "~%~s" x) '-----------------------)
+
+   (f goal-schema-inst) ; to see the bindings of schema variables
+   (f (get-matching-facts '(on ?x ?y) *kb-ht*)) ; to see the altered on-relations
+   (mark-objects-with-load *kb-ht*) ; to revise the load data (as obj. properties)
+
+

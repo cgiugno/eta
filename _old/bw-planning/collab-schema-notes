@@ -1,0 +1,180 @@
+Mar 7/18
+
+Notes on algorithmic schema instantiation (for both the collab-schema
+`````````````````````````````````````````````````````````````````````
+and the reaction-schema for greeting).
+````````````````````````````````````
+There are unresolved issues concerning the "trade-off" between goal-driven
+schema execution and reactive schemas triggered by observed events or by
+problems in schema execution (thus potentially invoking metaschemas that
+modify an object-level schema being executed). However, I have little
+doubt that we need to *at least* be able to handle the schema constructs
+in "collab-schema.lisp", so I want to outline a methodology for that
+first, basically generalizing from the LISSA schemas.
+
+One thought is that I'll probably want to do the matching that leads
+to selection of a schema for instantiation in an approximate way,
+treating the predications in a schema much like gist clauses. For
+example, consider the goal
+    (?x want1.v (that ((set-of ?x ?y) collaborate1.v))).
+I would treat this much like a gist clause
+    (I want that we collaborate), or
+    (I want to collaborate with you), or
+    (I want us to collaborate), or
+    (Let us collaborate)
+
+But note that a matching English utterance may not be explicitly available,
+so some such gist clauses may have to be generated as a sort of inference
+from given circumstances -- a presupposition of sorts.
+  [But I decided that the intention to collaborate will already be
+  in the KB when the schema is instantiated -- in the context of a more
+  comprehensive life plan, where there should have been a prior agreement
+  to collaborate.]
+
+Assume that we have a global hash table, *active-schemas*, where the keys
+are names of skolemized events (for episodic schemas) or given/Skolemized
+names (for object schemas). The corresponding entries are triples, where 
+the first element is the name of the general schema being instantiated
+(e.g., this might be *blocks-collab-schema-1*), the second is the partially
+instantiated schema (potentially modified with deleted and inserted steps
+and subschemas), and the third is a hash table of variable values. (The
+idea is to avoid actually substituting values for instantiated variables.)
+
+One issue: If we attach or insert a subschema, and the variable names in
+the subschema overlap with those in the main schema (as is likely), how do
+we avoid name conflicts? Evidently subschemas should have their own hash
+table of variable-values. So when inserting or attaching a subschema,
+we should again use a triple 
+   (<subschema name> <subschema instance> <subschema variable htable>)
+
+For the time being I'll assume that a partially instantiated schema is
+unnamed (though we can extract the event or object name) and is just
+represented as a list structure. 
+
+Temporal "execution sequencing" is an issue if the ordering of episodes
+in the schema isn't necessarily their execution order. After considering 
+the infamous Z-graph, I expect to do it this way: treat the listing order 
+as a topological sort; but use the explict temporal constraints to specify 
+allowable initial actions. When one of these has been executed, compute 
+the (now in general narrowed-down) allowable next steps, etc. This is
+just a matter of keeping track of which steps have had all their parents
+in the temporal partial order executed.
+
+I think this can be integrated with concurrent execution of other schemas.
+In particular, if two ordered steps aren't required to be consecutive, we
+can insert a step from another schema between them. This sort of checking
+for necessarily consecutive steps is needed anyway, in case we want to
+modify the current schema instance by adding a further step somewhere in
+the schema. However, for more "intelligent" execution of concurrent
+schemas we may eventually need to represent the events as start-end pairs 
+of nodes in a temporal graph, to make ordered instantiation of steps in 
+the schema, and coordination with concurrent schemas, more efficient -- 
+something like a timegraph.
+
+So, suppose we've instantiated ?x and ?y and a Skolem constant for ?e,
+say E1.sk, in *blocks-collab-schema-1*, with header
+
+   ((?x jointly-solve-blocks-world-problems-with.v ?y) ** ?e)
+
+This means we've entered E1.sk into *active-schemas*, with corr. entry
+
+  (*blocks-collab-schema-1* <copy of *blocks-collab-schema-1*> <new htable>),
+
+where <new htable> contains appropriate constant entries for ?x, ?y, and ?e
+(for the last, the entry is of course E1.sk). Note that this method of
+storing schemas and variable values will make it easy to access variables
+in hierarchic schemas via the "forward slash" convention I'm assuming,
+e.g., we can easily look up E1.sk/?x and E1.sk/?y.
+
+As a result, the copy of *blocks-collab-schema-1* will now in effect
+contain predications about the participants, namely (?x person1.n) and
+(?y robot1.n) with?x and ?y having particular values.
+
+Of course, we need to create instance names to be bound to the corresponding 
+wff variables !w1, !w2 and (probably only when getting to those formulas) 
+for episodic variables like ?s1, ?s2, ?g1, ?g2, ?e1, ?e2, etc. 
+These too will then be accessible as E1.sk/!w1, E1.sk/?s1, and the like, 
+with the help of the hash table for variables.
+
+Further processing then would go something like this, assuming that
+we have, say, *curr-state* knowledge; the perspective is that of the
+AI agent, ?y, i.e., we're considering how it would use this schema:
+
+1. We look in *curr-state* for a set of bindings for the argument 
+   variables occurring unbound (and therefore transparently) in, 
+   and best satisfying the Fixed-roles, Static-conds, Nonfluent-conds, 
+   and goals (though only ?x may know ?x's wants reliably, and only 
+   ?y may know ?y's wants reliably). 
+
+   This in general requires metaknowledge about what positive formulas
+   can be regarded as false by default (i.e., when not appearing in
+   the *curr-state* or very directly following from it). And we also
+   need to account for perspective here: ?x knows what s/he does and 
+   doesn't know/want, and likewise for ?y, but they don't know each 
+   other's knowledge/wants fully. But each knows what the other 
+   knows in terms of the overt, perceptible facts of the situation
+   and dialogue history -- the common ground (mutual knowledge).
+ 
+   For plural objects, we find the maximal instance (that also meets 
+   other conditions involving it).
+
+     [I realized that I have to somehow treat "participant" 
+        !w5 (?ka1 (kind1-of.n action1.n))
+     differently, since it only acquires a value later, in context
+        ?e4.2 (?x propose1-to.v ?y ?ka1)
+     and furthermore, varies for each repeat-cycle (though it's always
+     of type '(kind1-of.n action1.n)' ... So at each step, this means
+     "there is some (new) kind of action ?ka1 such that ?x proposes 
+     that kind of action to ?y.  So I've split ":Participants" into 
+     :Fixed-roles & :Var-roles.]
+
+   We should do this with some tolerance for conditions whose certainty
+   is < 1. Maybe increment a mismatch score for a false condition
+   something like 
+     -lg(1-certainty).
+
+2. For conditions that are known by one agent but not the other  
+   (e.g., goals), we should insert a step specifying that the first
+   agent asks the second about it. (That amounts to a grounding step).
+
+3. For other conditions not met by the best match(es), we might insert 
+   an action to achieve them (or get them achieved). For example, if there
+   are no blocks on the table, ?y might ask ?x to provide some blocks
+   perhaps w/an indirect speech act, like "Aren't we going to need some
+   blocks to collaborate? Then ?y needs to monitor the current state
+   for fulfilment of the required condition.
+
+     [Actually, from a third-person perspective of ?x's perspective
+     that's a prediction.]
+   If ?x says no, then the associated certainty (necessity?) would
+   perhaps be set to 0, making its contribution to mismatch error = 0.
+
+4. [Note: The (now deleted) greetings I had in the original schema
+   would come too late -- verification of unknown conditions should 
+   come after greeting. That's all the more reason to trigger
+   greetings separately reactively. We need to "time-share"
+   observation of the current state (including new perceptions
+   and verbal input), verification that the static conditions still 
+   hold, and schema execution, instantiating reactive schemas as 
+   warranted by these checks.]
+
+   So then ?y announces its readiness to help with blocks tasks (?e3).
+
+5. Now we hit the repeat loop for doing a series (?e4) of tasks till
+   ?x terminates it. (I swapped a 'terminate' step should for "?e 
+   is finished", where that's in the *curr-state* as a result of 
+   interpreting and reacting to an input from ?x, saying that we're 
+   done.)
+
+   I think what we do is to split off a single iteration, inserting
+   this just before the repeat loop. [There's a book-keeping issue
+   here -- if we have a value for, e.g., ?e4.2, in the variable 
+   hash table, we don't want to overwrite this on the next cycle.
+   So I think we need to create variants of the variables -- or
+   else have a *list* of values for each variable (a stack)...]
+   
+         Then the first (?x propose1-to.v ?y ?ka1) event will be
+           interpreted. How do we know ?ka1 doesn't stay fixed
+           (unlike the table, and other roles)? Do we need some
+           sort of explicit scoped-existential indicator?
+         Then we need ways of creating a goal representation, etc.

@@ -1,0 +1,52 @@
+May 19/20
+
+Notes on building complex structures out of nonprimitive substructures
+``````````````````````````````````````````````````````````````````````
+
+My starting point is the idea that we can just plug complex objects into
+goal schemas, and the existing code should be able to determine how to build 
+the specified goal structure bottom-up out of the complex constituents.
+
+For example, to build an arch, we could specify
+
+(setq *goal-schema3*
+ ; The goal is an arch consisting of two height-2 red columns and a blue top block:
+ '(rel-schema (red-and-blue-arch ?s)
+   :vars ?x ?y ?z ; a list of vars for the objects to be placed
+   :types (?x column) (?y column) (?z block) 
+   :nonfluent-conds 
+     (red ?x) (red ?y) (blue ?z) (has-height ?x 2) (has-height ?y 2)
+   :static-conds
+     (on ?x table) (on ?y table) (on ?z ?x) (on ?z ?y)
+   :end))
+
+(Note: I'm not worrying at this point about the part-relation between ?s
+and ?x, ?y, ?z)
+
+We would use this at the top level, but for placing multi-block objects,
+we would add a set of steps for constructing these, assuming that we can
+derive schemas for them like
+
+(setq *goal-schema4*
+ ; The goal is a red column of height 2
+ '(rel-schema (column ?c)
+   :vars ?x ?y
+   :types (?x block) (?y block)
+   :nonfluent-conds (red ?x) (red ?y)
+   :static-conds (on ?x ?y)
+   :end))
+
+But we clearly should allow for variables like height, and currently this
+would throw off the planning code -- it takes all the :vars to be stackable
+objects. But we could modify the code so that it only stacks up variables
+for which an appropriate type is specified, such as (block ?x) or 
+(multi-block-objects ?x).
+
+In the nonfluent-conds we should be able to use constraints like 
+  (has-height ?x ?h), (has-height ?y ?h),
+which will force instantiation as equal-height columns. 
+
+But we also want e.g., (> ?h 1), and that requires augmentation of the code
+e.g., for 'constrain-relation' to handle such mathematical constraints, muc
+like the way equality and inequality are currently handled therein.
+
