@@ -297,25 +297,29 @@
   (let ((type-pred (case type (turn #'identity) (question #'ask-prop?) (move #'move-prop?) (otherwise #'identity))))
     (labels
       ; Past direction
-      ((is-apart-type-prev (time-prev n)
+      ((is-apart-type-prev (time-prev m)
         (cond
           ; If reach end
           ((null time-prev) nil)
           ; If all n hops have been taken, see if landed on time1
-          ((<= n 0) (equal time1 time-prev))
+          ((<= m 0) (equal time1 time-prev))
           ; Otherwise, take a hop in the past direction
-          (t (is-apart-type-prev (get-prev-time time-prev)
-            (- n (if (remove-if-not type-pred (gethash time-prev *context*)) 1 0))))))
+          (t
+            (setq m (- m (if (remove-if-not type-pred (gethash time-prev *context*)) 1 0)))
+            (if (<= m 0) (equal time1 time-prev)
+              (is-apart-type-prev (get-prev-time time-prev) m)))))
        ; Future direction
-       (is-apart-type-next (time-next n)
+       (is-apart-type-next (time-next m)
         (cond
           ; If reach end
           ((null time-next) nil)
           ; If all n hops have been taken, see if landed on time1
-          ((<= n 0) (equal time1 time-next))
+          ((<= m 0) (equal time1 time-next))
           ; Otherwise, take a hop in the future direction
-          (t (is-apart-type-next (get-next-time time-next)
-            (- n (if (remove-if-not type-pred (gethash time-next *context*)) 1 0)))))))
+          (t 
+            (setq m (- m (if (remove-if-not type-pred (gethash time-next *context*)) 1 0)))
+              (if (<= m 0) (equal time1 time-next)
+                (is-apart-type-next (get-next-time time-next) m))))))
       (or (is-apart-type-prev time2 n) (is-apart-type-next time2 n))))
 ) ; END is-apart-type
 
