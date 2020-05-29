@@ -4,46 +4,10 @@
 ;; Functions used in answering historical questions
 ;;
 
-; NOW0
-; "Where is the Target block?"
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 1 0 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-; NOW0
-; [ans]
-; *Moves Starbucks, Target blocks*
-; "Where is the Target block?"
-; ((|Target| at-loc.p ($ loc 5 5 1)) (|Starbucks| at-loc.p ($ loc 5 5 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 1 0 0)) (to.p-arg ($ loc 5 5 0)))) (|Target| ((past move.v) (from.p-arg ($ loc 0 0 0)) (to.p-arg ($ loc 5 5 1)))))
-; NOW2
-; [ans]
-; *Moves Target, Twitter blocks*
-; "Where was the Target block before I moved it?"
-; ((|Target| at-loc.p ($ loc 2 0 1)) (|Starbucks| at-loc.p ($ loc 5 5 0)) (|Twitter| at-loc.p ($ loc 5 5 1)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Target| ((past move.v) (from.p-arg ($ loc 5 5 1)) (to.p-arg ($ loc 2 0 1)))) (|Twitter| ((past move.v) (from.p-arg ($ loc 2 0 0)) (to.p-arg ($ loc 5 5 1)))))
-; NOW4
-; [ans]
-
-; "What blocks did I move?"
-; "What blocks did I move since the beginning?"
-; "What block did I just move?"
 
 ; "Where did I move the Texaco block" => "Where was the Texaco block after I moved it"
 
-; '((|Target| at-loc.p ($ loc 2 0 1)) (|Starbucks| at-loc.p ($ loc 5 5 0)) (|Twitter| at-loc.p ($ loc 5 5 1)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0)))
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Target| BLOCK.N)))))))))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (ON.P (THE.D (|Starbucks| BLOCK.N))))))))))) ?)
 
-
-;
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 1 0 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 1 0 0)) (to.p-arg ($ loc 0 2 0))))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-; 
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 1 0 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 2 0 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 1 0 0)) (to.p-arg ($ loc 0 2 0))))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Twitter| ((past move.v) (from.p-arg ($ loc 2 0 0)) (to.p-arg ($ loc 0 4 0)))) )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 2 0)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 4 0 0)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 0 1)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 5 0 1)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))      (|Starbucks| ((past move.v) (from.p-arg ($ loc 0 2 0)) (to.p-arg ($ loc 0 0 1)))) (|McDonalds| ((past move.v) (from.p-arg ($ loc 4 0 0)) (to.p-arg ($ loc 5 0 1))))  )
-; ((|Target| at-loc.p ($ loc 0 0 0)) (|Starbucks| at-loc.p ($ loc 0 0 1)) (|Twitter| at-loc.p ($ loc 0 4 0)) (|Texaco| at-loc.p ($ loc 3 0 0)) (|McDonalds| at-loc.p ($ loc 5 0 1)) (|Mercedes| at-loc.p ($ loc 5 0 0)) (|Toyota| at-loc.p ($ loc 6 0 0)) (|Burger King| at-loc.p ($ loc 7 0 0))  )
-;
 
 
 (defun recall-answer (object-locations ulf)
@@ -134,6 +98,8 @@
     ; Select appropriate function depending on whether it's a where-question, asking about a relation,
     ; asking about an action, or both (e.g. "when did I put the Twitter block on the Starbucks block")
     (cond
+      ((and where-question action)
+        (setq func `(compute-move-relations ,obj)))
       (where-question
         (setq func `(compute-relations ,subj)))
       ((and relation (equal (second relation) '=))
@@ -161,6 +127,7 @@
       (format t "obj: ~a~%" obj)
       (format t "extracted relation: ~a~%" relation)
       (format t "extracted action-verb: ~a~%" action)
+      (format t "using function: ~a~%" func)
       (format t "blocks at coordinates: ~a~%" coords)) ; DEBUGGING
 
     ; Find the times where the function holds (determining the relevant answer propositions),
@@ -195,6 +162,8 @@
         ; Call func using current scene, any moves, result scene, and any special args
         (setq props (if f (apply f (append (list scene moves scene1) args))))
 
+        (format t " > time ~a props: ~a~%" time props) ; DEBUGGING
+
         ; Attach propositions to time and cons to result list
         (setf (get time '@) props)
         (setq times (cons time times)))
@@ -202,14 +171,19 @@
       ; Go to previous time
       (setq time (get-prev-time time)))
 
+    (format t "Times before unary/freq constraints: ~a~%" times) ; DEBUGGING
+
+    ; Remove any times with no props
+    ; NOTE: moved this to before unary/freq constraint pruning... I think that's correct, but will have to double-check.
+    (setq times (remove-if-not (lambda (time) (get time '@)) times))
+
     ; Apply all unary constraints to further constrain times
     (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
 
     ; Apply all frequency constraints phrases to select times which satisfy frequency
     (mapcar (lambda (constraint) (setq times (apply-frequency-constraint constraint times))) constraints-freq)
 
-    ; Remove any times with no props
-    (setq times (remove-if-not (lambda (time) (get time '@)) times))
+    (format t "RESULT TIMES: ~a~%~%" times) ; DEBUGGING
 
   times)
 ) ; END find+constrain-times
@@ -234,6 +208,9 @@
     (cond
       (embedded nil)
       (when-question nil)
+      ((and where-question action (null unary-constraints) (null binary-constraints))
+        (format t "'where did I move' question with underspecified unary constraints: adding 'most recently'~%")
+        (setq adv-e-unary-inferred (cons '(most.mod-a recent.a) adv-e-unary-inferred)))
       ((and where-question (null unary-constraints) (null binary-constraints))
         (format t "where question with underspecified unary & binary constraints: adding 'most recently' and 'before the last move'~%")
         (setq adv-e-unary-inferred (cons '(most.mod-a recent.a) adv-e-unary-inferred))
@@ -384,8 +361,8 @@
 ;
   (let ((obj
     (ttt:apply-rules '(
-      (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1)))))) !)
-      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))))))) !))
+      (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1))) _*))) !)
+      (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1))) _*)))) !))
     ulf)))
   (if (or (np? obj) (nnp? obj) (variable? obj) (restricted-variable? obj)) obj nil))
 ) ; END extract-obj
@@ -698,6 +675,7 @@
 ; Computes all spatial relations that hold at a particular scene, for a particular subject.
 ; NOTE: we assume uniqueness of coords in the scene, or else this will break.
 ; NOTE: we ensure that the top-2 relations returned do not have duplicate objects.
+; TODO: "where wasn't the Twitter block?"
 ;
   ; Find all possible pairs of subject + object in the scene, and check if relation holds
   (let ((relations (form-pred-list scene *spatial-prep-list* scene scene)))
@@ -706,6 +684,23 @@
     ; Filter relations and return the top-2 relations with unique objects
     (last (remove-duplicates (reverse (find-cars-list subj relations)) :key #'third) 2))
 ) ; END compute-relations
+
+
+(defun compute-move-relations (scene moves scene1 obj)
+; ```````````````````````````````````````````````````````
+; Computes all spatial relations that hold at a particular scene immediately following a move of
+; a particular object, if such a move did occur.
+; TODO: "where did I not move the Twitter block?"
+;
+  ; Resolve object to specific names
+  (setq obj (resolve-rel-np! obj scene))
+  ; Only find relations in the case where the object(s) were moved
+  (when (find-cars-list obj moves)
+    ; Find relations in the scene following the move with the block(s) in question as subject(s),
+    ; and return the top-2 relations with unique objects
+    (let ((relations (form-pred-list scene1 *spatial-prep-list* scene1 scene1)))
+      (last (remove-duplicates (reverse (find-cars-list obj relations)) :key #'third) 2)))
+) ; END compute-move-relations
 
 
 (defun compute-move+relation (scene moves scene1 rel obj neg deg-adv)
