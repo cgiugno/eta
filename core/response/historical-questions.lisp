@@ -171,11 +171,11 @@
       ; Go to previous time
       (setq time (get-prev-time time)))
 
-    (format t "Times before unary/freq constraints: ~a~%" times) ; DEBUGGING
-
     ; Remove any times with no props
     ; NOTE: moved this to before unary/freq constraint pruning... I think that's correct, but will have to double-check.
     (setq times (remove-if-not (lambda (time) (get time '@)) times))
+
+    (format t "Times before unary/freq constraints: ~a~%" times) ; DEBUGGING
 
     ; Apply all unary constraints to further constrain times
     (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
