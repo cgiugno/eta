@@ -33,7 +33,7 @@
                   (ESSO '|Esso|)
                   (HEINEKEN '|Heineken|)
                   (HP '|HP |)
-                  (MCDONALDS '|McDonalds|)
+                  (MCDONALDS '|McDonald's|)
                   (MERCEDES '|Mercedes|)
                   (NVIDIA '|NVidia|)
                   (PEPSI '|Pepsi|)
