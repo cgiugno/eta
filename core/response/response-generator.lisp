@@ -270,6 +270,8 @@
       (/ (_*1 not not _*2) (_*1 _*2))
       ; do I not => I do not
       (/ ((tense? do.aux-s) indiv? (not (verb-untensed? _*))) (indiv? ((tense? do.aux-s) not (verb-untensed? _*))))
+      ; not have => have not
+      (/ (not ((tense? aspect?) (verb? _*))) ((tense? aspect?) not (verb? _*)))
       ; pron verb that => that pron verb
       (/ (pron? ((tense? verb?) relative?)) (sub relative? (pron? ((tense? verb?) *h))))
       ; fix adv-e with sentential preposition
