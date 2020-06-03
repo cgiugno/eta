@@ -171,19 +171,22 @@
       ; Go to previous time
       (setq time (get-prev-time time)))
 
-    ; Remove any times with no props
-    ; NOTE: moved this to before unary/freq constraint pruning... I think that's correct, but will have to double-check.
-    (setq times (remove-if-not (lambda (time) (get time '@)) times))
-
-    (format t "Times before unary/freq constraints: ~a~%" times) ; DEBUGGING
-
-    ; Apply all unary constraints to further constrain times
-    (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
+    (format t "Times before applying frequency constraints: ~a~%" times) ; DEBUGGING
 
     ; Apply all frequency constraints phrases to select times which satisfy frequency
     (mapcar (lambda (constraint) (setq times (apply-frequency-constraint constraint times))) constraints-freq)
 
-    (format t "RESULT TIMES: ~a~%~%" times) ; DEBUGGING
+    (format t "Times before applying unary constraints: ~a~%" times) ; DEBUGGING
+
+    ; Apply all unary constraints to further constrain times
+    (mapcar (lambda (constraint) (setq times (apply-unary-constraint constraint times))) constraints-unary)
+
+    (format t "Times before removing times with no props: ~a~%" times) ; DEBUGGING
+
+    ; Remove any times with no props
+    (setq times (remove-if-not (lambda (time) (get time '@)) times))
+
+    (format t "Returning times: ~a~%~%" times) ; DEBUGGING
 
   times)
 ) ; END find+constrain-times
@@ -628,6 +631,7 @@
 ; the certainty is above the threshold (or zero in the case of neg).
 ;
   (let ((certainty (eval-spatial-relation prep coords1 coords2 coords3 deg-adv)))
+    ;; (format t "::(~a ~a ~a) -> ~a~%" prep coords1 coords2 certainty) ; DEBUGGING
     (if neg
       ; If neg, add negated tuple + certainty for all with zero certainty
       (if (and (numberp certainty) (<= certainty 0))
@@ -817,7 +821,9 @@
 ; ````````````````````````````````````````````````````
 ; Applies a frequency constraint (e.g. ALWAYS.A) to a list of times.
 ;
-  (eval-frequency-modifier constraint times)
+  (let ((constraint-eval (ttt:apply-rule `(/ (! adj? (mod-a? adj?))
+          (eval-frequency-modifier 'adj? ',times '(ensure-bound! mod-a?))) constraint :shallow t)))
+    (eval constraint-eval))
 ) ; END apply-frequency-constraint
 
 

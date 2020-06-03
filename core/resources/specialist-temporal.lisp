@@ -848,8 +848,8 @@
 ) ; END template.a
 
 
-(defun eval-frequency-modifier (adj times)
-; ``````````````````````````````````````````
+(defun eval-frequency-modifier (adj times &optional mod-a)
+; ``````````````````````````````````````````````````````````
 ; Applies an adjectival frequency modifier to times (with props attached) to
 ; retrieve a subset of times which have props satisfying the given frequency,
 ; and the props limited to only those props.
@@ -859,54 +859,60 @@
     (cond
       ((or (null times) (not (listp times))) nil)
       ((and (symbolp mod) (fboundp mod))
-        (funcall mod times))
+        (funcall mod times mod-a))
       (t times)))
 ) ; END eval-frequency-modifier
 
 
-(defun always.a (times)
-; ``````````````````````
+(defun always.a (times mod-a)
+; ``````````````````````````````
 ; Select the times & props such that each prop occurs at every time. This is the same
 ; as ensuring that each prop occurs n times, where n is the length of times.
 ;
-  (limit-props-by-freq times (length times))
+  (cond
+    ; recently always
+    ((ttt:match-expr 'temporal-recent-mod-a? mod-a)
+      (let ((recent-times (remove-if-not #'is-recent-now times)))
+        (limit-props-by-freq recent-times (length recent-times))))
+    ; no/unknown mod-a
+    (t (limit-props-by-freq times (length times))))
 ) ; END always.a
 
 
-(defun one-time.a (times)
-; ``````````````````````
+(defun one-time.a (times mod-a)
+; ``````````````````````````````
 ; Select the times & props that occur one time (and no more than once).
 ;
   (limit-props-by-freq times 1)
 ) ; END one-time.a
 
 
-(defun two-time.a (times)
-; ``````````````````````
+(defun two-time.a (times mod-a)
+; ``````````````````````````````
 ; Select the times & props that occur two times (and no more).
 ;
   (limit-props-by-freq times 2)
 ) ; END two-time.a
 
 
-(defun three-time.a (times)
-; ``````````````````````
+(defun three-time.a (times mod-a)
+; ````````````````````````````````
 ; Select the times & props that occur three times (and no more).
 ;
   (limit-props-by-freq times 3)
 ) ; END three-time.a
 
 
-(defun four-time.a (times)
-; ``````````````````````
+(defun four-time.a (times mod-a)
+; `````````````````````````````````
 ; Select the times & props that occur four times (and no more).
 ;
   (limit-props-by-freq times 4)
 ) ; END four-time.a
 
 
-(defun five-time.a (times)
-; ``````````````````````
+(defun five-time.a (times mod-a)
+; `````````````````````````````````
 ; Select the times & props that occur five times (and no more).
 ;
   (limit-props-by-freq times 5)

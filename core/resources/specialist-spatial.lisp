@@ -290,7 +290,7 @@
 ; ````````````````````````````````````````````
   (let ((diffx (- x1 x2)) (diffy (abs (- y1 y2))) (diffz (abs (- z1 z2))))
     (if (<= diffx (* -1 *blocksize*))
-      (exp-decay (dist x1 y1 z1 x2 y2 z2)) 0))
+      (exp-decay (dist x1 y1 z1 x2 y2 z2) :a 0.02) 0))
 ) ; END to_the_left_of.p
 
 
@@ -298,7 +298,7 @@
 ; `````````````````````````````````````````````
   (let ((diffx (- x1 x2)) (diffy (abs (- y1 y2))) (diffz (abs (- z1 z2))))
     (if (>= diffx *blocksize*)
-      (exp-decay (dist x1 y1 z1 x2 y2 z2)) 0))
+      (exp-decay (dist x1 y1 z1 x2 y2 z2) :a 0.02) 0))
 ) ; END to_the_right_of.p
 
 
@@ -306,7 +306,7 @@
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (abs (- y1 y2))) (diffz (- z1 z2)))
     (if (<= diffz (* -1 *blocksize*))
-      (exp-decay (dist x1 y1 z1 x2 y2 z2)) 0))
+      (exp-decay (dist x1 y1 z1 x2 y2 z2) :a 0.02) 0))
 ) ; END below.p
 
 
@@ -314,7 +314,7 @@
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (abs (- y1 y2))) (diffz (- z1 z2)))
     (if (>= diffz *blocksize*)
-      (exp-decay (dist x1 y1 z1 x2 y2 z2)) 0))
+      (exp-decay (dist x1 y1 z1 x2 y2 z2) :a 0.02) 0))
 ) ; END above.p
 
 
@@ -322,7 +322,7 @@
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (- y1 y2)) (diffz (abs (- z1 z2))))
     (if (>= diffy *blocksize*)
-      (exp-decay (dist x1 y1 z1 x2 y2 z2)) 0))
+      (exp-decay (dist x1 y1 z1 x2 y2 z2) :a 0.02) 0))
 ) ; END behind.p
 
 
@@ -330,7 +330,7 @@
 ; `````````````````````````````````````````````
   (let ((diffx (abs (- x1 x2))) (diffy (- y1 y2)) (diffz (abs (- z1 z2))))
     (if (<= diffy (* -1 *blocksize*))
-      (exp-decay (dist x1 y1 z1 x2 y2 z2)) 0))
+      (exp-decay (dist x1 y1 z1 x2 y2 z2) :a 0.02) 0))
 ) ; END in_front_of.p
 
 
