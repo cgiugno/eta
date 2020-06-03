@@ -18,3 +18,5 @@ avatars/test_*
 
 # logs
 logs/*
+logs_out/*
+logs_in/*
