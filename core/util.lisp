@@ -1514,15 +1514,15 @@
           (format outfile "(\"~a\" ~S \"~a\" ~a)~%" (first turn-tuple) (second turn-tuple) (third turn-tuple) (fourth turn-tuple)))
         ; Otherwise, check the new output with the user and prompt them to change feedback
         (t
-          (format t "----------------------------------------------------------~%")
-          (format t "| A CHANGE WAS DETECTED:~%")
-          (format t "| question: ~a~%" (first turn-tuple))
-          (format t "| old answer: ~a~%" answer-old)
-          (format t "| old feedback: ~a~%" (fourth turn-tuple))
-          (format t "| new answer: ~a~%" answer-new)
-          (format t "| new feedback: ")
+          (format t " ----------------------------------------------------------~%")
+          (format t "| A CHANGE WAS DETECTED IN LOG '~a':~%" (pathname-name filename))
+          (format t "| * question: ~a~%" (first turn-tuple))
+          (format t "| * old answer: ~a~%" answer-old)
+          (format t "| * old feedback: ~a~%" (fourth turn-tuple))
+          (format t "| * new answer: ~a~%" answer-new)
+          (format t "| > new feedback: ")
           (finish-output) (setq feedback-new (read-from-string (read-line)))
-          (format t "----------------------------------------------------------~%")
+          (format t " ----------------------------------------------------------~%")
           (if (not (member feedback-new '(C I P F E))) (setq feedback-new 'E))
           (format outfile "(\"~a\" ~S \"~a\" ~a)~%"
             (first turn-tuple) (second turn-tuple) (format nil "~{~a~^ ~}" answer-new) feedback-new)))))
