@@ -1265,6 +1265,20 @@
 
 
 
+(defun read-log-contents (log)
+;```````````````````````````````
+; Reads the contents of a given log file and converts to list.
+;
+  (let (result)
+    (with-open-file (logfile log :if-does-not-exist :create)
+      (do ((l (read-line logfile) (read-line logfile nil 'eof)))
+          ((eq l 'eof) "Reached end of file.")
+        (setq result (cons (read-from-string l) result))))
+    (reverse result))
+) ; END read-log-contents
+
+
+
 (defun write-ulf (ulf)
 ;````````````````````````
 ; Writes a ulf to the file ulf.lisp, so that it can be used
@@ -1330,14 +1344,15 @@
 
 
 
-(defun read-words () 
-;`````````````````````
+(defun read-words (&optional str) 
+;``````````````````````````````````
 ; This is the input reader when ETA is used with argument live =
 ; nil (hence also *live* = nil), i.e., with terminal input rather
 ; than live spoken input.
+; If optional str parameter given, simply read words from str.
 ;
   (finish-output)
-  (parse-chars (coerce (read-line) 'list))
+  (parse-chars (coerce (if str str (read-line)) 'list))
 ) ; END read-words
 
 
@@ -1477,6 +1492,41 @@
     ((listp *next-answer*) (cons (parse-chars (coerce (car *next-answer*) 'list))
                             (cdr *next-answer*))))
 ) ; END get-answer-string
+
+
+
+(defun verify-log (answer-new turn-tuple filename)
+;```````````````````````````````````````````````````
+; Given Eta's answer for a turn, allow the user to compare to the answer in the log
+; and amend the correctness judgment for that turn. Output to the corresponding
+; filename in log_out/ directory.
+;
+  (let ((filename-out (concatenate 'string "logs_out/" (pathname-name filename)))
+        (answer-old (read-words (third turn-tuple))) (feedback-old (fourth turn-tuple)) feedback-new)
+    ;; (format t "/~a~%\\~a~%" answer-old answer-new)
+    (with-open-file (outfile filename-out :direction :output :if-exists :append :if-does-not-exist :create)
+      (cond
+        ; If answer is the same, just output without modification
+        ((equal answer-old answer-new)
+          (format outfile "(\"~a\" ~S \"~a\" ~a)~%" (first turn-tuple) (second turn-tuple) (third turn-tuple) (fourth turn-tuple)))
+        ; If question was marked as non-historical, also skip
+        ((member (fourth turn-tuple) '(XC XI XP XE))
+          (format outfile "(\"~a\" ~S \"~a\" ~a)~%" (first turn-tuple) (second turn-tuple) (third turn-tuple) (fourth turn-tuple)))
+        ; Otherwise, check the new output with the user and prompt them to change feedback
+        (t
+          (format t "----------------------------------------------------------~%")
+          (format t "| A CHANGE WAS DETECTED:~%")
+          (format t "| question: ~a~%" (first turn-tuple))
+          (format t "| old answer: ~a~%" answer-old)
+          (format t "| old feedback: ~a~%" (fourth turn-tuple))
+          (format t "| new answer: ~a~%" answer-new)
+          (format t "| new feedback: ")
+          (finish-output) (setq feedback-new (read-from-string (read-line)))
+          (format t "----------------------------------------------------------~%")
+          (if (not (member feedback-new '(C I P F E))) (setq feedback-new 'E))
+          (format outfile "(\"~a\" ~S \"~a\" ~a)~%"
+            (first turn-tuple) (second turn-tuple) (format nil "~{~a~^ ~}" answer-new) feedback-new)))))
+) ; END verify-log
 
 
 

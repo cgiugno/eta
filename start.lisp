@@ -12,6 +12,9 @@
 ; Overwrites all io files used by Eta with blank files
 ;
   (ensure-directories-exist "./io/")
+  (when *read-log-mode*
+    (ensure-directories-exist "./logs/")
+    (ensure-directories-exist "./logs_out/"))
 
   ; Delete the content of the sessionInfo.lisp file after reading
   (with-open-file (outfile "./io/sessionInfo.lisp" :direction :output :if-exists
@@ -77,14 +80,36 @@
 (load-avatar-files *avatar*)
 
 
-; Run Eta
-;`````````````
-(if *safe-mode*
-  (handler-case (eta *live-mode* *perceptive-mode* *responsive-mode*)
-    (error (c)
-      (error-message "Execution of Eta failed due to an internal error." *live-mode*)
-      (values 0 c)))
-  (eta *live-mode* *perceptive-mode* *responsive-mode*))
+(cond
+
+  ; Run Eta (safe mode)
+  ;`````````````````````````
+  (*safe-mode*
+    (handler-case (eta nil *live-mode* *perceptive-mode* *responsive-mode*)
+      (error (c)
+        (error-message "Execution of Eta failed due to an internal error." *live-mode*)
+        (values 0 c))))
+
+  ; Run Eta (read-log mode)
+  ;`````````````````````````
+  (*read-log-mode*
+    (let ((logs (if (stringp *read-log-mode*)
+                  (directory (concatenate 'string "logs/" *read-log-mode*))
+                  (directory "logs/*"))))
+      ; Create empty log_out file
+      (mapcar (lambda (log)
+        (with-open-file (outfile (pathname (concatenate 'string "logs_out/" (pathname-name log)))
+          :direction :output :if-exists :supersede :if-does-not-exist :create))) logs)
+      ; Start eta using log
+      (mapcar (lambda (log)
+        (format t "==:: READING LOG ~a ::==~%" log)
+        (load "load-eta.lisp")
+        (load-avatar-files *avatar*)
+        (eta log nil t t)) logs)))
+
+  ; Run Eta
+  ;`````````````````````````
+  (t (eta nil *live-mode* *perceptive-mode* *responsive-mode*)))
 
 
 ; Write user gist clauses to file

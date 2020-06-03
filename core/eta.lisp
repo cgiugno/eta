@@ -147,6 +147,16 @@
   ; an infinite loop (e.g. if the plan isn't correctly updated).
   (defparameter *error-check* 0)
 
+  ; If *read-log* is the name of some file (in logs/ directory), read and
+  ; emulate that file, allowing for user corrections and saving them in a file
+  ; of the same name in logs_out/ directory.
+  (defparameter *read-log* nil)
+
+  ; Log contents and pointer corresponding to current position in log.
+  (defparameter *log-contents* nil)
+  (defparameter *log-answer* nil)
+  (defparameter *log-ptr* 0)
+
   ; If *live* = T, operates in "live mode" (intended for avatar
   ; system) with file IO. If *live* = nil, operates in terminal mode.
   (defparameter *live* nil)
@@ -180,8 +190,8 @@
 
 
 
-(defun eta (live perceptive responsive)
-;```````````````````````````````````````
+(defun eta (read-log live perceptive responsive)
+;`````````````````````````````````````````````````
 ; live = t: avatar mode; live = nil: terminal mode
 ; perceptive = t: system awaits information during perceive-world.v action
 ;                      (from command line if in terminal mode)
@@ -193,10 +203,16 @@
 ; formation, gist clause formation, etc.).
 ;
   (init)
+  (setq *read-log* read-log)
   (setq *live* live)
   (setq *perceptive* perceptive)
   (setq *responsive* responsive)
   (setq *count* 0) ; Number of outputs so far
+
+  (when *read-log*
+    (setq *log-contents* (read-log-contents *read-log*))
+    (setq *log-answer* nil)
+    (setq *log-ptr* -1))
 
   ; Create a partially instantiated dialog plan from a schema,
   ; starting with a copy of the schema with the first action variable
@@ -1064,6 +1080,7 @@
         (setq expr (get-single-binding bindings))
         ; Leaving this open in case we want different procedures for different systems
         (cond
+          (*read-log* (setq ans '()))
           ((null *responsive*) (setq ans '()))
           ((null *live*) (setq ans `(quote ,(get-answer-offline))))
           ((eq system '|Blocks-World-System|) (setq ans `(quote ,(get-answer))))
@@ -1087,6 +1104,9 @@
           ((null *responsive*) (setq ans '(Could not form final answer \: not in responsive mode \.)))
           (t (setq ans (generate-response (eval user-ulf) (eval expr)))))
         (format t "answer to output: ~a~%" ans) ; DEBUGGING
+        ; If in read-log mode, append answer to list of new log answers
+        (when *read-log*
+          (setq *log-answer* (modify-response ans)))
         ; Create say-to.v subplan from answer
         (setq new-subplan-name
           (init-plan-from-episode-list
@@ -1167,6 +1187,7 @@
         (setq expr (get-single-binding bindings))
         ; Get perceptions
         (cond
+          (*read-log* (setq perceptions (second (nth *log-ptr* *log-contents*))))
           ((null *perceptive*) (setq perceptions nil))
           ((null *live*) (setq perceptions (get-perceptions-offline)))
           ((eq system '|Blocks-World-System|) (setq perceptions (get-perceptions)))
@@ -1176,7 +1197,7 @@
         (if (or (not perceptions) (not (listp perceptions)) (not (every #'listp perceptions)))
           (setq perceptions nil))
         ; When in terminal mode and perceptive mode, update block coordinates after user gives move and add to perceptions
-        (when (and (null *live*) *perceptive*)
+        (when (or *read-log* (and (null *live*) *perceptive*))
           (setq perceptions (update-block-coordinates (remove-if-not #'verb-phrase? perceptions))))
         ; Substitute quoted perceptions for var in plan
         (nsubst-variable {sub}plan-name `(quote ,perceptions) expr)
@@ -1343,6 +1364,7 @@
         ; first we need the superordinate action
         (setq user-episode-name1 (get {sub}plan-name 'subplan-of))
         ;; (format t "~%User action name1 = ~a" user-episode-name1) ; DEBUGGING
+        ;; (format t "~%User words = ~a" words) ; DEBUGGING
         
         ; Next we find the Eta action name referred to in the wff of the
         ; (nonprimitive) superordinate action; this wff is expected to be of form
@@ -1435,8 +1457,23 @@
       ; Nonprimitive (you reply-to.v <eta action name>) action; we particularize this
       ; action as a subplan, based on reading the user's input
       (t
+        ; If in *read-log* mode, finish processing the previous turn-tuple before moving on
+        (when *read-log*
+          (when (>= *log-ptr* 0)
+            (if (not *log-answer*) (setq *log-answer* '(PARSE FAILURE \.)))
+            (verify-log *log-answer* (nth *log-ptr* *log-contents*) *read-log*)
+            (setq *log-answer* nil))
+          (setq *log-ptr* (1+ *log-ptr*)))
+
         (loop while (not input) do
-          (setq input (if *live* (hear-words) (read-words))))
+          
+          ;; Read user input
+          (setq input (cond
+            (*read-log* (if (>= *log-ptr* (length *log-contents*))
+              (read-words "bye")
+              (read-words (first (nth *log-ptr* *log-contents*)))))
+            (*live* (hear-words))
+            (t (read-words)))))
 
         ;; (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
@@ -2072,7 +2109,6 @@
         (choose-result-for1 tagged-clause parts (get rule-node 'next))))
 
     ;; (format t "~% ***1*** Tagwords = ~a ~%" tagged-clause) ; DEBUGGING
-    ;; (format t tagged-clause)
     ;; (format t "~% =====2==== Pattern/output to be matched in rule ~a = ~
     ;;            ~%  ~a and directive = ~a" rule-node pattern directive) ; DEBUGGING
   
