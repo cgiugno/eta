@@ -10,8 +10,9 @@ io/*
 # package fasl files
 **/*.fasl
 
-# any TODO files
+# any TODO or NOTES files
 **/TODO*
+**/NOTES*
 
 # any test avatars
 avatars/test_*
