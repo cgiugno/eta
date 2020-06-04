@@ -18,69 +18,6 @@
 ;; and responding to presupposition failure using the ulf-pragmatics library.
 ;;
 
-; Example queries:
-; '((SUB (WHAT.D BLOCK.N) ((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P *H)))) ?)
-; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D BLOCK.N) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) (ON.P (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PRES DO.AUX-S) NOT (TOUCH.V (THE.D (|SRI | BLOCK.N))))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PRES BE.V) NOT (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N))))) ?)
-; '(((PRES BE.V) THERE.PRO (A.D BLOCK.N) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
-; '(((PRES BE.V) THERE.PRO (K (PLUR BLOCK.N)) (ON.P (THE.D (|SRI | BLOCK.N)))) ?)
-; '(((PRES DO.AUX-S) (SOME.D BLOCK.N) (TOUCH.V (THE.D (SRI  BLOCK.N)))) ?)
-; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (MOST-N LEFT.A BLOCK.N)) ((PRES BE.V) *H))) ?)
-; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (N+PREDS BLOCK.N (ON.P (THE.D (|Twitter| BLOCK.N))))) ((PRES BE.V) *H))) ?)
-; '((((NQUAN (HOW.MOD-A MANY.A)) (RED.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
-; '(((WHAT.D BLOCK.N) ((PRES BE.V) (BETWEEN.P ((THE.D (|SRI | BLOCK.N)) AND.CC (THE.D (|NVidia| BLOCK.N)))))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|SRI | BLOCK.N)) ((PRES BE.V) *H))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (MOST-N LEFT.A (GREEN.A BLOCK.N))) ((PRES BE.V) *H))) ?)
-; '((WHAT.PRO ((PRES BE.V) (= (THE.D (MOST-N LEFT.A BLOCK.N))))) ?)
-; '((SUB (WHAT.D BLOCK.N) ((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON_TOP_OF.P *H)))) ?)
-; '(((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (TO_THE_LEFT_OF.P (THE.D (|Texaco| BLOCK.N))))) ?)
-; '(((WHAT.D (COLOR.A (PLUR BLOCK.N))) ((PRES BE.V) (ON.P (THE.D TABLE.N)))) ?)
-; '((SUB (OF.P (WHAT.D COLOR.N)) ((THE.D (|Texaco| BLOCK.N)) ((PRES BE.V) *H))) ?)
-; '((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
-; '(((THE.D (NVidia BLOCK.N)) (EVER.ADV-E ((PAST PERF) (TOUCH.V (THE.D (NVidia BLOCK.N)))))) ?)
-; '((SUB (DURING.P (WHAT.D TURN.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|SRI | BLOCK.N)) (ADV-E *H)))) ?)
-; '((SUB (WHAT.D BLOCK.N) ((THE.D (Twitter BLOCK.N)) ((PAST BE.V) INITIALLY.ADV-E (ON.P *H)))) ?)
-; '(((THE.D (|Twitter| BLOCK.N)) ((PRES BE.V) (ON.P (WHICH.D BLOCK.N)))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Twitter| BLOCK.N)))))))))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Twitter|  BLOCK.N)) ((PAST BE.V) *H (ADV-E ((BEFORE.P (THE.D (SECOND.A TURN.N))) AND.CC (AFTER.P (THE.D (THIRD.A TURN.N)))))))) ?)
-; '((SUB (WHAT.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H (ADV-E (DURING.P (THE.D (INITIAL.A (PLUR TURN.N)))))))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (Twitter BLOCK.N)) (ADV-A *H)))) ?)
-; '((SUB (HOW_MANY.D (PLUR BLOCK.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V *H))) ?)
-; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (MOVE.V *H (ADV-E (SUB (TWO.D (PLUR TURN.N)) (AGO.P *H)))))) ?)
-; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))))) ?)
-; '(((THE.D (|Target| BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (ON.P (THE.D (|Starbucks| BLOCK.N)))) (ADV-E (BEFORE.P (KE (I.PRO ((PAST MOVE.V) (THE.D (|Starbucks| BLOCK.N))))))))) ?)
-; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H)))) ?)
-; '((SUB (AT.P (WHAT.D PLACE.N)) ((THE.D (|Target| BLOCK.N)) ((PAST BE.V) *H (ADV-E (BEFORE.P (KE (IT.PRO ((PAST BE.V) (ON.P (THE.D (|Starbucks| BLOCK.N))))))))))) ?)
-; '((SUB (WHAT.D BLOCK.N) ((PAST DO.AUX-S) I.PRO (JUST.ADV-E (MOVE.V *H (ON.P (THE.D (|Twitter| BLOCK.N))))))) ?)
-; '(((PAST DO.AUX-S) (THE.D (|Twitter| BLOCK.N)) (EVER.ADV-E (TOUCH.V (THE.D (|Texaco| BLOCK.N))))) ?)
-; '((SUB (AT.P (WHAT.D TIME.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|Starbucks| BLOCK.N)) (ADV-E *H)))) ?)
-; '(((WHAT.D (PLUR BLOCK.N)) ((PAST BE.V) (EVER.ADV-E (TO_THE_LEFT_OF.P (THE.D (|Twitter| BLOCK.N)))))) ?)
-; '((SUB (OF.P (WHAT.D COLOR.N)) ((SET-OF (THE.D (|Target| BLOCK.N)) (THE.D (|Starbucks| BLOCK.N))) ((PRES BE.V) *H))) ?)
-; '((SUB (AT.P (WHAT.D TIME.N)) ((PAST DO.AUX-S) I.PRO (MOVE.V (THE.D (|Twitter| BLOCK.N)) (ADV-E *H)))) ?)
-;
-; Example relations:
-; '()
-; '(((|Starbucks| on.p |Target|) 0.6))
-; '(((|Starbucks| on.p |Target|) 0.8))
-; '(((|Starbucks| touching.p |Target|) 0.8))
-; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.8))
-; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.8) ((|Texaco| on.p |Target|) 0.8))
-; '(((|Starbucks| on.p |Target|) 0.6) ((|Twitter| on.p |Target|) 0.8))
-; '(((|Starbucks| on.p |Target|) 0.8) ((|Twitter| on.p |Target|) 0.6))
-; '(((|Starbucks| on.p |Target|) 0.6) ((|Twitter| on.p |Target|) 0.6))
-; '(((|Starbucks| on.p |Target|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
-; '(((|Starbucks| on.p |Target|) 0.8) ((|Starbucks| on.p |Twitter|) 0.8))
-; '(((|Target| on.p |Starbucks|) 0.8) ((|Target| on.p |Texaco|) 0.8) ((|Target| near.p |Twitter|) 0.8))
-; '(((|Target| on.p |Starbucks|) 0.8) ((|Target| near.p |Texaco|) 0.8) ((|Target| between.p |Mercedez| |Texaco|) 0.8) ((|Target| between.p |Twitter| |NVidia|) 0.8))
-; '(((|Texaco| on.p |Twitter|) 0.8) ((|Starbucks| near.p |Twitter|) 0.8))
-; '(((|Texaco| (past move.v)) 0.8) ((|Starbucks| (past move.v)) 0.8))
-; '(((|Texaco| ((pres be.v) blue.a)) 0.8))
-; '((NOW1 1.0))
-;
-
 
 (defun generate-response (query-ulf relations)
 ; `````````````````````````````````````````````
@@ -406,14 +343,14 @@
 (defun form-ans-descr (relations)
 ; ```````````````````````````````````
 ; Creates a ULF conjunction of relations describing where the subject is.
-; TODO: function needs cleaning.
 ;
-  (when (equal relations 'None) (return-from conjoin-relations 'None))
-  (make-set (mapcan (lambda (group)
-    (if (and (listp group) (listp (car group)))
-      (mapcan (lambda (rel) (list (list (second rel) (third rel)))) group)
-      (list (list (second group) (third group)))))
-    (mapcar #'condense-by-objs (group-relations relations))))
+; e.g. (form-ans-descr '((|Twitter| on.p |Texaco|) (|Twitter| on.p |McDonald's|) (|Twitter| between.p |Target| |Mercedes|)
+;                        (|Twitter| between.p |Starbucks| |Toyota|)))
+;       => (set-of (between.p (set-of (the.d (|Target| block.n)) (the.d (|Mercedes| block.n))))
+;                  (between.p (set-of (the.d (|Starbucks| block.n)) (the.d (|Toyota| block.n))))
+;                  (on.p (the.d ((set-of |McDonald's| |Texaco|) (plur block.n)))))
+;
+  (make-set (mapcar #'cdr (mapcar #'condense-by-objs (group-relations relations))))
 ) ; END form-ans-descr
 
 
@@ -432,53 +369,12 @@
 ) ; END form-ans-time
 
 
-(defun relations-empty? (relations)
-; ```````````````````````````````````
-; Checks if a list of relations is empty (i.e. an atomic element equal to 'None).
-;
-  (and (symbolp relations) (equal relations 'None))
-) ; END relations-empty?
-
-
-(defun relations-singular? (relations)
-; ````````````````````````````````````
-; Checks if a list of relations only has a singular element.
-;
-  (and (listp relations) (= (length relations) 1))
-) ; END relations-singular?
-
-
-(defun relations-some? (relations)
-; `````````````````````````````````
-; Checks if a list of relations has a few elements (i.e. 5 or less, but greater than one).
-;
-  (and (listp relations) (> (length relations) 1) (<= (length relations) 5))
-) ; END relations-some?
-
-
-(defun relations-many? (relations)
-; `````````````````````````````````
-; Checks if a list of relations has many elements (i.e. more than 5).
-;
-  (and (listp relations) (> (length relations) 5))
-) ; END relations-many?
-
-
 (defun compare-certainty (relation)
 ; ```````````````````````````````````
 ; Compares certainty of relation to the global threshold parameter.
 ;
   (> (second relation) *certainty-threshold*)
 ) ; END compare-certainty
-
-
-(defun filter-relations (relations filter)
-; ``````````````````````````````````````````
-; Given a list of relations, filter so only the specific relations in filter are kept.
-;
-  (let ((filtered (remove-if-not (lambda (rel) (member (second (first rel)) filter)) relations)))
-    (if filtered filtered 'None))
-) ; END filter-relations
 
 
 (defun certain-rels (relations)
@@ -501,20 +397,26 @@
 
 (defun group-relations (relations)
 ; `````````````````````````````````
-; Groups relations into sublists according to predicate.
-; TODO: function needs cleaning.
+; Groups relations into sublists according to predicate using a hash table.
 ;
-  (when (equal relations 'None) (return-from group-relations 'None))
-  (let ((i -1) preps result)
-    (mapcar (lambda (rel)
-      (let ((prep (car (member rel preps :test (lambda (r p) (equal (second rel) (first p)))))))
-        (cond
-          (prep (let* ((n (second prep)) (prev (nth n result)))
-            (setq result (replace-n n result (cons rel prev)))))
-          (t (setq i (1+ i))
-             (setq preps (cons (list (second rel) i) preps))
-             (setq result (append result (list (list rel))))))))
-      relations)
+; e.g. (group-relations '((|Twitter| on.p |Texaco|) (|Twitter| on.p |McDonald's|)
+;                         (|Twitter| near.p |Target|) (|Twitter| to_the_left_of.p |Starbucks|)))
+;       => (((|Twitter| to_the_left_of.p |Starbucks|)) ((|Twitter| near.p |Target|))
+;           ((|Twitter| on.p |McDonald's|) (|Twitter| on.p |Texaco|)))
+;
+  (let ((relation-ht (make-hash-table :test #'equalp)) result)
+    ; Store each relation in hash table under corresponding pred
+    (dolist (rel relations)
+      (if (gethash (second rel) relation-ht)
+        (setf (gethash (second rel) relation-ht) (cons rel (gethash (second rel) relation-ht)))
+        (setf (gethash (second rel) relation-ht) (list rel))))
+    ; Map over each list of props in hash table under each unique pred and cons to result list
+    ; NOTE: if pred is ternary, e.g. BETWEEN.P, group each relation separately
+    (maphash (lambda (pred props) 
+      (if (ternary-spatial-prep-p pred)
+        (mapcar (lambda (rel) (setq result (cons (list rel) result))) props)
+        (setq result (cons props result))))
+      relation-ht)
   result)
 ) ; END group-relations
 
@@ -523,20 +425,43 @@
 ; ```````````````````````````````````
 ; Given a list of relations (assumed to have the same subject and predicate), condense relations into a
 ; single relation with a (set-of ...) object.
-; NOTE: we make an exception for "between" (or any other predicates with more than one object). Certainties
-; are ignored at this point.
+; NOTE: we make an exception for "between" (or any other predicates with more than one object).
 ;
-  (let ((pred (second (car relations))) (subj (first (car relations))) (objs (make-plur-np-obj relations)))
-    (if (equal pred 'BETWEEN.P)
-      (mapcar (lambda (rel)
-        `(,(first rel) ,(second rel) (set-of ,(make-np (third rel) 'block.n) ,(make-np (fourth rel) 'block.n)))) relations)
-     `(,subj ,pred ,objs)))
+; e.g. (condense-by-objs '((|Twitter| on.p |Texaco|) (|Twitter| on.p |Starbucks|)))
+;       => (|Twitter| on.p (the.d ((set-of |Texaco| |Starbucks|) (plur block.n))))
+; e.g. (condense-by-objs '((|Twitter| between.p |Texaco| |Starbucks|)))
+;       => (|Twitter| between.p (set-of (the.d (|Texaco| block.n)) (the.d (|Starbucks| block.n))))
+;
+  (let ((pred (second (car relations)))
+        (subj (first (car relations)))
+        (objs (make-plur-np-obj relations)))
+    (if (ternary-spatial-prep-p pred)
+      ; If ternary predicate, e.g. BETWEEN.P, leave uncondensed but turn objects into sets
+      (car (mapcar #'collapse-ternary-relation relations))
+      ; Otherwise, return new condensed 
+      `(,subj ,pred ,objs)))
 ) ; END condense-by-objs
 
 
+(defun collapse-ternary-relation (relation)
+; ```````````````````````````````````````````
+; Given a ternary relation, collapse the objects to a set.
+; e.g. (collapse-ternary-relation '(|Twitter| between.p |Texaco| |Starbucks|))
+;       => (|Twitter| between.p (set-of (the.d (|Texaco| block.n)) (the.d (|Starbucks| block.n))))
+;
+  (if (ternary-spatial-prep-p (second relation))
+    `(,(first relation) ,(second relation)
+      (set-of ,(make-np (third relation) 'block.n) ,(make-np (fourth relation) 'block.n)))
+    relation)
+) ; END collapse-ternary-relation
+
+
 (defun make-plur-np-obj (relations)
-; ``````````````````````````````````
-; Makes plural np with conjoined object names as modifier
+; ```````````````````````````````````
+; Makes plural np with conjoined object names as modifier.
+;
+; e.g. (make-plur-np-obj '((|Twitter| on.p |Texaco|) (|Twitter| on.p |Starbucks|)))
+;       => (the.d ((set-of |Texaco| |Starbucks|) (plur block.n)))
 ;
   (make-np (make-set (remove-duplicates (remove nil
     (mapcar (lambda (rel) (third rel)) relations)) :test #'equal)) 'block.n)
@@ -547,6 +472,8 @@
 ; ``````````````````````````
 ; Forms a definite noun phrase from a name and type.
 ; e.g. (make-np '|Twitter| 'block.n) => (the.d (|Twitter| block.n))
+; TODO: ultimately the type should come from an object schema, rather than being hard-coded
+; into the response generation.
 ;
   (if (listp name) `(the.d (,name (plur ,type)))
     `(the.d (,name ,type)))

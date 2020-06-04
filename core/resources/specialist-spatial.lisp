@@ -13,6 +13,7 @@
   '(touching.p to_the_left_of.p to_the_right_of.p below.p (under.p below.p) (beneath.p below.p) above.p behind.p
     in_front_of.p on.p (on_top_of.p on.p) near.p (near-to.p near.p) (close-to.p near.p) next_to.p (adjacent_to.p next-to.p)
     between.p))
+(defun ternary-spatial-prep-p (x) (member x '(between.p)))
 
 ; List of supported spatial adjectives
 ; TODO few.a, fewest.a, visible.a, nearby.a, facing.a

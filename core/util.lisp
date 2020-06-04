@@ -251,9 +251,10 @@
 ;``````````````````````````
 ; Check whether a list is a list of propositional answers with associated certainties.
 ;
-  (or (and (listp list) (every (lambda (l) (and (listp l) (= 2 (length l)) (numberp (second l))
-      (or (symbolp (first l)) (and (listp (first l)) (symbolp (car (first l))))))) list))
-    (equal list 'None))
+  (and (listp list) (every (lambda (l)
+      (and (listp l) (= 2 (length l)) (numberp (second l))
+          (or (symbolp (first l)) (and (listp (first l)) (symbolp (car (first l)))))))
+    list))
 ) ; END answer-list?
 
 

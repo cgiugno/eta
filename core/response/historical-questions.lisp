@@ -1,13 +1,31 @@
 ;; Dec 9/19
 ;; ================================================
 ;;
-;; Functions used in answering historical questions
+;; This code is used to compute answer propositions, given a historical query ULF,
+;; a list of currently observed block locations, and a record of actions stored in
+;; Eta's memory.
 ;;
-
-
-; "Where did I move the Texaco block" => "Where was the Texaco block after I moved it"
-
-
+;; The initial function 'recall-answer' serves to process the block coordinates into
+;; a simpler format, as well as categorize the query as a 'when' question or a historical
+;; spatial question. In the case of a 'when' question, the relevant time(s) are returned
+;; as answers, otherwise the relevant spatial relations are returned.
+;;
+;; The 'find-answer-times' function extracts any adv-e or adv-f constituents as unary &
+;; binary constraints, resolving the arguments into specific times in the case of binary
+;; constraints. The function also extracts information about the type of question, subject,
+;; object, pos/neg context, action predicate (if any), and spatial predicate (if any), and
+;; transduces this information into a relevant function call to be used by the temporal
+;; backtracking algorithm.
+;;
+;; The 'find+constrain-times' function implements the temporal backtracking algorithm.
+;; Starting from the current time, given the currently observed block coordinates, the
+;; algorithm reconstructs the previous scene using the block move actions stored in Eta's
+;; memory. For any time not excluded by binary temporal constraints, the relevant function
+;; is called to compute propositions, which are attached to that time. At the end, frequency
+;; constraints (if any) are applied to select a subset of the resulting times, any times with
+;; no remaining facts attached are pruned, and finally unary constraints (if any) are applied
+;; to select a final subset of times.
+;;
 
 
 (defun recall-answer (object-locations ulf)
@@ -45,6 +63,7 @@
 ; ```````````````````````````````````````````````
 ; Given a time (or list of times), check if the time directly after contains a move event, and if so, return
 ; a relation to the (reified) event. Otherwise, simply return the time/list of times.
+; TODO: this function could use some cleaning.
 ;
   (let* ((latest (latest-time times))
          (move-before-answers (find+constrain-times '(compute-move (what.d block.n) nil)
@@ -661,8 +680,8 @@
           (if (not (equal (car coords1) (car coords2)))
             ; Evaluate all prepositions in prep-list
             (mapcan (lambda (prep)
-              ; If between.p, also need to check all possible third blocks
-              (if (equal prep 'between.p)
+              ; If ternary pred, e.g. BETWEEN.P, also need to check all possible third blocks
+              (if (ternary-spatial-prep-p prep)
                 (mapcar (lambda (coords3)
                     (eval-prep-with-certainty prep coords1 coords2 coords3 neg deg-adv))
                   coords-list3)
