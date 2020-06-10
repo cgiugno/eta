@@ -37,12 +37,12 @@
   ; NOTE: Currently using ?ulf rather than ?var, since there is no way to provide
   ; an action name as an argument when a schema is selected during pattern transduction
   ; TODO: Add this functionality and then add ?var back to header
-    :episodes ?a1. (me perceive-world.v |Blocks-World-System| ?ulf ?perceptions)
-              ;; ?a2. (:store-in-context (get-actions.f ?perceptions))
+    :episodes ?e1 (me perceive-world.v |Blocks-World-System| ?ulf ?perceptions)
+              ;; ?e2 (:store-in-context (get-actions.f ?perceptions))
                ; this is where Eta "sees" the blocks world, specifically block movements.
                ; ?perceptions is given as a list of propositions reflecting Eta's perceptions
                ; e.g. locations of blocks (at-loc.p), things that have moved (move.v), etc.
-              ?a3. (me seek-answer-from.v |Blocks-World-System| ?ulf)
+              ?e3 (me seek-answer-from.v |Blocks-World-System| ?ulf)
                ; this would send the ulf (obtained from the properties
                ; of the actual name replacing ?var) to an appropriate
                ; file, monitored by the Spatial-QA-Server; the server
@@ -50,14 +50,14 @@
                ; Currently variable given should be '?ans+alternates if expect
                ; to recieve list of answer and then alternates, or should be given
                ; as '?ans if expect to recieve only answer.
-              ?a4. (me receive-answer-from.v |Blocks-World-System| ?ans-relations)
-              ;; ?a4. (me receive-answer-from.v |Blocks-World-System| ?ans+alternates)
+              ?e4 (me receive-answer-from.v |Blocks-World-System| ?ans-relations)
+              ;; ?e4 (me receive-answer-from.v |Blocks-World-System| ?ans+alternates)
                ; the value of ?ans+alternates would be read off from a file
                ; to which Spatial-QA-Server sends the answer (with weighted
                ; alternates); once ; the answer is read off, the file would
                ; be emptied.
-              ?a5. (me conditionally-say-to.v you ?ulf ?ans-relations)
-              ;; ?a5. (me conditionally-say-to.v you (main-answer.f ?ans+alternates))
+              ?e5 (me conditionally-say-to.v you ?ulf ?ans-relations)
+              ;; ?e5 (me conditionally-say-to.v you (main-answer.f ?ans+alternates))
                ; here ?ans is split off from ?ans+alternates;
                ; "conditionally say to you" would normally expand
                ; into just (me say-to.v you '?ans); but I'm thinking
@@ -66,7 +66,7 @@
                ; weighted possibilities, in which case one might
                ; instantiate a subplan for generating a main answer
                ; but also mention alternates (attached as property
-               ; to ?a4., I suppose).
+               ; to ?e4, I suppose).
 
 )) ; END parameter *reactions-to-spatial-question*
 

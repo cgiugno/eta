@@ -779,7 +779,8 @@
 
 (defun print-context ()
 ;```````````````````````
-; Prints the context (dividing between full propositions, and ones that are stored under some specific key)
+; Prints the context (dividing between full propositions, and ones that
+; are stored under some specific key)
 ;
   (let (l1 l2)
     (maphash (lambda (k v)
@@ -787,8 +788,9 @@
         (setq l2 (cons (list k v) l2)))) *context*)
     (mapcar (lambda (f)
       (format t "~a~%" f)) l1)
+    (format t "~%")
     (mapcar (lambda (f)
-      (format t "~a~%" f)) l2))
+      (format t "~a: ~a~%~%" (first f) (second f))) l2))
 ) ; END print-context
 
 
@@ -1082,32 +1084,34 @@
 
 
 
-(defun new-var! ()
-;```````````````````
-; TTT pred for creating new variable starting with ?x
-  (intern (format nil "?~a" (string (gensym "X"))))
-) ; END new-var!
-
-
-
-(defun action-var ()
+(defun episode-var ()
 ;````````````````````````````
-; Creates an action variable starting with "?A" % with final "."
-  (intern (format nil "?~a." (string (gensym "A"))))
-) ; END action-var
+; Creates an episode variable starting with '?E'.
+;
+  (intern (format nil "?~a." (string (gensym "E"))))
+) ; END episode-var
 
 
 
-(defun action-name ()
-;````````````````````````````
-; Creates an action name starting with "A" % with final "."
-  (intern (format nil "~a." (string (gensym "A"))))
-) ; END action-name
+(defun episode-name (ep-var)
+;``````````````````````````````````
+; Given an episode variable (e.g., '?e1'), generate and return a unique
+; episode name to be substituted in for the variable (e.g., 'EP38').
+;
+  (when (not (char-equal #\? (car (explode ep-var))))
+    (format t "~%***Attempt to form episode name from ~
+               ~%   non-question-mark variable ~a" ep-var)
+    (return-from episode-name nil))
+  (gensym "EP")
+) ; END episode-name
 
 
 
 (defun episode-and-proposition-name (dual-var)
 ;````````````````````````````````````````````````
+; NOTE: function deprecated as of 6/9/2020, after it was decided that we
+; would abandon the proposition variable format (i.e., '?a1.') for the
+; episode schemas. -B.K.
 ; 'dual-var' is normally a variable symbol starting with '?' and ending
 ; in '.'. As such, it actually stands for 2 variables: a reified-
 ; proposition variable (when the period is included) and implicitly,
@@ -1138,19 +1142,19 @@
 
 
 
-(defun get-schema-sections (plan)
-;``````````````````````````````````
-; Gets list of sections of schema, currently forms tuple (types episodes)
-; TODO: Improve reading schemas - store as key-value pairs using class?
+(defun get-schema-sections (schema)
+;```````````````````````````````````
+; Gets a hash table containing each schema section as a key, and the
+; contents of that section as the value.
 ;
-  (let (sections)
-    (dolist (section '(:episodes :types))
-      (let* ((lookup (member section plan))
+  (let ((schema-ht (make-hash-table :test #'equal)))
+    (dolist (section '(:types :rigid-conds :episodes))
+      (let* ((lookup (member section schema))
              (rest (member nil (cdr lookup) :test (lambda (x y) (keywordp y)))))
-        (setq sections
-          (cons (cons (car lookup)
-            (if rest (reverse (set-difference (cdr lookup) rest)) (cdr lookup))) sections))))
-    sections)
+        (when lookup
+          (setf (gethash (car lookup) schema-ht)
+            (if rest (reverse (set-difference (cdr lookup) rest)) (cdr lookup))))))
+    schema-ht)
 ) ; END get-schema-sections
 
 
@@ -1168,7 +1172,7 @@
 
 
 (defun get-episode-vars (plan)
-;`````````````````````````````
+;``````````````````````````````
 ; Form a list of all episode vars (in proposition form) from a plan.
 ;
   (let (var vars)
@@ -1177,7 +1181,7 @@
       ; var, or nil otherwise.
       ((symbolp plan)
         (if (variable? plan)
-          `(,(if (ep-var? plan) (intern (format nil "~a." plan)) plan)) nil))
+          `(,(if (ep-var? plan) (intern (format nil "~a" plan)) plan)) nil))
       ; Recursive case
       (t
         (remove-duplicates
@@ -1216,8 +1220,8 @@
 ;
   (let (new-var schema-name)
     ; Create new variable
-    (setq new-var (intern (format nil "~a." (gentemp
-      (if (prop-var? var)
+    (setq new-var (intern (format nil "~a" (gentemp
+      (if (variable? var)
         (string var)
         (concatenate 'string (string var) "."))))))
     (setq schema-name (get plan-name 'schema-name))
@@ -1394,8 +1398,8 @@
 ;``````````````````````
 ; This waits until it can load a list of block perceptions from "./io/perceptions.lisp".
 ; This should have a list of relations of the following two forms:
-; (|Twitter| at-loc.p ($ loc ?x ?y ?z))
-; (|Toyota| ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
+; ((the.d (|Twitter| block.n)) at-loc.p ($ loc ?x ?y ?z))
+; ((the.d (|Toyota| block.n)) ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
 ;
   (setq *next-perceptions* nil)
   (loop while (not *next-perceptions*) do
