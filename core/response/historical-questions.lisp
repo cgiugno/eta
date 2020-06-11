@@ -796,7 +796,6 @@
   ; and remove all of the blocks which moved during Ti.
   (if neg (setq moves (negate-moves moves)))
   ; Simplify form of relations and filter based on obj
-  (format t "::~a, ~a > ~a~%" moves obj (filter+process-moves moves obj))
   (filter+process-moves moves obj)
 ) ; END compute-move
 
