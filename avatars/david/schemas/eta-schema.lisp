@@ -39,6 +39,16 @@
   !r6 ((the.d (|Mercedes| block.n)) red.a)
   !r7 ((the.d (|Toyota| block.n)) blue.a)
   !r8 ((the.d (|Burger King| block.n)) green.a)
+  ; TODO: the following is temporary until I figure out how to
+  ; instantiate the variables in :types via observation.
+  !r9  ((the.d (|Target| block.n)) block.n)
+  !r10 ((the.d (|Starbucks| block.n)) block.n)
+  !r11 ((the.d (|Twitter| block.n)) block.n)
+  !r12 ((the.d (|Texaco| block.n)) block.n)
+  !r13 ((the.d (|McDonald's| block.n)) block.n)
+  !r14 ((the.d (|Mercedes| block.n)) block.n)
+  !r15 ((the.d (|Toyota| block.n)) block.n)
+  !r16 ((the.d (|Burger King| block.n)) block.n)
 
 
 :episodes 

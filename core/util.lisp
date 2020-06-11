@@ -188,7 +188,7 @@
 ;
   (if (and x (every #'listp list)) (cond
     ((atom x) (remove-if-not (lambda (l) (equal (car l) x)) list))
-    (t (remove-if-not (lambda (l) (member (car l) x)) list))))
+    (t (remove-if-not (lambda (l) (member (car l) x :test #'equal)) list))))
 ) ; END find-cars-list
 
 
@@ -250,10 +250,13 @@
 (defun answer-list? (list)
 ;``````````````````````````
 ; Check whether a list is a list of propositional answers with associated certainties.
+; TODO: needs cleaning
 ;
   (and (listp list) (every (lambda (l)
       (and (listp l) (= 2 (length l)) (numberp (second l))
-          (or (symbolp (first l)) (and (listp (first l)) (symbolp (car (first l)))))))
+          (or (np? (first l)) (symbolp (first l))
+              (and (listp (first l)) (symbolp (car (first l))))
+              (and (listp (first l)) (np? (car (first l)))))))
     list))
 ) ; END answer-list?
 
@@ -1278,8 +1281,8 @@
     (with-open-file (logfile log :if-does-not-exist :create)
       (do ((l (read-line logfile) (read-line logfile nil 'eof)))
           ((eq l 'eof) "Reached end of file.")
-        (setq result (cons (read-from-string l) result))))
-    (reverse result))
+        (setq result (concatenate 'string result " " l))))
+    (read-from-string (concatenate 'string "(" result ")")))
 ) ; END read-log-contents
 
 

@@ -180,8 +180,9 @@
 (defun color-prop? (ulf)
 ; ```````````````````````
 ; Checks if a ULF is a proposition about color.
+; (|Twitter| (red.a block.n))
 ;
-  (and (listp ulf) (= 2 (length ulf)) (listp (second ulf)) (color? (first (second ulf))))
+  (and (listp ulf) (= 2 (length ulf)) (color? (second ulf)))
 ) ; END color-prop?
 
 
@@ -657,7 +658,7 @@
 
 (defun no-type? (ulf)
 ; ````````````````````
-; Checks whether ULF is a symbol with no type, e.g. |NVidia|, |Ben|, etc.
+; Checks whether ULF is a proper name, e.g. |Ben|
 ;
   (and (symbolp ulf) (not (special-op? ulf)) (not (sym-contains ulf #\.)))
 ) ; END no-type?
@@ -1090,7 +1091,7 @@
 
 (defun relation-prop? (prop)
 ; ````````````````````````````
-; Checks whether a proposition is a relation, i.e. (|Twitter| on.p |Texaco|).
+; Checks whether a proposition is a relation, i.e. ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))).
 ;
   (and (listp prop) (or
     (and
@@ -1148,7 +1149,7 @@
 (defun at-loc-prop? (prop)
 ; ```````````````````````````
 ; Checks whether a proposition is an at-loc.p formula.
-; i.e. (|Twitter| at-loc.p ($ loc ?x ?y ?z))
+; i.e. ((the.d (|Twitter| block.n)) at-loc.p ($ loc ?x ?y ?z))
 ;
   (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-loc.p) (loc-record? (third prop)))
 ) ; END at-loc-prop?
@@ -1166,7 +1167,7 @@
 (defun move-prop? (prop)
 ; `````````````````````````
 ; Checks whether a proposition is a move.v formula.
-; i.e. (|Toyota| ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
+; i.e. ((the.d (|Twitter| block.n)) ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
 ;
   (and (listp prop) (= (length prop) 2) (listp (second prop)) (= (length (second prop)) 3)
     (equal (first (second prop)) '(past move.v)) (listp (second (second prop))) (listp (third (second prop)))

@@ -297,8 +297,7 @@
 ; Retrieves objects from a list of relations
 ;
   (make-set (remove-duplicates (remove nil
-    (mapcar (lambda (rel)
-      (make-np (third rel) 'block.n)) relations)) :test #'equal))
+    (mapcar #'third relations)) :test #'equal))
 ) ; END form-ans-obj
 
 
@@ -307,8 +306,7 @@
 ; Retrieves subjects from a list of relations
 ;
   (make-set (remove-duplicates (remove nil
-    (mapcar (lambda (rel)
-      (make-np (first rel) 'block.n)) relations)) :test #'equal))
+    (mapcar #'first relations)) :test #'equal))
 ) ; END form-ans-subj
 
 
@@ -336,7 +334,7 @@
 ;
   (make-set (remove-duplicates (remove nil
     (mapcar (lambda (rel)
-      (make-color-np (first rel) 'block.n)) relations)) :test #'equal))
+      (make-color-np (first rel))) relations)) :test #'equal))
 ) ; END form-ans-color
 
 
@@ -344,8 +342,10 @@
 ; ```````````````````````````````````
 ; Creates a ULF conjunction of relations describing where the subject is.
 ;
-; e.g. (form-ans-descr '((|Twitter| on.p |Texaco|) (|Twitter| on.p |McDonald's|) (|Twitter| between.p |Target| |Mercedes|)
-;                        (|Twitter| between.p |Starbucks| |Toyota|)))
+; e.g. (form-ans-descr '(((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n)))
+;                        ((the.d (|Twitter| block.n)) on.p (the.d (|McDonald's| block.n)))
+;                        ((the.d (|Twitter| block.n)) between.p (the.d (|Target| block.n)) (the.d (|Mercedes| block.n)))
+;                        ((the.d (|Twitter| block.n)) between.p (the.d (|Starbucks| block.n)) (the.d (|Toyota| block.n)))))
 ;       => (set-of (between.p (set-of (the.d (|Target| block.n)) (the.d (|Mercedes| block.n))))
 ;                  (between.p (set-of (the.d (|Starbucks| block.n)) (the.d (|Toyota| block.n))))
 ;                  (on.p (the.d ((set-of |McDonald's| |Texaco|) (plur block.n)))))
@@ -399,10 +399,14 @@
 ; `````````````````````````````````
 ; Groups relations into sublists according to predicate using a hash table.
 ;
-; e.g. (group-relations '((|Twitter| on.p |Texaco|) (|Twitter| on.p |McDonald's|)
-;                         (|Twitter| near.p |Target|) (|Twitter| to_the_left_of.p |Starbucks|)))
-;       => (((|Twitter| to_the_left_of.p |Starbucks|)) ((|Twitter| near.p |Target|))
-;           ((|Twitter| on.p |McDonald's|) (|Twitter| on.p |Texaco|)))
+; e.g. (group-relations '(((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n)))
+;                         ((the.d (|Twitter| block.n)) on.p (the.d (|McDonald's| block.n)))
+;                         ((the.d (|Twitter| block.n)) near.p (the.d (|Target| block.n)))
+;                         ((the.d (|Twitter| block.n)) to_the_left_of.p (the.d (|Starbucks| block.n)))))
+;       => ((((the.d (|Twitter| block.n)) to_the_left_of.p (the.d (|Starbucks| block.n))))
+;           (((the.d (|Twitter| block.n)) near.p (the.d (|Target| block.n))))
+;           (((the.d (|Twitter| block.n)) on.p (the.d (|McDonald's| block.n)))
+;            ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n)))))
 ;
   (let ((relation-ht (make-hash-table :test #'equalp)) result)
     ; Store each relation in hash table under corresponding pred
@@ -427,9 +431,10 @@
 ; single relation with a (set-of ...) object.
 ; NOTE: we make an exception for "between" (or any other predicates with more than one object).
 ;
-; e.g. (condense-by-objs '((|Twitter| on.p |Texaco|) (|Twitter| on.p |Starbucks|)))
+; e.g. (condense-by-objs '(((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n)))
+;                          ((the.d (|Twitter| block.n)) on.p (the.d (|Starbucks| block.n)))))
 ;       => (|Twitter| on.p (the.d ((set-of |Texaco| |Starbucks|) (plur block.n))))
-; e.g. (condense-by-objs '((|Twitter| between.p |Texaco| |Starbucks|)))
+; e.g. (condense-by-objs '(((the.d (|Twitter| block.n)) between.p (the.d (|Texaco| block.n)) (the.d (|Starbucks| block.n)))))
 ;       => (|Twitter| between.p (set-of (the.d (|Texaco| block.n)) (the.d (|Starbucks| block.n))))
 ;
   (let ((pred (second (car relations)))
@@ -446,12 +451,14 @@
 (defun collapse-ternary-relation (relation)
 ; ```````````````````````````````````````````
 ; Given a ternary relation, collapse the objects to a set.
-; e.g. (collapse-ternary-relation '(|Twitter| between.p |Texaco| |Starbucks|))
-;       => (|Twitter| between.p (set-of (the.d (|Texaco| block.n)) (the.d (|Starbucks| block.n))))
+; e.g. (collapse-ternary-relation
+;       '((the.d (|Twitter| block.n)) between.p (the.d (|Texaco| block.n)) (the.d (|Starbucks| block.n))))
+;       => ((the.d (|Twitter| block.n)) between.p (set-of
+;             (the.d ((the.d (|Texaco| block.n)) block.n))
+;             (the.d ((the.d (|Starbucks| block.n)) block.n))))
 ;
   (if (ternary-spatial-prep-p (second relation))
-    `(,(first relation) ,(second relation)
-      (set-of ,(make-np (third relation) 'block.n) ,(make-np (fourth relation) 'block.n)))
+    `(,(first relation) ,(second relation) (set-of ,(third relation) ,(fourth relation)))
     relation)
 ) ; END collapse-ternary-relation
 
@@ -459,35 +466,37 @@
 (defun make-plur-np-obj (relations)
 ; ```````````````````````````````````
 ; Makes plural np with conjoined object names as modifier.
+; TODO: currently assumes that all objects are individuals of the
+; same type with nnp modifiers; this should be made more general in the future.
 ;
-; e.g. (make-plur-np-obj '((|Twitter| on.p |Texaco|) (|Twitter| on.p |Starbucks|)))
+; e.g. (make-plur-np-obj '(((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n)))
+;                          ((the.d (|Twitter| block.n)) on.p (the.d (|Starbucks| block.n)))))
 ;       => (the.d ((set-of |Texaco| |Starbucks|) (plur block.n)))
 ;
-  (make-np (make-set (remove-duplicates (remove nil
-    (mapcar (lambda (rel) (third rel)) relations)) :test #'equal)) 'block.n)
+  (let ((nnps (make-set (remove-duplicates (remove nil (mapcar (lambda (rel) (caadr (third rel))) relations)))))
+        (type (get-head-noun (third (car relations)))))
+    `(the.d (,nnps ,(if (listp nnps) (list 'plur type) type))))
 ) ; END make-plur-np-obj
 
 
-(defun make-np (name type)
+(defun make-color-np (np)
 ; ``````````````````````````
-; Forms a definite noun phrase from a name and type.
-; e.g. (make-np '|Twitter| 'block.n) => (the.d (|Twitter| block.n))
-; TODO: ultimately the type should come from an object schema, rather than being hard-coded
-; into the response generation.
-;
-  (if (listp name) `(the.d (,name (plur ,type)))
-    `(the.d (,name ,type)))
-) ; END make-np
-
-
-(defun make-color-np (name type)
-; ```````````````````````````````
 ; Forms an indefinite noun phrase from a color adjective and type.
-; e.g. (make-color-np '|Twitter| 'block.n) => (a.d (red.a block.n))
+; e.g. (make-color-np '(the.d (|Twitter| block.n))) => (a.d (red.a block.n))
 ;
-  (let ((color (get-color name)))
-    `(a.d (,color block.n)))
+  (let ((color (get-color np)) (type (get-head-noun np)))
+    `(a.d (,color ,type)))
 ) ; END make-color-np
+
+
+(defun get-color (np)
+; `````````````````````
+; Gets the color of a given name.
+; e.g. (get-color '|Twitter|) => red.a
+;
+  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context np)))))
+    (cadr color-prop))
+) ; END get-color
 
 
 ; TTT flags and other preds are defined as follows

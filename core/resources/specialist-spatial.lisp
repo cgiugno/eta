@@ -223,26 +223,6 @@
 ) ; END filter-names
 
 
-(defun get-color (name)
-; ```````````````````````
-; Gets the color of a given name.
-; e.g. (get-color '|Twitter|) => red.a
-;
-  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context name)))))
-    (caadr color-prop))
-) ; END get-color
-
-
-(defun get-type (name)
-; ```````````````````````
-; Gets the type of a given name.
-; e.g. (get-type '|Twitter|) => block.n
-; TODO: can this be relied on if other facts are added and hashed on name?
-;
-  (get-head-noun (car (get-from-context name)))
-) ; END get-type
-
-
 (defun eval-spatial-relation-bool (rel coords1 coords2 coords3 &optional deg-adv)
 ; ``````````````````````````````````````````````````````````````````````````````````
 ; Evaluate whether relation rel holds between an object with centroid at coords1, and

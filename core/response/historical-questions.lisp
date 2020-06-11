@@ -69,11 +69,11 @@
          (move-before-answers (find+constrain-times '(compute-move (what.d block.n) nil)
                                                nil `((just.mod-a (after.p ,latest))) nil scene))
          (moved-before-block (if (and move-before-answers (listp move-before-answers) (get (car move-before-answers) '@))
-            (make-np (caar (get (car move-before-answers) '@)) 'block.n)))
+            (caar (get (car move-before-answers) '@))))
          (move-after-answers (find+constrain-times '(compute-move (what.d block.n) nil)
                                                nil `((just.mod-a (before.p ,latest))) nil scene))
          (moved-after-block (if (and move-after-answers (listp move-after-answers) (get (car move-after-answers) '@))
-            (make-np (caar (get (car move-after-answers) '@)) 'block.n))))
+            (caar (get (car move-after-answers) '@)))))
     ; If next turn has some move action, return a relation to that move, otherwise just return the original time(s).
     (cond
       (moved-before-block
@@ -482,7 +482,7 @@
 ; ````````````````````````````````````````````````````````````
 ; Resolves each constraint in constraints-binary to a simple binary predicate involving a
 ; time individual or set of time individuals.
-; e.g. (before.p (the.d (last.a turn.n))) => (before.p |Now3|)
+; e.g. (before.p (the.d (last.a turn.n))) => (before.p Now3)
 ;
   (mapcar (lambda (constraint)
     (ttt:apply-rules `(
@@ -528,15 +528,16 @@
 ; TODO: this function is rather messy... I'm a bit unsure how to reorganize it, due to the complexity
 ; of some adjectives interacting with temporal postmodifiers, e.g. "the first block I moved". Some things
 ; should just be refactored though.
+; TODO: this function assumes that np's are blocks, which needs to change for generality.
 ;
   (let* ((np-parts (split-np-modifiers ulf)) (premods (first np-parts))
          (postmods (second np-parts)) (noun (third np-parts)) coords-list times)  
 
     ; If we have a definite reference of a specific block, return the name of that block
     (when (nnp? ulf)
-      (return-from resolve-rel-np! (list ulf)))
+      (return-from resolve-rel-np! (list `(the.d (,ulf block.n)))))
     (when (ttt:match-expr '(det? (nnp? noun?)) ulf)
-      (return-from resolve-rel-np! (list (caadr ulf))))
+      (return-from resolve-rel-np! (list ulf)))
 
     ; Select initial names based on postmodifier. If temporal postmodifier, also find list of relevant
     ; times with attached propositions.
@@ -554,7 +555,7 @@
     
     ; Filter by type
     (when noun
-      (setq coords-list (remove-if-not (lambda (c) (equal (get-type (car c)) noun)) coords-list)))
+      (setq coords-list (remove-if-not (lambda (c) (equal (get-head-noun (car c)) noun)) coords-list)))
     
     ; Apply any premods
     (mapcar (lambda (premod)
@@ -795,13 +796,14 @@
   ; and remove all of the blocks which moved during Ti.
   (if neg (setq moves (negate-moves moves)))
   ; Simplify form of relations and filter based on obj
+  (format t "::~a, ~a > ~a~%" moves obj (filter+process-moves moves obj))
   (filter+process-moves moves obj)
 ) ; END compute-move
 
 
 (defun filter+process-moves (moves obj)
 ; ``````````````````````````````````````
-; Filters all moves to ones involving the given object, and processes to form (|Texaco| (past move.v))
+; Filters all moves to ones involving the given object, and processes to form ((the.d (|Texaco| block.n)) (past move.v))
 ;
   (mapcar (lambda (move) `(,(car move) (past move.v))) (find-cars-list obj moves))
 ) ; END filter+process-moves
@@ -810,6 +812,9 @@
 (defun negate-moves (moves)
 ; ``````````````````````````
 ; Given a list of block moves, return the complement of that list by accessing context.
+; TODO: this is a bad approach because (a) it's not general, and (b) it relies on "internal"
+; manipulation of context outside of the schemas. I'm not immediately sure how to generalize
+; it, though.
 ;
   (set-difference (gethash 'block.n *context*) moves
     :test (lambda (x y) (equal (car x) (car y))))
