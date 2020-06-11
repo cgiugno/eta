@@ -14,7 +14,8 @@
   (ensure-directories-exist "./io/")
   (when *read-log-mode*
     (ensure-directories-exist "./logs/")
-    (ensure-directories-exist "./logs_out/"))
+    (ensure-directories-exist "./logs/logs/")
+    (ensure-directories-exist "./logs/logs_out/"))
 
   ; Delete the content of the sessionInfo.lisp file after reading
   (with-open-file (outfile "./io/sessionInfo.lisp" :direction :output :if-exists
@@ -94,11 +95,11 @@
   ;`````````````````````````
   (*read-log-mode*
     (let ((logs (if (stringp *read-log-mode*)
-                  (directory (concatenate 'string "logs/" *read-log-mode*))
-                  (directory "logs/*"))))
+                  (directory (concatenate 'string "logs/logs/" *read-log-mode*))
+                  (directory "logs/logs/*"))))
       ; Create empty log_out file
       (mapcar (lambda (log)
-        (with-open-file (outfile (pathname (concatenate 'string "logs_out/" (pathname-name log)))
+        (with-open-file (outfile (pathname (concatenate 'string "logs/logs_out/" (pathname-name log)))
           :direction :output :if-exists :supersede :if-does-not-exist :create))) logs)
       ; Start eta using log
       (mapcar (lambda (log)

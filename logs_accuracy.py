@@ -70,8 +70,8 @@ def main():
   Calculate the accuracy of the files in logs_out, as well as the accuracy of the files in logs.
   """
 
-  path_logs = 'logs/'
-  path_logs_out = 'logs_out/'
+  path_logs = 'logs/logs/'
+  path_logs_out = 'logs/logs_out/'
   logs = [f for f in listdir(path_logs) if isfile(join(path_logs, f))]
   logs_out = [f for f in listdir(path_logs_out) if isfile(join(path_logs_out, f))]
 

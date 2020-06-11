@@ -1509,7 +1509,7 @@
 ; and amend the correctness judgment for that turn. Output to the corresponding
 ; filename in log_out/ directory.
 ;
-  (let ((filename-out (concatenate 'string "logs_out/" (pathname-name filename)))
+  (let ((filename-out (concatenate 'string "logs/logs_out/" (pathname-name filename)))
         (answer-old (read-words (third turn-tuple))) (feedback-old (fourth turn-tuple)) feedback-new)
     ;; (format t "/~a~%\\~a~%" answer-old answer-new)
     (with-open-file (outfile filename-out :direction :output :if-exists :append :if-does-not-exist :create)

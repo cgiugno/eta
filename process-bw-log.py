@@ -1,24 +1,36 @@
 import sys
 import re
 
-regex = r'(\(from\.p-arg (\(\$ loc -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)?\))\)) (\(to\.p-arg (\(\$ loc -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)?\))\))'
+regex_moves = r'(\(from\.p-arg (\(\$ loc -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)?\))\)) (\(to\.p-arg (\(\$ loc -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)?\))\))'
+regex_names = r'(\|[a-zA-Z\d_\s\']+\|)'
 
 def main():
   """
   Given a filename of a log in the Blocks World output format (relative path from root eta directory), processes the log into a log format
   useable by Eta. Optionally pass '-fixmoves' argument to apply block move fix to old log files where to/from coords were mistakenly switched.
+  The 'fixnames' argument changes shorthand block names (e.g. |Twitter|) to full block noun phrases.
   """
   fixmoves = False
+  fixnames = False
   if len(sys.argv) > 1:
     filename = sys.argv[1]
-    if len(sys.argv) > 2 and sys.argv[2] == '-fixmoves':
-      fixmoves = True
+    if len(sys.argv) > 2:
+      if sys.argv[2] == '-fixmoves':
+        fixmoves = True
+      elif sys.argv[2] == '-fixnames':
+        fixnames = True
+      if len(sys.argv) > 3:
+        if sys.argv[3] == '-fixmoves':
+          fixmoves = True
+        elif sys.argv[3] == '-fixnames':
+          fixnames = True
+
   else:
     print('must give filename')
     exit()
 
   filename_in = filename
-  filename_out = 'logs/' + filename.split('/')[-1]
+  filename_out = 'logs/logs_original' + filename.split('/')[-1]
 
   with open(filename_in,'r') as f_in:
 
@@ -50,7 +62,9 @@ def main():
         # Add block move(s) to turn tuple, fixing move format if flag enabled
         if action == 'BLOCK MOVE':
           if fixmoves:
-            content = re.sub(regex, r'(from.p-arg \7) (to.p-arg \2)', content)
+            content = re.sub(regex_moves, r'(from.p-arg \7) (to.p-arg \2)', content)
+          if fixnames:
+            content = re.sub(regex_names, r'(the.d (\1 block.n))', content)
           turn_tuple[action] = turn_tuple[action] + [content] if action in turn_tuple else [content]
         # Add any other action to turn tuple
         else:
