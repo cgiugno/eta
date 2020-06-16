@@ -359,7 +359,7 @@
 ;
   (let ((utime1 (to-universal-time (get-time-of-episode time1)))
         (utime2 (to-universal-time (get-time-of-episode time2))))
-    (or (< utime1 utime2) (is-prev time1 time2)))
+    (or (< utime1 utime2) (is-prev time1 time2) (is-prev time1 (get-prev-time time2))))
 ) ; END is-before
 
 
@@ -387,7 +387,7 @@
 ;
   (let ((utime1 (to-universal-time (get-time-of-episode time1)))
         (utime2 (to-universal-time (get-time-of-episode time2))))
-    (or (> utime1 utime2) (is-next time1 time2)))
+    (or (> utime1 utime2) (is-next time1 time2) (is-next time1 (get-next-time time2))))
 ) ; END is-after
 
 

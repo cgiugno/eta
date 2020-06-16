@@ -37,6 +37,7 @@ def compute_accuracy(logs):
   """
   c, i, p, e = 0, 0, 0, 0
   xc, xi, xp, xe = 0, 0, 0, 0
+  pf, xpf = 0, 0 # parse failure
 
   for log in logs:
     with open(log,'r') as f:
@@ -57,11 +58,22 @@ def compute_accuracy(logs):
           xp += 1
         elif ' XE)' in line.upper():
           xe += 1
+        
+        if 'PARSE FAILURE' in line.upper() or 'DIDN\'T CATCH WHAT IT WAS' in line.upper():
+          if ' XI)' in line.upper():
+            xpf += 1
+          elif ' I)' in line.upper():
+            pf += 1
   
   acc_hist = c / (c+i+p+e)
   acc_all = (c+xc) / (c+xc+i+xi+p+xp+e+xe)
+  parse_acc_hist = 1 - (pf / (c+i+p+e))
+  parse_acc_all = 1 - ((pf+xpf) / (c+xc+i+xi+p+xp+e+xe))
+  parse_fail_frac_hist = pf / i
+  parse_fail_frac_all = pf / (i+xi)
 
-  return acc_hist, acc_all
+  return [c,i,p,e,xc,xi,xp,xe,((c+i+p+e)-pf),((c+xc+i+xi+p+xp+e+xe)-xpf)], \
+    acc_hist, acc_all, parse_acc_hist, parse_acc_all, parse_fail_frac_hist, parse_fail_frac_all
 
 
 
@@ -89,20 +101,41 @@ def main():
 
   # Get accuracies of each source
   for source in logs_grouped:
-    acc_logs_source_hist, acc_logs_source_all = compute_accuracy(logs_grouped[source])
+    _, acc_logs_source_hist, acc_logs_source_all, _, _, _, _ = compute_accuracy(logs_grouped[source])
     print('Accuracy of initial logs (%s): %.2f (hist), %.2f (all)' % (source, acc_logs_source_hist, acc_logs_source_all))
   
   for source in logs_out_grouped:
-    acc_logs_out_source_hist, acc_logs_out_source_all = compute_accuracy(logs_out_grouped[source])
+    _, acc_logs_out_source_hist, acc_logs_out_source_all, _, _, _, _ = compute_accuracy(logs_out_grouped[source])
     print('Accuracy of final logs (%s): %.2f (hist), %.2f (all)' % (source, acc_logs_out_source_hist, acc_logs_out_source_all))
 
   print('----------------------------------------------------------------')
 
   # Get overall accuracies
-  acc_logs_hist, acc_logs_all = compute_accuracy(logs)
-  acc_logs_out_hist, acc_logs_out_all = compute_accuracy(logs_out)
+  stats_logs, acc_logs_hist, acc_logs_all, parse_acc_logs_hist, parse_acc_logs_all, parse_fail_frac_logs_hist, \
+    parse_fail_frac_logs_all = compute_accuracy(logs)
+  stats_logs_out, acc_logs_out_hist, acc_logs_out_all, parse_acc_logs_out_hist, parse_acc_logs_out_all, \
+    parse_fail_frac_logs_out_hist, parse_fail_frac_logs_out_all = compute_accuracy(logs_out)
   print('Accuracy of initial logs: %.2f (hist), %.2f (all)' % (acc_logs_hist, acc_logs_all))
   print('Accuracy of final logs: %.2f (hist), %.2f (all)' % (acc_logs_out_hist, acc_logs_out_all))
+
+  print('Parsing accuracy of initial logs: %.2f (hist), %.2f (all)' % (parse_acc_logs_hist, parse_acc_logs_all))
+  print('Parsing accuracy of final logs: %.2f (hist), %.2f (all)' % (parse_acc_logs_out_hist, parse_acc_logs_out_all))
+
+  print('Fraction of errors due to parsing in initial logs: %.2f (hist), %.2f (all)' % (parse_fail_frac_logs_hist, parse_fail_frac_logs_all))
+  print('Fraction of errors due to parsing in final logs: %.2f (hist), %.2f (all)' % (parse_fail_frac_logs_out_hist, parse_fail_frac_logs_out_all))
+
+  print('----------------------------------------------------------------')
+
+  # Get final stats for paper
+  c,i,p,e,xc,xi,xp,xe,pf,xpf = stats_logs_out
+  total = (c+i+p+e+xc+xi+xp+xe)
+  total_hist = (c+i+p+e)
+  print('Total # of questions questions: %s' % total)
+  print('Total # of historical questions: %s' % total_hist)
+  print('Correct #: %s (%.2f of %s)' % (c, (c / total_hist), total_hist))
+  print('Partially correct #: %s (%.2f of %s)' % (p, (p / total_hist), total_hist))
+  print('Incorrect #: %s (%.2f of %s)' % (i+e, ((i+e) / total_hist), total_hist))
+  print('Correctly parsed #: %s (%.2f of %s)' % (pf, (pf / total_hist), total_hist))
 
 
 
