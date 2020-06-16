@@ -1620,9 +1620,6 @@
     ; :exists condition satisfied if the formula of the condition exists (i.e. is non-nil)
     ((and (listp cond) (equal (car cond) :exists))
       (not (null (second cond))))
-    ; :context condition satisfied if the formula of the condition is made true by context
-    ((and (listp cond) (equal (car cond) :context))
-      (contextual-truth-value (second cond)))
     ; :not condition satisfied if the rest of the condition is not true
     ((and (listp cond) (equal (car cond) :not))
       (not (eval-truth-value (second cond))))
@@ -1632,6 +1629,9 @@
     ; :or condition satisfied if some part of the condition is true
     ((and (listp cond) (equal (car cond) :or))
       (some #'eval-truth-value (cdr cond)))
+    ; Otherwise, check context for truth of proposition (assuming a CWA)
+    (t
+      (contextual-truth-value cond))
 )) ; END eval-truth-value
 
 

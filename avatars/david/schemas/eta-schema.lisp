@@ -64,7 +64,7 @@
 
 
 ; Repeat prompting the user for a spatial question until finished.
-?e5 (:repeat-until (:context (?e5 finished2.a))
+?e5 (:repeat-until (?e5 finished2.a)
 
     ; Prompt the user for a spatial question.
     ?e7 (~me say-to.v ~you
@@ -82,7 +82,7 @@
         ; If user makes 'pause' special request, repeat listening to the user for a request to resume.
         ((:equal (ulf-of.f ?e8) (PAUSE.GR))
         ?e12 (~me react-to.v ?e8)
-        ?e13 (:repeat-until (:context (?e13 finished2.a))
+        ?e13 (:repeat-until (?e13 finished2.a)
 
             ; Empty say-to act, carries (implied) meaning "do you want to resume?". Not ideal, but currently
             ; necessary to give the user something to reply to.
