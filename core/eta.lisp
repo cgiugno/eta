@@ -786,16 +786,6 @@
     ; action, and to form the subsequent action accordingly.
     (cond
 
-      ;`````````````````````````
-      ; Eta: Storing in context
-      ;`````````````````````````
-      ; Storing a given wff expression in context
-      ((setq bindings (bindings-from-ttt-match '(:store-in-context _+) wff))
-        (setq expr (get-multiple-bindings bindings))
-        ; Store each formula in context
-        (store-in-context expr)
-        (delete-current-episode {sub}plan-name))
-
       ;`````````````````````
       ; Eta: Choosing
       ;`````````````````````
@@ -1195,6 +1185,20 @@
         (delete-current-episode {sub}plan-name)
       )
 
+      ;`````````````````````````
+      ; Eta: Committing to STM
+      ;`````````````````````````
+      ; Storing a given wff expression in short-term memory (context)
+      ; TODO: currently this action takes a single (reified) fact, e.g.,
+      ; (~me commit-to-STM.v (that ((the.d (|Twitter| block.n)) blue.a))).
+      ; In the future, it seems like it should be able to support a conjunction
+      ; of facts using 'and', rather than having to have many separate actions for each.
+      ((setq bindings (bindings-from-ttt-match '(~me commit-to-STM.v (that _!)) wff))
+        (setq expr (get-single-binding bindings))
+        ; Store each formula in context
+        (store-in-context expr)
+        (delete-current-episode {sub}plan-name))
+
       ;````````````````````````````
       ; Eta: Initiating Subschema
       ;````````````````````````````
@@ -1575,19 +1579,15 @@
 
 
 
-(defun store-in-context (wffs)
+(defun store-in-context (wff)
 ;```````````````````````````````
-; Stores a given list of wffs in context.
+; Stores a wff in context.
 ; TODO: improve context - different types of facts (static & temporal), list of discourse entities, etc.
 ; Use hash tables?
 ;
-  ; Get facts by evaluating each wff (which may have formulas)
-  (let ((facts (mapcar (lambda (wff)
-          (if (equal (car wff) 'quote) (eval wff) (eval-functions wff))) wffs)))
-    ; Store each fact in context, hashing on the subject of the fact (first element) as well
-    (mapcar (lambda (fact)
-      (let ((keys (list (car fact))))
-        (store-fact fact *context* :keys keys))) facts))
+  ; Get fact (which may be quoted, or may have formulas) and store in context.
+  (let ((fact (if (equal (car wff) 'quote) (eval wff) (eval-functions wff))))
+    (store-fact fact *context* :keys (list (car fact))))
 ) ; END store-in-context
 
 

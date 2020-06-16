@@ -73,11 +73,10 @@
     ; User replies with either spatial question, special request, or smalltalk.
     ?e8 (~you reply-to.v ?e7)
 
-    ; If user makes 'goodbye' special request, store the fact that ?e5 is finished.
     ?e9 (:if
+        ; If user makes 'goodbye' special request, store the fact that ?e5 is finished.
         ((:equal (ulf-of.f ?e8) (GOODBYE.GR))
-        ;; ?e11 (~me commit-to-STM.v (that (?e5 finished2.a)))
-        ?e11 (:store-in-context '(?e5 finished2.a))
+        ?e11 (~me commit-to-STM.v (that (?e5 finished2.a)))
         ?e12 (~me react-to.v ?e8))
 
         ; If user makes 'pause' special request, repeat listening to the user for a request to resume.
@@ -95,18 +94,19 @@
             ; If user makes 'resume' special request, store the fact that ?e12 is finished.
             ?e16 (:if
                 ((:equal (ulf-of.f ?e15) (RESUME.GR))
-                ?e17 (:store-in-context '(?e13 finished2.a))
+                ?e17 (~me commit-to-STM.v (that (?e13 finished2.a)))
                 ?e18 (~me react-to.v ?e15))
 
                 ; If user makes 'goodbye' special request, store the fact that both ?e5 and ?e12 are finished.
                 ((:equal (ulf-of.f ?e15) (GOODBYE.GR))
-                ?e17 (:store-in-context '(?e13 finished2.a) '(?e5 finished2.a))
-                ?e18 (~me react-to.v ?e15))))))
+                ?e17 (~me commit-to-STM.v (that (?e5 finished2.a)))
+                ?e18 (~me commit-to-STM.v (that (?e13 finished2.a)))
+                ?e19 (~me react-to.v ?e15))))))
 
   ; React to the user's input (but stay silent if they made a special request)
-  ?e19 (:if
+  ?e20 (:if
        ((:not (:or (:equal (ulf-of.f ?e8) (PAUSE.GR)) (:equal (ulf-of.f ?e8) (GOODBYE.GR))))
-        ?e20 (~me react-to.v ?e8))))
+        ?e21 (~me react-to.v ?e8))))
 
 )) ; END defparameter *eta-schema*
 
