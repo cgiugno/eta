@@ -815,7 +815,7 @@
 ;
   (unless no-self (setf (gethash fact ht) t))
   (mapcar (lambda (key)
-    (setf (gethash key ht) (append (gethash key ht) (list fact)))) keys)
+    (setf (gethash key ht) (remove-duplicates (append (gethash key ht) (list fact)) :test #'equal))) keys)
 ) ; END store-fact
 
 
@@ -1164,12 +1164,12 @@
 
 (defun create-say-to-wff (content &key reverse)
 ;```````````````````````````````````````````````
-; Creates and returns a wff consisting of a (me say-to.v you '(...))
-; action, or a (you say-to.v me '(...)) action if :reverse t is given.
+; Creates and returns a wff consisting of a (~me say-to.v ~you '(...))
+; action, or a (~you say-to.v ~me '(...)) action if :reverse t is given.
 ;
   (if (not reverse)
-    `(me say-to.v you (quote ,(modify-response content)))
-    `(you say-to.v me (quote ,content)))
+    `(~me say-to.v ~you (quote ,(modify-response content)))
+    `(~you say-to.v ~me (quote ,content)))
 ) ; END create-say-to-wff
 
 

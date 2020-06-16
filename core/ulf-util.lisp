@@ -1089,6 +1089,14 @@
 ) ; END copulative?
 
 
+(defun equal-prop? (prop)
+; `````````````````````````
+; Checks whether a proposition is an equality predicate, i.e.
+; ((the.d (|Twitter| block.n)) = (the.d (|Twitter| block.n))).
+  (and (listp prop) (= 3 (length prop)) (equal '= (second prop)))
+) ; END equal-prop?
+
+
 (defun relation-prop? (prop)
 ; ````````````````````````````
 ; Checks whether a proposition is a relation, i.e. ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))).
