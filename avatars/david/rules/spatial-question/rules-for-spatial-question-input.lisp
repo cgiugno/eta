@@ -14,7 +14,7 @@
     (spatial-verb be modal wh_ do)
     (spatial-ending noun adj there directions ana-pron prep conj-prep facing
       adv-hist-word prep-history-adj verb-rel that this those corp)
-    (spatial-word noun ana-pron supporting corp adj
+    (spatial-word noun-bw ana-pron supporting corp adj
       uppermost under close touching farthest rotated)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
     (kinds types sorts kind type sort formats format)
