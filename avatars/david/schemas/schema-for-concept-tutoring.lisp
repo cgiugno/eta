@@ -140,16 +140,16 @@
     ; is, etc.
 
     ; Either (4a) next step found successfully, or (4b) failure to do so.
-    ?e4 (:if
+    ?e4 (:cond
 
         ; (4a)
         ((:in-context ((pair ~me ?e3) successful.a))
-        ; LKS: Again, I think (:if ((pair ~me ?e3) successful.a) ...) should
+        ; LKS: Again, I think (:cond ((pair ~me ?e3) successful.a) ...) should
         ; suffice.
 
           ; Either (5a) goal structure has been reached, or (5b) goal structure
           ; not yet reached.
-          ?e5 (:if
+          ?e5 (:cond
 
             ; (5a)
             (?ka1 = (ka (do2.v nothing.pro))); tentatively changed from (:equal ...)
@@ -205,7 +205,7 @@
                 ; Either (11a) user accepts proposal, (11b) user rejects
                 ; proposal, (11c) makes a termination ; request, or (11d) asks 
                 ; some query.
-                ?e11 (:if
+                ?e11 (:cond
 
                   ; (11a)
                   ((:equal ?ulf '(YES.YN))

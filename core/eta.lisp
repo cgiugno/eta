@@ -789,9 +789,9 @@
       ;`````````````````````
       ; Eta: Choosing
       ;`````````````````````
-      ; if-statements, potentially other conditionals in the future.
+      ; cond statement, potentially other types of conditionals in the future.
       ; bindings yields ((_+ (cond1 name1.1 wff1.1 name1.2 wff1.2 ... cond2 name2.1 wff2.1 name2.2 wff2.2 ...)))
-      ((setq bindings (bindings-from-ttt-match '(:if _+) wff))
+      ((setq bindings (bindings-from-ttt-match '(:cond _+) wff))
         (setq expr (get-multiple-bindings bindings))
         ; Generate a subplan for the 1st action-wff with a true condition:
         (setq new-subplan-name (plan-cond {sub}plan-name expr))
@@ -1594,44 +1594,31 @@
 
 
 
-(defun contextual-truth-value (wff)
-;`````````````````````````````````````
-; Finds whether a given wff is made true by the context.
-; TODO: see store-in-context note.
-;
-  (get-from-context wff)
-) ; END contextual-truth-value
-
-
-
-
-
-(defun eval-truth-value (cond)
+(defun eval-truth-value (wff)
 ;```````````````````````````````
 ; Evaluates the truth of a conditional schema action.
+; This assumes a CWA, i.e., if something is not found in
+; context, it is assumed to be false.
 ;
   (cond
     ; :default condition is always satisfied
-    ((and (symbolp cond) (equal cond :default))
-      t)
-    ; :equal condition satisfied if the two formulas of the condition are equivalent
-    ((and (listp cond) (equal (car cond) :equal))
-      (equal (second cond) (third cond)))
-    ; :exists condition satisfied if the formula of the condition exists (i.e. is non-nil)
-    ((and (listp cond) (equal (car cond) :exists))
-      (not (null (second cond))))
-    ; :not condition satisfied if the rest of the condition is not true
-    ((and (listp cond) (equal (car cond) :not))
-      (not (eval-truth-value (second cond))))
-    ; :and condition satisfied if every part of the condition is true
-    ((and (listp cond) (equal (car cond) :and))
-      (every #'eval-truth-value (cdr cond)))
-    ; :or condition satisfied if some part of the condition is true
-    ((and (listp cond) (equal (car cond) :or))
-      (some #'eval-truth-value (cdr cond)))
-    ; Otherwise, check context for truth of proposition (assuming a CWA)
-    (t
-      (contextual-truth-value cond))
+    ((equal wff :default) t)
+    ; (wff1 = wff2)
+    ((equal-prop? wff)
+      (equal (first wff) (third wff)))
+    ; (not wff1)
+    ((not-prop? wff)
+      (not (eval-truth-value (second wff))))
+    ; (wff1 and wff2)
+    ((and-prop? wff)
+      (and (eval-truth-value (first wff))
+           (eval-truth-value (third wff))))
+    ; (wff1 or wff2)
+    ((or-prop? wff)
+      (or  (eval-truth-value (first wff))
+           (eval-truth-value (third wff))))
+    ; Otherwise, check to see if wff is true in context
+    (t (get-from-context wff))
 )) ; END eval-truth-value
 
 

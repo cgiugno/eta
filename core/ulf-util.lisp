@@ -1091,10 +1091,38 @@
 
 (defun equal-prop? (prop)
 ; `````````````````````````
-; Checks whether a proposition is an equality predicate, i.e.
+; Checks whether a proposition is an equality predicate, i.e.,
 ; ((the.d (|Twitter| block.n)) = (the.d (|Twitter| block.n))).
+;
   (and (listp prop) (= 3 (length prop)) (equal '= (second prop)))
 ) ; END equal-prop?
+
+
+(defun and-prop? (prop)
+; ```````````````````````
+; Checks whether a proposition is a conjunction, i.e.,
+; (((the.d (|Twitter| block.n)) red.a) and ((the.d (|Texaco| block.n)) blue.a)).
+;
+  (and (listp prop) (= 3 (length prop)) (equal 'and (second prop)))
+) ; END and-prop?
+
+
+(defun or-prop? (prop)
+; ```````````````````````
+; Checks whether a proposition is a disjunction, i.e.,
+; (((the.d (|Twitter| block.n)) red.a) or ((the.d (|Texaco| block.n)) blue.a)).
+;
+  (and (listp prop) (= 3 (length prop)) (equal 'or (second prop)))
+) ; END or-prop?
+
+
+(defun not-prop? (prop)
+; ``````````````````````
+; Checks whether a proposition is negated, i,e.,
+; (not ((the.d (|Twitter| block.n)) red.a))
+;
+  (and (listp prop) (= 2 (length prop)) (equal 'not (car prop)))
+) ; END not-prop?
 
 
 (defun relation-prop? (prop)
