@@ -787,7 +787,7 @@
     (cond
 
       ;`````````````````````
-      ; Eta: Choosing
+      ; Plan: Conditional
       ;`````````````````````
       ; cond statement, potentially other types of conditionals in the future.
       ; bindings yields ((_+ (cond1 name1.1 wff1.1 name1.2 wff1.2 ... cond2 name2.1 wff2.1 name2.2 wff2.2 ...)))
@@ -803,7 +803,7 @@
           (t (delete-current-episode {sub}plan-name))))
 
       ;`````````````````````
-      ; Eta: Looping
+      ; Plan: Looping
       ;`````````````````````
       ; repeat-until, potentially other forms of loops in the future.
       ; bindings yields ((_+ (ep-var cond name1 wff1 ...)))
@@ -821,6 +821,24 @@
           ; If nil, the stop condition holds, so we drop the loop by associating wff0
           ; with 'ep-name', and updating the plan.
           (t (delete-current-episode {sub}plan-name))))
+
+      ;````````````````````````````````
+      ; Plan: Subschema Instantiation
+      ;````````````````````````````````
+      ; instantiation of any subschema involving both participants.
+      ((setq bindings (bindings-from-ttt-match '((! (set-of ~me ~you) (set-of ~you ~me))
+                                                  schema-header? (? _*)) wff))
+        (setq bindings (cdr bindings))
+        (setq args-list (get-multiple-bindings bindings))
+        ; Before instantiating the schema, check whether the episode is an obviated action
+        (when (not (null (obviated-action ep-name)))
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (setq new-subplan-name (gensym "SUBPLAN"))
+        ; Instantiate schema from schema name
+        ; TODO: allow for schema arguments
+        (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
+        (add-subplan {sub}plan-name new-subplan-name))
       
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
@@ -1301,7 +1319,7 @@
 ; utterance. (In future the 'interpretation' property is to be used.)
 ; 
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (user-ep-name (car rest))
-        (wff (second rest)) bindings words user-ep-name1 wff1 eta-ep-name
+        (wff (second rest)) bindings words expr user-ep-name1 wff1 wff1-arg eta-ep-name
         eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input)
 
     ;; (format t "~%WFF = ~a,~%      in the user action ~a being ~
@@ -1312,17 +1330,37 @@
       ;`````````````````````
       ; User: Saying
       ;`````````````````````
-      ; We deal with primitive say-actions first (previously created from
-      ; (~you reply-to.v <eta action>)) based on reading the user's input:
+      ; A say-to.v act may be primitive, having a '?words' variable as its argument,
+      ; or may have been created from a (~you reply-to.v <eta action>)) based on reading
+      ; the user's input:
       ((setq bindings (bindings-from-ttt-match '(~you say-to.v ~me _!) wff))
-        (setq words (get-single-binding bindings))
-        ; Anything but a quoted word list is unexpected:
-        (when (not (eq (car words) 'quote))
-          (format t "~%*** SAY-ACTION ~a~%    BY THE USER ~
-                    SHOULD SPECIFY A QUOTED WORD LIST" words)
-          (return-from observe-next-user-action nil))
-        ; Drop the quote
-        (setq words (decompress (second words)))
+        (setq expr (get-single-binding bindings))
+
+        (cond
+          ; if say-to.v act has a variable argument, e.g. '?words', it should read the user's
+          ; words, and destructively substitute these words in for the variable in the plan.
+          ((variable? expr)
+            (loop while (not input) do
+              (setq input (cond
+                (*read-log* (if (>= *log-ptr* (length *log-contents*))
+                  (read-words "bye")
+                  (read-words (first (nth *log-ptr* *log-contents*)))))
+                (*live* (hear-words))
+                (t (read-words)))))
+            (setq words (decompress input))
+            (nsubst-variable {sub}plan-name `(quote ,input) expr))
+
+          ; if say-to.v act has a quoted word list argument, e.g., '(nice to meet you \.)',
+          ; it should unquote and decompress the words.
+          ((quoted-sentence? expr)
+            (setq words (decompress (second expr))))
+
+          ; anything else is unexpected
+          (t
+            (format t "~%*** SAY-ACTION ~a~%    BY THE USER ~
+                       SHOULD SPECIFY A QUOTED WORD LIST OR VARIABLE" expr)
+            (return-from observe-next-user-action nil)))
+
         ; Prepare to "interpret" 'words', using the Eta output it is a response to;
         ; first we need the superordinate action
         (setq user-ep-name1 (get {sub}plan-name 'subplan-of))
@@ -1330,24 +1368,25 @@
         ;; (format t "~%User words = ~a" words) ; DEBUGGING
         
         ; Next we find the Eta action name referred to in the wff of the
-        ; (nonprimitive) superordinate action; this wff is expected to be of form
-        ; (~you reply-to.v <eta action>).
+        ; (nonprimitive) superordinate action (if such a superordinate action
+        ; exists); this wff is expected to be of form (~you reply-to.v <eta action>).
+        ; Also retrieve the item in the final argument position (if it exists).
         (setq wff1 (get user-ep-name1 'wff))
+        (setq wff1-arg (car (last wff1)))
         ;; (format t "~%User WFF1 = ~a, if correct,~%            ~
         ;;           ends in a ETA action name" wff1) ; DEBUGGING
         
         (cond
-          ; If replying to specific gist clauses
-          ((quoted-sentence-list? (car (last wff1)))
-            (setq eta-clauses (eval (car (last wff1)))))
-          ; If replying to an action which has gist clauses associated
-          (t
-            (setq eta-ep-name (car (last wff1)))
-            (when (not (symbolp eta-ep-name))
-              (format t "~%***UNEXPECTED USER ACTION ~A" wff)
-              (return-from observe-next-user-action nil))
-            ; Next, the "interpretation" (gist clauses) of the Eta action:
-            (setq eta-clauses (get eta-ep-name 'gist-clauses))))
+          ; If the superordinate reply-to.v action has specific gist clause(s)
+          ((quoted-sentence-list? wff1-arg)
+            (setq eta-clauses (eval wff1-arg)))
+          ; If the superordinate reply-to.v action has an episode with gist clause(s) associated
+          ((symbolp wff1-arg)
+            (setq eta-ep-name wff1-arg)
+            (setq eta-clauses (get eta-ep-name 'gist-clauses)))
+          ; Otherwise, assume there is no superordinate action, set gist clauses to nil
+          (t (setq eta-clauses nil)))
+
         ;; (format t "~%ETA action name is ~a" eta-ep-name)
         ;; (format t "~%ETA gist clauses that the user is responding to ~
         ;;           ~% = ~a " eta-clauses)
@@ -1399,13 +1438,13 @@
       ; properties of the user action rather than applying 'form-gist-clauses-from-input'
       ; again (as was done above for (~you say-to.v ~me '(...)) actions).
       ((setq bindings (bindings-from-ttt-match '(~you paraphrase.v _!) wff))
-        (setq words (get-single-binding bindings))
-        (when (not (eq (car words) 'quote))
+        (setq expr (get-single-binding bindings))
+        (when (not (quoted-sentence? expr))
           (format t "~%*** PARAPHRASE-ACTION ~a~%    BY THE USER ~
-                    SHOULD SPECIFY A QUOTED WORD LIST" words)
+                    SHOULD SPECIFY A QUOTED WORD LIST" expr)
           (return-from observe-next-user-action nil))
         ; Drop quote, leaving a singleton list of clauses
-        (setq user-gist-clauses (cdr words))
+        (setq user-gist-clauses (cdr expr))
         (setf (get user-ep-name 'gist-clauses) user-gist-clauses)
         ; Advance the 'rest-of-plan' ptr of the primitive plan past the action name
         ; and wff just processed, and initialize the next action (if any)
