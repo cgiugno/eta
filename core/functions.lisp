@@ -37,7 +37,7 @@
 ; to use iteration in interpreting the user's response until, say,
 ; an end of turn is recorded in *context*?
 ;
-  (if (and (symbolp x) (get x 'ulf)) (car (remove nil (get x 'ulf))) nil)
+  (if (and (symbolp x) (get x 'ulf)) `(quote ,(car (remove nil (get x 'ulf)))) nil)
 ) ; END ulf-of.f
 
 
@@ -47,7 +47,7 @@
 ; Retrives gist clauses attached to action proposition name.
 ; TODO: See issue with ulf-of.f
 ;
-  (if (and (symbolp x) (get x 'gist-clauses)) (car (get x 'gist-clauses)) nil)
+  (if (and (symbolp x) (get x 'gist-clauses)) `(quote (car (get x 'gist-clauses))) nil)
 ) ; END gist-of.f
 
 

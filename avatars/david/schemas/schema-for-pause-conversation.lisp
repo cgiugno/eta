@@ -26,7 +26,7 @@
 
     ; If user makes 'resume' special request, store the fact that ?e12 is finished.
     ?e16 (:cond
-      (((ulf-of.f ?e15) = (RESUME.GR))
+      (((ulf-of.f ?e15) = '(RESUME.GR))
       ?e17 (~me commit-to-STM.v (that (?e13 finished2.a)))
       ?e18 (~me react-to.v ?e15))))
 
