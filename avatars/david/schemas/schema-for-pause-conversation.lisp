@@ -25,10 +25,9 @@
     ?e15 (~you say-to.v ~me ?words)
 
     ; If user makes 'resume' special request, store the fact that ?e12 is finished.
-    ?e16 (:cond
-      (((ulf-of.f ?e15) = '(RESUME.GR))
+    ?e16 (:if ((ulf-of.f ?e15) = '(RESUME.GR))
       ?e17 (~me commit-to-STM.v (that (?e13 finished2.a)))
-      ?e18 (~me react-to.v ?e15))))
+      ?e18 (~me react-to.v ?e15)))
 
 )) ; END defparameter *pause-conversation*
 

@@ -61,24 +61,24 @@
 
     ; Either (5a) user requests goodbye, (5b) user requests to pause, or
     ; (5c) user makes some other reply.
-    ?e5 (:cond
+    ?e5 (:try-in-sequence
 
       ; (5a)
-      (((ulf-of.f ?e4) = '(GOODBYE.GR))
+      (:if ((ulf-of.f ?e4) = '(GOODBYE.GR))
 
         ; Store the fact that ?e2 is finished and react.
         ?e6 (~me commit-to-STM.v (that (?e2 finished2.a)))
         ?e7 (~me react-to.v ?e4))
 
       ; (5b)
-      (((ulf-of.f ?e4) = '(PAUSE.GR))
+      (:if ((ulf-of.f ?e4) = '(PAUSE.GR))
 
         ; React and instantiate pause-conversation schema.
         ?e8 (~me react-to.v ?e4)
         ?e9 ((set-of ~me ~you) pause-conversation.v))
 
       ; (5c)
-      (:default
+      (:else
 
         ; React to user's reply (i.e., respond to smalltalk or
         ; give an answer to the user's spatial query).
