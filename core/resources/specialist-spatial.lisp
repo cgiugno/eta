@@ -36,6 +36,8 @@
     adjacent.a (flush.a adjacent.a)
     clear.a
     purple.a blue.a green.a yellow.a orange.a red.a pink.a gray.a (grey.a gray.a) black.a white.a brown.a))
+(defvar *color-adj-list*
+  '(red.a orange.a yellow.a green.a blue.a indigo.a violet.a purple.a pink.a black.a gray.a grey.a white.a))
     
 ; Block sizes and expected standard error of coordinate measurements
 ; TODO: needs to be generalized

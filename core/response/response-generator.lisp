@@ -492,10 +492,9 @@
 (defun get-color (np)
 ; `````````````````````
 ; Gets the color of a given name.
-; e.g. (get-color '|Twitter|) => red.a
+; e.g. (get-color '(the.d (|Twitter| block.n))) => red.a
 ;
-  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context np)))))
-    (cadr color-prop))
+  (find-if (lambda (pred) (get-from-context (list np pred))) *color-adj-list*)
 ) ; END get-color
 
 

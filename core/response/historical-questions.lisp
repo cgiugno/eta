@@ -170,7 +170,7 @@
     (loop while time do
 
       ; Get moves and 'backup' current scene (so we can use the scene of the consecutive turn)
-      (setq moves (extract-moves (gethash time *context*)))
+      (setq moves (extract-moves (mapcar #'first (get-from-context `(nil @ ,time)))))
       (setq scene1 scene)
       ; Undo all moves that happened at current time to get new scene
       (mapcar (lambda (move)
@@ -815,7 +815,7 @@
 ; manipulation of context outside of the schemas. I'm not immediately sure how to generalize
 ; it, though.
 ;
-  (set-difference (gethash 'block.n *context*) moves
+  (set-difference (get-from-context 'block.n) moves
     :test (lambda (x y) (equal (car x) (car y))))
 ) ; END negate-moves
 

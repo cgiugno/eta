@@ -59,8 +59,6 @@
 ; TODO:
 ; Other global parameters used here, but whose values are set elsewhere,
 ; are:  ***THIS NEEDS UPDATING
-;      *next-input*
-;      *next-answer*
 ;      *output-semantics*
 ;      *output-gist-clauses*
 ;      *eta-schema* (top-level schema) & possibly many subschemas
@@ -186,6 +184,15 @@
     ((the.d (|Burger King| block.n)) at-loc.p ($ loc  3.753 -2.323 0.493))
   ))
 
+  ; Global variables used for IO
+  (defparameter *next-answer* nil)
+  (defparameter *next-input* nil)
+  (defparameter *next-perceptions* nil)
+  (defparameter *next-ulf* nil)
+  (defparameter *goal-rep* nil)
+  (defparameter *obj-schemas* nil)
+  (defparameter *chosen-obj-schema* nil)
+
 ) ; END init
 
 
@@ -262,7 +269,7 @@
 ; successive variables occurring in the (..) part of the header
 ; (i.e., exclusive of ?e) by successive elements of 'args'.
 ;
-  (let (plan sections episodes ep-var)
+  (let (plan sections episodes ep-var sk-name)
     (setf (get plan-name 'schema-name) schema-name)
 
     ;; (format t "~%'schema-name' of ~a has been set to ~a" plan-name
@@ -301,11 +308,21 @@
     ; :types
     ;`````````````````
     ; Add all types to context.
-    ; TODO: This is incomplete and needs to be updated in the future. Currently doesn't resolve
-    ; formula variables at all (e.g., for a type like (~you person.n) or (?cc (plur BW-concept.n)))),
-    ; or do anything with the proposition variables e.g. !t1
-    (mapcar (lambda (cond) (if (not (variable? cond))
-        (store-fact cond *context* :keys (list (first cond) (second cond)))))
+    ; TODO: This is incomplete and needs to be updated in the future. Currently doesn't
+    ; do anything with the proposition variables e.g. !t1
+    (mapcar (lambda (type) (when (not (variable? type))
+        ; If typed variable, find value for variable through observation and
+        ; substitute in both type and in contents of each schema section.
+        (when (variable? (car type))
+          ; TODO: following lines possibly need reworking.
+          ;; (setq sk-name (skolem (implode (cdr (explode (car type))))))
+          ;; (setf (get sk-name 'denotation) (observe-variable-type (second type)))
+          (setq sk-name (observe-variable-type (second type)))
+          (maphash (lambda (k v) (setf (gethash k sections)
+            (subst sk-name (car type) v))) sections)
+          (setq type (subst sk-name (car type) type)))
+        ; Store type as fact in context.
+        (store-in-context type)))
       (gethash :types sections))
 
     ;`````````````````
@@ -316,7 +333,7 @@
     ; formula variables at all (e.g., for a rigid-cond like (?b1 red.a)), or do anything
     ; with the proposition variables e.g. !r1
     (mapcar (lambda (cond) (if (not (variable? cond))
-        (store-fact cond *context* :keys (list (first cond) (second cond)))))
+        (store-in-context cond)))
       (gethash :rigid-conds sections))
 
     ;`````````````````
@@ -560,6 +577,67 @@
 
 
 
+(defun observe-variable-type (type)
+;`````````````````````````````````````
+; Through observation of the world, find an entity which can fill in
+; variable of type (variable assumed to be neither in schema header or
+; filled in at later point in schema).
+; TODO: this is super incomplete - currently I've just hard-coded the
+; choice for testing purposes, but this is not general at all.
+;
+  (cond
+    ((equal type '(plur BW-concept.n))
+      (if *live* (get-obj-schemas) (get-obj-schemas-offline)))
+  )
+) ; END observe-variable-type
+
+
+
+
+(defun observe-variable-restrictions (restrictions)
+;````````````````````````````````````````````````````
+; Handles any indefinite quantification filled through observation
+; of the world, given a list of restrictions.
+; TODO: this should be considered temporary/incomplete while I
+; figure out a better way to deal with such indefinite quantification.
+;
+  (format t "::~a~%" restrictions)
+) ; END observe-variable-restrictions
+
+
+
+
+
+(defun choose-variable-restrictions (restrictions)
+;```````````````````````````````````````````````````
+; Handles any indefinite quantification filled through a choice 
+; made by Eta, given a list of restrictions.
+; TODO: this should be considered temporary/incomplete while I
+; figure out a better way to deal with such indefinite quantification.
+;
+  (let (bindings binding1 binding2 binding3 binding4 sk-var constraints member-set)
+    (cond
+      ; If randomly choosing a member of another entity, with additional constraints.
+      ((setq bindings (bindings-from-ttt-match '(_*1 (_!1 member-of.p _!2) _*2) restrictions))
+        (setq binding1 (get-multiple-bindings bindings)) (setq bindings (cdr bindings))
+        (setq binding2 (get-single-binding bindings)) (setq bindings (cdr bindings))
+        (setq binding3 (get-single-binding bindings)) (setq bindings (cdr bindings))
+        (setq binding4 (get-multiple-bindings bindings))
+        (setq sk-var binding2)
+        ;; (setq member-set (get binding3 'denotation))
+        (setq member-set binding3)
+        (setq constraints (append binding1 binding4))
+        ; Randomly choose a member such that every constraint, where the choice variable has
+        ; been substituted with the member, evaluates to true.
+        (car (member sk-var (shuffle (cdr member-set))
+          :test (lambda (var member)
+            (every #'eval-truth-value (subst member var constraints))))))))
+) ; END choose-variable-restrictions
+
+
+
+
+
 (defun find-curr-{sub}plan (plan-name)
 ;``````````````````````````````````````
 ; Find the deepest subplan of 'plan-name' (starting with the action
@@ -786,15 +864,33 @@
     ; action, and to form the subsequent action accordingly.
     (cond
 
-      ;`````````````````````
+      ;`````````````````````````````
       ; Plan: Conditional
-      ;`````````````````````
-      ; cond statement, potentially other types of conditionals in the future.
-      ; bindings yields ((_+ (cond1 name1.1 wff1.1 name1.2 wff1.2 ... cond2 name2.1 wff2.1 name2.2 wff2.2 ...)))
-      ((setq bindings (bindings-from-ttt-match '(:cond _+) wff))
+      ;`````````````````````````````
+      ; Simple "if cond, do this, else do this" conditional.
+      ; binding yields ((_+ (cond1 name1 wff1 name2 wff2 ... :else name3 wff3 ...)))
+      ((setq bindings (bindings-from-ttt-match '(:if _+) wff))
+        (setq expr (get-multiple-bindings bindings))
+        ; Generate a subplan
+        (setq new-subplan-name (plan-if-else {sub}plan-name expr))
+        ; Make bidirectional connection to the new subplan (if not nil)
+        (cond
+          ; Add subplan if one was found
+          (new-subplan-name (add-subplan {sub}plan-name new-subplan-name))
+          ; Otherwise, update the plan
+          (t (delete-current-episode {sub}plan-name))))
+
+      ;``````````````````````````````````````````
+      ; Plan: Sequence of conditionals
+      ;``````````````````````````````````````````
+      ; An arbitrary number of conditionals which are tried in sequence.
+      ; bindings yields ((_+ ((:if cond1 name1.1 wff1.1 name1.2 wff1.2 ...)
+      ;                       (:if cond2 name2.1 wff2.1 name2.2 wff2.2 ...) ...
+      ;                       (:else name3.1 wff3.1 name3.2 wff3.2 ...))))
+      ((setq bindings (bindings-from-ttt-match '(:try-in-sequence _+) wff))
         (setq expr (get-multiple-bindings bindings))
         ; Generate a subplan for the 1st action-wff with a true condition:
-        (setq new-subplan-name (plan-cond {sub}plan-name expr))
+        (setq new-subplan-name (plan-try-in-sequence {sub}plan-name expr))
         ; Make bidirectional connection to the new subplan (if not nil)
         (cond
           ; Add subplan if one was found
@@ -899,7 +995,7 @@
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest))
         (wff (second rest)) bindings expr user-action-name user-ulf n new-subplan-name
         user-gist-clauses user-gist-passage main-clause info topic suggestion query ans
-        perceptions perceived-actions)
+        perceptions perceived-actions sk-var sk-name)
   
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being ~
     ;;           processed~%" wff ep-name) ; DEBUGGING
@@ -1170,38 +1266,9 @@
         (nsubst-variable {sub}plan-name `(quote ,perceptions) expr)
 
         (format t "received perceptions: ~a~% (for variable ~a)~%" perceptions expr) ; DEBUGGING
-
-        ; Store move.v facts in context, deindexed at the current time
-        ; TODO: COME BACK TO THIS
-        ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
-        ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
-        (let ((action-perceptions (remove-if-not #'verb-phrase? perceptions)))
-          (when action-perceptions
-            (setq *time-prev* *time*)
-            (mapcar (lambda (perception)
-                (let ((perception1 (list perception '@ *time*)))
-                  (update-time)
-                  (store-fact perception1 *context*)
-                  (store-fact (first perception1) *context* :keys (list (third perception1)) :no-self t)
-                ))
-              action-perceptions)))
-
-        ; Store ULF of user utterance in context, deindexed at the current time
-        ; TODO: COME BACK TO THIS
-        ; This should probably be done elsewhere (e.g. at the time of Eta processing the say-to.v episode),
-        ; but then the utterance would come temporally before any block moves, whereas it should be the other
-        ; way around. The perceive-world.v action in general needs to be rethought (since really observing a
-        ; user say-to.v action, much like a move.v action or any other action, IS a perceive world action).
-        ; Update Eta's current time
-        (when user-ulf
-          (let ((utterance-prop `((~you ((past ask.v) ,user-ulf)) @ ,*time*)))
-            (update-time)
-            (store-fact utterance-prop *context*)
-            (store-fact (first utterance-prop) *context* :keys (list (third utterance-prop)) :no-self t)
-        ))
+        (commit-perceptions-to-memory perceptions user-ulf)        
         
-        (delete-current-episode {sub}plan-name)
-      )
+        (delete-current-episode {sub}plan-name))
 
       ;`````````````````````````
       ; Eta: Committing to STM
@@ -1218,6 +1285,48 @@
         (delete-current-episode {sub}plan-name))
 
       ;````````````````````````````
+      ; Eta: Choosing
+      ;````````````````````````````
+      ; Choose 
+      ((setq bindings (bindings-from-ttt-match '(~me choose.v _!) wff))
+        (setq expr (get-single-binding bindings))
+        (setq sk-var (car expr))
+        ;; (setq sk-name (skolem "CHOICE"))
+        ;; (setf (get sk-name 'denotation) (choose-variable-restrictions (cdr expr)))
+        ;; (format t "formed skolem constant ~a with ~
+        ;;            denotation ~a~%" sk-name (get sk-name 'denotation)) ; DEBUGGING
+        (setq sk-name (choose-variable-restrictions (cdr expr)))
+        (format t "formed value ~a for variable ~a~%" sk-name sk-var) ; DEBUGGING
+        (nsubst-variable {sub}plan-name sk-name sk-var)
+        (delete-current-episode {sub}plan-name))
+
+      ;```````````````````````````````````````
+      ; Eta: Forming a formal representation
+      ;```````````````````````````````````````
+      ; Form some formal representation of a concept (e.g., an object schema).
+      ; This assumes dynamic semantics for the argument, e.g.,
+      ; ($goal-rep ($goal-rep goal-schema1.n) ($goal-rep instance-of.n $c)).
+      ; Here, $goal-rep gets instantiated to some skolem constant denoting
+      ; a schema of some specific type. Eta should query the BW system
+      ; for a schema such that the schema is goal-schema1.n and
+      ; instance-of.n $c (where $c is some concept/object schema).
+      ; (alternatively, should Eta have the object schemas and its instances?)
+      ; The schema contents get attached to the skolem constant via 'schema.
+      ; TODO: temporarily just reads goal schema from *goal-schema*.
+      ; 
+      ((setq bindings (bindings-from-ttt-match '(~me form.v _!) wff))
+        (setq expr (get-single-binding bindings))
+        (setq sk-var (car expr))
+        (setq sk-name (skolem "REP"))
+        (setf (get sk-name 'denotation) (observe-variable-restrictions (cdr expr)))
+        ;; (setf (get sk-name 'denotation) *goal-schema*)
+        ;; (format t "formed schema ~a with ~
+        ;;            representation ~a~%" sk-name (get sk-name 'denotation)) ; DEBUGGING
+        (nsubst-variable {sub}plan-name sk-name sk-var)
+        (delete-current-episode {sub}plan-name)
+      )
+
+      ;````````````````````````````
       ; Eta: Initiating Subschema
       ;````````````````````````````
       ((setq bindings (bindings-from-ttt-match '(~me schema-header? ~you (? _*)) wff))
@@ -1230,8 +1339,7 @@
         ; Instantiate schema from schema name
         ; TODO: allow for schema arguments
         (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
-        (add-subplan {sub}plan-name new-subplan-name)
-      )
+        (add-subplan {sub}plan-name new-subplan-name))
       
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
@@ -1618,16 +1726,45 @@
 
 
 
-(defun store-in-context (wff)
-;```````````````````````````````
-; Stores a wff in context.
-; TODO: improve context - different types of facts (static & temporal), list of discourse entities, etc.
-; Use hash tables?
+(defun commit-perceptions-to-memory (perceptions user-ulf)
+;``````````````````````````````````````````````````````````
+; Given perceptions by the system (e.g., block moves) and/or a
+; query ULF, store these facts in short-term memory (context).
+; The facts are deindexed and stored in context as, e.g.,
+; ((you.pro ((past move.v) |B1|)) @ NOW1), though the indexical
+; formula is also stored hashed on the time NOW1.
+; TODO: as indicated, many aspects of this will need changing.
+; I'm also not sure that such historical temporal facts should
+; be stored in short-term memory/context at all, versus some
+; form of long-term memory.
 ;
-  ; Get fact (which may be quoted, or may have formulas) and store in context.
-  (let ((fact (if (equal (car wff) 'quote) (eval wff) (eval-functions wff))))
-    (store-fact fact *context* :keys (list (car fact))))
-) ; END store-in-context
+  ; Store move.v facts in context, deindexed at the current time
+  ; TODO: COME BACK TO THIS
+  ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
+  ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
+  (let ((action-perceptions (remove-if-not #'verb-phrase? perceptions)))
+    (when action-perceptions
+      (setq *time-prev* *time*)
+      (mapcar (lambda (perception)
+          (let ((perception1 (list perception '@ *time*)))
+            (update-time)
+            (store-in-context perception1)
+          ))
+        action-perceptions)))
+
+  ; Store ULF of user utterance in context, deindexed at the current time
+  ; TODO: COME BACK TO THIS
+  ; This should probably be done elsewhere (e.g. at the time of Eta processing the say-to.v episode),
+  ; but then the utterance would come temporally before any block moves, whereas it should be the other
+  ; way around. The perceive-world.v action in general needs to be rethought (since really observing a
+  ; user say-to.v action, much like a move.v action or any other action, IS a perceive world action).
+  ; Update Eta's current time
+  (when user-ulf
+    (let ((utterance-prop `((~you ((past ask.v) ,user-ulf)) @ ,*time*)))
+      (update-time)
+      (store-in-context utterance-prop)
+    ))
+) ; END commit-perceptions-to-memory
 
 
 
@@ -1640,8 +1777,6 @@
 ; context, it is assumed to be false.
 ;
   (cond
-    ; :default condition is always satisfied
-    ((equal wff :default) t)
     ; (wff1 = wff2)
     ((equal-prop? wff)
       (equal (first wff) (third wff)))
@@ -1664,29 +1799,55 @@
 
 
 
-(defun plan-cond ({sub}plan-name expr)
-;```````````````````````````````````````
-; expr = ((cond1 name1.1 wff1.1 name1.2 wff1.2 ...) (cond2 name2.1 wff2.1 name2.2 wff2.2 ...)))
-; Expr is a list of consecutive (cond name wff) triples. Currently, cond is either
-; a pair (?var expr), in which case the condition is satisfied if the value of ?var is
-; equivalent to expr, or :default, in which case the condition will be satisfied unconditionally.
-; The first condition that is satisfies results in a subplan being created from the subsequent
-; name and wff. If no conditions are satisfied, a nil subplan is returned.
-; TODO: This should be changed in the future to allow for complicated wff's which are actually
-; lists of name and wff pairs. Potentially we might also want to allow for more complex conditions.
+(defun plan-if-else ({sub}plan-name expr)
+;``````````````````````````````````````````
+; expr = (cond name1 wff1 name2 wff2 ... :else name3 wff3 name4 wff4 ...)
+; Expr is a condition followed by consecutive name & wff pairs. Optionally,
+; this is followed by an :else keyword and additional name & wff pairs.
 ;
-  (let ((cond1 (eval-functions (caar expr))) (episodes1 (cdar expr)) truth-val subplan-name)
+  (let* ((cnd (eval-functions (car expr))) (rst (cdr expr))
+         (else-episodes (get-keyword-contents rst :else))
+         (if-episodes (if (not else-episodes) rst
+          (butlast (reverse (set-difference rst else-episodes))))))
+    (cond
+      ; Try conditional
+      ((eval-truth-value cnd)
+        (init-plan-from-episode-list
+          (cons :episodes if-episodes) {sub}plan-name))
+      ; Otherwise try else, if it exists
+      (else-episodes
+        (init-plan-from-episode-list
+          (cons :episodes else-episodes) {sub}plan-name))))
+) ; END plan-if-else
+
+
+
+
+
+(defun plan-try-in-sequence ({sub}plan-name expr)
+;`````````````````````````````````````````````
+; TODO: update desc
+; expr = ((:if cond1 name1.1 wff1.1 name1.2 wff1.2 ...)
+;         (:if cond2 name2.1 wff2.1 name2.2 wff2.2 ...) ...
+;         (:else name3.1 wff3.1 name3.2 wff3.2 ...))
+; Expr is a list of consecutive (:if cond e1 e2 ...) lists, potentially followed
+; by a final (:else e1 e2 ...) list. These conditions should be tried in sequence,
+; instantiating the first one which holds true.
+;
+  (let* ((lst1 (car expr)) (else1 (if (equal (first lst1) :else) t))
+         (cond1 (if (not else1) (eval-functions (second lst1))))
+         (episodes1 (if (not else1) (cddr lst1) (cdr lst1))))
     (cond
       ; None of the cases have been matched, so no subplan is generated
       ((null expr) nil)
       ; If the condition is satisfied, create a subplan from the episode list
-      ((eval-truth-value cond1)
+      ((or else1 (eval-truth-value cond1))
         (init-plan-from-episode-list
           (cons :episodes episodes1)
           {sub}plan-name))
       ; Otherwise, try next condition & episodes
-      (t (plan-cond {sub}plan-name (cdr expr))))
-)) ; END plan-cond
+      (t (plan-try-in-sequence {sub}plan-name (cdr expr))))
+)) ; END plan-try-in-sequence
 
 
 

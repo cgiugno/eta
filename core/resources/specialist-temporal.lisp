@@ -101,8 +101,8 @@
     (store-time)
     (setq pred-before (list time-old 'before.p time-new))
     (setq pred-after  (list time-new 'after.p time-old))
-    (store-fact pred-before *context* :keys (list (car pred-before)))
-    (store-fact pred-after  *context* :keys (list (car pred-after))))
+    (store-in-context pred-before)
+    (store-in-context pred-after))
 ) ; END update-time
 
 
@@ -129,7 +129,7 @@
 ; Gets and stores the date-time of the current time proposition.
 ;
   (let ((pred-time (list *time* 'at-about.p (get-time))))
-    (store-fact pred-time *context* :keys (list (car pred-time))))
+    (store-in-context pred-time))
 ) ; END store-time
 
 
@@ -153,7 +153,7 @@
 ; ``````````````````````````````````
 ; Gets the time record corresponding to an episode symbol.
 ;
-  (third (car (remove-if-not #'at-about-prop? (gethash ep-sym *context*))))
+  (car (find-all-instances-context `(:l (?x) (,ep-sym at-about.p ?x))))
 ) ; END get-time-of-episode
 
 
@@ -180,7 +180,7 @@
 ; `````````````````````````
 ; Get a constant denoting the subsequent period (related by before.p/after.p propositions in context).
 ;
-  (third (car (remove-if-not #'before-prop? (gethash Ti *context*))))
+  (car (find-all-instances-context `(:l (?x) (,Ti before.p ?x))))
 ) ; END get-next-time
 
 
@@ -188,7 +188,7 @@
 ; `````````````````````````
 ; Get a constant denoting the previous period (related by before.p/after.p propositions in context).
 ;
-  (third (car (remove-if-not #'after-prop? (gethash Ti *context*))))
+  (car (find-all-instances-context `(:l (?x) (,Ti after.p ?x))))
 ) ; END get-prev-time
 
 
@@ -197,11 +197,17 @@
 ; Gets a list of all times (excluding the current time, unless the current time is 'NOW0).
 ; NOTE: if type is given, restrict to turns of only that type.
 ;
-  (let ((type-pred (case type (turn #'identity) (question #'ask-prop?) (move #'move-prop?) (otherwise #'identity))))
+  (let ((type-pred (case type (question #'ask-prop?) (move #'move-prop?) (otherwise nil))))
     (labels ((all-times-recur (time)
         (cond
+          ; Base case
           ((null time) nil)
-          ((remove-if-not type-pred (gethash time *context*)) (cons time (all-times-recur (get-prev-time time))))
+          ; If time contains a proposition of the given type, add time to list
+          ((if type-pred (remove-if-not type-pred
+                          (mapcar #'first (get-from-context `(nil @ ,time))))
+                         t)
+            (cons time (all-times-recur (get-prev-time time))))
+          ; Otherwise, skip this time and continue recursively
           (t (all-times-recur (get-prev-time time))))))
       (all-times-recur (get-prev-time *time*))))
 ) ; END all-times
@@ -294,7 +300,7 @@
 ; ````````````````````````````````````````
 ; Checks whether time1 and time2 are apart by n instances of some prop.
 ;
-  (let ((type-pred (case type (turn #'identity) (question #'ask-prop?) (move #'move-prop?) (otherwise #'identity))))
+  (let ((type-pred (case type (question #'ask-prop?) (move #'move-prop?) (otherwise nil))))
     (labels
       ; Past direction
       ((is-apart-type-prev (time-prev m)
@@ -305,7 +311,9 @@
           ((<= m 0) (equal time1 time-prev))
           ; Otherwise, take a hop in the past direction
           (t
-            (setq m (- m (if (remove-if-not type-pred (gethash time-prev *context*)) 1 0)))
+            (setq m (- m (if (or (not type-pred) (remove-if-not type-pred
+                              (mapcar #'first (get-from-context `(nil @ ,time-prev)))))
+                            1 0)))
             (if (<= m 0) (equal time1 time-prev)
               (is-apart-type-prev (get-prev-time time-prev) m)))))
        ; Future direction
@@ -317,7 +325,9 @@
           ((<= m 0) (equal time1 time-next))
           ; Otherwise, take a hop in the future direction
           (t 
-            (setq m (- m (if (remove-if-not type-pred (gethash time-next *context*)) 1 0)))
+            (setq m (- m (if (or (not type-pred) (remove-if-not type-pred
+                              (mapcar #'first (get-from-context `(nil @ ,time-next)))))
+                            1 0)))
               (if (<= m 0) (equal time1 time-next)
                 (is-apart-type-next (get-next-time time-next) m))))))
       (or (is-apart-type-prev time2 n) (is-apart-type-next time2 n))))

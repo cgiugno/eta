@@ -35,7 +35,7 @@
 ; ties into the issue of a user say-to.v act having a potentially
 ; indefinite amount of gist clauses attached... might it make sense
 ; to use iteration in interpreting the user's response until, say,
-; an end of turn is recorded in *context*?
+; an end of turn is recorded in context?
 ;
   (if (and (symbolp x) (get x 'ulf)) `(quote ,(car (remove nil (get x 'ulf)))) nil)
 ) ; END ulf-of.f
@@ -49,17 +49,6 @@
 ;
   (if (and (symbolp x) (get x 'gist-clauses)) `(quote (car (get x 'gist-clauses))) nil)
 ) ; END gist-of.f
-
-
-
-(defun color-of.f (name)
-; ````````````````````````
-; Gets the color of a given name based on contextual knowledge.
-; e.g. (color-of.f '|Twitter|) => red.a
-;
-  (let ((color-prop (car (remove-if-not #'color-prop? (get-from-context name)))))
-    (caadr color-prop))
-) ; END color-of.f
 
 
 

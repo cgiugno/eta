@@ -167,25 +167,6 @@
 ) ; END adj?
 
 
-(defun color? (ulf)
-; ``````````````````
-; Checks if ULF is a color adjective.
-; NOTE: in the future, we may want to do this using an ontology instead.
-;
-  (and (atom ulf) (member ulf '(red.a orange.a yellow.a green.a blue.a
-    indigo.a violet.a purple.a pink.a black.a gray.a grey.a white.a)))
-) ; END color?
-
-
-(defun color-prop? (ulf)
-; ```````````````````````
-; Checks if a ULF is a proposition about color.
-; (|Twitter| (red.a block.n))
-;
-  (and (listp ulf) (= 2 (length ulf)) (color? (second ulf)))
-) ; END color-prop?
-
-
 (defun adv-e? (ulf)
 ; ``````````````````
 ; Checks if a ULF is an adv-e word or phrase.

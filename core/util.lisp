@@ -57,6 +57,26 @@
 
 
 
+(defun shuffle (l)
+;``````````````````
+; Shuffles top-level elements of a list
+;
+  (cond
+    ((or (null l) (atom l)) l)
+    ((= 1 (length l)) l)
+    ((= 2 (length l))
+      (if (= (random 2) 1)
+        (list (first l) (second l))
+        (list (second l) (first l))))
+    (t (let* ((mid (floor (length l) 2))
+              (l1 (butlast l mid)) (l2 (last l mid)))
+      (if (= (random 2) 1)
+        (append (shuffle l1) (shuffle l2))
+        (append (shuffle l2) (shuffle l1))))))
+) ; END shuffle
+
+
+
 (defun intersection1 (l)
 ;`````````````````````````
 ; Intersection of all sub-lists in l
@@ -240,9 +260,10 @@
 
 (defun variable? (atm)
 ;`````````````````````
-; Check whether a symbol is a variable, i.e. starts with '?' or '!'
+; Check whether a symbol is a variable, i.e. starts with '?', '!', or '$'.
+; NOTE: this excludes indexical variables, such as '~you'.
 ;
-  (and (symbolp atm) (member (car (explode atm)) '(#\? #\!) :test #'char-equal))
+  (and (symbolp atm) (member (car (explode atm)) '(#\? #\! #\$) :test #'char-equal))
 ) ; END variable?
 
 
@@ -798,25 +819,419 @@
 
 
 
-(defun get-from-context (key)
-;``````````````````````````````
+(defun store-in-context (wff)
+;```````````````````````````````
+; Stores a wff in context. Fact may be quoted, e.g., '(E2 finished.a), in
+; which case the unquoted predicate is stored (although this format is unused
+; in the current schema syntax). Otherwise, evaluate all functions in fact and
+; store in context.
+;
+  (let ((fact (if (equal (car wff) 'quote) (eval wff) (eval-functions wff))))
+    (store-fact fact *context*))
+) ; END store-in-context
+
+
+
+(defun get-from-context (pred-patt)
+;````````````````````````````````````
 ; Retrieves a fact from context
 ;
-  (gethash key *context*)
+  (get-matching-facts pred-patt *context*)
 ) ; END get-from-context
 
 
 
-(defun store-fact (fact ht &key keys no-self)
-;``````````````````````````````````````````````
-; Stores a fact in a given hash table. The fact is always hashed on itself.
-; Optionally, a list of additional keys can be specified for the fact to be hashed on.
-; Also, if no-self is given as true, don't hash on the fact itself.
+(defun find-all-instances-context (descr)
+;```````````````````````````````````````````
+; Given a lambda description, find all instances
+; from context (see 'find-all-instances').
+  (find-all-instances descr *context*)
+) ; END find-all-instances-context
+
+
+
+(defun storage-keys (fact)
+;``````````````````````````
+; Find the list of keys for hash-table storage of 'fact': the fact as a whole, 
+; the predicate, and the predicate with one argument at a time, if there
+; is more than one (while other arguments are set to nil).
+; 
+; We also allow facts that are atoms or of form (<atom>); in the 1st case
+; the atom is the only key on the output list, and in the second both 
+; <atom> and (<atom>) are on the output list; (we always want to be able
+; to retrieve via the fact as a whole, and via the predicate)..
 ;
-  (unless no-self (setf (gethash fact ht) t))
-  (mapcar (lambda (key)
-    (setf (gethash key ht) (remove-duplicates (append (gethash key ht) (list fact)) :test #'equal))) keys)
-) ; END store-fact
+  (let (keys key n)
+    (cond ((atom fact) (list fact))
+          ((null (cdr fact)) (list (car fact) fact)); e.g., (pred (pred))
+          (t (setq keys (list fact (second fact))); entire fact, & pred
+            (when (cddr fact); more than one argument?
+              (setq n (length (cddr fact))); no. of non-subject args
+              ; push key for subject arg first
+              (setq key (list (second fact) (first fact))); in reverse
+              (dotimes (i n) (push nil key))
+              (setq key (reverse key))
+              (push key keys)
+              ; push keys for all other args
+              (dotimes (i n)
+                (setq key (list (second fact) nil)); in reverse
+                (dotimes (j n)
+                  (if (= i j) (push (nth i (cddr fact)) key)
+                              (push nil key)))
+                (setq key (reverse key))
+                (push key keys)))
+            keys))
+)) ; END storage-keys
+
+
+
+(defun store-fact (fact ht)
+;````````````````````````````
+; Store the 'fact' in hash table 'ht' (that uses 'equal' as test) using as keys: 
+; - the entire fact, 
+; - the predicate (unless the fact is atomic or a 1-element list 
+;   (i.e., pred with 0 arguments)
+; - if the pred has >= 2 arguments, patterns of form  (pred arg1 nil nil ...), 
+;   (pred nil arg2 nil nil ...), (pred nil nil arg3 nil nil ...), etc.
+; Return T if the fact was new, and NIL otherwise.
+;
+  (let ()
+    (if (gethash fact ht) (return-from store-fact nil))
+    (dolist (key (storage-keys fact))
+      (if (equal key fact)
+        (setf (gethash key ht) t); just store t in the case where key is the whole fact
+        (push fact (gethash key ht))))
+    T
+)) ; END store-fact
+
+
+
+(defun store-facts (facts ht)
+;`````````````````````````````
+  (dolist (fact facts) (store-fact fact ht))
+) ; END store-facts
+
+
+
+(defun remove-fact (fact ht)
+;````````````````````````````
+; Delete 'fact' from hash table 'ht', under all its keys
+;
+  (if (gethash fact ht); is 'fact' actually in ht? 
+    (prog2 (dolist (key (storage-keys fact))
+               (setf (gethash key ht) 
+                     (remove fact (gethash key ht) :test #'equal)))
+            t) ; signal that the fact was removed
+     nil ; fact wasn't present in ht
+)) ; END remove-fact
+
+
+
+(defun get-matching-facts (pred-patt ht)
+;``````````````````````````````````````````
+; TAKEN FROM 'planning-via-schemas.lisp', MODIFIED FOR INFIX SYNTAX.
+; pred-patt: e.g., (B between.p ?x C); any vars in pred-patt are
+;    assumed to be distinct;
+; Note that we need to use retrieval key (B between nil nil) or
+;    (nil between nil C), and filter the results, because ground
+;    wffs are stored under the entire wff as key, under the pred,
+;    and under the pred in combination with one argument at a time.
+;
+; Retrieve the list of facts matching pred-patt from hash table ht.
+; This is dependent on the restricted set of keys that are used in 
+; storing facts: If there is a variable in pred-patt (as in the
+; example), we need to make the variable and all but one non-var
+; argument "don't-cares" (nil) in the retrieval. The we filter out
+; instances that don't have the required non-variable arguments.
+;
+  (if (atom pred-patt) ; special (unexpected) cases of arg-less preds
+    (if (symbolp pred-patt) ; facts are stored as list elements
+      (return-from get-matching-facts (gethash pred-patt ht))
+      ; not a symbol
+      (return-from get-matching-facts nil)))
+  (if (null (cdr pred-patt)); of form (p)
+    (if (symbolp (car pred-patt)) ; use p as key
+      (return-from get-matching-facts (gethash (car pred-patt) ht))
+      ; of form (p) where p is not a symbol
+      (return-from get-matching-facts nil)))
+    
+  ; at this point we have something of form (x0 p x1 ... xk) where x1 ... xk
+  ; are optional and some of the xi may be variables (the expected case).
+  (let (arglist pred (nvars 0) nconst key const facts select-facts)
+    (setq arglist (cons (car pred-patt) (cddr pred-patt)))
+    (setq pred (second pred-patt))
+    (dolist (arg arglist)
+      (if (variable? arg) (incf nvars)))
+    (setq nconst (- (length arglist) nvars))
+    ; 4 cases: no vars; no consts; vars & 1 const; vars & > 1 consts
+    (cond
+      ; no vars
+      ((zerop nvars) (gethash (cons (car arglist) (cons pred (cdr arglist))) ht))
+      ; no facts
+      ((zerop nconst) (reverse (gethash pred ht)))
+      ; vars & 1 const
+      ((= nconst 1) 
+        (setq key (mapcar #'(lambda (x) (if (variable? x) nil x)) pred-patt))
+        (reverse (gethash key ht)))
+      ; vars & > 1 consts
+      (t 
+        ; for the key, set all var's and all but one const. to nil
+        ; Pick a constant to retain in the key:
+        (setq const (find-if #'(lambda (x) (not (variable? x))) 
+                      arglist))
+        (setq key 
+          (let ((arglist-const
+                  (mapcar #'(lambda (x) (if (not (eq x const)) nil x)) arglist)))
+            (cons (car arglist-const) (cons pred (cdr arglist-const)))))
+        (setq facts (gethash key ht)); (in reverse store-order)
+        ; filter out facts whose constant args don't match those
+        ; of pred-patt:
+        (dolist (fact facts)
+          (if (not (member nil
+                (mapcar #'(lambda (x y) (or (variable? x) (equal x y)))
+                  arglist (cons (car fact) (cddr fact)))))
+            (push fact select-facts))); this causes correct order
+        select-facts))
+)) ; END get-matching-facts
+
+
+
+(defun find-all-instances (descr curr-state-ht)
+;``````````````````````````````````````````````````
+; TAKEN FROM 'planning-via-schemas.lisp', MODIFIED FOR INFIX SYNTAX.
+; 'descr' is a lambda abstract, using ':l' for lambda.
+;    The body of 'descr' consists of conjoined +ve or -ve literals, one
+;    of which must be +ve & contain all variables, including the lambda 
+;    variable(s).
+;    e.g., (:l (?x ?y) (and (?x between.p ?z ?y) (?x red.a) (?y blue.a)));
+;    e.g., (:l (?x) (?x on.p ?y)); everything that's on something
+;    NB: A non-equality constraint like "?y is not the table" would
+;        have to be expressed as something like (not (?y table.n)),
+;        where we've added (is-table table) to the set of facts.
+; 'curr-state-ht' is a hash table for positive facts comprising the 
+;    current state, indexed under the fact as a whole, the predicate
+;    alone, and the predicate in combination with one argument (for
+;    each argument, if there's more than one).
+; We find all instances of the :l-variable(s)? as follows: 
+; (simplest possible method) Start with all the instances of the
+; positive predication (in the lambda-description) that contains 
+; all the variables, and successively restrict the tuples with the
+; remaining conjuncts. Use predication templates, in addition to the
+; current set of instances, as arguments in 'constrain-relation', 
+; so that argument correspondences will be clear, w/o any indexing.
+; In the end, project the resulting list of predicate instances onto
+; the :l-variable "dimensions"
+;
+  (let (body lambda-vars vars main-conjunct facts neglist poslist ind inds)
+    (setq lambda-vars (second descr))
+    (setq body 
+      (if (not (eq (car (third descr)) 'and)); just one predication?
+        (list (third descr)); list it, for uniformity
+        (cdr (third descr)))); drop the "and"
+    (setq vars (remove-duplicates ; look for variables in the "flattened",
+      (remove nil      ; unnegated predications, appended together
+        (mapcar #'(lambda (x) (if (variable? x) x nil)) 
+          (apply #'append 
+            (mapcar #'(lambda (x) (if (eq (car x) 'not) (second x) x))
+              body))))))
+    ; find positive conjunct containing all variables
+    (dolist (conjunct body)
+      (when (subsetp vars ; is the set of all vars a subset of (& thus
+              (remove nil ; equal to) the variables of conjunct?
+                (mapcar #'(lambda (x) (if (variable? x) x nil))
+                          (cons (car conjunct) (cddr conjunct)))))
+            (setq main-conjunct conjunct)
+            (return nil))) ; exit loop
+    (when (null main-conjunct)
+          (format t "~%*** Description ~s ~
+                     ~%      given to 'find-all-instances' didn't contain ~
+                     ~%      a predication that covers all variables" descr)
+          (return-from find-all-instances nil))
+
+    ; Retrieve the facts in curr-state-ht matching main-conjunct
+    (setq facts (get-matching-facts main-conjunct curr-state-ht))
+    ; Now apply the remaining conjuncts as constraints on facts;
+    ; first place negative facts after positive ones (also omitting 
+    ; main-conjunct):
+    (dolist (conjunct body)
+        (if (eq (car conjunct) 'not) 
+            (push conjunct neglist)
+            (if (not (equal conjunct main-conjunct))
+                (push conjunct poslist))))
+    (setq body (append (reverse poslist) (reverse neglist)))
+    (dolist (conjunct body)
+        (setq facts 
+          (constrain-relation main-conjunct conjunct facts curr-state-ht)))
+
+    ; Now project 'facts" onto the dimensions picked out by the :l-variables
+    ; 'Project-relation' uses indices for argument positions to be picked
+    ; out by the projection, so we compute these first by assigning
+    ; index properties to the variables (the properties will be global, 
+    ; but harmless):
+    (setq ind 1)
+    (when (cdr main-conjunct)
+      (setf (get (car main-conjunct) 'index) ind)
+      (incf ind))
+    (dolist (arg (cddr main-conjunct))
+        (incf ind) (if (variable? arg) (setf (get arg 'index) ind)))
+    (setq inds (mapcar #'(lambda (x) (get x 'index)) lambda-vars))
+    ; Return the projecton of facts onto the positions corr. to the
+    ; Lambda variables:
+    (project-relation facts inds)
+)) ; END find-all-instances
+
+
+
+(defun constrain-relation (pred1-patt {~}pred2-patt rel1 kb-ht)
+;````````````````````````````````````````````````````````````````
+; TAKEN FROM 'planning-via-schemas.lisp', MODIFIED FOR INFIX SYNTAX.
+; pred1-patt: of form (arg1 pred1 ... argn); in general, argi may
+;     be a variable.
+; {~}pred2-patt: of form (arg'1 pred2 ... arg'm) or 
+;     (not (arg'1 pred2 ... arg'm)), where m =< n and all variables 
+;     of pred2-patt occur in pred1-patt; {~}pred2-patt also allows
+;     for equalities or negated equalities, using one of {=,eq,equal};
+; rel1: a list of relation instances, a subset of pred1-patt instances;
+;
+; If {-}pred2-patt is unnegated, the result is a restricted subset
+; of the rel1-instances, where only those are retained and returned 
+; whose arguments, when used to instantiate {~}pred2-patt, lead to 
+; existing hash-table entries.
+;
+; If {-}pred2-patt is negated, the procedure is similar, except that
+; only rel1-instances are retained where the pred2 hash-table lookup
+; does *not* lead to existing entries.
+;
+  (let (positive key rel2)
+    ; deal with equality constraints first
+    (if (and (listp {~}pred2-patt) (member (second {~}pred2-patt) '(= eq equal)))
+        (return-from constrain-relation
+            (constrain-relation-by-equality pred1-patt {~}pred2-patt rel1)))
+    ; now inequality constraints
+    (if (and (listp {~}pred2-patt) (eq (car {~}pred2-patt) 'not)
+              (listp (second {~}pred2-patt)) 
+              (member (second (second {~}pred2-patt)) '(= eq equal)))
+        (return-from constrain-relation 
+            (constrain-relation-by-inequality pred1-patt {~}pred2-patt rel1)))
+    ; other constraints (=> require consulting '{~}pred2-patt'-facts in kb-ht)
+    (setq positive (not (and (listp {~}pred2-patt) 
+                              (eq (car {~}pred2-patt) 'not))))
+    (dolist (item rel1)
+      ; set variables occurring in pred1-patt to corresponding
+      ; elements of the item predication:
+      (mapcar #'(lambda (x y) (if (variable? x) (set x y)))
+              (cons (car pred1-patt) (cddr pred1-patt))
+              (cons (car item) (cddr item)))
+      ; construct a retrieval key for pred2 accordingly:
+      (setq key (mapcar #'(lambda (x) (if (variable? x) (eval x) x))
+                    (if positive {~}pred2-patt (second {~}pred2-patt))))
+      (if (gethash key kb-ht)
+          (if positive (push item rel2))
+          (if (not positive) (push item rel2))))
+    (reverse rel2)
+    ; It will come out preserving the ordering in rel1.
+)) ; END constrain-relation
+
+
+
+(defun constrain-relation-by-equality (pred-patt equality rel)
+;```````````````````````````````````````````````````````````````
+; TAKEN FROM 'planning-via-schemas.lisp', MODIFIED FOR INFIX SYNTAX.
+; pred-patt: provides variable argument positions for the predications in rel;
+; equality: e.g., (?y = B3), i.e., we fix the value of a variable in pred-patt
+;           and hence of corresponding arguments in the rel predications;
+;           the reverse form, e.g., (B3 = ?y), is also handled;
+; rel: a set of ground predications (of form  pred-patt), to be filtered with
+;           the equality; NB: no error check is done to ensure that pred-patt
+;           and rel use the same predicate. Also no check is made on the form
+;           of equality. The calling program might use 'eq' or 'equal', instead
+;           of '=', but the initial symbol in the given equality is ignored.
+;    
+  (let (var val (i -1) result)
+    ; find the position of the variable in the equality in pred-patt, and
+    ; then go through the elements of rel, retaining for output just those
+    ; that have the constant specified by the equality at the position
+    ; determined from the pred-patt:
+    (setq var (first equality); e.g., (?y = B3) ... the expected form
+          val (third equality))
+    (if (not (variable? var))
+        (setq var (third equality); e.g., (B3 = ?y)
+              val (first equality)))
+    (cond ((atom pred-patt) rel); unexpected: pred-patt should be (pred ...)
+          (t (dolist (x pred-patt)
+              (incf i) (if (equal x var) (return nil))); exit loop (i is set)
+              (dolist (r rel)
+                (if (equal (nth i r) val) (push r result)))
+              result))
+)) ; END constrain-relation-by-equality
+
+
+
+(defun constrain-relation-by-inequality (pred-patt inequality rel)
+;```````````````````````````````````````````````````````````````````
+; TAKEN FROM 'planning-via-schemas.lisp', MODIFIED FOR INFIX SYNTAX.
+; pred-patt: provides variable argument positions for the predications in rel;
+; inequality: e.g., (not (?y = B3)), i.e., we preclude the value of a variable 
+;           in pred-patt and hence of corresponding arguments in the rel pred-
+;           ications; the reverse form, e.g., (not (B3 = ?y)), is also handled;
+; rel: a set of ground predications (of form  pred-patt), to be filtered with
+;           the inequality; NB: no error check is done to ensure that pred-patt
+;           and rel use the same predicate. Also no check is made on the form
+;           of inequality.
+;    
+  (let (var val (i -1) result)
+    ; find the position of the variable in the equality in pred-patt, and
+    ; then go through the elements of rel, retaining for output just those
+    ; that have the constant specified by the equality at the position
+    ; determined from the pred-patt:
+    (setq var (first (second inequality)); e.g., (not (?y = B3)) ... expected 
+          val (third (second inequality)))
+    (if (not (variable? var))
+        (setq var (third (second inequality)); e.g., (not (B3 = ?y))
+              val (first (second inequality))))
+    (cond ((atom pred-patt) rel); unexpected: pred-patt should be (pred ...)
+          (t (dolist (x pred-patt)
+              (incf i) (if (equal x var) (return nil))); exit loop (i is set)
+              (dolist (r rel)
+                (if (not (equal (nth i r) val)) (push r result)))
+              result))
+)) ; END constrain-relation-by-inequality
+
+
+
+(defun project-relation (rel indices)
+;``````````````````````````````````````
+; TAKEN FROM 'planning-via-schemas.lisp', MODIFIED FOR INFIX SYNTAX.
+; 'rel' is assumed to be a set of k-tuples, with k  >= 1. (If it is 1,
+; the list 'rel' is returned unchanged.) 'Indices' is the list of argument
+; indices indicating what "dimensions" of rel should be retained (projecting
+; other dimensions onto them), and in what order they should be returned.
+; The result is a set k-tuples, where k =|indices|, except that if k=1,
+; the 1-tuples are reduced to individual atoms, not singleton lists.
+;
+; Method: Run through the 'rel' tuples, and for each tuple, pull out the
+; elements corresponding to the 'indices', and if this "subtuple" has not yet
+; been encountered before (as registered in an ad-hoc hash table), push it
+; onto the result list and register it in the ad-hoc hash table.
+; Return the reverse of the final result list.
+; 
+  (let (ht key result)
+    ; Is 'rel' unary, i.e., a list of atoms or single-element lists?
+    (if (or (null rel) (atom (car rel)) (null (cdar rel)))
+        (return-from project-relation rel))
+    (setq ht (make-hash-table :test #'equal))
+    (dolist (tuple rel)
+        (setq key nil)
+        (dolist (i indices)
+            (push (nth (- i 1) tuple) key))
+        (setq key (reverse key))
+        (when (null (gethash key ht))
+            (setf (gethash key ht) T) 
+            (push key result)))
+    (if (null (cdr indices)); if just one index, "flatten" the result
+        (setq result (apply #'append result)))
+    (reverse result)
+)) ; END project-relation 
 
 
 
@@ -1087,11 +1502,20 @@
 
 
 
+(defun skolem (name)
+; ````````````````````
+; Creates a unique skolem constant given a name.
+;
+  (intern (format nil "~a.SK" (gensym (string-upcase (string name)))))
+) ; END skolem
+
+
+
 (defun episode-var ()
 ;````````````````````````````
 ; Creates an episode variable starting with '?E'.
 ;
-  (intern (format nil "?~a." (string (gensym "E"))))
+  (intern (format nil "?~a" (string (gensym "E"))))
 ) ; END episode-var
 
 
@@ -1145,6 +1569,18 @@
 
 
 
+(defun get-keyword-contents (lst key)
+;``````````````````````````````````````
+; Gets the contents of lst following a keyword (including the
+; keyword itself), and preceding any subsequent keyword.
+;
+  (let* ((lookup (member key lst))
+         (rst (member nil (cdr lookup) :test (lambda (x y) (keywordp y)))))
+    (if rst (reverse (set-difference (cdr lookup) rst)) (cdr lookup)))
+) ; END get-keyword-contents
+
+
+
 (defun get-schema-sections (schema)
 ;```````````````````````````````````
 ; Gets a hash table containing each schema section as a key, and the
@@ -1152,11 +1588,9 @@
 ;
   (let ((schema-ht (make-hash-table :test #'equal)))
     (dolist (section '(:types :rigid-conds :episodes))
-      (let* ((lookup (member section schema))
-             (rest (member nil (cdr lookup) :test (lambda (x y) (keywordp y)))))
-        (when lookup
-          (setf (gethash (car lookup) schema-ht)
-            (if rest (reverse (set-difference (cdr lookup) rest)) (cdr lookup))))))
+      (let ((contents (get-keyword-contents schema section)))
+        (when contents
+          (setf (gethash section schema-ht) contents))))
     schema-ht)
 ) ; END get-schema-sections
 
@@ -1201,32 +1635,27 @@
 ; or indirectly) to create the current plan.
 ;
   (let* ((episode-vars (get-episode-vars plan))
-        (var-duals (mapcar (lambda (var)
-          (cons (implode (butlast (explode var))) var)) episode-vars))
-        (new-var-duals (mapcar (lambda (episode-var)
+        (new-episode-vars (mapcar (lambda (episode-var)
           (duplicate-variable plan-name episode-var)) episode-vars))
         (result plan))
-    (mapcar (lambda (var-dual new-var-dual)
-      (setq result
-        (subst (car new-var-dual) (car var-dual)
-          (subst (cdr new-var-dual) (cdr var-dual) result))))
-      var-duals new-var-duals)
+    (mapcar (lambda (var new-var)
+      (setq result (subst new-var var result)))
+      episode-vars new-episode-vars)
   result)
 ) ; END subst-duplicate-variables
 
 
 
 (defun duplicate-variable (plan-name var)
-;``````````````````````````````````````````
-; Duplicates a variable, inheriting the gist-clauses, ulf, etc. attached to
-; it in the schema used (directly or indirectly) to create the current plan.
+;```````````````````````````````````````````````````
+; Duplicates an episode variable, inheriting the gist-clauses,
+; ulf, etc. attached to it in the schema used (directly or
+; indirectly) to create the current plan.
 ;
   (let (new-var schema-name)
-    ; Create new variable
-    (setq new-var (intern (format nil "~a" (gentemp
-      (if (variable? var)
-        (string var)
-        (concatenate 'string (string var) "."))))))
+    ; Create new episode variable
+    (setq new-var
+      (intern (format nil "~a" (gentemp (string var)))))
     (setq schema-name (get plan-name 'schema-name))
     ; Inherit gist-clauses, semantics, and topic keys
     (setf (gethash new-var (get schema-name 'gist-clauses))
@@ -1235,8 +1664,8 @@
       (gethash var (get schema-name 'semantics)))
     (setf (gethash new-var (get schema-name 'topic-keys))
       (gethash var (get schema-name 'topic-keys)))
-  ; Return (?a1 . ?a1.) pair
-  (cons (implode (butlast (explode new-var))) new-var))
+  ; Return new var
+  new-var)
 ) ; END duplicate-variable
 
 
@@ -1430,19 +1859,70 @@
 
 
 
-(defun update-block-coordinates (moves)
-;````````````````````````````````````````
-; Given a list of moves (in sequential order), update *block-coordinates*. Return a list of
-; perceptions, i.e. the given moves combined with the current block coordinates.
+(defun get-obj-schemas ()
+; `````````````````````````
+; This waits until it can load a list of object schemas from "./io/obj-schemas.lisp".
 ;
-  (mapcar (lambda (move)
-    (setq *block-coordinates* (mapcar (lambda (coordinate)
-        (if (equal (car move) (car coordinate))
-          (list (car coordinate) 'at-loc.p (cadar (cddadr move)))
-          coordinate))
-      *block-coordinates*))) moves)
-  (append *block-coordinates* moves)
-) ; END update-block-coordinates
+  (setq *obj-schemas* nil)
+  (loop while (not *obj-schemas*) do
+    (sleep .5)
+    (progn
+      (load "./io/obj-schemas.lisp")
+		  (if *obj-schemas*
+        (with-open-file (outfile "./io/obj-schemas.lisp" :direction :output 
+                                                         :if-exists :supersede
+                                                         :if-does-not-exist :create)))))
+  (if (listp *obj-schemas*)
+    (cons 'set-of (mapcar (lambda (obj-schema)
+        (setf (get (cadadr obj-schema) 'schema) obj-schema)
+        `(k ,(cadadr obj-schema)))
+      *obj-schemas*)))
+) ; END get-obj-schemas
+
+
+
+(defun get-obj-schemas-offline ()
+; `````````````````````````````````
+; Reads in a list of local object schemas from "./core/resources
+; concept_schemas_offline/BW-concepts.lisp".
+;
+  (load "./core/resources/concept_schemas_offline/BW-concepts.lisp")
+  (cons 'set-of (mapcar (lambda (obj-schema)
+        (setf (get (cadadr obj-schema) 'schema) obj-schema)
+        `(k ,(cadadr obj-schema)))
+      *BW-concepts*))
+) ; END get-obj-schemas-offline
+
+
+
+(defun request-goal-rep (obj-schema)
+;`````````````````````````````````````
+; Writes a ulf to the file ulf.lisp, so that it can be used
+; by the blocksworld system.
+;
+  (with-open-file (outfile "./io/goal-request.lisp" :direction :output
+                                                    :if-exists :supersede
+                                                    :if-does-not-exist :create)
+    (format outfile "(setq *chosen-obj-schema* ~a)" obj-schema))
+) ; END request-goal-rep
+
+
+
+(defun get-goal-rep ()
+; ``````````````````````
+; This waits until it can load a goal representation from "./io/goal-rep.lisp".
+;
+  (setq *goal-rep* nil)
+  (loop while (not *goal-rep*) do
+    (sleep .5)
+    (progn
+      (load "./io/goal-rep.lisp")
+		  (if *goal-rep*
+        (with-open-file (outfile "./io/goal-rep.lisp" :direction :output 
+                                                      :if-exists :supersede
+                                                      :if-does-not-exist :create)))))
+  *goal-rep*
+) ; END get-goal-rep
 
 
 
@@ -1500,6 +1980,22 @@
     ((listp *next-answer*) (cons (parse-chars (coerce (car *next-answer*) 'list))
                             (cdr *next-answer*))))
 ) ; END get-answer-string
+
+
+
+(defun update-block-coordinates (moves)
+;````````````````````````````````````````
+; Given a list of moves (in sequential order), update *block-coordinates*. Return a list of
+; perceptions, i.e. the given moves combined with the current block coordinates.
+;
+  (mapcar (lambda (move)
+    (setq *block-coordinates* (mapcar (lambda (coordinate)
+        (if (equal (car move) (car coordinate))
+          (list (car coordinate) 'at-loc.p (cadar (cddadr move)))
+          coordinate))
+      *block-coordinates*))) moves)
+  (append *block-coordinates* moves)
+) ; END update-block-coordinates
 
 
 
