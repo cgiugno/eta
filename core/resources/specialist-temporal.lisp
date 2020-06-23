@@ -108,11 +108,11 @@
 
 (defun get-time ()
 ; ``````````````````
-; Gets the system time and returns a record structure. The format of the
-; record is ($ time ?second ?minute ?hour ?day ?month ?year).
+; Gets the system time and returns a record structure.
 ; 
   (multiple-value-bind (seconds minutes hours days months years) (get-decoded-time)
-    `($ date-time ,years ,months ,days ,hours ,minutes ,seconds))
+    `($ date+time :year ,years :month ,months :day ,days
+                  :hour ,hours :minute ,minutes :sec ,seconds))
 ) ; END get-time
 
 
@@ -120,7 +120,8 @@
 ; ``````````````````````````````````````
 ; Converts time record to universal time.
 ;
-  (apply #'encode-universal-time (reverse (cddr time-record)))
+  (apply #'encode-universal-time (reverse
+    (get-keyword-contents time-record '(:year :month :day :hour :minute :sec))))
 ) ; END to-universal-time
 
 

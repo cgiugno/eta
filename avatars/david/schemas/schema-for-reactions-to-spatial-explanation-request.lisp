@@ -20,7 +20,8 @@
   ; NOTE: Currently using ?ulf rather than ?var, since there is no way to provide
   ; an action name as an argument when a schema is selected during pattern transduction
   ; TODO: Add this functionality and then add ?var back to header
-    :episodes ?e1 (~me seek-answer-from.v |Spatial-QA-Server| ?ulf)
+    :episodes (
+              ?e1 (~me seek-answer-from.v |Spatial-QA-Server| ?ulf)
                ; this would send the ulf (obtained from the properties
                ; of the actual name replacing ?var) to an appropriate
                ; file, monitored by the Spatial-QA-Server; the server
@@ -43,6 +44,7 @@
                ; instantiate a subplan for generating a main answer
                ; but also mention alternates (attached as property
                ; to ?e3, I suppose).
+    )
 
 )) ; END parameter *reactions-to-spatial-question*
 

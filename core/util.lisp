@@ -1638,14 +1638,14 @@
 
 
 
-(defun get-keyword-contents (lst key)
+(defun get-keyword-contents (lst keys)
 ;``````````````````````````````````````
-; Gets the contents of lst following a keyword (including the
-; keyword itself), and preceding any subsequent keyword.
+; Gets the contents corresponding to a list of keywords in a record structure
+; (assuming the contents are a single element immediately following the keyword).
 ;
-  (let* ((lookup (member key lst))
-         (rst (member nil (cdr lookup) :test (lambda (x y) (keywordp y)))))
-    (if rst (reverse (set-difference (cdr lookup) rst)) (cdr lookup)))
+  (mapcar (lambda (key)
+    (if (keywordp key)
+      (second (member key lst)))) keys)
 ) ; END get-keyword-contents
 
 
@@ -1657,7 +1657,7 @@
 ;
   (let ((schema-ht (make-hash-table :test #'equal)))
     (dolist (section '(:types :rigid-conds :episodes))
-      (let ((contents (get-keyword-contents schema section)))
+      (let ((contents (car (get-keyword-contents schema (list section)))))
         (when contents
           (setf (gethash section schema-ht) contents))))
     schema-ht)

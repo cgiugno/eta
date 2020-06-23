@@ -392,10 +392,12 @@
 
 (defun extract-coords (prop-list)
 ; `````````````````````````````````
-; Extracts all coordinates from a list of propositions, returned in the form: (|Name| ?x ?y ?z)
-; NOTE: assuming that all at-loc.p propositions use explicit location record, i.e. ($ loc ?x ?y ?z)
+; Extracts all coordinates from a list of propositions, returned in the
+; form: (|Name| ?x ?y ?z). NOTE: assuming that all at-loc.p propositions
+; use explicit location record, i.e. ($ loc :x ?x :y ?y :z ?z)
 ;
-  (mapcar (lambda (prop) (append (list (first prop)) (cddr (third prop))))
+  (mapcar (lambda (prop) (append (list (first prop))
+                                       (get-keyword-contents (third prop) '(:x :y :z))))
     (remove-if-not #'at-loc-prop? prop-list))
 ) ; END extract-coords
 
@@ -416,10 +418,13 @@
 ; Extracts all moves from a list of propositions, returned in the form:
 ; (|Name| (?x1 ?y1 ?z1) (?x2 ?y2 ?z2))
 ; (|Twitter| ((pres move.v) (from.p-arg ($ loc ...)) (to.p-arg ($ loc ...)) ))
-; NOTE: assuming that all move.v propositions use explicit location record, i.e. ($ loc ?x1 ?y1 ?z1)
+; NOTE: assuming that all move.v propositions use explicit
+; location record, i.e. ($ loc :x ?x1 :y ?y1 :z ?z1)
 ;
   (mapcar (lambda (prop)
-      (list (first prop) (cddr (second (second (second prop)))) (cddr (second (third (second prop))))))
+      (list (first prop)
+            (get-keyword-contents (second (second (second prop))) '(:x :y :z))
+            (get-keyword-contents (second (third  (second prop))) '(:x :y :z))))
     (remove-if-not #'move-prop? prop-list))
 ) ; END extract-moves
 

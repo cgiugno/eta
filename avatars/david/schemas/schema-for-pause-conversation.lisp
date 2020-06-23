@@ -14,7 +14,7 @@
 ;
 
 
-:episodes 
+:episodes (
 
   ; David "pauses" by repeatedly listening to the user say something, and ignoring it
   ; unless it is interpreted as a resumption request, in which case the loop is broken.
@@ -28,6 +28,7 @@
     ?e16 (:if ((ulf-of.f ?e15) = '(RESUME.GR))
       ?e17 (~me commit-to-STM.v (that (?e13 finished2.a)))
       ?e18 (~me react-to.v ?e15)))
+)
 
 )) ; END defparameter *pause-conversation*
 

@@ -20,7 +20,7 @@
 ; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
 ; where '@' is the EL operator for "true at the time of"]
 
-:types
+:types (
   !t1 (~you person.n)
   !t2 (~me robot.n)  
   !t3 (?cc (plur BW-concept.n)); concepts that ~me knows (as obj-schema)
@@ -33,8 +33,9 @@
   !t10 ((the.d (|Mercedes| block.n)) block.n)
   !t11 ((the.d (|Toyota| block.n)) block.n)
   !t12 ((the.d (|Burger King| block.n)) block.n)
+)
 
-:rigid-conds
+:rigid-conds (
   !r1 ((the.d (|Target| block.n)) blue.a)
   !r2 ((the.d (|Starbucks| block.n)) green.a)
   !r3 ((the.d (|Twitter| block.n)) red.a)
@@ -43,31 +44,36 @@
   !r6 ((the.d (|Mercedes| block.n)) red.a)
   !r7 ((the.d (|Toyota| block.n)) blue.a)
   !r8 ((the.d (|Burger King| block.n)) green.a)
+)
 
-:var-roles
+:var-roles (
 ;  !r9 (?ka1 (kind1-of.n action1.n)); LKS: I've dropped it because I now think
                                     ; constraints on "ad-hoc variables (introduced
                                     ; existentially as some point) should be
                                     ; placed at that point of introduction
+)
 
-:static-conds 
+:static-conds (
   ; Currently not handled by Eta
   ?s1 (~me understand.v ?cc); assume that understanding a set of things
                             ; entails understanding each of them
   ?s2 (~you at-loc.p |Table|)
   ?s3 (~me at-loc.p |Table|)
+)
 
-:preconds
+:preconds (
   ; Currently not handled by Eta
   ?p1 (some ?c ((?c member-of.p ?cc) and (not (~you understand.v ?c))))
+)
 
-:goals
+:goals (
   ; Currently not handled by Eta
   ?g1 (~me want1.v (that (~you understand1.v ?c)))
   ?g2 (~you want1.v (that ((~me teach-BW-concept-to.v ~you) @ ^now)))
+)
 
 
-:episodes 
+:episodes (
 
   ?e1 (~me choose.v ($c ($c member-of.p ?cc) (not (~you understand.v $c))))
 
@@ -269,18 +275,22 @@
 
   ;; ; David says goodbye after conversation is over.
   ;; ?e18 (~me say-to.v ~you '(Goodbye for now!))
+)
 
 
-:event-relations
+:event-relations (
   ; Not included yet
+)
 
 
-:necessities
+:necessities (
   ; Not included yet
+)
 
 
-:certainties
+:certainties (
   ; Not included yet
+)
 
 
 )) ; END defparameter *teach-BW-concept-to*

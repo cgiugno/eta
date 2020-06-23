@@ -17,7 +17,7 @@
 ; (currently disabled).
 ;
 
-:types
+:types (
   !t1 (~you person.n)
   !t2 (~me robot.n)
   !t3 ((the.d table.n) table.n)
@@ -30,9 +30,10 @@
   !t9  ((the.d (|Mercedes| block.n)) block.n)
   !t10 ((the.d (|Toyota| block.n)) block.n)
   !t11 ((the.d (|Burger King| block.n)) block.n)
+)
 
 
-:rigid-conds
+:rigid-conds (
   !r1 ((the.d (|Target| block.n)) blue.a)
   !r2 ((the.d (|Starbucks| block.n)) green.a)
   !r3 ((the.d (|Twitter| block.n)) red.a)
@@ -41,9 +42,10 @@
   !r6 ((the.d (|Mercedes| block.n)) red.a)
   !r7 ((the.d (|Toyota| block.n)) blue.a)
   !r8 ((the.d (|Burger King| block.n)) green.a)
+)
 
 
-:episodes 
+:episodes (
 
   ; David introduces himself.
   ?e1 (~me say-to.v ~you 
@@ -83,6 +85,7 @@
         ; React to user's reply (i.e., respond to smalltalk or
         ; give an answer to the user's spatial query).
         ?e10 (~me react-to.v ?e4))))
+)
 
 )) ; END defparameter *have-question-answering-dialogue*
 

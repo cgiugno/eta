@@ -37,7 +37,8 @@
   ; NOTE: Currently using ?ulf rather than ?var, since there is no way to provide
   ; an action name as an argument when a schema is selected during pattern transduction
   ; TODO: Add this functionality and then add ?var back to header
-    :episodes ?e1 (~me perceive-world.v |Blocks-World-System| ?ulf ?perceptions)
+    :episodes (
+              ?e1 (~me perceive-world.v |Blocks-World-System| ?ulf ?perceptions)
               ;; ?e2 (:store-in-context (get-actions.f ?perceptions))
                ; this is where Eta "sees" the blocks world, specifically block movements.
                ; ?perceptions is given as a list of propositions reflecting Eta's perceptions
@@ -67,6 +68,7 @@
                ; instantiate a subplan for generating a main answer
                ; but also mention alternates (attached as property
                ; to ?e4, I suppose).
+    )
 
 )) ; END parameter *reactions-to-spatial-question*
 

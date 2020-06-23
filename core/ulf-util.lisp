@@ -1147,26 +1147,25 @@
 
 (defun loc-record? (list)
 ; `````````````````````````
-; Checks whether a list is a location record of form ($ loc ?x ?y ?z)
+; Checks whether a list is a location record of form ($ loc :x ?x :y ?y :z ?z)
 ;
-  (and (listp list) (= (length list) 5) (equal '$ (first list)) (equal 'loc (second list))
-    (every #'numberp (cddr list)))
+  (ttt:match-expr '($ loc :x _!1 :y _!2 :z _!3) list)
 ) ; END loc-record?
 
 
-(defun date-time-record? (list)
-; `````````````````````````
-; Checks whether a list is a date-time record of form ($ date-time ?year ?month ?day ?hour ?minute ?second)
+(defun date+time-record? (list)
+; ```````````````````````````````
+; Checks whether a list is a date-time record of form
+; ($ date+time :year ?year :month ?month :day ?day :hour ?hour :minute ?minute :second ?second)
 ;
-  (and (listp list) (= (length list) 8) (equal '$ (first list)) (equal 'date-time (second list))
-    (every #'numberp (cddr list)))
-) ; END date-time-record?
+  (ttt:match-expr '($ date+time :year _!1 :month _!2 :day _!3 :hour _!4 :minute _!5 :second _!6))
+) ; END date+time-record?
 
 
 (defun at-loc-prop? (prop)
 ; ```````````````````````````
 ; Checks whether a proposition is an at-loc.p formula.
-; i.e. ((the.d (|Twitter| block.n)) at-loc.p ($ loc ?x ?y ?z))
+; i.e. ((the.d (|Twitter| block.n)) at-loc.p ($ loc :x ?x :y ?y :z ?z))
 ;
   (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-loc.p) (loc-record? (third prop)))
 ) ; END at-loc-prop?
@@ -1175,16 +1174,18 @@
 (defun at-about-prop? (prop)
 ; ```````````````````````````
 ; Checks whether a proposition is an at-about.p formula.
-; i.e. (|Now1| at-about.p ($ date-time 2020 3 6 21 37 15))
+; i.e. (|Now1| at-about.p ($ date-time :year 2020 :month 3 :day 6 :hour 21 :minute 37 :second 15))
 ;
-  (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-about.p) (date-time-record? (third prop)))
+  (and (listp prop) (= (length prop) 3) (equal (second prop) 'at-about.p) (date+time-record? (third prop)))
 ) ; END at-about-prop?
 
 
 (defun move-prop? (prop)
 ; `````````````````````````
 ; Checks whether a proposition is a move.v formula.
-; i.e. ((the.d (|Twitter| block.n)) ((past move.v) (from.p-arg ($ loc ?x1 ?y1 ?z1)) (to.p-arg ($ loc ?x2 ?y2 ?z2))))
+; i.e. ((the.d (|Twitter| block.n)) ((past move.v)
+;                                     (from.p-arg ($ loc :x ?x1 :y ?y1 :z ?z1))
+;                                     (to.p-arg   ($ loc :x ?x2 :y ?y2 :z ?z2))))
 ;
   (and (listp prop) (= (length prop) 2) (listp (second prop)) (= (length (second prop)) 3)
     (equal (first (second prop)) '(past move.v)) (listp (second (second prop))) (listp (third (second prop)))
