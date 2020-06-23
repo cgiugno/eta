@@ -1,36 +1,32 @@
 import sys
 import re
+import argparse
 
 regex_moves = r'(\(from\.p-arg (\(\$ loc -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)?\))\)) (\(to\.p-arg (\(\$ loc -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)? -?[0-9]\d*(\.\d+)?\))\))'
 regex_names = r'(\|[a-zA-Z\d_\s\']+\|)'
+regex_locrecords = r'\(\$ loc ([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+) ([-+]?[0-9]*\.?[0-9]+)\)'
 
 def main():
   """
   Given a filename of a log in the Blocks World output format (relative path from root eta directory), processes the log into a log format
-  useable by Eta. Optionally pass '-fixmoves' argument to apply block move fix to old log files where to/from coords were mistakenly switched.
-  The 'fixnames' argument changes shorthand block names (e.g. |Twitter|) to full block noun phrases.
+  useable by Eta. Optionally pass '--fixmoves' argument to apply block move fix to old log files where to/from coords were mistakenly switched.
+  The '--fixnames' argument changes shorthand block names (e.g. |Twitter|) to full block noun phrases. The '--fixlocrecords' argument changes
+  any ($ loc ...) records to the new format using keywords.
   """
-  fixmoves = False
-  fixnames = False
-  if len(sys.argv) > 1:
-    filename = sys.argv[1]
-    if len(sys.argv) > 2:
-      if sys.argv[2] == '-fixmoves':
-        fixmoves = True
-      elif sys.argv[2] == '-fixnames':
-        fixnames = True
-      if len(sys.argv) > 3:
-        if sys.argv[3] == '-fixmoves':
-          fixmoves = True
-        elif sys.argv[3] == '-fixnames':
-          fixnames = True
-
-  else:
-    print('must give filename')
-    exit()
+  parser = argparse.ArgumentParser(description='Process BW log')
+  parser.add_argument("filename")
+  parser.add_argument("--fixmoves", action="store_true")
+  parser.add_argument("--fixnames", action="store_true")
+  parser.add_argument("--fixlocrecords", action="store_true")
+  parser.add_argument("--fixall", action="store_true")
+  args = parser.parse_args()
+  filename = args.filename
+  fixmoves = args.fixmoves or args.fixall
+  fixnames = args.fixnames or args.fixall
+  fixlocrecords = args.fixlocrecords or args.fixall
 
   filename_in = filename
-  filename_out = 'logs/logs_original' + filename.split('/')[-1]
+  filename_out = 'logs/logs_original/' + filename.split('/')[-1]
 
   with open(filename_in,'r') as f_in:
 
@@ -65,6 +61,8 @@ def main():
             content = re.sub(regex_moves, r'(from.p-arg \7) (to.p-arg \2)', content)
           if fixnames:
             content = re.sub(regex_names, r'(the.d (\1 block.n))', content)
+          if fixlocrecords:
+            content = re.sub(regex_locrecords, r'($ loc :x \1 :y \2 :z \3)', content)
           turn_tuple[action] = turn_tuple[action] + [content] if action in turn_tuple else [content]
         # Add any other action to turn tuple
         else:
