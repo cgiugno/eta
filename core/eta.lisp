@@ -87,6 +87,7 @@
   ; ulf, gist, and references, respectively).
   ; Currently these are just lists - maybe in the future they should be
   ; hash tables (hashed on time)?
+  ; TODO: reconcile old 
   (defparameter *discourse-history* nil)
   (defparameter *discourse-history-ulf* nil)
   (defparameter *discourse-history-gist* nil)
@@ -94,7 +95,6 @@
 
   ; Hash table of gist clauses attributed to each person
   ; involved in the conversation.
-  ;```````````````````````````````````````````
   (defparameter *gist-kb-user* (make-hash-table :test #'equal))
   (defparameter *gist-kb-eta* (make-hash-table :test #'equal))
 
@@ -103,6 +103,15 @@
   ; This is a hash table with propositions hashed on the full proposition, the predicate, the subject,
   ; and possibly the time that the formula is true in.
   (defparameter *context* (make-hash-table :test #'equal))
+
+  ; Memory
+  ; TODO: Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
+  ; from previous contexts.
+  (defparameter *memory* (make-hash-table :test #'equal))
+
+  ; Equality sets
+  ; Stores coreference/equality sets, which indexes to the canonical name
+  (defparameter *equality-sets* (make-hash-table :test #'equal))
 
   ; Time
   ; Stores the constant denoting the current time period. NOW0 is taken uniquely to refer
@@ -114,11 +123,6 @@
   ; Time of previous episode
   ; Stores the constant denoting the time of the previous episode
   (defparameter *time-prev* *time*)
-
-  ; Memory
-  ; Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
-  ; from previous contexts.
-  (defparameter *memory* (make-hash-table :test #'equal))
 
   ; Coreference mode
   ; 0 : simply reconstruct the original ulf
@@ -1779,6 +1783,7 @@
   (cond
     ; (wff1 = wff2)
     ((equal-prop? wff)
+      (setq wff (eval-functions wff))
       (equal (first wff) (third wff)))
     ; (not wff1)
     ((not-prop? wff)
@@ -1805,7 +1810,7 @@
 ; Expr is a condition followed by consecutive name & wff pairs. Optionally,
 ; this is followed by an :else keyword and additional name & wff pairs.
 ;
-  (let* ((cnd (eval-functions (car expr))) (rst (cdr expr))
+  (let* ((cnd (car expr)) (rst (cdr expr))
          (else-episodes (get-keyword-contents rst :else))
          (if-episodes (if (not else-episodes) rst
           (butlast (reverse (set-difference rst else-episodes))))))
@@ -1835,7 +1840,7 @@
 ; instantiating the first one which holds true.
 ;
   (let* ((lst1 (car expr)) (else1 (if (equal (first lst1) :else) t))
-         (cond1 (if (not else1) (eval-functions (second lst1))))
+         (cond1 (if (not else1) (second lst1)))
          (episodes1 (if (not else1) (cddr lst1) (cdr lst1))))
     (cond
       ; None of the cases have been matched, so no subplan is generated

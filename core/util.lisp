@@ -77,6 +77,26 @@
 
 
 
+(defun flatten (lst)
+;````````````````````````
+; Flattens an arbitrary list using mapcar. Note that we can do this fairly easily
+; using recursion: use mapcar to flatten each sublist (or if an atom is reached, create a
+; list consisting of that atom). Then just append all of the flattened sublists together.
+;
+  (if (not (listp lst))
+    (return-from flatten nil))
+
+  ; Recursively flatten list
+  (labels
+    ((flatten-recur (p)
+      (if (atom p)
+        (list p)
+        (apply #'append (mapcar #'flatten-recur p)))))
+    (flatten-recur lst))
+) ; END flatten
+
+
+
 (defun intersection1 (l)
 ;`````````````````````````
 ; Intersection of all sub-lists in l
@@ -265,6 +285,17 @@
 ;
   (and (symbolp atm) (member (car (explode atm)) '(#\? #\! #\$) :test #'char-equal))
 ) ; END variable?
+
+
+
+(defun get-variables (lst)
+;``````````````````````````
+; Returns a list of all unique variables in lst.
+;
+  (remove-duplicates (remove nil
+    (mapcar #'(lambda (x) (if (variable? x) x nil)) 
+      (flatten lst))))
+) ; END get-variables
 
 
 
@@ -826,7 +857,7 @@
 ; in the current schema syntax). Otherwise, evaluate all functions in fact and
 ; store in context.
 ;
-  (let ((fact (if (equal (car wff) 'quote) (eval wff) (eval-functions wff))))
+  (let ((fact (if (equal (car wff) 'quote) (eval wff) wff)))
     (store-fact fact *context*))
 ) ; END store-in-context
 
@@ -847,6 +878,45 @@
 ; from context (see 'find-all-instances').
   (find-all-instances descr *context*)
 ) ; END find-all-instances-context
+
+
+
+(defun add-alias (alias canonical-name)
+;`````````````````````````````````````````
+; Adds a given alias for a canonical name to the equality sets hash table,
+; i.e., indexing on the canonical name.
+; For example, (add-alias '(k BW-arch.n) '|BW-concept-3|) creates the equality
+; set (|BW-concept-3| (k BW-arch.n)) hashed on |BW-concept-3|, or else appends
+; (k BW-arch.n) to the existing set under that index.
+;
+  (if (member alias (gethash canonical-name *equality-sets*) :test #'equal)
+    (return-from add-alias nil))
+  (when (not (gethash canonical-name *equality-sets*))
+    (push canonical-name (gethash canonical-name *equality-sets*)))
+  (push alias (gethash canonical-name *equality-sets*))
+) ; END add-alias
+
+
+
+(defun remove-alias (alias canonical-name)
+;```````````````````````````````````````````
+; Removes a given alias for a canonical name.
+;
+  (when (gethash canonical-name *equality-sets*)
+    (setf (gethash canonical-name *equality-sets*) 
+      (remove alias (gethash canonical-name *equality-sets*) :test #'equal)))
+) ; END remove-alias
+
+
+
+(defun print-aliases ()
+;````````````````````````
+; Prints all aliases in equality sets hash table.
+;
+  (maphash (lambda (canonical-name aliases)
+      (format t "~a: ~a~%" canonical-name aliases))
+    *equality-sets*)
+) ; END print-aliases
 
 
 
@@ -896,6 +966,7 @@
 ; Return T if the fact was new, and NIL otherwise.
 ;
   (let ()
+    (setq fact (eval-functions fact))
     (if (gethash fact ht) (return-from store-fact nil))
     (dolist (key (storage-keys fact))
       (if (equal key fact)
@@ -917,6 +988,7 @@
 ;````````````````````````````
 ; Delete 'fact' from hash table 'ht', under all its keys
 ;
+  (setq fact (eval-functions fact))
   (if (gethash fact ht); is 'fact' actually in ht? 
     (prog2 (dolist (key (storage-keys fact))
                (setf (gethash key ht) 
@@ -944,6 +1016,7 @@
 ; argument "don't-cares" (nil) in the retrieval. The we filter out
 ; instances that don't have the required non-variable arguments.
 ;
+  (setq pred-patt (eval-functions pred-patt))
   (if (atom pred-patt) ; special (unexpected) cases of arg-less preds
     (if (symbolp pred-patt) ; facts are stored as list elements
       (return-from get-matching-facts (gethash pred-patt ht))
@@ -1028,18 +1101,14 @@
       (if (not (eq (car (third descr)) 'and)); just one predication?
         (list (third descr)); list it, for uniformity
         (cdr (third descr)))); drop the "and"
-    (setq vars (remove-duplicates ; look for variables in the "flattened",
-      (remove nil      ; unnegated predications, appended together
-        (mapcar #'(lambda (x) (if (variable? x) x nil)) 
-          (apply #'append 
-            (mapcar #'(lambda (x) (if (eq (car x) 'not) (second x) x))
-              body))))))
+    (setq body (eval-functions body))
+    (setq vars (get-variables
+      (mapcar #'(lambda (x) (if (eq (car x) 'not) (second x) x))
+        body)))
     ; find positive conjunct containing all variables
     (dolist (conjunct body)
-      (when (subsetp vars ; is the set of all vars a subset of (& thus
-              (remove nil ; equal to) the variables of conjunct?
-                (mapcar #'(lambda (x) (if (variable? x) x nil))
-                          (cons (car conjunct) (cddr conjunct)))))
+      (when (subsetp vars
+              (get-variables (cons (car conjunct) (cddr conjunct))))
             (setq main-conjunct conjunct)
             (return nil))) ; exit loop
     (when (null main-conjunct)
