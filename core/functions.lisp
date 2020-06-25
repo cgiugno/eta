@@ -64,9 +64,13 @@
 
 
 
-(defun relevant-answers.f (x y)
+(defun verbalize-goal-rep.f (x)
 ; ```````````````````````````````
-; Given a list of answer relations and a query ulf, we want to get the answers that are needed to generate a response
-; TODO (?)
-
-) ; END relevant-answers.f
+; Temporary
+;
+  (let (goal-rep-record)
+    (setq goal-rep-record (get-record-structure x))
+    (if goal-rep-record
+      `(quote (Building a ,(caar (get-keyword-contents goal-rep-record '(:header))) \.))
+      ''(No goal representation found \.)))
+) ; END verbalize-goal-rep.f

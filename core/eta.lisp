@@ -1044,7 +1044,7 @@
       ; e.g. yields ((_+ '(I am a senior comp sci major\, how about you?)))
       ; or nil, for non-match
       ((setq bindings (bindings-from-ttt-match '(~me say-to.v ~you _+) wff))
-        (setq expr (get-single-binding bindings))
+        (setq expr (eval-functions (get-single-binding bindings)))
         ; If the current "say" action is a question (final question mark,
         ; can also check for wh-words & other cues), then use 'topic-keys'
         ; and 'gist-clauses' of current ep-name and the *gist-kb-user*
@@ -1317,6 +1317,44 @@
         ; Store each formula in context
         (store-in-context expr)
         (delete-current-episode {sub}plan-name))
+
+      ;````````````````````````````
+      ; Eta: Trying
+      ;````````````````````````````
+      ; Forms a subplan for whichever argument is given to the try1.v
+      ; action. If the subplan is successful (i.e., returns t), store
+      ; ((pair ~me ?ep-var) successful.a) in context.
+      ((setq bindings (bindings-from-ttt-match '(~me try1.v (to _!)) wff))
+        (setq expr (get-single-binding bindings))
+        ; TBC
+        (setq new-subplan-name
+          (init-plan-from-episode-list
+            (list :episodes (episode-var) (cons '~me expr))
+            {sub}plan-name))
+        (when (null new-subplan-name)
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (add-subplan {sub}plan-name new-subplan-name)
+        ;; (setq new-subplan-name
+        ;;   (init-plan-from-episode-list
+        ;;     (list :episodes (episode-var) (create-say-to-wff ans))
+        ;;     {sub}plan-name))
+        ;; ; If subplan creation is successful, attach as subplan (otherwise delete).
+        ;; (when (null new-subplan-name)
+        ;;   (delete-current-episode {sub}plan-name)
+        ;;   (return-from implement-next-eta-action nil))
+        ;; (add-subplan {sub}plan-name new-subplan-name)
+      )
+
+      ;````````````````````````````
+      ; Eta: Finding
+      ;````````````````````````````
+      ; TBC
+      ; (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
+      ((setq bindings (bindings-from-ttt-match '(~me find4.v _!) wff))
+        (setq expr (get-single-binding bindings))
+        (setq sk-var (second expr))
+      )
 
       ;````````````````````````````
       ; Eta: Choosing

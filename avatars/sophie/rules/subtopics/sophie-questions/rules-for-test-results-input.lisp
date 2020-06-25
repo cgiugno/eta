@@ -61,5 +61,5 @@
     2 (*have-subdialogue* ((I see\. That sounds pretty bleak\. What does it mean for me?)
                            ((What is my prognosis ?)))) (0 :schema+args)
   1 (0)
-    2 (Hmm\, you see\.) (0 :out)
+    2 (Oh\, you see\.) (0 :out)
 ))
