@@ -75,11 +75,22 @@
 
 :episodes (
 
-  ?e1 (~me choose.v ($c ($c member-of.p ?cc) (not (~you understand.v $c))))
+  ; TODO: it might make more sense for this action to be "(~me try.v (to (choose.v ...)))",
+  ; since something may go wrong - for instance, you might already understand all the concepts
+  ; that Eta has available.
+  ;; ?e1 (~me choose.v (a.d ?c ((most.mod-a simple.a)
+  ;;       (:l (?x) (and (?x member-of.p ?cc) (not (~you understand.v ?x)))))))
+  ?e1 (~me choose.v (a.d ?c (random.a
+        (:l (?x) (and (?x member-of.p ?cc) (not (~you understand.v ?x)))))))
 
-  ?e2 (~me form.v ($goal-rep ($goal-rep goal-schema1.n) ($goal-rep instance-of.n $c)))
+  ; TODO: likewise - Eta might not have any visual/BW concepts, the concepts may be ill-formed, etc.
+  ;; ?e2 (~me form.v ($goal-rep ($goal-rep goal-schema1.n) ($goal-rep instance-of.n $c)))
+  ?e2 (~me form-spatial-representation.v (a.d ?goal-rep
+        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
 
-  ?e3 (~me guide-BW-construction.v ~you $goal-rep)
+  ?e3 (~me guide-BW-construction.v ~you ?goal-rep)
+
+  ?e4 (~me commit-to-STM.v (that (~you understand.v ?c)))
 
   ;; ; David starts conversation. It would be nice to gave opening greetings
   ;; ; if the user is new, or it's a new day ... The opening could be more concise

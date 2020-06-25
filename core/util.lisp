@@ -288,6 +288,28 @@
 
 
 
+(defun lambda-descr? (lst)
+;```````````````````````````
+; Check whether a list is a lambda abstract, e.g.,
+; (:l (?x ?y) (and (?x on.p ?y) (not (?x red.a))))
+;
+  (and (listp lst) (= 3 (length lst)) (equal :l (first lst))
+       (listp (second lst)) (every #'variable? (second lst))
+       (listp (third lst)))
+) ; END lambda-descr?
+
+
+
+(defun record-structure? (lst)
+;```````````````````````````````
+; Checks whether a list is a record structure, e.g.,
+; ($ loc :x 1 :y 2 :z 0)
+  (and (listp lst) (cddr lst) (equal '$ (car lst))
+       (symbolp (second lst)))
+) ; END record-structure?
+
+
+
 (defun get-variables (lst)
 ;``````````````````````````
 ; Returns a list of all unique variables in lst.
@@ -872,6 +894,16 @@
 
 
 
+(defun remove-from-context (pred-patt)
+;```````````````````````````````````````
+; Removes a fact from context
+;
+  (remove-facts (get-matching-facts pred-patt *context*)
+    *context*)
+) ; END remove-from-context
+
+
+
 (defun find-all-instances-context (descr)
 ;```````````````````````````````````````````
 ; Given a lambda description, find all instances
@@ -882,7 +914,7 @@
 
 
 (defun add-alias (alias canonical-name)
-;`````````````````````````````````````````
+;````````````````````````````````````````
 ; Adds a given alias for a canonical name to the equality sets hash table,
 ; i.e., indexing on the canonical name.
 ; For example, (add-alias '(k BW-arch.n) '|BW-concept-3|) creates the equality
@@ -895,6 +927,15 @@
     (push canonical-name (gethash canonical-name *equality-sets*)))
   (push alias (gethash canonical-name *equality-sets*))
 ) ; END add-alias
+
+
+
+(defun get-aliases (canonical-name)
+;````````````````````````````````````
+; Gets a list of aliases for a particular canonical name.
+;
+  (gethash canonical-name *equality-sets*)
+) ; END get-aliases
 
 
 
@@ -917,6 +958,16 @@
       (format t "~a: ~a~%" canonical-name aliases))
     *equality-sets*)
 ) ; END print-aliases
+
+
+
+(defun get-record-structure (canonical-name)
+;``````````````````````````````````````````````
+; Gets the record structure aliased to a canonical name,
+; if one exists.
+;
+  (find-if #'record-structure? (get-aliases canonical-name))
+) ; END get-record-structure
 
 
 
@@ -991,11 +1042,20 @@
   (setq fact (eval-functions fact))
   (if (gethash fact ht); is 'fact' actually in ht? 
     (prog2 (dolist (key (storage-keys fact))
-               (setf (gethash key ht) 
-                     (remove fact (gethash key ht) :test #'equal)))
+            (if (equal key fact)
+              (remhash key ht)
+              (setf (gethash key ht) 
+                     (remove fact (gethash key ht) :test #'equal))))
             t) ; signal that the fact was removed
      nil ; fact wasn't present in ht
 )) ; END remove-fact
+
+
+
+(defun remove-facts (facts ht)
+;```````````````````````````````
+  (dolist (fact facts) (remove-fact fact ht))
+) ; END remove-facts
 
 
 
@@ -1015,6 +1075,9 @@
 ; example), we need to make the variable and all but one non-var
 ; argument "don't-cares" (nil) in the retrieval. The we filter out
 ; instances that don't have the required non-variable arguments.
+;
+; NOTE: here we use the equality sets, so that any match to a constant
+; or alias of that constant is successful.
 ;
   (setq pred-patt (eval-functions pred-patt))
   (if (atom pred-patt) ; special (unexpected) cases of arg-less preds
@@ -1572,11 +1635,20 @@
 
 
 (defun skolem (name)
-; ````````````````````
+;````````````````````
 ; Creates a unique skolem constant given a name.
 ;
   (intern (format nil "~a.SK" (gensym (string-upcase (string name)))))
 ) ; END skolem
+
+
+
+(defun skolem? (sk-name)
+;``````````````````````````
+; Checks if sk-name is a skolem constant.
+;
+  (and (atom sk-name) (equal (second (sym-split sk-name 3)) '.SK))
+) ; END skolem?
 
 
 
@@ -1928,39 +2000,53 @@
 
 
 
-(defun get-obj-schemas ()
-; `````````````````````````
-; This waits until it can load a list of object schemas from "./io/obj-schemas.lisp".
+(defun load-obj-schemas ()
+;```````````````````````````````````````````````
+; Load core object schemas
+; (in directory 'core/resources/obj-schemas')
+; NOTE: I don't like having this here (loaded during Eta's
+; 'init' function), but it's currently necessary since
+; the equality sets and context are only defined in 'init'.
 ;
-  (setq *obj-schemas* nil)
-  (loop while (not *obj-schemas*) do
-    (sleep .5)
-    (progn
-      (load "./io/obj-schemas.lisp")
-		  (if *obj-schemas*
-        (with-open-file (outfile "./io/obj-schemas.lisp" :direction :output 
-                                                         :if-exists :supersede
-                                                         :if-does-not-exist :create)))))
-  (if (listp *obj-schemas*)
-    (cons 'set-of (mapcar (lambda (obj-schema)
-        (setf (get (cadadr obj-schema) 'schema) obj-schema)
-        `(k ,(cadadr obj-schema)))
-      *obj-schemas*)))
-) ; END get-obj-schemas
+(mapcar (lambda (file) (load file))
+    (directory "core/resources/obj-schemas/*.lisp"))
+) ; END load-obj-schemas
 
 
 
-(defun get-obj-schemas-offline ()
-; `````````````````````````````````
-; Reads in a list of local object schemas from "./core/resources
-; concept_schemas_offline/BW-concepts.lisp".
+(defun store-obj-schema (obj-type canonical-name schema)
+;``````````````````````````````````````````````````````````
+; Stores an object schema with an associated canonical name. Also stores the
+; generic name as an alias, e.g., (k BW-arch.n), generated from the header.
 ;
-  (load "./core/resources/concept_schemas_offline/BW-concepts.lisp")
-  (cons 'set-of (mapcar (lambda (obj-schema)
-        (setf (get (cadadr obj-schema) 'schema) obj-schema)
-        `(k ,(cadadr obj-schema)))
-      *BW-concepts*))
-) ; END get-obj-schemas-offline
+  (let (generic-name schema-record)
+    (setq schema-record (cons '$ schema))
+    (setq generic-name (list 'k (cadar (get-keyword-contents schema '(:header)))))
+    (add-alias generic-name canonical-name)
+    (add-alias schema-record canonical-name)
+    (store-in-context (list canonical-name obj-type)))
+) ; END store-obj-schema
+
+
+
+(defun store-concept-set (set-type canonical-name concept-set)
+;```````````````````````````````````````````````````````````````
+; Stores a concept set (i.e., set of object schema names) with an associated
+; canonical name. Also stores the generic name, i.e. a set of the generic
+; names of the objects in the set.
+;
+  (let (generic-name)
+    (setq generic-name (make-set (mapcar (lambda (concept)
+        (find-if (lambda (alias)
+          (equal (car alias) 'k)) (get-aliases concept)))
+      concept-set)))
+    (add-alias generic-name canonical-name)
+    (store-in-context (list canonical-name set-type))
+    (mapcar (lambda (concept)
+        (store-in-context
+          (list concept 'member-of.p canonical-name)))
+      concept-set))
+) ; END store-concept-set
 
 
 
@@ -1972,13 +2058,13 @@
   (with-open-file (outfile "./io/goal-request.lisp" :direction :output
                                                     :if-exists :supersede
                                                     :if-does-not-exist :create)
-    (format outfile "(setq *chosen-obj-schema* ~a)" obj-schema))
+    (format outfile "(setq *chosen-obj-schema* '~s)" obj-schema))
 ) ; END request-goal-rep
 
 
 
 (defun get-goal-rep ()
-; ``````````````````````
+;```````````````````````
 ; This waits until it can load a goal representation from "./io/goal-rep.lisp".
 ;
   (setq *goal-rep* nil)

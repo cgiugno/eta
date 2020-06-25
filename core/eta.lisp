@@ -113,6 +113,9 @@
   ; Stores coreference/equality sets, which indexes to the canonical name
   (defparameter *equality-sets* (make-hash-table :test #'equal))
 
+  ; Load object schemas
+  (load-obj-schemas)
+
   ; Time
   ; Stores the constant denoting the current time period. NOW0 is taken uniquely to refer
   ; to the beginning, with all moves/etc. occurring at subsequent times.
@@ -318,10 +321,8 @@
         ; If typed variable, find value for variable through observation and
         ; substitute in both type and in contents of each schema section.
         (when (variable? (car type))
-          ; TODO: following lines possibly need reworking.
-          ;; (setq sk-name (skolem (implode (cdr (explode (car type))))))
-          ;; (setf (get sk-name 'denotation) (observe-variable-type (second type)))
-          (setq sk-name (observe-variable-type (second type)))
+          ; Get skolem name and replace in schema.
+          (setq sk-name (observe-variable-type (car type) (second type)))
           (maphash (lambda (k v) (setf (gethash k sections)
             (subst sk-name (car type) v))) sections)
           (setq type (subst sk-name (car type) type)))
@@ -581,61 +582,90 @@
 
 
 
-(defun observe-variable-type (type)
-;`````````````````````````````````````
+(defun observe-variable-type (sk-var type)
+;```````````````````````````````````````````
 ; Through observation of the world, find an entity which can fill in
 ; variable of type (variable assumed to be neither in schema header or
 ; filled in at later point in schema).
-; TODO: this is super incomplete - currently I've just hard-coded the
-; choice for testing purposes, but this is not general at all.
 ;
-  (cond
-    ((equal type '(plur BW-concept.n))
-      (if *live* (get-obj-schemas) (get-obj-schemas-offline)))
-  )
+  (let (sk-name sk-const)
+    (setq sk-const (skolem (implode (cdr (explode sk-var)))))
+    (setq sk-name
+      (car (find-all-instances-context `(:l (?x) (?x ,type)))))
+    (add-alias sk-const sk-name)
+    sk-name)
 ) ; END observe-variable-type
 
 
 
 
-(defun observe-variable-restrictions (restrictions)
-;````````````````````````````````````````````````````
-; Handles any indefinite quantification filled through observation
-; of the world, given a list of restrictions.
-; TODO: this should be considered temporary/incomplete while I
-; figure out a better way to deal with such indefinite quantification.
+
+(defun form-spatial-representation ()
+;``````````````````````````````````````
+; Forms a spatial representation from the currently chosen BW-concept.n
+; (assuming such a choice has actually been made at this point), through
+; sending the BW system the chosen concept schema and receiving a goal
+; schema.
+; TODO: I'm not sold on how this is done currently, but I'm stumped on
+; how to do it more sensibly. The issue is that, for the lambda expression
+; + find-all-instances to work, the facts about the goal schema need to be
+; stored ahead-of-time, so the communication of the goal schema needs to be
+; done before the 'choice' step of the indefinite quantifier. This requires
+; sending the BW system the chosen concept schema, but the concept schema
+; name is nested inside the lambda extract, and messing with that here would
+; be a pretty messy approach. Instead, I check context for some individual such
+; that it is a BW-concept.n and Eta has chosen it.
 ;
-  (format t "::~a~%" restrictions)
-) ; END observe-variable-restrictions
+  (let (concept-name goal-schema goal-name)
+    (setq concept-name (car (find-all-instances-context
+      '(:l (?x) (and (?x BW-concept.n) (~me choose.v ?x))))))
+    (request-goal-rep (cdr (get-record-structure concept-name)))
+    ; NOTE: currently no special offline (terminal mode) procedure
+    ; for getting goal schema.
+    (setq goal-schema (get-goal-rep))
+    (setq goal-name (gensym "BW-goal-rep"))
+    (add-alias (cons '$ goal-schema) goal-name)
+    (store-in-context (list goal-name 'goal-schema1.n))
+    (store-in-context (list goal-name 'instance-of.p concept-name)))
+) ; END form-spatial-representation
 
 
 
 
 
-(defun choose-variable-restrictions (restrictions)
-;```````````````````````````````````````````````````
-; Handles any indefinite quantification filled through a choice 
-; made by Eta, given a list of restrictions.
-; TODO: this should be considered temporary/incomplete while I
-; figure out a better way to deal with such indefinite quantification.
+(defun choose-variable-restrictions (sk-var restrictions)
+;``````````````````````````````````````````````````````````
+; Handles any indefinite quantification of a variable filled
+; through a choice  made by Eta, given a list of restrictions.
+; 'sk-var' is the variable to be replaced, e.g., '?c'.
+; 'restrictions' may be a lambda abstract, possibly preceded by
+; some adjective modifier, e.g.,
+; (random.a (:l (?x) (and (?x member-of.p ?cc)
+;                         (not (~you understand.v ?x)))))
+; The fact that some individual was chosen is also stored in context.
+; NOTE: does this make sense? i.e., should something being chosen be
+; stored in dialogue context? If the choosing occurs as part of a loop,
+; how is something "unchosen" at the end of the loop? Currently I do that
+; here, so basically only one (~me choose.v ?x) fact can be active in
+; context at once, but it's pretty ugly.
 ;
-  (let (bindings binding1 binding2 binding3 binding4 sk-var constraints member-set)
-    (cond
-      ; If randomly choosing a member of another entity, with additional constraints.
-      ((setq bindings (bindings-from-ttt-match '(_*1 (_!1 member-of.p _!2) _*2) restrictions))
-        (setq binding1 (get-multiple-bindings bindings)) (setq bindings (cdr bindings))
-        (setq binding2 (get-single-binding bindings)) (setq bindings (cdr bindings))
-        (setq binding3 (get-single-binding bindings)) (setq bindings (cdr bindings))
-        (setq binding4 (get-multiple-bindings bindings))
-        (setq sk-var binding2)
-        ;; (setq member-set (get binding3 'denotation))
-        (setq member-set binding3)
-        (setq constraints (append binding1 binding4))
-        ; Randomly choose a member such that every constraint, where the choice variable has
-        ; been substituted with the member, evaluates to true.
-        (car (member sk-var (shuffle (cdr member-set))
-          :test (lambda (var member)
-            (every #'eval-truth-value (subst member var constraints))))))))
+  (let (sk-name sk-const lambda-descr modifier candidates)
+    (setq sk-const (skolem (implode (cdr (explode sk-var)))))
+    ; Allow for initial modifier 
+    (when (not (lambda-descr? restrictions))
+      (setq modifier (car restrictions)) (setq restrictions (second restrictions)))
+    (setq lambda-descr restrictions)
+    (setq candidates (find-all-instances-context lambda-descr))
+    (format t "given restriction ~a, found ~
+               candidates ~a~%" lambda-descr candidates) ; DEBUGGING
+    (setq sk-name (cond
+      ((equal modifier 'random.a)
+        (car (shuffle candidates)))
+      (t (car candidates))))
+    ; Store fact that sk-name chosen in context (removing any existing choice).
+    (remove-from-context '(~me choose.v ?x))
+    (store-in-context `(~me choose.v ,sk-name))
+    sk-name)
 ) ; END choose-variable-restrictions
 
 
@@ -1291,44 +1321,44 @@
       ;````````````````````````````
       ; Eta: Choosing
       ;````````````````````````````
-      ; Choose 
+      ; Choosing a reference for an indefinite quantifier, given an episode
+      ; like ?e1 (~me choose.v (a.d ?c (random.a
+      ;            (:l (?x) (and (?x member-of.p ?cc)
+      ;                          (not (~you understand.v ?x)))))))
+      ; The lambda abstract is used to select candidates (given the facts stored
+      ; in context), which is optionally preceded by an additional modifier
+      ; (e.g., random.a, (most.mod-a simple.a), etc.) which is used for final
+      ; selection from the candidate list.
+      ; The canonical name is substituted for the variable in the rest of the plan
+      ; (a skolem constant is also generated and aliased to the canonical name, but
+      ; is currently unused).
       ((setq bindings (bindings-from-ttt-match '(~me choose.v _!) wff))
         (setq expr (get-single-binding bindings))
-        (setq sk-var (car expr))
-        ;; (setq sk-name (skolem "CHOICE"))
-        ;; (setf (get sk-name 'denotation) (choose-variable-restrictions (cdr expr)))
-        ;; (format t "formed skolem constant ~a with ~
-        ;;            denotation ~a~%" sk-name (get sk-name 'denotation)) ; DEBUGGING
-        (setq sk-name (choose-variable-restrictions (cdr expr)))
-        (format t "formed value ~a for variable ~a~%" sk-name sk-var) ; DEBUGGING
+        (setq sk-var (second expr))
+        (setq sk-name (choose-variable-restrictions sk-var (third expr)))
+        (format t "chose value ~a for variable ~a~%" sk-name sk-var) ; DEBUGGING
         (nsubst-variable {sub}plan-name sk-name sk-var)
         (delete-current-episode {sub}plan-name))
 
       ;```````````````````````````````````````
-      ; Eta: Forming a formal representation
+      ; Eta: Forming a spatial representation
       ;```````````````````````````````````````
-      ; Form some formal representation of a concept (e.g., an object schema).
-      ; This assumes dynamic semantics for the argument, e.g.,
-      ; ($goal-rep ($goal-rep goal-schema1.n) ($goal-rep instance-of.n $c)).
-      ; Here, $goal-rep gets instantiated to some skolem constant denoting
-      ; a schema of some specific type. Eta should query the BW system
-      ; for a schema such that the schema is goal-schema1.n and
-      ; instance-of.n $c (where $c is some concept/object schema).
-      ; (alternatively, should Eta have the object schemas and its instances?)
-      ; The schema contents get attached to the skolem constant via 'schema.
-      ; TODO: temporarily just reads goal schema from *goal-schema*.
-      ; 
-      ((setq bindings (bindings-from-ttt-match '(~me form.v _!) wff))
+      ; Form some spatial representation of a concept (i.e., of an
+      ; object schema). Given an episode like:
+      ; ?e2 (~me form-spatial-representation.v (a.d ?goal-rep
+      ;        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
+      ; First, Eta queries the BW system for the spatial representation, given
+      ; the concept schema. Eta then selects the spatial representation (goal schema)
+      ; after storing the two relevant facts, and substitutes it for the variable
+      ; in the rest of the plan.
+      ((setq bindings (bindings-from-ttt-match '(~me form-spatial-representation.v _!) wff))
         (setq expr (get-single-binding bindings))
-        (setq sk-var (car expr))
-        (setq sk-name (skolem "REP"))
-        (setf (get sk-name 'denotation) (observe-variable-restrictions (cdr expr)))
-        ;; (setf (get sk-name 'denotation) *goal-schema*)
-        ;; (format t "formed schema ~a with ~
-        ;;            representation ~a~%" sk-name (get sk-name 'denotation)) ; DEBUGGING
+        (setq sk-var (second expr))
+        (form-spatial-representation)
+        (setq sk-name (choose-variable-restrictions sk-var (third expr)))
+        (format t "formed representation ~a for variable ~a~%" sk-name sk-var)
         (nsubst-variable {sub}plan-name sk-name sk-var)
-        (delete-current-episode {sub}plan-name)
-      )
+        (delete-current-episode {sub}plan-name))
 
       ;````````````````````````````
       ; Eta: Initiating Subschema

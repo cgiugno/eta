@@ -32,12 +32,9 @@
   ; Delete the content of perceptions.lisp, if it exists, otherwise create
   (with-open-file (outfile "./io/perceptions.lisp" :direction :output :if-exists 
                                               :supersede :if-does-not-exist :create))
-  ; Delete the content of reaction.lisp, if it exists, otherwise create
+  ; Delete the content of answer.lisp, if it exists, otherwise create
   (with-open-file (outfile "./io/answer.lisp" :direction :output :if-exists 
                                               :supersede :if-does-not-exist :create))
-  ; Delete the content of obj-schemas.lisp, if it exists, otherwise create
-  (with-open-file (outfile "./io/obj-schemas.lisp" :direction :output :if-exists 
-                                                   :supersede :if-does-not-exist :create))
   ; Delete the content of goal-request.lisp, if it exists, otherwise create
   (with-open-file (outfile "./io/goal-request.lisp" :direction :output :if-exists 
                                                     :supersede :if-does-not-exist :create))

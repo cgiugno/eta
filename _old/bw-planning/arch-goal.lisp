@@ -1,4 +1,4 @@
-(setq *goal-schema2*
+(setq *goal-rep*
 ; Currently only types are assumed to be in infix form. Note that 'req-properties'
 ; reverses infixed type predications to get prefix form.
 '(rel-schema (red-and-blue-arch ?s)
