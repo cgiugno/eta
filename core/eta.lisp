@@ -238,7 +238,7 @@
   ; pointer. Every time an action is completed, the 'rest-of-plan'
   ; pointer is updated to point at a new action name (which may
   ; be nonprimitive and in turn have a 'subplan' property). If an
-  ; action is primitive (e.g. (~me say-to.v ~you)) execute it, otherwise
+  ; action is primitive (e.g. (^me say-to.v ^you)) execute it, otherwise
   ; form and initialize a subplan.
   (loop while (and
     (not (null (get '*dialog-plan* 'rest-of-plan)))
@@ -554,7 +554,7 @@
 
     ; If this is a Eta action, transfer to it the gist clauses, interpretation,
     ; and topic key list from the hash tables associated with 'schema-name':
-    (when (eq '~me (car (get ep-name 'wff)))
+    (when (eq '^me (car (get ep-name 'wff)))
       (when (get schema-name 'gist-clauses)
         (setq gist-clauses (gethash ep-var (get schema-name 'gist-clauses)))
         (setf (get ep-name 'gist-clauses) gist-clauses))
@@ -615,7 +615,7 @@
 ;
   (let (concept-name goal-schema goal-name)
     (setq concept-name (car (find-all-instances-context
-      '(:l (?x) (and (?x BW-concept.n) (~me choose.v ?x))))))
+      '(:l (?x) (and (?x BW-concept.n) (^me choose.v ?x))))))
     (request-goal-rep (cdr (get-record-structure concept-name)))
     ; NOTE: currently no special offline (terminal mode) procedure
     ; for getting goal schema.
@@ -659,12 +659,12 @@
 ; 'restrictions' may be a lambda abstract, possibly preceded by
 ; some adjective modifier, e.g.,
 ; (random.a (:l (?x) (and (?x member-of.p ?cc)
-;                         (not (~you understand.v ?x)))))
+;                         (not (^you understand.v ?x)))))
 ; The fact that some individual was chosen is also stored in context.
 ; NOTE: does this make sense? i.e., should something being chosen be
 ; stored in dialogue context? If the choosing occurs as part of a loop,
 ; how is something "unchosen" at the end of the loop? Currently I do that
-; here, so basically only one (~me choose.v ?x) fact can be active in
+; here, so basically only one (^me choose.v ?x) fact can be active in
 ; context at once, but it's pretty ugly.
 ;
   (let (sk-name sk-const lambda-descr modifier candidates)
@@ -681,8 +681,8 @@
         (car (shuffle candidates)))
       (t (car candidates))))
     ; Store fact that sk-name chosen in context (removing any existing choice).
-    (remove-from-context '(~me choose.v ?x))
-    (store-in-context `(~me choose.v ,sk-name))
+    (remove-from-context '(^me choose.v ?x))
+    (store-in-context `(^me choose.v ,sk-name))
     sk-name)
 ) ; END choose-variable-restrictions
 
@@ -876,12 +876,12 @@
 
     (setq wff (second rest))
 
-    ; Match '(~me ...)' (Eta) actions, or '(~you ...)' (User) actions, and
+    ; Match '(^me ...)' (Eta) actions, or '(^you ...)' (User) actions, and
     ; act accordingly.
     (cond
-      ((eq (car wff) '~me)
+      ((eq (car wff) '^me)
         (implement-next-eta-action {sub}plan-name))
-      ((eq (car wff) '~you)
+      ((eq (car wff) '^you)
         (observe-next-user-action {sub}plan-name))
       (t (implement-next-plan-episode {sub}plan-name)))
 )) ; END process-next-action
@@ -974,7 +974,7 @@
       ; Plan: Subschema Instantiation
       ;````````````````````````````````
       ; instantiation of any subschema involving both participants.
-      ((setq bindings (bindings-from-ttt-match '((! (set-of ~me ~you) (set-of ~you ~me))
+      ((setq bindings (bindings-from-ttt-match '((! (set-of ^me ^you) (set-of ^you ^me))
                                                   schema-header? (? _*)) wff))
         (setq bindings (cdr bindings))
         (setq args-list (get-multiple-bindings bindings))
@@ -1009,7 +1009,7 @@
 ;
 ; We assume that this program is called only if the first action of
 ; 'rest-of-plan' of '{sub}plan-name' is already known to be of type
-; (~me ...), i.e., an action by Eta.
+; (^me ...), i.e., an action by Eta.
 ;
 ; TODO: IT SEEMS THAT THIS PROGRAM COULD ITSELF BE
 ;   REFORMULATED AS A KIND OF CHOICE TREE THAT SELECTS A SUBPLAN
@@ -1039,9 +1039,9 @@
 ; add or modify temporal constraints to avoid inconsistencies; more 
 ; radical changes may be warranted for optimizing overall utility).
 ; Any subschemas used in the elaboration process typically supply 
-; multiple (~me say-to.v ~you '(...)) actions), and choice packets used
-; for step elaboration typically elaborate (~me react-to.v ...) actions
-; into single or multiple (~me say-to.v ~you '(...)) subactions.
+; multiple (^me say-to.v ^you '(...)) actions), and choice packets used
+; for step elaboration typically elaborate (^me react-to.v ...) actions
+; into single or multiple (^me say-to.v ^you '(...)) subactions.
 ;
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest)) ep-name1
         (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
@@ -1060,7 +1060,7 @@
       ;`````````````````````
       ; e.g. yields ((_+ '(I am a senior comp sci major\, how about you?)))
       ; or nil, for non-match
-      ((setq bindings (bindings-from-ttt-match '(~me say-to.v ~you _+) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me say-to.v ^you _+) wff))
         (setq expr (eval-functions (get-single-binding bindings)))
         ; If the current "say" action is a question (final question mark,
         ; can also check for wh-words & other cues), then use 'topic-keys'
@@ -1082,9 +1082,9 @@
             ;; (print-current-plan-status {sub}plan-name); DEBUGGING
 
             ; Add turn to dialogue history
-            (store-turn '~me expr :gists (get ep-name 'gist-clauses) :ulfs (list (get ep-name 'ulf)))
+            (store-turn '^me expr :gists (get ep-name 'gist-clauses) :ulfs (list (get ep-name 'ulf)))
           )
-          ; Nonprimitive say-to.v act (e.g. (~me say-to.v ~you (that (?e be.v finished.a)))):
+          ; Nonprimitive say-to.v act (e.g. (^me say-to.v ^you (that (?e be.v finished.a)))):
           ; Should probably be illegal action specification since we can use 'tell.v' for
           ; inform acts. For the moment however, handle equivalently to tell.v.
           (t
@@ -1098,7 +1098,7 @@
       ; Eta: Reacting
       ;`````````````````````
       ; Yields e.g. ((_! EP34.)), or nil if unsuccessful.
-      ((setq bindings (bindings-from-ttt-match '(~me react-to.v _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me react-to.v _!) wff))
         (setq user-ep-name (get-single-binding bindings))
         ; Get user gist clauses and ulf from bound user action
         (setq user-gist-clauses (get user-ep-name 'gist-clauses))
@@ -1127,12 +1127,12 @@
       ; Eta: Telling
       ;`````````````````````
       ; e.g. telling one's name could be formulated as
-      ; (~me tell.v ~you (ans-to (wh ?x (~me have-as.v name.n ?x))))
+      ; (^me tell.v ^you (ans-to (wh ?x (^me have-as.v name.n ?x))))
       ; and answer retrieval should bind ?x to a name. Or we could have
-      ; explicit reified propositions such as (that (~me have-as.v name.n 'Eta))
-      ; or (that (~me be.v ((attr autonomous.a) avatar.n))). The match variable
+      ; explicit reified propositions such as (that (^me have-as.v name.n 'Eta))
+      ; or (that (^me be.v ((attr autonomous.a) avatar.n))). The match variable
       ; _! will have as a binding the (wh ...) expression.
-      ((setq bindings (bindings-from-ttt-match '(~me tell.v ~you _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me tell.v ^you _!) wff))
         (setq info (get-single-binding bindings))
         (setq new-subplan-name (plan-tell info))
         (when (null new-subplan-name)
@@ -1151,11 +1151,11 @@
       ; In general, describing is a severe challenge in NLG, but here it will be initially assumed
       ; that we have schemas for expanding any descriptive actions that a plan might call for.
       ; An even simpler way of packaging related sets of sentences for outputs is to just use a
-      ; tell-act of type (~me tell.v ~you (meaning-of.f '(<sent1> <sent2> ...))), where the
+      ; tell-act of type (^me tell.v ^you (meaning-of.f '(<sent1> <sent2> ...))), where the
       ; 'meaning-of.f' function applied to English sentences supplies their semantic interpretation,
       ; reified with the 'that' operator. Combining the two ideas, we can provide schemas for expanding
       ; a describe-act directly into a tell-act with a complex meaning-of.f argument.
-      ((setq bindings (bindings-from-ttt-match '(~me describe-to.v ~you _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me describe-to.v ^you _!) wff))
         (setq topic (get-single-binding bindings))
         (setq new-subplan-name (plan-description topic))
         (when (null new-subplan-name)
@@ -1166,8 +1166,8 @@
       ;`````````````````````
       ; Eta: Suggesting
       ;`````````````````````
-      ; e.g. (that (~you provide-to.v ~me (K ((attr extended.a) (plur answer.n)))))
-      ((setq bindings (bindings-from-ttt-match '(~me suggest-to.v ~you _!) wff))
+      ; e.g. (that (^you provide-to.v ^me (K ((attr extended.a) (plur answer.n)))))
+      ((setq bindings (bindings-from-ttt-match '(^me suggest-to.v ^you _!) wff))
         (setq suggestion (get-single-binding bindings))
         (setq new-subplan-name (plan-suggest suggestion))
         (when (null new-subplan-name)
@@ -1178,8 +1178,8 @@
       ;`````````````````````
       ; Eta: Asking
       ;`````````````````````
-      ; e.g. (ans-to (wh ?x (~you have-as.v major.n ?x)))
-      ((setq bindings (bindings-from-ttt-match '(~me ask.v ~you _!) wff))
+      ; e.g. (ans-to (wh ?x (^you have-as.v major.n ?x)))
+      ((setq bindings (bindings-from-ttt-match '(^me ask.v ^you _!) wff))
         (setq query (get-single-binding bindings))
         (setq new-subplan-name (plan-question query))
         (when (null new-subplan-name)
@@ -1190,7 +1190,7 @@
       ;`````````````````````
       ; Eta: Saying hello
       ;`````````````````````
-      ((equal wff '(~me say-hello-to.v you))
+      ((equal wff '(^me say-hello-to.v you))
         (setq new-subplan-name (plan-saying-hello))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
@@ -1200,7 +1200,7 @@
       ;``````````````````````
       ; Eta: Saying good-bye
       ;``````````````````````
-      ((equal wff '(~me say-bye-to.v you))
+      ((equal wff '(^me say-bye-to.v you))
         (setq new-subplan-name (plan-saying-bye))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
@@ -1210,7 +1210,7 @@
       ;`````````````````````````````````````
       ; Eta: Recalling answer from history
       ;`````````````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me recall-answer.v _! _!1 _!2) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me recall-answer.v _! _!1 _!2) wff))
         (setq object-locations (eval-functions (get-single-binding bindings)))
         ;; (format t "bindings: ~a~% object locations: ~a~%" (get-single-binding bindings) object-locations) ; DEBUGGING
         (setq bindings (cdr bindings))
@@ -1231,7 +1231,7 @@
       ;````````````````````````````````````````
       ; Eta: Seek answer from external source
       ;````````````````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me seek-answer-from.v _! _!1) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me seek-answer-from.v _! _!1) wff))
         (setq system (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq user-ulf (get-single-binding bindings))
@@ -1245,7 +1245,7 @@
       ;``````````````````````````````````````````
       ; Eta: Recieve answer from external source
       ;``````````````````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me receive-answer-from.v _! _!1) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me receive-answer-from.v _! _!1) wff))
         (setq system (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
@@ -1266,7 +1266,7 @@
       ;````````````````````````````
       ; Eta: Conditionally saying
       ;````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me conditionally-say-to.v ~you _! _!1) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me conditionally-say-to.v ^you _! _!1) wff))
         (setq user-ulf (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq expr (get-single-binding bindings))
@@ -1292,7 +1292,7 @@
       ;````````````````````````````
       ; Eta: Proposing
       ;````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me propose1-to.v ~you _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me propose1-to.v ^you _!) wff))
         (setq expr (get-single-binding bindings))
         (cond
           ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
@@ -1307,7 +1307,7 @@
       ;````````````````````````````
       ; Eta: Perceiving world
       ;````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me perceive-world.v _! _!1 _!2) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me perceive-world.v _! _!1 _!2) wff))
         (setq system (get-single-binding bindings))
         (setq bindings (cdr bindings))
         (setq user-ulf (get-single-binding bindings))
@@ -1340,10 +1340,10 @@
       ;`````````````````````````
       ; Storing a given wff expression in short-term memory (context)
       ; TODO: currently this action takes a single (reified) fact, e.g.,
-      ; (~me commit-to-STM.v (that ((the.d (|Twitter| block.n)) blue.a))).
+      ; (^me commit-to-STM.v (that ((the.d (|Twitter| block.n)) blue.a))).
       ; In the future, it seems like it should be able to support a conjunction
       ; of facts using 'and', rather than having to have many separate actions for each.
-      ((setq bindings (bindings-from-ttt-match '(~me commit-to-STM.v (that _!)) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me commit-to-STM.v (that _!)) wff))
         (setq expr (get-single-binding bindings))
         ; Store each formula in context
         (store-in-context expr)
@@ -1354,15 +1354,15 @@
       ;````````````````````````````
       ; Forms a subplan for whichever argument is given to the try1.v
       ; action. If the subplan is successful (i.e., returns t), store
-      ; ((pair ~me ?ep-var) successful.a) in context.
+      ; ((pair ^me ?ep-var) successful.a) in context.
       ; TODO: currently doesn't do anything in particular other than
       ; making a subplan - the context storage is hardcoded into the find4.v
       ; action, which needs to be changed once I hear back from Len.
-      ((setq bindings (bindings-from-ttt-match '(~me try1.v (to _!)) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me try1.v (to _!)) wff))
         (setq expr (get-single-binding bindings))
         (setq new-subplan-name
           (init-plan-from-episode-list
-            (list :episodes (episode-var) (cons '~me expr))
+            (list :episodes (episode-var) (cons '^me expr))
             {sub}plan-name))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
@@ -1374,11 +1374,11 @@
       ;````````````````````````````
       ; Finding some action (or other entity?), given an episode like
       ; ?e1 (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
-      ; TODO: currently manually stores ((pair ~me ?e1) successful.a), which
+      ; TODO: currently manually stores ((pair ^me ?e1) successful.a), which
       ; needs to be changed - see note on 'Eta: Trying' action.
       ; Also sends query to the BW system for step regardless of what the
       ; argument of the find4.v action is.
-      ((setq bindings (bindings-from-ttt-match '(~me find4.v _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me find4.v _!) wff))
         (setq expr (get-single-binding bindings))
         (setq sk-var (second expr))
         (observe-step-towards-goal (third (third (third expr)))); desperately needs changing
@@ -1387,7 +1387,7 @@
         ;; (setq ep-name1 (get {sub}plan-name 'subplan-of))
         (setq ep-name1 ep-name)
         (if (and sk-name ep-name1)
-          (store-in-context `((pair ~me ,ep-name1) successful.a))); also desperately needs changing
+          (store-in-context `((pair ^me ,ep-name1) successful.a))); also desperately needs changing
         (nsubst-variable {sub}plan-name sk-name sk-var)
         (delete-current-episode {sub}plan-name))
 
@@ -1395,9 +1395,9 @@
       ; Eta: Choosing
       ;````````````````````````````
       ; Choosing a reference for an indefinite quantifier, given an episode
-      ; like ?e1 (~me choose.v (a.d ?c (random.a
+      ; like ?e1 (^me choose.v (a.d ?c (random.a
       ;            (:l (?x) (and (?x member-of.p ?cc)
-      ;                          (not (~you understand.v ?x)))))))
+      ;                          (not (^you understand.v ?x)))))))
       ; The lambda abstract is used to select candidates (given the facts stored
       ; in context), which is optionally preceded by an additional modifier
       ; (e.g., random.a, (most.mod-a simple.a), etc.) which is used for final
@@ -1405,7 +1405,7 @@
       ; The canonical name is substituted for the variable in the rest of the plan
       ; (a skolem constant is also generated and aliased to the canonical name, but
       ; is currently unused).
-      ((setq bindings (bindings-from-ttt-match '(~me choose.v _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me choose.v _!) wff))
         (setq expr (get-single-binding bindings))
         (setq sk-var (second expr))
         (setq sk-name (choose-variable-restrictions sk-var (third expr)))
@@ -1418,13 +1418,13 @@
       ;```````````````````````````````````````
       ; Form some spatial representation of a concept (i.e., of an
       ; object schema). Given an episode like:
-      ; ?e2 (~me form-spatial-representation.v (a.d ?goal-rep
+      ; ?e2 (^me form-spatial-representation.v (a.d ?goal-rep
       ;        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
       ; First, Eta queries the BW system for the spatial representation, given
       ; the concept schema. Eta then selects the spatial representation (goal schema)
       ; after storing the two relevant facts, and substitutes it for the variable
       ; in the rest of the plan.
-      ((setq bindings (bindings-from-ttt-match '(~me form-spatial-representation.v _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me form-spatial-representation.v _!) wff))
         (setq expr (get-single-binding bindings))
         (setq sk-var (second expr))
         (form-spatial-representation)
@@ -1436,7 +1436,7 @@
       ;````````````````````````````
       ; Eta: Initiating Subschema
       ;````````````````````````````
-      ((setq bindings (bindings-from-ttt-match '(~me schema-header? ~you (? _*)) wff))
+      ((setq bindings (bindings-from-ttt-match '(^me schema-header? ^you (? _*)) wff))
         (setq args-list (get-multiple-bindings bindings))
         ; Before instantiating the schema, check whether the episode is an obviated action
         (when (not (null (obviated-action ep-name)))
@@ -1460,10 +1460,10 @@
 ;`````````````````````````````````````````````````
 ; '{sub}plan-name' provides the name of a (sub)plan whose
 ; 'rest-of-plan' pointer points to a user action, i.e., the
-; name of a user action followed by a wff of type (~you ...).
+; name of a user action followed by a wff of type (^you ...).
 ;
 ; We build a two-level plan structure for nonprimitive user
-; replies (with a (~you say-to.v ~me '(...)) at the primitive
+; replies (with a (^you say-to.v ^me '(...)) at the primitive
 ; level), and (in another Eta plan iteration) "interpret" 
 ; these replies. The value returned is a pair 
 ;    (<user action name> <corresponding wff>) 
@@ -1474,9 +1474,9 @@
 ; hierarchically organized (just like Eta actions). 
 ; Currently we're just anticipating nonprimitive top-level
 ; actions like 
-;        (~you reply-to.v <eta action>)
+;        (^you reply-to.v <eta action>)
 ; that we expand to one further, primitive level of type
-;        (~you say-to.v ~me '(...)) 
+;        (^you say-to.v ^me '(...)) 
 ; actions. However, in principle, observing a user action
 ; is a plan-recognition process, where for example multiple 
 ; sentences uttered by the user may comprise a sequence of
@@ -1485,13 +1485,13 @@
 ; fail to match the *expected* type of the user action (but
 ; we're ignoring this possibility for now).
 ;
-; Primitive user actions arise in two ways: First, (~you say-to.v
-; ~me '(...)) actions are generated here from nonprimitive
-; (~you reply-to.v ...) actions as already mentioned and explained
-; further below. Second, Eta actions of type (~me react-to.v ...)
+; Primitive user actions arise in two ways: First, (^you say-to.v
+; ^me '(...)) actions are generated here from nonprimitive
+; (^you reply-to.v ...) actions as already mentioned and explained
+; further below. Second, Eta actions of type (^me react-to.v ...)
 ; may generate schema-based subplans that contain multiple Eta
-; comments of type (~me say-to.v ~you '(...)), where these are
-; preceded by "hallucinated" user inputs of form (~you paraphrase.v
+; comments of type (^me say-to.v ^you '(...)), where these are
+; preceded by "hallucinated" user inputs of form (^you paraphrase.v
 ; '(...)); here the quoted words comprise a gist clause "attributed"
 ; to the user, i.e., these are treated as implicit versions of 
 ; (parts of) the user's previous actual input that were "para-
@@ -1500,16 +1500,16 @@
 ; needed to enable uniform processing of Eta's reaction to each
 ; individual gist clause derived from an actual input.
 ;
-; To generate a subplan containing a primitive (~you say-to.v ~me 
-; '(...)) action, given a (~you reply-to.v <eta action>) action, 
+; To generate a subplan containing a primitive (^you say-to.v ^me 
+; '(...)) action, given a (^you reply-to.v <eta action>) action, 
 ; we read the user input, form a wff for the primitive action with
 ; the input word list filled in, generate a plan name for the
 ; simple subordinate plan, and assign a value to that plan name
 ; consisting of a new action name for the primitive action and the
-; (~you say-to.v ...) wff. We don't make interpretation of the 
+; (^you say-to.v ...) wff. We don't make interpretation of the 
 ; user input part of the process of generating the primitive 
 ; action (though we could, since we have at hand the <eta action>
-; to which the user is responding, in the wff (~you reply-to.v 
+; to which the user is responding, in the wff (^you reply-to.v 
 ; <eta action>)); instead, we derive the interpretation when
 ; processing the primitive action; this is for consistency with
 ; the general principle that interpretation (including speech act
@@ -1518,13 +1518,13 @@
 ; interpretation should be a process separate from hierarchical
 ; plan processing...]
 ; 
-; So, processing of primitive (~you say-to.v ~me '(...)) actions
+; So, processing of primitive (^you say-to.v ^me '(...)) actions
 ; should lead to their "interpretation", i.e., extraction of gist
 ; clauses and possibly supplementary information that could
 ; obviate later Eta questions. This requires finding out what
 ; the user is replying to, by looking "upward" and "backward" in the
 ; plan hierarchy. Specifically, we need to access the nonprimitive
-; user action that immediately subsumes the (~you say-to.v ~me ...)
+; user action that immediately subsumes the (^you say-to.v ^me ...)
 ; action -- this is accessible via the 'subplan-of' property of
 ; {sub}plan-name -- and the wff of this noprimitive action in turn
 ; supplies the name of the Eta action that the user is responding
@@ -1545,9 +1545,9 @@
       ; User: Saying
       ;`````````````````````
       ; A say-to.v act may be primitive, having a '?words' variable as its argument,
-      ; or may have been created from a (~you reply-to.v <eta action>)) based on reading
+      ; or may have been created from a (^you reply-to.v <eta action>)) based on reading
       ; the user's input:
-      ((setq bindings (bindings-from-ttt-match '(~you say-to.v ~me _!) wff))
+      ((setq bindings (bindings-from-ttt-match '(^you say-to.v ^me _!) wff))
         (setq expr (get-single-binding bindings))
 
         (cond
@@ -1583,7 +1583,7 @@
         
         ; Next we find the Eta action name referred to in the wff of the
         ; (nonprimitive) superordinate action (if such a superordinate action
-        ; exists); this wff is expected to be of form (~you reply-to.v <eta action>).
+        ; exists); this wff is expected to be of form (^you reply-to.v <eta action>).
         ; Also retrieve the item in the final argument position (if it exists).
         (setq wff1 (get user-ep-name1 'wff))
         (setq wff1-arg (car (last wff1)))
@@ -1632,7 +1632,7 @@
         (setf (get user-ep-name1 'ulf) user-ulfs)
 
         ; Add turn to dialogue history
-        (store-turn '~you words :gists user-gist-clauses :ulfs user-ulfs)
+        (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs)
 
         ; Advance the 'rest-of-plan' pointer of the primitive plan past the
         ; action name and wff just processed, and initialize the next action (if any)
@@ -1645,13 +1645,13 @@
       ; User: Paraphrasing
       ;`````````````````````
       ; Next we deal with gist clauses "attributed" to the user, in user
-      ; actions of form '(~you paraphrase.v '<gist clause>')' in a subplan
+      ; actions of form '(^you paraphrase.v '<gist clause>')' in a subplan
       ; derived from a schema for handling complex user turns; i.e. we take the
       ; view that the user paraphrased these gist clauses in his/her original, 
       ; often "condensed", sentences; thus we can directly set the 'gist-clauses'
       ; properties of the user action rather than applying 'form-gist-clauses-from-input'
-      ; again (as was done above for (~you say-to.v ~me '(...)) actions).
-      ((setq bindings (bindings-from-ttt-match '(~you paraphrase.v _!) wff))
+      ; again (as was done above for (^you say-to.v ^me '(...)) actions).
+      ((setq bindings (bindings-from-ttt-match '(^you paraphrase.v _!) wff))
         (setq expr (get-single-binding bindings))
         (when (not (quoted-sentence? expr))
           (format t "~%*** PARAPHRASE-ACTION ~a~%    BY THE USER ~
@@ -1670,7 +1670,7 @@
       ;`````````````````````
       ; User: Replying
       ;`````````````````````
-      ; Nonprimitive (~you reply-to.v <eta action name>) action; we particularize this
+      ; Nonprimitive (^you reply-to.v <eta action name>) action; we particularize this
       ; action as a subplan, based on reading the user's input
       (t
         ; If in *read-log* mode, finish processing the previous turn-tuple before moving on
@@ -1866,7 +1866,7 @@
   ; user say-to.v action, much like a move.v action or any other action, IS a perceive world action).
   ; Update Eta's current time
   (when user-ulf
-    (let ((utterance-prop `((~you ((past ask.v) ,user-ulf)) @ ,*time*)))
+    (let ((utterance-prop `((^you ((past ask.v) ,user-ulf)) @ ,*time*)))
       (update-time)
       (store-in-context utterance-prop)
     ))
@@ -2080,7 +2080,7 @@
     ; 'choice' may be an instantiated reassembly pattern (prefaced by
     ; directive :out), or the name of a schema (to be initialized).
     ; In the first case we create a 1-step subplan whose action is of
-    ; the type (~me say-to.v ~you '(...)), where the verbal output is
+    ; the type (^me say-to.v ^you '(...)), where the verbal output is
     ; adjusted by applying 'modify-response' to the reassembly patterns.
     ; In the second case, we initiate a multistep plan.
     (cond
@@ -2166,8 +2166,8 @@
 ; parser output, reified using 'that'; but of course, for verbal-
 ; ization we don't need to first convert to EL! Or else the info 
 ; is directly in EL form, e.g.,
-;     (that (~me have-as.v name.n 'Eta)), or
-;     (that (~me be.v ((attr autonomous.a) avatar.n))),
+;     (that (^me have-as.v name.n 'Eta)), or
+;     (that (^me be.v ((attr autonomous.a) avatar.n))),
 ; which requires English generation for a fully expanded tell
 ; act.
 ;

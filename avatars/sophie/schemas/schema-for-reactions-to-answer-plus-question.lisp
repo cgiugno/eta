@@ -25,7 +25,7 @@
 
 (defparameter *reactions-to-answer+question*
 
-'(Event-schema ((~me react-to-answer+question ?answer ?question) ** ?e)
+'(Event-schema ((^me react-to-answer+question ?answer ?question) ** ?e)
 ;`````````````````````````````````````````````````````````````````````
 ; Eta reacts to one or more answer gist clauses plus a question
 ; gist clause from the user (in response to a Eta question).
@@ -33,9 +33,9 @@
 ; The schema simply combines a reaction to the question and a reaction
 ; to the answer based on appropriate choice trees, joining them
 ; with discourse connective "so". To be able to process individual
-; (~me react-to.v ...) components in the usual way, we "hallucinate"
+; (^me react-to.v ...) components in the usual way, we "hallucinate"
 ; separate user inputs of form
-;    (~you paraphrase.v '...)
+;    (^you paraphrase.v '...)
 ; containing single user gist clauses, viewing these as what the
 ; use had in mind but "paraphrased" in the context of the preceding
 ; Eta question.
@@ -43,15 +43,15 @@
 :episodes (
 ; we start execution at this keyword
 ; (other schema components are omitted for the time being.)
-?e1 (~you paraphrase.v '?question)
+?e1 (^you paraphrase.v '?question)
 
-?e2 (~me react-to.v ?e1)
+?e2 (^me react-to.v ?e1)
 
-?e3 (~me say-to.v ~you '(So \,))
+?e3 (^me say-to.v ^you '(So \,))
 
-?e4 (~you paraphrase.v '?answer)
+?e4 (^you paraphrase.v '?answer)
 
-?e5 (~me react-to.v ?e4)
+?e5 (^me react-to.v ?e4)
 
 )
 

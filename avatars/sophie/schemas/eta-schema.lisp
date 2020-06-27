@@ -7,7 +7,7 @@
 
 (defparameter *eta-schema*
 
-'(Event-schema (((set-of ~me ~you) have-eta-dialog.v) ** ?e)
+'(Event-schema (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
 ;```````````````````````````````````````````````````````````
 ; An Eta dialogue focused around a patient-doctor interaction: after an introduction, the
 ; doctor may initiate conversation with a question. Otherwise, the patient has a list of
@@ -63,7 +63,7 @@
 
 :episodes (
 
-?e1 (~me say-to.v ~you '(Hi\, my name is Sophie\. I am a computer character\. I may sound choppy\, but I am still able to have
+?e1 (^me say-to.v ^you '(Hi\, my name is Sophie\. I am a computer character\. I may sound choppy\, but I am still able to have
                         a conversation with you\. I just moved back into the area from Florida about two weeks ago\. I was recently
                         diagnosed with lung cancer\, and finished radiation about a month ago\. My pain seemed to be under
                         control for a while\, but it seems to be getting worse now\. I\'m meeting with you today to help
@@ -71,69 +71,69 @@
 
 
 ;; 1. (sleep-poorly)
-?e10 (~me say-to.v ~you '(One thing I\'ve noticed in the last few weeks is that I haven\'t been sleeping very well\. Most nights I
+?e10 (^me say-to.v ^you '(One thing I\'ve noticed in the last few weeks is that I haven\'t been sleeping very well\. Most nights I
                         have to take medication for my pain\. I\'m not sure if it\'s only the pain\, but I keep waking up at night\.
                         Do you know why I keep waking up like this?))
-?e11 (~you reply-to.v ?e10)
-?e12 (~me react-to.v ?e11)
+?e11 (^you reply-to.v ?e10)
+?e12 (^me react-to.v ?e11)
 
 
-;; 2. (~medicine-working)
-?e20 (~me say-to.v ~you '(I just started on my new pain medication recently\. How long will it be before I know if it\'s working?))
-?e21 (~you reply-to.v ?e20)
-?e22 (~me react-to.v ?e21)
+;; 2. (^medicine-working)
+?e20 (^me say-to.v ^you '(I just started on my new pain medication recently\. How long will it be before I know if it\'s working?))
+?e21 (^you reply-to.v ?e20)
+?e22 (^me react-to.v ?e21)
 
 
-;; 3. (~medicine-request)
+;; 3. (^medicine-request)
 ;; NOTE: may be obviated by previous replies.
-?e30 (~me say-to.v ~you '(You know\, I\'m in a lot of pain\, and the Lortab just isn\'t working\. I think maybe I need something
+?e30 (^me say-to.v ^you '(You know\, I\'m in a lot of pain\, and the Lortab just isn\'t working\. I think maybe I need something
                      stronger for my pain\.))
-?e31 (~you reply-to.v ?e30)
-?e32 (~me react-to.v ?e31)
+?e31 (^you reply-to.v ?e30)
+?e32 (^me react-to.v ?e31)
 
 
 ;; 4. (test-results)
-?e35 (~me say-to.v ~you '(Can you explain to me what my test results mean?))
-?e36 (~you reply-to.v ?e35)
-?e37 (~me react-to.v ?e36)
+?e35 (^me say-to.v ^you '(Can you explain to me what my test results mean?))
+?e36 (^you reply-to.v ?e35)
+?e37 (^me react-to.v ?e36)
 
 
 ;; 5. (prognosis)
 ;; NOTE: may be obviated by previous replies.
-?e40 (~me say-to.v ~you '(I want you to be honest with me\. How long do you think I have?))
-?e41 (~you reply-to.v ?e40)
-?e42 (~me react-to.v ?e41)
+?e40 (^me say-to.v ^you '(I want you to be honest with me\. How long do you think I have?))
+?e41 (^you reply-to.v ?e40)
+?e42 (^me react-to.v ?e41)
 
 
 ;; 6. (treatment-option)
-?e50 (~me say-to.v ~you '(What are my choices at this point?))
-?e51 (~you reply-to.v ?e50)
-?e52 (~me react-to.v ?e51)
+?e50 (^me say-to.v ^you '(What are my choices at this point?))
+?e51 (^you reply-to.v ?e50)
+?e52 (^me react-to.v ?e51)
 
 
 ;; 7. (chemotherapy)
 ;; NOTE: may be obviated by previous replies.
-?e60 (~me say-to.v ~you '(My previous doctor mentioned something about chemotherapy\, but he said to wait to see how
+?e60 (^me say-to.v ^you '(My previous doctor mentioned something about chemotherapy\, but he said to wait to see how
        things go after the radiation\. Do you think I need chemotherapy?))
-?e61 (~you reply-to.v ?e60)
-?e62 (~me react-to.v ?e61)
+?e61 (^you reply-to.v ?e60)
+?e62 (^me react-to.v ?e61)
 
 
 ;; 8. (comfort-care)
 ;; NOTE: may be obviated by previous replies.
-?e70 (~me say-to.v ~you '(You know\, I really just prefer to be comfortable at this point\. Do you think I should
+?e70 (^me say-to.v ^you '(You know\, I really just prefer to be comfortable at this point\. Do you think I should
                          start considering comfort care?))
-?e71 (~you reply-to.v ?e70)
-?e72 (~me react-to.v ?e71)
+?e71 (^you reply-to.v ?e70)
+?e72 (^me react-to.v ?e71)
 
 
 ;; 9. (tell-family)
-?e80 (~me say-to.v ~you '(I haven\'t told my family everything yet\. I wanted to wait to talk to you first\. What should I say to them?))
-?e81 (~you reply-to.v ?e80)
-?e82 (~me react-to.v ?e81)
+?e80 (^me say-to.v ^you '(I haven\'t told my family everything yet\. I wanted to wait to talk to you first\. What should I say to them?))
+?e81 (^you reply-to.v ?e80)
+?e82 (^me react-to.v ?e81)
 
 
-?e300 (~me say-to.v ~you '(Thank you for taking the time to meet with me today\. It was difficult to talk about my future\, but comforting to
+?e300 (^me say-to.v ^you '(Thank you for taking the time to meet with me today\. It was difficult to talk about my future\, but comforting to
                           learn more about my options\. You\'ve given me a lot to think about and to discuss with my family\. Goodbye\.))
 
 )
@@ -196,8 +196,8 @@
       (store-topic-keys (first x) (second x) '*eta-schema*))
   '(
     (?e10 (sleep-poorly))
-    (?e20 (~medicine-working))
-    (?e30 (~medicine-request))
+    (?e20 (^medicine-working))
+    (?e30 (^medicine-request))
     (?e35 (test-results))
     (?e40 (prognosis))
     (?e50 (treatment-option))

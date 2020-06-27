@@ -31,16 +31,16 @@
 ;    called for when the question precedes an assertion, rather
 ;    than being preceded by an assertion.
 
-'(Event-schema ((~me react-to-question+clause ?question ?clause) ** ?e)
+'(Event-schema ((^me react-to-question+clause ?question ?clause) ** ?e)
 ;`````````````````````````````````````````````````````````````````````
 ; Eta reacts to a gist-clause question plus a (brief) added gist 
 ; clause assertion from the user (in response to a Eta question).
 ;
 ; The schema simply combines a reaction to the question and perhaps
 ; a reaction to the extra clause. To be able to process individual
-; (~me react-to.v ...) components in the usual way, we "hallucinate"
+; (^me react-to.v ...) components in the usual way, we "hallucinate"
 ; separate user inputs of form
-;    (~you paraphrase.v '...)
+;    (^you paraphrase.v '...)
 ; containing single user gist clauses, viewing these as what the
 ; use had in mind but "paraphrased" in the context of the preceding
 ; Eta question.
@@ -48,16 +48,16 @@
 :episodes (
 ; we start execution at this keyword
 ; (other schema components are omitted for the time being.)
-?e1 (~you paraphrase.v '?clause)
+?e1 (^you paraphrase.v '?clause)
 
-?e2 (~me react-to.v ?e1)
+?e2 (^me react-to.v ?e1)
 
 ; This feels sort of unnatural most of the time.
-?e3 (~me say-to.v ~you '(As for your question \,))
+?e3 (^me say-to.v ^you '(As for your question \,))
 
-?e4 (~you paraphrase.v '?question)
+?e4 (^you paraphrase.v '?question)
 
-?e5 (~me react-to.v ?e4)
+?e5 (^me react-to.v ?e4)
 
 )
 

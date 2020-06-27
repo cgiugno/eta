@@ -7,7 +7,7 @@
 
 (defparameter *have-question-answering-dialogue*
 
-'(Event-schema (((set-of ~me ~you) have-question-answering-dialogue.v) ** ?e)
+'(Event-schema (((set-of ^me ^you) have-question-answering-dialogue.v) ** ?e)
 ;````````````````````````````````````````````````````````````````````````````
 ; Blocks world conversation. An expected blocks world dialogue consists
 ; of the agent repeatedly asking the user if they have a spatial question
@@ -18,8 +18,8 @@
 ;
 
 :types (
-  !t1 (~you person.n)
-  !t2 (~me robot.n)
+  !t1 (^you person.n)
+  !t2 (^me robot.n)
   !t3 ((the.d table.n) table.n)
   ; Eventually this should be changed to just ?bb (plur block1.n)
   !t4  ((the.d (|Target| block.n)) block.n)
@@ -48,18 +48,18 @@
 :episodes (
 
   ; David introduces himself.
-  ?e1 (~me say-to.v ~you 
+  ?e1 (^me say-to.v ^you 
         '(Hi\, my name is David\. I\'m ready to answer your spatial questions\.))
 
   ; Repeat prompting the user for a spatial question until finished.
   ?e2 (:repeat-until (?e2 finished2.a)
 
     ; Prompt the user for a spatial question.
-    ?e3 (~me say-to.v ~you
+    ?e3 (^me say-to.v ^you
           '(Do you have a spatial question for me?))
 
     ; User replies with either spatial question, special request, or smalltalk.
-    ?e4 (~you reply-to.v ?e3)
+    ?e4 (^you reply-to.v ?e3)
 
     ; Either (5a) user requests goodbye, (5b) user requests to pause, or
     ; (5c) user makes some other reply.
@@ -69,22 +69,22 @@
       (:if ((ulf-of.f ?e4) = '(GOODBYE.GR))
 
         ; Store the fact that ?e2 is finished and react.
-        ?e6 (~me commit-to-STM.v (that (?e2 finished2.a)))
-        ?e7 (~me react-to.v ?e4))
+        ?e6 (^me commit-to-STM.v (that (?e2 finished2.a)))
+        ?e7 (^me react-to.v ?e4))
 
       ; (5b)
       (:if ((ulf-of.f ?e4) = '(PAUSE.GR))
 
         ; React and instantiate pause-conversation schema.
-        ?e8 (~me react-to.v ?e4)
-        ?e9 ((set-of ~me ~you) pause-conversation.v))
+        ?e8 (^me react-to.v ?e4)
+        ?e9 ((set-of ^me ^you) pause-conversation.v))
 
       ; (5c)
       (:else
 
         ; React to user's reply (i.e., respond to smalltalk or
         ; give an answer to the user's spatial query).
-        ?e10 (~me react-to.v ?e4))))
+        ?e10 (^me react-to.v ?e4))))
 )
 
 )) ; END defparameter *have-question-answering-dialogue*

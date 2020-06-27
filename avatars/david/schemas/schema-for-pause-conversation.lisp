@@ -7,7 +7,7 @@
 
 (defparameter *pause-conversation*
 
-'(Event-schema (((set-of ~me ~you) pause-conversation.v) ** ?e)
+'(Event-schema (((set-of ^me ^you) pause-conversation.v) ** ?e)
 ;````````````````````````````````````````````````````````````````
 ; The user and the agent suspend dialogue until the user says something
 ; interpreted as a resumption request.
@@ -22,12 +22,12 @@
 
     ; User says something which is either smalltalk (ignored by David),
     ; or is a special request.
-    ?e15 (~you say-to.v ~me ?words)
+    ?e15 (^you say-to.v ^me ?words)
 
     ; If user makes 'resume' special request, store the fact that ?e12 is finished.
     ?e16 (:if ((ulf-of.f ?e15) = '(RESUME.GR))
-      ?e17 (~me commit-to-STM.v (that (?e13 finished2.a)))
-      ?e18 (~me react-to.v ?e15)))
+      ?e17 (^me commit-to-STM.v (that (?e13 finished2.a)))
+      ?e18 (^me react-to.v ?e15)))
 )
 
 )) ; END defparameter *pause-conversation*

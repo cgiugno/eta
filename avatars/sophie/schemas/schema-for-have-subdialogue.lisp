@@ -7,18 +7,18 @@
 
 (defparameter *have-subdialogue*
 
-'(Event-schema (((set-of ~me ~you) have-subdialogue.v ?response ?gists) ** ?e)
+'(Event-schema (((set-of ^me ^you) have-subdialogue.v ?response ?gists) ** ?e)
 ;``````````````````````````````````````````````````````````````````````````
 ;
 ;
 
 :episodes (
 
-?e1 (~me say-to.v ~you '?response)
+?e1 (^me say-to.v ^you '?response)
  
-?e2 (~you reply-to.v '?gists)
+?e2 (^you reply-to.v '?gists)
 
-?e3 (~me react-to.v ?e2)
+?e3 (^me react-to.v ?e2)
 
 )
 

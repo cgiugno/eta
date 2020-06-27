@@ -8,7 +8,7 @@
 
 (defparameter *instruct-structure-building*
 
-'(Event-schema ((~me instruct-structure-building.v ~you ?goal-rep) ** ?e)
+'(Event-schema ((^me instruct-structure-building.v ^you ?goal-rep) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
 ;
 ; Blocks world structure building instruction; such a session is expected to
@@ -21,11 +21,11 @@
 ; [Re indexicals ^me, ^you, ^now, ... Original suggestion was @me, @you, @now, ...
 ; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
 ; where '@' is the EL operator for "true at the time of"]
-; Changed it to ~me, ~you, and ~now because '^' doesn't play nicely with TTT. -B.K.
+; Changed it to ^me, ^you, and ~now because '^' doesn't play nicely with TTT. -B.K.
 
 :types
-  !t1 (~you person.n)
-  !t2 (~me robot.n)  
+  !t1 (^you person.n)
+  !t2 (^me robot.n)  
   !t3 (|Table| table.n)
   !t4  ((the.d (|Target| block.n)) block.n) ;; LKS: I wouldn't admit ULFs - just EL;
                                             ;; it's ok only as 2nd-order logic. 
@@ -56,8 +56,8 @@
 ;  !r9 (?ka1 (kind1-of.n action1.n))
 
 :static-conds 
-  ?s2 (~you at-loc.p |Table|)
-  ?s3 (~me at-loc.p |Table|)
+  ?s2 (^you at-loc.p |Table|)
+  ?s3 (^me at-loc.p |Table|)
 
 :preconds
   ; Currently not handled by Eta
@@ -71,19 +71,19 @@
   ; David starts conversation. It would be nice to gave opening greetings
   ; if the user is new, or it's a new day ... The opening could be more concise
   ; for repeat users.
-  ?e1 (~me say-to.v ~you 
+  ?e1 (^me say-to.v ^you 
        '(OK\, let\'s start building\.))
 
   ?e2 (:repeat-until (?e2 finished2.a)
 
     ; David attempts to find next step (an action type) to realize goal structure.
     ; NOTE: ?ka1 becomes bound to a reified action corresponding to the planner
-    ; output; if this is done successfully, ((pair ~me ?e3) successful.a) is 
+    ; output; if this is done successfully, ((pair ^me ?e3) successful.a) is 
     ; stored in context.
     ; ====== TO BE IMPLEMENTED ======
     ; try.v should take some (reified) action corresponding to a schema which ca
-    ; possibly fail (in this case, finding something), and store ((pair ~me ?e3)
-    ; successful.a) if the action succeeds, or ((pair ~me ?e3) unsuccessful.a)
+    ; possibly fail (in this case, finding something), and store ((pair ^me ?e3)
+    ; successful.a) if the action succeeds, or ((pair ^me ?e3) unsuccessful.a)
     ; otherwise (or possibly just nothing, given that we're assuming absence-as-
     ; negation for the context.
     ; In this case, find.v should find some entity (e.g., (ka (place.v ...))))
@@ -94,13 +94,13 @@
     ; needs to turn this into a proper reified action, i.e.,
     ; (ka (place.v (the.d (|Twitter| block.n)) (on.p (the.d (|Texaco| block.n))))).
     ; Or, in the special case of the BW system returning nil, (ka (do2.v nothing.pro)).
-    ?e3 (~me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
+    ?e3 (^me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
 
     ; Either (4a) next step found successfully, or (4b) failure to do so.
     ?e4 (:cond
 
       ; (4a)
-      (((pair ~me ?e3) successful.a)
+      (((pair ^me ?e3) successful.a)
 
         ; Either (5a) goal structure has been reached, or (5b) goal structure
         ; not yet reached.
@@ -110,10 +110,10 @@
           ((?ka1 = (ka (do2.v nothing.pro)))
 
             ; Next step is to do nothing; goal structure realized.
-            ?e6 (~me say-to.v ~you '(The goal structure is complete\.))
+            ?e6 (^me say-to.v ^you '(The goal structure is complete\.))
 
             ; Terminate conversation.
-            ?e7 (~me commit-to-STM.v (that (?e2 finished2.a))))
+            ?e7 (^me commit-to-STM.v (that (?e2 finished2.a))))
                 ; LKS:``````````` I'm wondering if we can get away with a less
                 ;                 technical term, like 'register.v'. Somehow
                 ;                 'commit-to-STM.v' seems like an implementation
@@ -124,12 +124,12 @@
                 ;                 here, would the loop still terminate, in an
                 ;                 "ultimate" version of schema syntax/semantics?
                 ;                 If not, it seems we might as well use
-                ;                   (~me register.v '(?e2 finished2.a))
+                ;                   (^me register.v '(?e2 finished2.a))
                 ;                 and in loop/branch tests always check whether
                 ;                 a specific formula has been registered, not
                 ;                 whether it is (currently) true. Mind you,
                 ;                 this would entail that a condition like
-                ;                   ((~me tired.a) or (~me bored.a))
+                ;                   ((^me tired.a) or (^me bored.a))
                 ;                 would have to be interpreted as a sort of
                 ;                 syntactic 'or' (one or the other *wff* is
                 ;                 in STM); and a test like
@@ -138,9 +138,9 @@
                 ;                 storage, or be handled specially (probably
                 ;                 the latter). I guess I lean towards the semantic
                 ;                 option. So (ultimately) mental actions like
-                ;                   (~me register.v (that (?e2 finished2.a))),
-                ;                   (~me note2.v (that (?e2 finished2.a))),
-                ;                   (~me recall.v (whether (?e2 finished2.a))),
+                ;                   (^me register.v (that (?e2 finished2.a))),
+                ;                   (^me note2.v (that (?e2 finished2.a))),
+                ;                   (^me recall.v (whether (?e2 finished2.a))),
                 ;                   etc.,
                 ;                 would be implemented by certain fixed storage
                 ;                 or retrieval actions, but we allow some flex
@@ -159,24 +159,24 @@
             ; to allow for the diversity of the example dialogue) such as (you.pro
             ; ((pres should.aux-s) ...)), and then converts the ULF to surface English
             ; using Gene's ulf2english lib.
-            ?e8 (~me propose1-to.v ~you ?ka1)
+            ?e8 (^me propose1-to.v ^you ?ka1)
 
             ; The system should not move on until the user correctly follows the action
             ; proposed in ?e8.
-            ?e9 (:repeat-until (~you follow.v ?e8)
+            ?e9 (:repeat-until (^you follow.v ?e8)
                               ; LKS: I guess that's 'follow5.v' in WordNet, i.e.,
                               ;      comply with. An alternative, focused on 
-                              ;      ?ka1, would be (~you do.v ?ka1).
+                              ;      ?ka1, would be (^you do.v ?ka1).
                               ;        A significant question here is how we
                               ;      interpret an episodic sentence like the
                               ;      above in STM when checking a condition.
-                              ;      E.g., does (~you eat.v (k lunch.n)) in STM
+                              ;      E.g., does (^you eat.v (k lunch.n)) in STM
                               ;      mean you're eating lunch, or you *have*
                               ;      eaten lunch? Assuming that it means the
                               ;      latter (as you in effect do) than we'll
-                              ;      need, say, (prog (~you eat.v (k lunch.n)))
+                              ;      need, say, (prog (^you eat.v (k lunch.n)))
                               ;      for an action being in progress. Or else, we
-                              ;      could use (perf ((~you eat.v (k lunch.n))))
+                              ;      could use (perf ((^you eat.v (k lunch.n))))
                               ;      for the completed action, while without
                               ;      modifier, "in progress" is implied. I guess
                               ;      I prefer the former.
@@ -189,7 +189,7 @@
                               ; just expresses a desire to learn some other
                               ; concept, or to quit, or whatver. Should we rely
                               ; on interrupts? Or maybe use alternative condition
-                              ;   (set-of (~you me) decide-against.v ~you ?ka1)
+                              ;   (set-of (^you me) decide-against.v ^you ?ka1)
                               ; (we decide against you doing ?ka1)?
                               ;   I think we'd have to regard such as condition
                               ; as *implied* by (automatically inferred from)
@@ -229,11 +229,11 @@
               ; like (ka (not move.v ... (on.p ...))), or if needed, the BW system can send one
               ; of the spatial relations which became true after the user's move and send that
               ; to Eta, giving a value like (ka (move.v ... (near.p ...))).
-              ?e10 (~you acknowledge.v ?e8) ; acknowledge.v might not be the right
+              ?e10 (^you acknowledge.v ?e8) ; acknowledge.v might not be the right
                                             ;  predicate here, since it might 
                                             ; include the user asking a question.
                                             ; LKS: or even saying goodbye
-              ?e11 (~you perform.v ?ka2)
+              ?e11 (^you perform.v ?ka2)
                    ; LKS: same as 'do.v ?ka1' (something to keep in mind);
                    ; However, you are kind of assuming that ?e10 is an acceptance,
                    ; so that one can understand ?e11 as an attempt to do ?ka1.
@@ -242,13 +242,13 @@
                    ; subsuming ?e10, ?e11 and other possibilities, i.e.,
                    ; embedding some of the things that may happen (keeping 
                    ; in mind they're not in general commands!). So the first
-                   ; possibility might be (~you acknowledge.v ?e8), understood
+                   ; possibility might be (^you acknowledge.v ?e8), understood
                    ; as your *accepting* the request, followed by 
-                   ;   ?e11 (~you try.v ?ka1).
+                   ;   ?e11 (^you try.v ?ka1).
                    ; Now we can test whether *trying* to do ?ka1 (which is a
                    ; specific action, instantiating (ka (try.v ?ka1))) actually
                    ; *instantiated* ?ka1:
-                   ;   (:if ((pair ~you ?e11) instance-of.n ?ka1)
+                   ;   (:if ((pair ^you ?e11) instance-of.n ?ka1)
                    ;   ; all good, on to the next action ...
                    ; Then you want those other alternatives that you get to below
 
@@ -261,11 +261,11 @@
                 ; LKS: Better: (?ka2 subtype-of.n ?ka1), which allows equality,
                 ;      synonymy, and specializations (e.g., dropping a block on
                 ;      the table as a way of putting it on the table). Better yet:
-                ;      ((pair ~you ?e11) instance of ?ka1) -- that's what matters.
+                ;      ((pair ^you ?e11) instance of ?ka1) -- that's what matters.
 
                   ; If user's move is the same as the proposed move, store in context that 
                   ; the user followed David's proposal.
-                  ?e13 (~me commit-to-STM.v (that (~you follow.v ?e8))))
+                  ?e13 (^me commit-to-STM.v (that (^you follow.v ?e8))))
 
                 ; (12b)
                 ((?ka2 = (ka (do2.v nothing.pro)))
@@ -281,17 +281,17 @@
                     ;      to internal representations, appearing in schemas
                     ;      (e.g., that probably at odds with learnability)
                     ;      Let's use something like 
-                    ;       (:if (~you say-bye.v) ...)
+                    ;       (:if (^you say-bye.v) ...)
                     
                       ; If user terminates conversation prematurely, store that conversation finished.
-                      ?e15 (~me commit-to-STM.v (that (?e2 finished2.a))))
+                      ?e15 (^me commit-to-STM.v (that (?e2 finished2.a))))
 
                     ; (14b)
                     (((ulf-of.f ?e10) = '(PAUSE.GR))
                       ; LKS: Again ...
                     
                       ; If user asks to pause, instantiate pause-conversation schema.
-                      ?e16 ((set-of ~me ~you) pause-conversation.v))
+                      ?e16 ((set-of ^me ^you) pause-conversation.v))
 
                     ; (14c)
                     (((ulf-of.f ?e10) = '()) ; not sure I like this syntax...
@@ -308,7 +308,7 @@
                     
                       ; If user asks a question David should react to them by answering the
                       ; question (i.e., instantiating the correct question-answering schema).
-                      ?e17 (~me react-to.v ?e10))))
+                      ?e17 (^me react-to.v ?e10))))
 
                 ; (12c)
                 (:default
@@ -329,13 +329,13 @@
                   ; system heretofore hasn't had to communicate such concepts as "move block A
                   ; to the left by X units" to Eta - only spatial reations which can be converted
                   ; to moves, as described above.
-                  ?e18 (~me issue-correction-to.v ~you ?ka1)))))))
+                  ?e18 (^me issue-correction-to.v ^you ?ka1)))))))
 
       ; (4b)
       (:default
 
         ; Failure to find next step; goal structure not possible.
-        ?e18 (~me say-to.v ~you
+        ?e18 (^me say-to.v ^you
                 '(I\'m afraid the example structure I had in mind cannot
                   be built with the blocks currently on the table\.))
                   ; "Let me select another example ..."?
@@ -346,10 +346,10 @@
         ; should probably be another constraint on the concepts/goal-schemas
         ; selected such that examples can be built with the available blocks
         ; in the first place.
-        ?e19 (~me commit-to-STM.v (that (?e2 finished2.a))))))
+        ?e19 (^me commit-to-STM.v (that (?e2 finished2.a))))))
 
   ; David says goodbye after conversation is over.
-  ?e20 (~me say-to.v ~you '(Goodbye for now!))
+  ?e20 (^me say-to.v ^you '(Goodbye for now!))
 
 
 :event-relations

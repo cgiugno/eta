@@ -7,7 +7,7 @@
 
 (defparameter *eta-schema*
 
-'(Event-schema (((set-of ~me ~you) have-eta-dialog.v) ** ?e)
+'(Event-schema (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
 ;```````````````````````````````````````````````````````````
 ; Blocks world conversation. An expected blocks world dialogue consists
 ; of the agent repeatedly asking the user if they have a spatial question
@@ -20,10 +20,10 @@
 :episodes (
 
   ; David has question-answering dialogue.
-  ;; ?e1 ((set-of ~me ~you) have-question-answering-dialogue.v)
+  ;; ?e1 ((set-of ^me ^you) have-question-answering-dialogue.v)
 
   ; David has concept tutoring dialogue.
-  ?e1 (~me teach-BW-concept-to.v ~you)
+  ?e1 (^me teach-BW-concept-to.v ^you)
 )
 
 )) ; END defparameter *eta-schema*

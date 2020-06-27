@@ -280,10 +280,10 @@
 
 (defun variable? (atm)
 ;`````````````````````
-; Check whether a symbol is a variable, i.e. starts with '?', '!', or '$'.
-; NOTE: this excludes indexical variables, such as '~you'.
+; Check whether a symbol is a variable, i.e. starts with '?', '!'.
+; NOTE: this excludes indexical variables, such as '^you'.
 ;
-  (and (symbolp atm) (member (car (explode atm)) '(#\? #\! #\$) :test #'char-equal))
+  (and (symbolp atm) (member (car (explode atm)) '(#\? #\!) :test #'char-equal))
 ) ; END variable?
 
 
@@ -537,6 +537,8 @@
 ; to that expression. Apply the rule to 'expr', hence obtain
 ; a list of bindings. A non-sticky match is assumed.
 ;
+(setq patt (hide-ttt-ops patt))
+(setq expr (hide-ttt-ops expr))
 (let ((vars (ttt-match-vars patt)) vals)
   (if (null vars) (return-from bindings-from-ttt-match nil))
   (setq vals (ttt:apply-rule `(/ ,patt ,(mapcar #'list vars)) expr :shallow t))
@@ -545,8 +547,72 @@
   ; case, return nil for it:
   (if (eq vals expr) (return-from bindings-from-ttt-match nil))
   ; Otherwise return the variables matched with their values:
-  (mapcar #'list vars vals)
+  (mapcar #'list vars (mapcar #'unhide-ttt-ops vals))
 )) ; END bindings-from-ttt-match
+
+
+
+(defun hide-ttt-ops (wff)
+;`````````````````````````````````````
+; TAKEN FROM Gene's cl-util/ttt.lisp.
+; Wrap [..] around symbols like /, !, +, ?, *, @, ~, {}, or <>, or
+; ones starting this way, which we may want to use in some patterns
+; (e.g., in wff-patterns involving *, **, @, or ~), but can't
+; because of their special meanings in TTT. We're assuming that
+; the wffs we want to process don't *already* contain symbols in
+; square brackets, starting as above inside the brackets, and which
+; shouldn't have the brackets removed when we ultimately "unhide"
+; the hidden symbols in a formula.
+;
+  (let (str chars)
+       (cond ((symbolp wff)
+              (setq str (string wff))
+              (setq chars (coerce str 'list))
+              (cond ((or (equal chars '(#\^ #\*)) (equal chars '(#\^)))
+                     wff)
+                    ((or (equal chars '(#\!)) (equal chars '(#\+))
+                         (equal chars '(#\?)) (equal chars '(#\*)))
+                     wff)
+                    ((member (car chars) '(#\! #\+ #\? #\* #\@ #\~ #\/ #\^))
+                     (intern (concatenate 'string "[" str "]")))
+                    ((and (eq (car chars) #\{) (eq (second chars) #\}))
+                     (intern (concatenate 'string "[" str "]")))
+                    ((and (eq (car chars) #\<) (eq (second chars) #\>))
+                     (intern (concatenate 'string "[" str "]")))
+                    (t wff)))
+             ((atom wff) wff)
+             (t (cons (hide-ttt-ops (car wff))
+                      (hide-ttt-ops (cdr wff)))))
+)) ; END hide-ttt-ops
+
+
+
+(defun unhide-ttt-ops (wff)
+;`````````````````````````````````````
+; TAKEN FROM Gene's cl-util/ttt.lisp.
+; Remove the square brackets that have been added around ttt symbols
+; in wff by 'hide-ttt-ops':
+;
+ (let (str chars)
+      (cond ((symbolp wff)
+             (setq str (string wff))
+             (setq chars (coerce str 'list))
+             (cond ((or (not (eq (car chars) #\[))
+                        (not (eq (car (last chars)) #\]))) wff)
+                   (t (setq chars (cdr (butlast chars)))
+                      (setq str (coerce chars 'string))
+                      (cond ((null chars) wff)
+                            ((member (car chars) '(#\! #\+ #\? #\* #\@ #\~ #\/ #\^))
+                             (intern str))
+                            ((and (eq (car chars) #\{) (eq (second chars) #\}))
+                             (intern str))
+                            ((and (eq (car chars) #\<) (eq (second chars) #\>))
+                             (intern str))
+                            (t wff)))))
+            ((atom wff) wff)
+            (t (cons (unhide-ttt-ops (car wff))
+                     (unhide-ttt-ops (cdr wff)))))
+)) ; END unhide-ttt-ops
 
 
 
@@ -1739,12 +1805,12 @@
 
 (defun create-say-to-wff (content &key reverse)
 ;```````````````````````````````````````````````
-; Creates and returns a wff consisting of a (~me say-to.v ~you '(...))
-; action, or a (~you say-to.v ~me '(...)) action if :reverse t is given.
+; Creates and returns a wff consisting of a (^me say-to.v ^you '(...))
+; action, or a (^you say-to.v ^me '(...)) action if :reverse t is given.
 ;
   (if (not reverse)
-    `(~me say-to.v ~you (quote ,(modify-response content)))
-    `(~you say-to.v ~me (quote ,content)))
+    `(^me say-to.v ^you (quote ,(modify-response content)))
+    `(^you say-to.v ^me (quote ,content)))
 ) ; END create-say-to-wff
 
 

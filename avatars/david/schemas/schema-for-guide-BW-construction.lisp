@@ -7,7 +7,7 @@
 
 (defparameter *guide-BW-construction*
 
-'(Event-schema ((~me guide-BW-construction.v ~you ?goal-rep) ** ?e)
+'(Event-schema ((^me guide-BW-construction.v ^you ?goal-rep) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
 ; Blocks world structure building instruction; such a session is expected to
 ; consist of the agent (given a goal representation) instructing the user on
@@ -19,11 +19,11 @@
 ; [Re indexicals ^me, ^you, ^now, ... Original suggestion was @me, @you, @now, ...
 ; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
 ; where '@' is the EL operator for "true at the time of"]
-; Changed it to ~me, ~you, and ~now because '^' doesn't play nicely with TTT. -B.K.
+; Changed it to ^me, ^you, and ~now because '^' doesn't play nicely with TTT. -B.K.
 
 :types (
-  !t1 (~you person.n)
-  !t2 (~me robot.n)  
+  !t1 (^you person.n)
+  !t2 (^me robot.n)  
   !t3 (|Table| table.n)
   !t4  ((the.d (|Target| block.n)) block.n)
   !t5  ((the.d (|Starbucks| block.n)) block.n)
@@ -54,8 +54,8 @@
 )
 
 :static-conds (
-  ?s2 (~you at-loc.p |Table|)
-  ?s3 (~me at-loc.p |Table|)
+  ?s2 (^you at-loc.p |Table|)
+  ?s3 (^me at-loc.p |Table|)
 )
 
 :preconds (
@@ -72,19 +72,19 @@
   ; David starts conversation. It would be nice to gave opening greetings
   ; if the user is new, or it's a new day ... The opening could be more concise
   ; for repeat users.
-  ?e1 (~me say-to.v ~you 
+  ?e1 (^me say-to.v ^you 
        '(OK\, let\'s start building\.))
 
   ?e2 (:repeat-until (?e2 finished2.a)
 
     ; David attempts to find next step (an action type) to realize goal structure.
     ; NOTE: ?ka1 becomes bound to a reified action corresponding to the planner
-    ; output; if this is done successfully, ((pair ~me ?e3) successful.a) is 
+    ; output; if this is done successfully, ((pair ^me ?e3) successful.a) is 
     ; stored in context.
     ; ====== TO BE IMPLEMENTED ======
     ; try.v should take some (reified) action corresponding to a schema which ca
-    ; possibly fail (in this case, finding something), and store ((pair ~me ?e3)
-    ; successful.a) if the action succeeds, or ((pair ~me ?e3) unsuccessful.a)
+    ; possibly fail (in this case, finding something), and store ((pair ^me ?e3)
+    ; successful.a) if the action succeeds, or ((pair ^me ?e3) unsuccessful.a)
     ; otherwise (or possibly just nothing, given that we're assuming absence-as-
     ; negation for the context.
     ; In this case, find.v should find some entity (e.g., (ka (place.v ...))))
@@ -95,15 +95,15 @@
     ; needs to turn this into a proper reified action, i.e.,
     ; (ka (place.v (the.d (|Twitter| block.n)) (on.p (the.d (|Texaco| block.n))))).
     ; Or, in the special case of the BW system returning nil, (ka (do2.v nothing.pro)).
-    ;; ?e3 (~me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
-    ;; ?e3 (~me try1.v (to (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))))
-    ?e3 (~me find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
+    ;; ?e3 (^me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
+    ;; ?e3 (^me try1.v (to (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))))
+    ?e3 (^me find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
 
     ; Either (4a) next step found successfully, or (4b) failure to do so.
     ?e4 (:try-in-sequence
 
       ; (4a)
-      (:if ((pair ~me ?e3) successful.a)
+      (:if ((pair ^me ?e3) successful.a)
 
         ; Either (5a) goal structure has been reached, or (5b) goal structure
         ; not yet reached.
@@ -113,10 +113,10 @@
           (:if (?ka1 = (ka (do2.v nothing.pro)))
 
             ; Next step is to do nothing; goal structure realized.
-            ?e6 (~me say-to.v ~you '(The goal structure is complete\.))
+            ?e6 (^me say-to.v ^you '(The goal structure is complete\.))
 
             ; Terminate conversation.
-            ?e7 (~me commit-to-STM.v (that (?e2 finished2.a))))
+            ?e7 (^me commit-to-STM.v (that (?e2 finished2.a))))
 
           ; (5b)
           (:else
@@ -128,11 +128,11 @@
             ; to allow for the diversity of the example dialogue) such as (you.pro
             ; ((pres should.aux-s) ...)), and then converts the ULF to surface English
             ; using Gene's ulf2english lib.
-            ?e8 (~me propose1-to.v ~you ?ka1)
+            ?e8 (^me propose1-to.v ^you ?ka1)
 
             ; The system should not move on until the user correctly follows the action
             ; proposed in ?e8.
-            ?e9 (:repeat-until (~you follow.v ?e8)
+            ?e9 (:repeat-until (^you follow.v ?e8)
 
               ; User says something in response to the system's proposal and/or
               ; makes a move.
@@ -160,9 +160,9 @@
               ; like (ka (not move.v ... (on.p ...))), or if needed, the BW system can send one
               ; of the spatial relations which became true after the user's move and send that
               ; to Eta, giving a value like (ka (move.v ... (near.p ...))).
-              ?e10 (~you acknowledge.v ?e8) ; acknowledge.v might not be the right predicate here,
+              ?e10 (^you acknowledge.v ?e8) ; acknowledge.v might not be the right predicate here,
                                             ; since it might include the user asking a question.
-              ?e11 (~you perform.v ?ka2)
+              ?e11 (^you perform.v ?ka2)
 
               ; Either (12a) user moves block to correct location, (12b) no move was observed
               ; within the fixed time, or (12c) user moves block to incorrect location.
@@ -173,7 +173,7 @@
 
                   ; If user's move is the same as the proposed move, store in context that 
                   ; the user followed David's proposal.
-                  ?e13 (~me commit-to-STM.v (that (~you follow.v ?e8))))
+                  ?e13 (^me commit-to-STM.v (that (^you follow.v ?e8))))
 
                 ; (12b)
                 (:if (?ka2 = (ka (do2.v nothing.pro)))
@@ -187,13 +187,13 @@
                     (:if ((ulf-of.f ?e10) = '(GOODBYE.GR))
                     
                       ; If user terminates conversation prematurely, store that conversation finished.
-                      ?e15 (~me commit-to-STM.v (that (?e2 finished2.a))))
+                      ?e15 (^me commit-to-STM.v (that (?e2 finished2.a))))
 
                     ; (14b)
                     (:if ((ulf-of.f ?e10) = '(PAUSE.GR))
                     
                       ; If user asks to pause, instantiate pause-conversation schema.
-                      ?e16 ((set-of ~me ~you) pause-conversation.v))
+                      ?e16 ((set-of ^me ^you) pause-conversation.v))
 
                     ; (14c)
                     (:if ((ulf-of.f ?e10) = '()) ; not sure I like this syntax...
@@ -209,7 +209,7 @@
                     
                       ; If user asks a question David should react to them by answering the
                       ; question (i.e., instantiating the correct question-answering schema).
-                      ?e17 (~me react-to.v ?e10))))
+                      ?e17 (^me react-to.v ?e10))))
 
                 ; (12c)
                 (:else
@@ -230,13 +230,13 @@
                   ; system heretofore hasn't had to communicate such concepts as "move block A
                   ; to the left by X units" to Eta - only spatial reations which can be converted
                   ; to moves, as described above.
-                  ?e18 (~me issue-correction-to.v ~you ?ka1)))))))
+                  ?e18 (^me issue-correction-to.v ^you ?ka1)))))))
 
       ; (4b)
       (:else
 
         ; Failure to find next step; goal structure not possible.
-        ?e18 (~me say-to.v ~you
+        ?e18 (^me say-to.v ^you
                 '(I\'m afraid the example structure I had in mind cannot
                   be built with the blocks currently on the table\.))
                   ; "Let me select another example ..."?
@@ -247,10 +247,10 @@
         ; should probably be another constraint on the concepts/goal-schemas
         ; selected such that examples can be built with the available blocks
         ; in the first place.
-        ?e19 (~me commit-to-STM.v (that (?e2 finished2.a))))))
+        ?e19 (^me commit-to-STM.v (that (?e2 finished2.a))))))
 
   ; David says goodbye after conversation is over.
-  ?e20 (~me say-to.v ~you '(Goodbye for now!))
+  ?e20 (^me say-to.v ^you '(Goodbye for now!))
 )
 
 
