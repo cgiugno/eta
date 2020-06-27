@@ -23,9 +23,9 @@
 ;; *user-id* : unique ID of user (potentially overwritten by sessionInfo.lisp if in live mode)
 ;;
 
-(defparameter *avatar* "david")
+(defparameter *avatar* "david-qa")
 (defparameter *read-log-mode* NIL)
-(defparameter *live-mode* T)
+(defparameter *live-mode* NIL)
 (defparameter *perceptive-mode* T)
 (defparameter *responsive-mode* T)
 (defparameter *safe-mode* NIL)
