@@ -26,7 +26,7 @@ def main():
   fixlocrecords = args.fixlocrecords or args.fixall
 
   filename_in = filename
-  filename_out = 'logs/logs_original/' + filename.split('/')[-1]
+  filename_out = 'logs_original/' + filename.split('/')[-1]
 
   with open(filename_in,'r') as f_in:
 
