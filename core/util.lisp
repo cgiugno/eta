@@ -2081,6 +2081,54 @@
 
 
 
+(defun get-planner-input ()
+;````````````````````````````
+; This waits until it can load a goal representation from "./io/planner-input.lisp".
+; The value of *planner-input* is a list of relations that hold after the proposed
+; action, e.g., ((|B1| to-the-left-of.p |B2|) (|B1| touching.p |B2|))
+; Each relation is assumed to have the same subject.
+;
+  (setq *planner-input* nil)
+  (loop while (not *planner-input*) do
+    (sleep .5)
+    (progn
+      (load "./io/planner-input.lisp")
+		  (if *planner-input*
+        (with-open-file (outfile "./io/planner-input.lisp" :direction :output 
+                                                           :if-exists :supersede
+                                                           :if-does-not-exist :create)))))
+  (cond
+    ((equal *planner-input* 'Failure) nil)
+    ((equal *planner-input* 'None)
+      '(ka (do2.v nothing.pro)))
+    (t `(ka (put.v ,(caar *planner-input*)
+                   ,(make-set (mapcar #'cdr *planner-input*))))))
+) ; END get-planner-input
+
+
+
+(defun get-planner-input-offline () 
+;````````````````````````````````````
+; This is the planner input when ETA is used with argument live =
+; nil (hence also *live* = nil)
+; The input should be a list of relations that hold after the proposed action,
+; e.g., ((|B1| to-the-left-of.p |B2|) (|B1| touching.p |B2|))
+; Each relation is assumed to have the same subject.
+;
+  (finish-output)
+  (format t "enter planner input below:~%")
+  (finish-output)
+  (let ((planner-input (read-from-string (read-line))))
+    (cond
+    ((equal planner-input 'Failure) nil)
+    ((equal planner-input 'None)
+      '(ka (do2.v nothing.pro)))
+    (t `(ka (put.v ,(caar planner-input)
+                   ,(make-set (mapcar #'cdr planner-input)))))))
+) ; END get-planner-input-offline
+
+
+
 (defun get-answer () 
 ;``````````````````````
 ; This waits until it can load a list of relations from "./io/answer.lisp".
@@ -2244,20 +2292,25 @@
 (defun str-to-output (str)
 ; ``````````````````````````
 ; Converts a string to a list of words/punctuation to output
+; TEST: "The next step be putting the Twitter block on the Texaco block."
 ; 
   (let ((char-list (coerce str 'list)) word words)
-    (mapcar (lambda (c)
+    (dolist (c char-list)
       (cond
+        ; If space, add accumulated word to word list and clear word
         ((member c '(#\ ) :test #'char-equal)
           (if word (setq words (cons (reverse word) words)))
           (setq word nil))
-        ((member c '(#\. #\, #\' #\"))
-          (setq words (cons (reverse word) words))
+        ; If punctuation, add accumulated word to word list, clear word,
+        ; and add punctuation to word list
+        ((member c '(#\. #\, #\' #\") :test #'char-equal)
+          (if word (setq words (cons (reverse word) words)))
           (setq word nil)
           (setq words (cons (intern (coerce (list c) 'string)) words)))
+        ; Otherwise, add current character to accumulated word
         (t
           (setq word (cons c word)))))
-      char-list)
+    ; Read list of word symbols from list of strings.
     (reverse (mapcar (lambda (w)
       (if (listp w) (read-from-string (coerce w 'string)) w)) words)))
 ) ; END str-to-output

@@ -87,10 +87,7 @@
   ; ulf, gist, and references, respectively).
   ; Currently these are just lists - maybe in the future they should be
   ; hash tables (hashed on time)?
-  ; TODO: reconcile old 
   (defparameter *discourse-history* nil)
-  (defparameter *discourse-history-ulf* nil)
-  (defparameter *discourse-history-gist* nil)
   (defparameter *reference-list* nil)
 
   ; Hash table of gist clauses attributed to each person
@@ -633,6 +630,27 @@
 
 
 
+(defun observe-step-towards-goal (goal-rep)
+;`````````````````````````````````````````````
+; Observes next step towards the currently active BW goal-schema,
+; through reading IO file. Store fact in context.
+; TODO: might need changing - see note on 'find4.v' implementation.
+; Currently, the (?x step1-toward.p ?goal-rep) step is hard-coded
+; (based on the value of ?goal-rep extracted from the lambda function
+; in the find4.v action), which it shouldn't be.
+;
+  (let (step)
+    (setq step (if *live* (get-planner-input)
+                          (get-planner-input-offline)))
+    (remove-from-context `(?x step1-toward.p ,goal-rep))
+    (if step
+      (store-in-context `(,step step1-toward.p ,goal-rep))))
+) ; END observe-step-toward-goal
+
+
+
+
+
 (defun choose-variable-restrictions (sk-var restrictions)
 ;``````````````````````````````````````````````````````````
 ; Handles any indefinite quantification of a variable filled
@@ -887,7 +905,7 @@
 ; formula, rather than an action formula starting with "Me" or "You".
 ;
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest))
-        (wff (second rest)) bindings expr user-action-name user-ulf n new-subplan-name
+        (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
         user-gist-clauses user-gist-passage main-clause info topic suggestion query user-ulf
         ans alternates)
   
@@ -966,7 +984,6 @@
           (return-from implement-next-eta-action nil))
         (setq new-subplan-name (gensym "SUBPLAN"))
         ; Instantiate schema from schema name
-        ; TODO: allow for schema arguments
         (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
         (add-subplan {sub}plan-name new-subplan-name))
       
@@ -1026,10 +1043,10 @@
 ; for step elaboration typically elaborate (~me react-to.v ...) actions
 ; into single or multiple (~me say-to.v ~you '(...)) subactions.
 ;
-  (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest))
-        (wff (second rest)) bindings expr user-action-name user-ulf n new-subplan-name
-        user-gist-clauses user-gist-passage main-clause info topic suggestion query ans
-        perceptions perceived-actions sk-var sk-name)
+  (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest)) ep-name1
+        (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
+        user-gist-clauses user-gist-passage proposal-gist main-clause info topic
+        suggestion query ans perceptions perceived-actions sk-var sk-name)
   
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being ~
     ;;           processed~%" wff ep-name) ; DEBUGGING
@@ -1082,11 +1099,10 @@
       ;`````````````````````
       ; Yields e.g. ((_! EP34.)), or nil if unsuccessful.
       ((setq bindings (bindings-from-ttt-match '(~me react-to.v _!) wff))
-        (setq user-action-name (get-single-binding bindings))
+        (setq user-ep-name (get-single-binding bindings))
         ; Get user gist clauses and ulf from bound user action
-        ; TODO: modify to use ulf to plan reaction
-        (setq user-gist-clauses (get user-action-name 'gist-clauses))
-        (setq user-ulf (resolve-references (get user-action-name 'ulf)))
+        (setq user-gist-clauses (get user-ep-name 'gist-clauses))
+        (setq user-ulf (resolve-references (get user-ep-name 'ulf)))
         (format t "~% user gist clause is ~a ~%" user-gist-clauses) ; DEBUGGING
         (format t "~% user ulf is ~a ~%" user-ulf) ; DEBUGGING
         (setq new-subplan-name (plan-reaction-to {sub}plan-name user-gist-clauses user-ulf))
@@ -1274,6 +1290,21 @@
         (add-subplan {sub}plan-name new-subplan-name))
 
       ;````````````````````````````
+      ; Eta: Proposing
+      ;````````````````````````````
+      ((setq bindings (bindings-from-ttt-match '(~me propose1-to.v ~you _!) wff))
+        (setq expr (get-single-binding bindings))
+        (cond
+          ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
+          (t (setq proposal-gist (generate-proposal expr))))
+        ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (setq new-subplan-name (plan-proposal {sub}plan-name proposal-gist))
+        (when (null new-subplan-name)
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (add-subplan {sub}plan-name new-subplan-name))
+
+      ;````````````````````````````
       ; Eta: Perceiving world
       ;````````````````````````````
       ((setq bindings (bindings-from-ttt-match '(~me perceive-world.v _! _!1 _!2) wff))
@@ -1324,9 +1355,11 @@
       ; Forms a subplan for whichever argument is given to the try1.v
       ; action. If the subplan is successful (i.e., returns t), store
       ; ((pair ~me ?ep-var) successful.a) in context.
+      ; TODO: currently doesn't do anything in particular other than
+      ; making a subplan - the context storage is hardcoded into the find4.v
+      ; action, which needs to be changed once I hear back from Len.
       ((setq bindings (bindings-from-ttt-match '(~me try1.v (to _!)) wff))
         (setq expr (get-single-binding bindings))
-        ; TBC
         (setq new-subplan-name
           (init-plan-from-episode-list
             (list :episodes (episode-var) (cons '~me expr))
@@ -1334,27 +1367,29 @@
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name)
-        ;; (setq new-subplan-name
-        ;;   (init-plan-from-episode-list
-        ;;     (list :episodes (episode-var) (create-say-to-wff ans))
-        ;;     {sub}plan-name))
-        ;; ; If subplan creation is successful, attach as subplan (otherwise delete).
-        ;; (when (null new-subplan-name)
-        ;;   (delete-current-episode {sub}plan-name)
-        ;;   (return-from implement-next-eta-action nil))
-        ;; (add-subplan {sub}plan-name new-subplan-name)
-      )
+        (add-subplan {sub}plan-name new-subplan-name))
 
       ;````````````````````````````
       ; Eta: Finding
       ;````````````````````````````
-      ; TBC
-      ; (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
+      ; Finding some action (or other entity?), given an episode like
+      ; ?e1 (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
+      ; TODO: currently manually stores ((pair ~me ?e1) successful.a), which
+      ; needs to be changed - see note on 'Eta: Trying' action.
+      ; Also sends query to the BW system for step regardless of what the
+      ; argument of the find4.v action is.
       ((setq bindings (bindings-from-ttt-match '(~me find4.v _!) wff))
         (setq expr (get-single-binding bindings))
         (setq sk-var (second expr))
-      )
+        (observe-step-towards-goal (third (third (third expr)))); desperately needs changing
+        (setq sk-name (choose-variable-restrictions sk-var (third expr)))
+        (format t "found ~a for variable ~a~%" sk-name sk-var)
+        ;; (setq ep-name1 (get {sub}plan-name 'subplan-of))
+        (setq ep-name1 ep-name)
+        (if (and sk-name ep-name1)
+          (store-in-context `((pair ~me ,ep-name1) successful.a))); also desperately needs changing
+        (nsubst-variable {sub}plan-name sk-name sk-var)
+        (delete-current-episode {sub}plan-name))
 
       ;````````````````````````````
       ; Eta: Choosing
@@ -1409,7 +1444,6 @@
           (return-from implement-next-eta-action nil))
         (setq new-subplan-name (gensym "SUBPLAN"))
         ; Instantiate schema from schema name
-        ; TODO: allow for schema arguments
         (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
         (add-subplan {sub}plan-name new-subplan-name))
       
@@ -1577,7 +1611,7 @@
         ; main Eta action clause, and with the user input being the text
         ; to which the tests in the gist clause packet (tree) are applied.
         ;
-        ; TODO: In the future, we might instead of in addition use
+        ; TODO: In the future, we might instead of or in addition use
         ; (get eta-ep-name 'interpretation).
         (setq user-gist-clauses
           (form-gist-clauses-from-input words (car (last eta-clauses))))
@@ -1898,8 +1932,7 @@
 
 
 (defun plan-try-in-sequence ({sub}plan-name expr)
-;`````````````````````````````````````````````
-; TODO: update desc
+;``````````````````````````````````````````````````
 ; expr = ((:if cond1 name1.1 wff1.1 name1.2 wff1.2 ...)
 ;         (:if cond2 name2.1 wff2.1 name2.2 wff2.2 ...) ...
 ;         (:else name3.1 wff3.1 name3.2 wff3.2 ...))
@@ -1928,7 +1961,6 @@
 
 (defun plan-repeat-until ({sub}plan-name ep-name expr)
 ;`````````````````````````````````````````````````````````
-; TODO: Create plan-repeat-until
 ; expr = (ep-var cond name1 wff1 name2 wff2 ...)
 ;
 ; 'ep-name' is the name of the reoccuring :repeat-until episode. It will
@@ -2004,13 +2036,12 @@
       (return-from plan-reaction-to nil))
 
     ; Currently we're only using a single ulf
-    ; TODO: in case use of ulf is extended, we will probably want to have some
-    ; way of dealing with multiple ulf in the same way that we deal with multiple
-    ; gist clauses
     (if user-ulf (setq user-ulf (car user-ulf)))
 
     ; If the extracted ulf specifies an :out directive, we want to create a
     ; say-to.v subplan directly
+    ; TODO: this is not very elegant - not sure it makes sense for the value
+    ; of the user's ULF to be an out directive by Eta...
     (cond
       ((and user-ulf (eq (car user-ulf) :out))
         (return-from plan-reaction-to
@@ -2085,6 +2116,40 @@
         (init-plan-from-schema subplan-name schema-name args))
       )
 )) ; END plan-reaction-to
+
+
+
+
+
+(defun plan-proposal ({sub}plan-name proposal-gist)
+;````````````````````````````````````````````````````
+; Given a proposal gist clause, convert it to an utterance using
+; hierarchical transduction trees, starting at a top-level choice
+; tree root.
+; NOTE: currently only :out directives are expected, but this can
+; be expanded if we find e.g. subschema instantiation is necessary
+; (for example, if some particularly complex proposal that needs
+; to be broken down into multiple actions).
+;
+  (let (tagged-words choice)
+
+    (if (null proposal-gist)
+      (return-from plan-proposal nil))
+
+    (setq tagged-words (mapcar #'tagword proposal-gist))
+    ;; (format t "~% proposal tagwords are ~a ~% " tagged-words) ; DEBUGGING
+    (setq choice (choose-result-for tagged-words '*output-for-proposal-tree*))
+    ;; (format t "~% proposal choice is ~a ~% " choice) ; DEBUGGING
+
+    (if (null choice) (return-from plan-proposal nil))
+
+    (cond
+      ; :out directive
+      ((eq (car choice) :out)
+        (init-plan-from-episode-list
+          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
+          {sub}plan-name)))
+)) ; END plan-proposal
 
 
 
@@ -2444,7 +2509,6 @@
       ;```````````````````````
       ; Obtains a ulf result using the subtree & input specified in the pattern, and
       ; then resolves the coreferences in the resulting ulf
-      ; TODO: Implement coreference resolution (ulf case)
       ((eq directive :ulf-coref)
         (setq newclause (instance (second pattern) parts))
         (setq new-tagged-clause (mapcar #'tagword newclause))
@@ -2466,7 +2530,6 @@
       ;```````````````````````````````
       ; Misc non-recursive directives
       ;```````````````````````````````
-      ; TODO: Remove temporary :schema+ulf directive once solution is found
       ((member directive '(:out :subtrees :schema :schemas 
                            :schema+args :gist :schema+ulf))
         (setq result (cons directive (instance pattern parts)))

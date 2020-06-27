@@ -101,6 +101,18 @@
 ) ; END generate-response
 
 
+(defun generate-proposal (ka)
+; ```````````````````````````````
+; Generates a gist clause for an action proposal (possibly further transduced into a surface expression),
+; given a reified action (e.g., (ka (put.v |B1| (on.p |B2|)))).
+;
+  (let (ulf output-ulf)
+    (setq ulf '(((the.d (next.a step.n)) ((pres be.v) (= what.pro))) \.))
+    (setq output-ulf (ttt:apply-rule `(/ what.pro ,ka) ulf))
+    (ulf-to-english output-ulf))
+) ; END generate-proposal
+
+
 (defun get-query-type (ulf)
 ; ```````````````````````````
 ; Classify a ULF query as one of a few types by checking corresponding TTT flags.
