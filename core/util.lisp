@@ -2001,35 +2001,39 @@
 
 
 
-(defun hear-words () 
-;````````````````````
+(defun hear-words (&key (delay nil)) 
+;`````````````````````````````````````
 ; This waits until it can load a character sequence from "./io/input.lisp",
 ; which will set the value of *next-input*, and then processes *input*
 ; in the same way as the result of (read-line) is processed in direct
 ; terminal input mode.
+; If some delay (an integer) is given, move on if no words heard after that
+; number of seconds.
 ;
-  ; Write empty star line to output to prompt avatar to listen
-  ; TODO: there has to be a better way of doing this...
-  (setq *output-count* (1+ *output-count*))
-  (with-open-file (outfile "./io/output.txt" :direction :output
-                                             :if-exists :append
-                                             :if-does-not-exist :create)
-    (format outfile "~%*~D: dummy" *output-count*))
+  (let ((s 0))
+    ; Write empty star line to output to prompt avatar to listen
+    ; TODO: there has to be a better way of doing this...
+    (setq *output-count* (1+ *output-count*))
+    (with-open-file (outfile "./io/output.txt" :direction :output
+                                               :if-exists :append
+                                               :if-does-not-exist :create)
+      (format outfile "~%*~D: dummy" *output-count*))
 
-  (setq *next-input* nil)
-  (loop while (not *next-input*) do
-    (sleep .5)
-    (progn
-      (load "./io/input.lisp")
-		  (if *next-input*
-        (progn
-          (format t "~a~%" *next-input*)
-          (with-open-file (outfile "./io/input.lisp" :direction :output 
-                                                  :if-exists :supersede
-                                                  :if-does-not-exist :create))))))
+    (setq *next-input* nil)
+    (loop while (and (not *next-input*) (or (not delay) (< s delay))) do
+      (sleep .5)
+      (setq s (+ s .5))
+      (progn
+        (load "./io/input.lisp")
+		    (if *next-input*
+          (progn
+            (format t "~a~%" *next-input*)
+            (with-open-file (outfile "./io/input.lisp" :direction :output 
+                                                       :if-exists :supersede
+                                                       :if-does-not-exist :create))))))
           
   (parse-chars (coerce *next-input* 'list))
-) ; END hear-words
+)) ; END hear-words
 
 
 
@@ -2285,7 +2289,14 @@
         ; If question was marked as non-historical, also skip
         ((member (fourth turn-tuple) '(XC XI XP XE))
           (format outfile "(\"~a\" ~S \"~a\" ~a)~%" (first turn-tuple) (second turn-tuple) (third turn-tuple) (fourth turn-tuple)))
+        ; If "when" question with specific time, also skip
+        ((and (equal "when" (string-downcase (subseq (first turn-tuple) 0 4)))
+              (find-if (lambda (x) (member x '(zero one two three four five six seven eight nine ten eleven twelve thirteen
+                                               fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty
+                                               fifty sixty seventy eighty ninety hundred))) answer-old))
+          (format outfile "(\"~a\" ~S \"~a\" ~a)~%" (first turn-tuple) (second turn-tuple) (third turn-tuple) (fourth turn-tuple)))
         ; Otherwise, check the new output with the user and prompt them to change feedback
+
         (t
           (format t " ----------------------------------------------------------~%")
           (format t "| A CHANGE WAS DETECTED IN LOG '~a':~%" (pathname-name filename))

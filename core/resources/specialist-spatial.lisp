@@ -11,7 +11,7 @@
 ; TODO: on_to in facing abutting visible flush_with towards)
 (defvar *spatial-prep-list*
   '(touching.p to_the_left_of.p to_the_right_of.p below.p (under.p below.p) (beneath.p below.p) above.p behind.p
-    in_front_of.p on.p (on_top_of.p on.p) near.p (near-to.p near.p) (close-to.p near.p) next_to.p (adjacent_to.p next-to.p)
+    in_front_of.p on.p (on_top_of.p on.p) near.p (near_to.p near.p) (close_to.p near.p) next_to.p (adjacent_to.p next_to.p)
     between.p))
 (defun ternary-spatial-prep-p (x) (member x '(between.p)))
 
@@ -103,7 +103,7 @@
 ; `````````````````````````
 ; Check whether two objects are at the same height
 ;
-  (exp-decay (abs (- z1 z2)))
+  (exp-decay (abs (- z1 z2)) :a 2)
 ) ; END same-height
 
 
@@ -336,7 +336,7 @@
 (defun next_to.p (x1 y1 z1 x2 y2 z2)
 ; ````````````````````````````````````````````````
   ;; (+ (* 0.5 (near.p x1 y1 z1 x2 y2 z2 size1 size2)) (* 0.5 (same-height z1 z2)))
-  (+ (* 0.5 (near.p x1 y1 z1 x2 y2 z2)) (* 0.5 (same-height z1 z2)))
+  (+ (* 0.7 (near.p x1 y1 z1 x2 y2 z2)) (* 0.3 (same-height z1 z2)))
 ) ; END next_to.p
 
 
