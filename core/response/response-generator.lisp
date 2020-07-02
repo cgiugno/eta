@@ -246,6 +246,8 @@
          (I.pro ((past verb-untensed?) _!)))
       (/ (I.pro ((past verb-untensed?) _! (adv-e (! (^* (some.d _!1))))))
          (I.pro ((past verb-untensed?) _!)))
+      (/ (ans-to (sub _! ((past do.aux-s) pron? (verb-untensed? _*))))
+         (ans-to (sub _! (pron? ((past verb-untensed?) _*)))))
     )
     ulf)
 ) ; END normalize-wh-question-presupposition

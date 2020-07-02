@@ -671,7 +671,7 @@
 ; ```````````````
 ; Checks if a ULF is a noun phrase starting with either a determiner or a type reifier, or a pronoun.
 ;
-  (or (det-np? ulf) (kind? ulf) (pron? ulf))
+  (or (det-np? ulf) (kind? ulf) (pron? ulf) (quan? ulf))
 ) ; END np?
 
 
