@@ -166,7 +166,7 @@
             ?e9 (:repeat-until (^you follow.v ?e8)
                               ; LKS: I guess that's 'follow5.v' in WordNet, i.e.,
                               ;      comply with. An alternative, focused on 
-                              ;      ?ka1, would be (^you do.v ?ka1).
+                              ;      ?ka1, would be (^you do2.v ?ka1).
                               ;        A significant question here is how we
                               ;      interpret an episodic sentence like the
                               ;      above in STM when checking a condition.
@@ -201,7 +201,7 @@
                               ; (the "common ground") are obtained by forward
                               ; inference, e.g., beliefs are inferred from what
                               ; both can see, and what each of them says.
-`
+
                        
               ; User says something in response to the system's proposal and/or
               ; makes a move.

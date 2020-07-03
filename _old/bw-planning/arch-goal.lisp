@@ -12,3 +12,8 @@
     (on ?v ?x) (on ?v ?z)
   )
   :end))
+
+
+;; (((the.d (|Twitter| block.n)) to_the_left_of.p (the.d (|Texaco| block.n))))
+;; (((the.d (|Target| block.n)) on.p (the.d (|Texaco| block.n))))
+;; None

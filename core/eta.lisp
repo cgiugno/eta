@@ -1534,7 +1534,7 @@
 ; 
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (user-ep-name (car rest))
         (wff (second rest)) bindings words expr user-ep-name1 wff1 wff1-arg eta-ep-name
-        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input)
+        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input user-try-ka-success)
 
     ;; (format t "~%WFF = ~a,~%      in the user action ~a being ~
     ;;           processed~%" wff user-ep-name) ; DEBUGGING
@@ -1672,7 +1672,7 @@
       ;`````````````````````
       ; Nonprimitive (^you reply-to.v <eta action name>) action; we particularize this
       ; action as a subplan, based on reading the user's input
-      (t
+      ((setq bindings (bindings-from-ttt-match '(^you reply-to.v _!) wff))
         ; If in *read-log* mode, finish processing the previous turn-tuple before moving on
         (when *read-log*
           (when (>= *log-ptr* 0)
@@ -1709,6 +1709,53 @@
         (add-subplan {sub}plan-name new-subplan-name)
         ;; (print-current-plan-status subplan-name) ; DEBUGGING
         (list user-ep-name1 wff1))
+
+      ;`````````````````````
+      ; User: Acknowledging
+      ;`````````````````````
+      ; Same as replying, but allows for "tacit approval" (10 secs of silence) as well.
+      ((setq bindings (bindings-from-ttt-match '(^you acknowledge.v _!) wff))
+        ; Read user input (within 15 secs if live mode)
+        (setq input (if *live* (hear-words :delay 10) (read-words)))
+        (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
+
+        ; Make sure that any final punctuation, such as ?, ., or !,
+        ; is separated from the final word (so as to not impair pattern matching)
+        (when (null input)
+          (delete-current-episode {sub}plan-name)
+          (return-from observe-next-user-action (list user-ep-name1 wff1)))
+        (setq input (detach-final-punctuation input))
+        ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
+        ; Create subplan
+        (setq new-subplan-name
+          (init-plan-from-episode-list
+            (list :episodes (episode-var) (create-say-to-wff input :reverse t))
+            {sub}plan-name))
+        ; Bidirectional hierarchical connections
+        (add-subplan {sub}plan-name new-subplan-name)
+        ;; (print-current-plan-status subplan-name) ; DEBUGGING
+        (list user-ep-name1 wff1)
+      )
+
+      ;````````````````````````````
+      ; User: Trying
+      ;````````````````````````````
+      ; User tries some reified action. Queries the BW system for whether or
+      ; not trying the action was successful.
+      ; TODO: needs to be made more general in the future.
+      ((setq bindings (bindings-from-ttt-match '(^you try1.v _!) wff))
+        (setq expr (get-single-binding bindings))
+        (setq user-try-ka-success (if *live* (get-user-try-ka-success)
+                                             (get-user-try-ka-success-offline)))
+        (format t "~% user-try-ka-success is equal to ~a ~%" user-try-ka-success) ; DEBUGGING
+        (when user-try-ka-success
+          (store-in-context `((pair ^you ,user-ep-name) successful.a))
+          (store-in-context `((pair ^you ,user-ep-name) instance-of.p ,expr)))
+        (delete-current-episode {sub}plan-name)
+        (list user-ep-name wff))
+
+      ; Unrecognizable step
+      (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
     )
 )) ; END observe-next-user-action
 
