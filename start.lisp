@@ -40,7 +40,13 @@
                                                     :supersede :if-does-not-exist :create))
   ; Delete the content of goal-rep.lisp, if it exists, otherwise create
   (with-open-file (outfile "./io/goal-rep.lisp" :direction :output :if-exists 
-                                                :supersede :if-does-not-exist :create))                                                                          
+                                                :supersede :if-does-not-exist :create)) 
+  ; Delete the content of planner-input.lisp, if it exists, otherwise create
+  (with-open-file (outfile "./io/planner-input.lisp" :direction :output :if-exists 
+                                                     :supersede :if-does-not-exist :create))    
+  ; Delete the content of user-try-ka-success.lisp, if it exists, otherwise create
+  (with-open-file (outfile "./io/user-try-ka-success.lisp" :direction :output :if-exists 
+                                                           :supersede :if-does-not-exist :create))                                                                           
 ) ; END clean-io-files
 
 
