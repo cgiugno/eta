@@ -808,11 +808,17 @@
          ((((nquan (how.mod-a many.a)) 1) ((past perf) (2 3))) ?)) (0 :ulf-recur)
 
     ; Counting blocks satisfying some preposition (historical)
+    1 (how many 1 noun be adv_ 1 prep 2 np-bw 3 conj 2 np-bw 3 ?); e.g., how many blocks were originally above the SRI block and NVidia block ?
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*adv-ulf-tree* 6 7) (*pp-ulf-tree* 8 9 10 11 12 13 14 15) ?) 
+          ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
     1 (how many 1 noun be not prep 2 np-bw 3 conj 2 np-bw 3 adv-hist-word 0 ?); e.g., how many blocks were not on red blocks or blue blocks previously ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-ulf-tree* 7 8 9 10 11 12 13 14) (*adv-ulf-tree* 15 16) ?)
           ((((nquan (how.mod-a many.a)) 1) (2 not 3 4)) ?)) (0 :ulf-recur)
     1 (how many 1 noun be 1 prep 2 np-bw 3 conj 2 np-bw 3 adv-hist-word 0 ?); e.g., how many blocks were there above the SRI block and NVidia block initially ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-ulf-tree* 7 8 9 10 11 12 13 14) (*adv-ulf-tree* 15 16) ?) 
+          ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
+    1 (how many 1 noun be adv_ 1 prep 2 np-bw 3 ?); e.g., how many blocks were originally above the SRI block ?
+       2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*adv-ulf-tree* 6 7) (*pp-ulf-tree* 8 9 10 11) ?) 
           ((((nquan (how.mod-a many.a)) 1) (2 3 4)) ?)) (0 :ulf-recur)
     1 (how many 1 noun be not prep 2 np-bw 3 adv-hist-word 0 ?); e.g., how many blocks were not on red blocks before ?
        2 (((*n1-ulf-tree* 3 4) (lex-ulf! v 5) (*pp-ulf-tree* 7 8 9 10) (*adv-ulf-tree* 11 12) ?)
