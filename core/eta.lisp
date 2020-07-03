@@ -612,10 +612,13 @@
 ; name is nested inside the lambda extract, and messing with that here would
 ; be a pretty messy approach. Instead, I check context for some individual such
 ; that it is a BW-concept.n and Eta has chosen it.
+; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
+; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
+; in noun hierarchy.
 ;
   (let (concept-name goal-schema goal-name)
     (setq concept-name (car (find-all-instances-context
-      '(:l (?x) (and (?x BW-concept.n) (^me choose.v ?x))))))
+      '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
     (request-goal-rep (cdr (get-record-structure concept-name)))
     ; NOTE: currently no special offline (terminal mode) procedure
     ; for getting goal schema.

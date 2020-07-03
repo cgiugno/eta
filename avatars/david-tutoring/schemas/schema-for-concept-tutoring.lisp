@@ -23,7 +23,7 @@
 :types (
   !t1 (^you person.n)
   !t2 (^me robot.n)  
-  !t3 (?cc (plur BW-concept.n)); concepts that ^me knows (as obj-schema)
+  !t3 (?cc (plur BW-concept-structure.n)); concepts that ^me knows (as obj-schema)
   !t4 (|Table| table.n)
   !t5  ((the.d (|Target| block.n)) block.n)
   !t6  ((the.d (|Starbucks| block.n)) block.n)

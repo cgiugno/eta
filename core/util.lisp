@@ -964,8 +964,7 @@
 ;```````````````````````````````````````
 ; Removes a fact from context
 ;
-  (remove-facts (get-matching-facts pred-patt *context*)
-    *context*)
+  (remove-facts (get-from-context pred-patt) *context*)
 ) ; END remove-from-context
 
 
@@ -1108,8 +1107,11 @@
   (setq fact (eval-functions fact))
   (if (gethash fact ht); is 'fact' actually in ht? 
     (prog2 (dolist (key (storage-keys fact))
-            (if (equal key fact)
+            (if (or (equal key fact) (= 1 (length (gethash key ht))))
+              ; If the key is either the fact itself, or the fact is the
+              ; only remaining element of the key, remove the hash itself
               (remhash key ht)
+              ; Otherwise, remove the fact from the list of facts at that key
               (setf (gethash key ht) 
                      (remove fact (gethash key ht) :test #'equal))))
             t) ; signal that the fact was removed
