@@ -1091,6 +1091,23 @@
 ; Parses wh + do questions.
 ;
 '(
+    ; Premodifying+postmodifying adv-e
+    1 (where do pron adv_ 1 verb-rel 2 np-bw 3 adv-hist-word 0 ?); e.g., where did I ever move the NVidia block since the beginning ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (*adv-ulf-tree* 4 5) (lex-ulf! v- 6)
+          (*np-ulf-tree* 7 8 9) (*adv-ulf-tree* 10 11) ?) ((sub 1 (2 3 (4 (5 6 (adv-a *h) 7)))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron adv_ 1 verb-rel between 0 adv-hist-word 0 ?); e.g., what blocks did I ever put between the SRI block and NVidia block since the beginning ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5 6) (lex-ulf! v- 7)
+          (*pp-between-ulf-tree* 8 9) (*adv-ulf-tree* 10 11) ?) ((sub 1 (2 3 (4 (5 *h 6 7)))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron adv_ 1 verb-rel 1 prep 2 np-bw 3 adv-hist-word 0 ?); e.g., what blocks did I ever put on the SRI block since the beginning ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5 6) (lex-ulf! v- 7)
+          (*pp-ulf-tree* 8 9 10 11 12) (*adv-ulf-tree* 13 14) ?) ((sub 1 (2 3 (4 (5 *h 6 7)))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron adv_ 1 verb-rel adv-hist-word 0 ?); e.g., what blocks did I ever move since the beginning ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 5 6) (lex-ulf! v- 7) (*adv-ulf-tree* 8 9) ?)
+          ((sub 1 (2 3 (4 (5 *h 6)))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 do pron not adv_ 1 verb-rel adv-hist-word 0 ?); e.g., what blocks did I not ever move since the beginning ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (*np-ulf-tree* 4) (*adv-ulf-tree* 6 7) (lex-ulf! v- 8) (*adv-ulf-tree* 9 10) ?)
+          ((sub 1 (2 3 (not (4 (5 *h 6))))) ?)) (0 :ulf-recur)
+
     ; Premodifying adverb
     1 (where do pron adv_ 1 verb-rel 2 np-bw 3 ?); e.g., where did I just move the NVidia block ?
        2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3) (*adv-ulf-tree* 4 5) (lex-ulf! v- 6)
