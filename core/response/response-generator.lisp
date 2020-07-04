@@ -294,7 +294,7 @@
     (t
       (ttt:apply-rules '(
           ; was moved => wasn't moved
-          (/ (_! (tense? (pasv verb-untensed?))) (_! not (tense? (pasv verb-untensed?))))
+          (/ (_! ((! tense? (tense? aspect?)) (pasv verb-untensed?))) (_! not (! (pasv verb-untensed?))))
           ; be not on => be always on
           (/ (_! ((tense? be.v) not _*))           ; NOTE: this is a little strange since 'always' is treated as adv-e
              (_! ((tense? be.v) always.adv-s _*))) ; elsewhere, but is adv-s here so it's not removed during output                    

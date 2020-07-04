@@ -102,7 +102,16 @@
                      (picked_up '(past (pasv pick_up.v)))
                      (rotated '(past (pasv rotate.v)))
                      (placed '(past (pasv place.v)))
-                     (t (read-from-string (format nil "(PAST (PASV ~a.V))" word-sym))))) ; by default we assume a verb is present tensed
+                     (t (read-from-string (format nil "(PAST (PASV ~a.V))" word-sym)))))
+         ; Untensed passive
+         ((v-pasv- verb-passive-) (case word-sym
+                     (moved '(pasv move.v))
+                     (put '(pasv put.v))
+                     (changed '(pasv change.v))
+                     (picked_up '(pasv pick_up.v))
+                     (rotated '(pasv rotate.v))
+                     (placed '(pasv place.v))
+                     (t (read-from-string (format nil "(PASV ~a.V)" word-sym)))))
          ; Untensed verb
          ((v- verb-untensed)
             ; This is a bit hacky...

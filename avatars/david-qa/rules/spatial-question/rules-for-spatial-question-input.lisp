@@ -15,7 +15,7 @@
     (spatial-ending noun adj there directions ana-pron prep conj-prep facing
       adv-hist-word prep-history-adj verb-rel that this those corp)
     (spatial-word noun-bw ana-pron supporting corp adj
-      uppermost under close touching farthest rotated)
+      uppermost under close touching farthest rotated verb-rel)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
     (kinds types sorts kind type sort formats format)
     (question questions)
@@ -77,6 +77,8 @@
   ; e.g. "burger king" into a single word, joined by an underscore.
   (READRULES '*multi-token-word-tree*
   '(
+    1 (0 how many 0)
+      2 (*multi-token-word-tree* (1 how_many 4)) (0 :subtree+clause)
     1 (0 burger king 0)
       2 (*multi-token-word-tree* (1 burger_king 4)) (0 :subtree+clause)
     1 (0 sri international 0)
@@ -504,6 +506,8 @@
        2 (*grammar-fix-tree* (at 1 2 3 4 5)) (0 :subtree+clause)
     1 (wh-det noun-history 0 verb-rel 0); e.g., what turn did I move the Twitter block ?
        2 (*grammar-fix-tree* (at 1 2 3 4 5)) (0 :subtree+clause)
+    1 (0 have not I 0); have not I => have I not
+       2 (*grammar-fix-tree* (1 have I not 5)) (0 :subtree+clause)
     1 (0)
       2 (*detect-smalltalk-tree* (1)) (0 :subtree+clause)
   ))

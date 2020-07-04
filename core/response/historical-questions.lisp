@@ -350,9 +350,13 @@
            (_!1 between.p _!2 _!3))
         (/ (_! ((tense? verb-untensed?) _!1 (^* (prep? _!2))))
            (_!1 prep? _!2))
-        (/ (_!1 ((tense? (pasv verb-untensed?)) (^* (between.p (set-of _!2 _!3)))))
+        (/ (_! ((tense? aspect?) (verb-untensed? _!1 (^* (between.p (set-of _!2 _!3))))))
            (_!1 between.p _!2 _!3))
-        (/ (_!1 ((tense? (pasv verb-untensed?)) (^* (prep? _!2))))
+        (/ (_! ((tense? aspect?) (verb-untensed? _!1 (^* (prep? _!2)))))
+           (_!1 prep? _!2))
+        (/ (_!1 (((! tense? (tense? aspect?)) (pasv verb-untensed?)) (^* (between.p (set-of _!2 _!3)))))
+           (_!1 between.p _!2 _!3))
+        (/ (_!1 (((! tense? (tense? aspect?)) (pasv verb-untensed?)) (^* (prep? _!2))))
            (_!1 prep? _!2))
         ; "what block touches the Twitter block?" (TODO: needs to be generalized)
         (/ (_!1 ((tense? spatial-verb?) _!2))
@@ -375,7 +379,9 @@
 ;
   (let ((subj
       (ttt:apply-rules '(
-        (/ (_!1 (! (^* (tense? verb-untensed?)))) _!1))
+        (/ (_!1 (! (^* (tense? verb-untensed?)))) _!1)
+        (/ (_!1 (! (^* ((tense? aspect?) (verb-untensed? _*))))) _!1)
+        (/ (_!1 (! (^* (pasv verb-untensed?)))) _!1))
       ulf))) 
     (if (or (np? subj) (nnp? subj) (variable? subj) (restricted-variable? subj)) subj nil))
 ) ; END extract-subj
@@ -389,7 +395,7 @@
     (ttt:apply-rules '(
       (/ (_! (^* ((tense? verb-untensed?) (^*2 (! wh-pron? (det? _!1) ((nquan _!2) _!3))) _*))) !)
       (/ (_! (^* ((tense? aspect?) (verb-untensed? (^*2 (! wh-pron? (det? _!1) ((nquan _!2) _!3))) _*)))) !)
-      (/ (_! (tense? (pasv verb-untensed?))) _!))
+      (/ (_! ((! tense? (tense? aspect?)) (pasv verb-untensed?))) _!))
     ulf)))
   (if (or (np? obj) (nnp? obj) (variable? obj) (restricted-variable? obj)) obj nil))
 ) ; END extract-obj
@@ -790,9 +796,17 @@
   (let* ((subj (resolve-rel-np! (first rel) scene)) (prep (second rel))
          (obj (resolve-rel-np! (third rel) scene)) (obj2 (resolve-rel-np! (fourth rel) scene))
          (coords-list1 (find-cars-list subj scene)) (coords-list2 (find-cars-list obj scene))
-         (coords-list3 (find-cars-list obj2 scene)))
-    ; Find all relations that hold
-    (form-pred-list coords-list1 (list prep) coords-list2 coords-list3 :neg neg :deg-adv deg-adv))
+         (coords-list3 (find-cars-list obj2 scene)) relation-list)
+    ; Find all relations that hold (removing duplicates if counting)
+    (setq relation-list (form-pred-list
+      coords-list1 (list prep) coords-list2 coords-list3 :neg neg :deg-adv deg-adv))
+    (if (quan? (first rel))
+      (setq relation-list (remove-duplicates relation-list
+        :test (lambda (r1 r2) (equal (first r1) (first r2))))))
+    (if (quan? (third rel))
+      (setq relation-list (remove-duplicates relation-list
+        :test (lambda (r1 r2) (equal (car (last r1)) (car (last r2)))))))
+  relation-list)
 ) ; END compute-relation
 
 
