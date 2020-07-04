@@ -253,8 +253,12 @@
               binary-constraints)
             (format t "historical question with underspecified unary constraints involving 'after' predicate: adding 'ever'~%")
             (setq adv-e-unary-inferred (cons 'ever.a adv-e-unary-inferred)))
-          (t
-            (format t "historical question with underspecified unary constraints: adding 'recently'~%")
+          ((some (lambda (binary-constraint)
+                (let* ((prep-lookup (find-car (car binary-constraint) *temporal-prep-list*))
+                       (prep (if (atom prep-lookup) prep-lookup (second prep-lookup))))
+                  (equal prep 'before.p)))
+              binary-constraints)
+            (format t "historical question with underspecified unary constraints involving 'before' predicate: adding 'recently'~%")
             (setq adv-e-unary-inferred (cons 'recent.a adv-e-unary-inferred))))))
             
     (list adv-e-unary-inferred adv-e-binary-inferred adv-f-inferred))

@@ -19,9 +19,6 @@
 
 :episodes (
 
-  ; David has question-answering dialogue.
-  ;; ?e1 ((set-of ^me ^you) have-question-answering-dialogue.v)
-
   ; David has concept tutoring dialogue.
   ?e1 (^me teach-BW-concept-to.v ^you)
 )
