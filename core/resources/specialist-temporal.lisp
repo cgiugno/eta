@@ -18,7 +18,7 @@
 
 ; List of supported temporal adjectives (potentially aliased in case of synonyms)
 (defvar *temporal-adj-list*
-  '(first.a (original.a first.a) (initial.a first.a) second.a third.a last.a (final.a last.a) current.a (now.a current.a)
+  '(original.a (initial.a original.a) first.a second.a third.a last.a (final.a last.a) current.a (now.a current.a)
     recent.a previous.a (ago.a previous.a) (before.a previous.a) (preceding.a previous.a)
     next.a (after.a next.a) (following.a next.a) (future.a next.a) (later.a next.a) ever.a just.a))
 
@@ -218,6 +218,11 @@
 ; `````````````````````````
 ; Gets the nth time in times (in temporal order).
 ;
+  ; If we're looking at times which have had the relevant relation evaluated (i.e.,
+  ; at least one of the times has facts attached), only consider times with relevant facts.
+  (if (some (lambda (time) (get time '@)) times)
+    (setq times (remove-if-not (lambda (time) (get time '@)) times)))
+  ; Sort in temporal order and get nth time
   (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
     (nth n sorted))
 ) ; END nth-time
@@ -227,6 +232,11 @@
 ; `````````````````````````````````````
 ; Gets the most recent time (or n most recent times, if n is given).
 ;
+  ; If we're looking at times which have had the relevant relation evaluated (i.e.,
+  ; at least one of the times has facts attached), only consider times with relevant facts.
+  (if (some (lambda (time) (get time '@)) times)
+    (setq times (remove-if-not (lambda (time) (get time '@)) times)))
+  ; Sort in temporal order and get most recent time(s)
   (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
     (if (null n) (car (last sorted))
       (reverse (last sorted n))))
@@ -237,6 +247,7 @@
 ; ```````````````````````````````````````
 ; Gets the least recent time (or n least recent times, if n is given).
 ;
+  ; Sort in temporal order and get earliest time(s)
   (let ((sorted (sort (copy-seq times) (lambda (x y) (is-before x y)))))
     (if (null n) (car sorted)
       (front sorted n)))
@@ -567,10 +578,38 @@
 ) ; END eval-temporal-modifier
 
 
+(defun original.a (times mod-a)
+; ```````````````````````````
+; Select the original time(s) in times, applying any mod-a as appropriate.
+; Synonyms: initial.a
+;
+  (cond
+    ; not original
+    ((ttt:match-expr 'temporal-not-mod-a? mod-a)
+      (set-difference times (earliest-time times 1)))
+    ; just original
+    ((ttt:match-expr 'temporal-just-mod-a? mod-a)
+      (earliest-time times 1))
+    ; most original
+    ((ttt:match-expr 'temporal-most-mod-a? mod-a)
+      (earliest-time times 1))
+    ; few original
+    ((ttt:match-expr 'temporal-few-mod-a? mod-a)
+      (earliest-time times (few-value! mod-a)))
+    ; two original
+    ((ttt:match-expr 'temporal-count-mod-a? mod-a)
+      (earliest-time times (numerical-mod-a! mod-a)))
+    ; original + plural noun
+    ((ttt:match-expr 'plur.mod-a mod-a)
+      (earliest-time times *temporal-plur-value*))
+    ; no/unknown mod-a
+    (t (earliest-time times 1)))
+) ; END original.a
+
+
 (defun first.a (times mod-a)
 ; ```````````````````````````
 ; Select the first time(s) in times, applying any mod-a as appropriate.
-; Synonyms: original.a, initial.a
 ;
   (cond
     ; not first
@@ -592,7 +631,7 @@
     ((ttt:match-expr 'plur.mod-a mod-a)
       (earliest-time times *temporal-plur-value*))
     ; no/unknown mod-a
-    (t (earliest-time times 1)))
+    (t (list (nth-time times 0))))
 ) ; END first.a
 
 
@@ -603,9 +642,9 @@
   (cond
     ; not adj
     ((ttt:match-expr 'temporal-not-mod-a? mod-a)
-      (set-difference times (list (nth-time times 2))))
+      (set-difference times (list (nth-time times 1))))
     ; no/unknown mod-a
-    (t (list (nth-time times 2))))
+    (t (list (nth-time times 1))))
 ) ; END second.a
 
 
@@ -616,9 +655,9 @@
   (cond
     ; not adj
     ((ttt:match-expr 'temporal-not-mod-a? mod-a)
-      (set-difference times (list (nth-time times 3))))
+      (set-difference times (list (nth-time times 2))))
     ; no/unknown mod-a
-    (t (list (nth-time times 3))))
+    (t (list (nth-time times 2))))
 ) ; END third.a
 
 
