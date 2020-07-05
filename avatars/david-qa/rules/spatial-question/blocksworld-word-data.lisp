@@ -73,6 +73,7 @@
   (prep-bw on on_to under in behind near touching facing abutting between from
         below beneath above next_to close_to near_to visible on_top_of to_the_left_of
         to_the_right_of in_front_of adjacent_to flush_with towards)
+  (prep-where-adv relative_to with_respect_to)
 
   (rel-adj near close touching facing adjacent flush central)
   (qual-adj purple blue green yellow orange red pink gray grey
@@ -91,7 +92,10 @@
   (mod-n adj-bw corp)
 
   (noun-bw block table stack row edge face plane line circle pile object
-        color structure left center right back front direction way other one thing)
+        color structure left center right back front direction way other
+        one thing)
+
+  (noun-total total all)
 
   (verb be verb-rel)
   (be is are was were)
@@ -122,8 +126,8 @@
   (adv-hist-word adv-history prep-history adj-history adv-hist-modifier adv-hist-number)
   (adv_ adv adv-history adv-hist-modifier)
   
-  (prep prep-bw prep-history)
+  (prep prep-bw prep-history prep-where-adv)
   (adj adj-bw adj-history)
-  (noun noun-bw noun-history)
+  (noun noun-bw noun-history noun-total)
   (np-bw np_ noun-bw corp)
 ))

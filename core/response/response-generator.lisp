@@ -65,7 +65,9 @@
           '(NO.YN)))
       ; Query is IDENT-PREP type
       ((equal query-type 'IDENT-PREP)
-        (ttt:apply-rule `(/ (prep? ident-flag?) (prep? ,ans-ulf)) query-ulf))
+        ; although ident-prep was used to select the appropriate argument,
+        ; we can still use the normal ident flag for answer substitution
+        (ttt:apply-rule `(/ ident-flag? ,ans-ulf) query-ulf))
       ; Query is IDENT type
       ((equal query-type 'IDENT)
         (ttt:apply-rule `(/ ident-flag? ,ans-ulf) query-ulf))
@@ -121,6 +123,7 @@
 ; "has the Twitter block ever touched the Mercedez block?" removes the "has" and adds a perfect aspect
 ; to touch.v, so the output ULF resembles a question in declarative form).
 ;
+  (setq ulf (apply-sub-macro ulf))
   (cond
     ((ttt:match-expr '(^* color-flag?) ulf) 'ATTR-COLOR)
     ((ttt:match-expr '(^* color-object-flag?) ulf) 'COLOR-OBJECT)
@@ -225,6 +228,9 @@
       (/ (pron? ((tense? verb?) relative?)) (sub relative? (pron? ((tense? verb?) *h))))
       ; fix adv-e with sentential preposition
       (/ (adv-e (sent-prep? _!)) (sent-prep? _!))
+      ; remove redundant 'relative to/with respect to' adjuncts in where questions
+      (/ (_!1 ((tense? verb?) (prep? _!2) (adv-a ((! relative_to.p with_respect_to.p) _!3))))
+         (_!1 ((tense? verb?) (prep? _!2))))
       ; TODO: temporary fix for "toppest"
       (/ (most-n top.a _*) (topmost.a _*))
       )

@@ -9,7 +9,8 @@
       second bit quit resume david now today finished-word)
     (finished-word it all everything)
 
-    (spatial-beginning-pair spatial-beginning there)
+    (spatial-beginning-pair2 spatial-beginning there)
+    (spatial-beginning-pair1 spatial-beginning)
     (spatial-beginning spatial-verb between prep conj-prep)
     (spatial-verb be modal wh_ do)
     (spatial-ending noun adj there directions ana-pron prep conj-prep facing
@@ -79,6 +80,10 @@
   '(
     1 (0 how many 0)
       2 (*multi-token-word-tree* (1 how_many 4)) (0 :subtree+clause)
+    1 (0 relative to 0)
+      2 (*multi-token-word-tree* (1 relative_to 4)) (0 :subtree+clause)
+    1 (0 with respect to 0)
+      2 (*multi-token-word-tree* (1 with_respect_to 5)) (0 :subtree+clause)
     1 (0 burger king 0)
       2 (*multi-token-word-tree* (1 burger_king 4)) (0 :subtree+clause)
     1 (0 sri international 0)
@@ -198,9 +203,9 @@
       2 ((spatial-question 7)) (0 :gist)
     1 (0 aux you 1 tell 0)
       2 ((spatial-question 6)) (0 :gist)
-    1 (0 spatial-beginning-pair spatial-beginning-pair spatial-beginning-pair ; meant to match something
-        spatial-beginning-pair 0)                                             ; like "is there...what is next
-                                                                              ; to the red block?"
+    1 (0 spatial-beginning-pair1 spatial-beginning-pair2 spatial-beginning-pair1 ; meant to match something
+        spatial-beginning-pair2 0)                                               ; like "is there...what is next
+                                                                                 ; to the red block?"
       2 ((spatial-question 4 5 6)) (0 :gist)
     1 (between spatial-beginning 0)
       2 ((spatial-question 1 2 3)) (0 :gist)
