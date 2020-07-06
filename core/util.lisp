@@ -2155,6 +2155,35 @@
 
 
 
+(defun planner-input-to-ka (planner-input)
+;```````````````````````````````````````````
+; Converts planner input to the appropriate reified action.
+; e.g.:
+; Failure -> nil
+; None -> (ka (do2.v nothing.pro))
+; (|B1| on.p |B2|) -> (ka (put.v |B1| (on.p |B2|)))
+; ((|B1| on.p |B2|) (|B1| behind.p |B3|))
+;   -> (ka (put.v |B1| (set-of (on.p |B2|) (behind.p |B3|))))
+; (undo (|B1| on.p |B2|)) -> (ka (move.v |B1| (back.mod-a (on.p |B2|))))
+;
+  (cond
+    ((equal planner-input 'Failure) nil)
+    ((equal planner-input 'None)
+      '(ka (do2.v nothing.pro)))
+    ((atom planner-input) nil)
+    ((relation-prop? planner-input)
+      `(ka (put.v ,(car planner-input)
+                  ,(cdr planner-input))))
+    ((every #'relation-prop? planner-input)
+      `(ka (put.v ,(caar planner-input)
+                  ,(make-set (mapcar #'cdr planner-input)))))
+    ((undo-relation-prop? planner-input)
+      `(ka (move.v ,(caadr planner-input)
+                    (back.mod-a ,(cdadr planner-input))))))
+) ; END planner-input-to-ka
+
+
+
 (defun get-planner-input ()
 ;````````````````````````````
 ; This waits until it can load a goal representation from "./io/planner-input.lisp".
@@ -2171,12 +2200,7 @@
         (with-open-file (outfile "./io/planner-input.lisp" :direction :output 
                                                            :if-exists :supersede
                                                            :if-does-not-exist :create)))))
-  (cond
-    ((equal *planner-input* 'Failure) nil)
-    ((equal *planner-input* 'None)
-      '(ka (do2.v nothing.pro)))
-    (t `(ka (put.v ,(caar *planner-input*)
-                   ,(make-set (mapcar #'cdr *planner-input*))))))
+  (planner-input-to-ka *planner-input*)
 ) ; END get-planner-input
 
 
@@ -2192,13 +2216,7 @@
   (finish-output)
   (format t "enter planner input below:~%")
   (finish-output)
-  (let ((planner-input (read-from-string (read-line))))
-    (cond
-    ((equal planner-input 'Failure) nil)
-    ((equal planner-input 'None)
-      '(ka (do2.v nothing.pro)))
-    (t `(ka (put.v ,(caar planner-input)
-                   ,(make-set (mapcar #'cdr planner-input)))))))
+  (planner-input-to-ka (read-from-string (read-line)))
 ) ; END get-planner-input-offline
 
 

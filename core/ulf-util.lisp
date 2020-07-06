@@ -1121,6 +1121,16 @@
 ) ; END relation-prop?
 
 
+(defun undo-relation-prop? (prop)
+; `````````````````````````````````
+; Checks whether a proposition is an 'undo' relation, i.e. (undo ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
+; (interpreted as 'put the Twitter block back on the Texaco block').
+; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
+;
+  (and (listp prop) (= 2 (length prop)) (equal 'undo (first prop)) (relation-prop? (second prop)))
+) ; END undo-relation-prop?
+
+
 (defun after-prop? (prop)
 ; ````````````````````````````
 ; Checks whether a proposition is an after relation, i.e. after.p.

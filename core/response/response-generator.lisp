@@ -106,10 +106,10 @@
 (defun generate-proposal (ka)
 ; ```````````````````````````````
 ; Generates a gist clause for an action proposal (possibly further transduced into a surface expression),
-; given a reified action (e.g., (ka (put.v |B1| (on.p |B2|)))).
+; given a reified action (e.g., (ka (put.v |B1| (on.p |B2|))), or (ka (move.v |B1| (back.mod-a (on.p |B2|))))).
 ;
   (let (ulf output-ulf)
-    (setq ulf '(((the.d (next.a step.n)) ((pres be.v) (= what.pro))) \.))
+    (setq ulf '((the.d (next.a step.n)) ((pres be.v) (= what.pro))))
     (setq output-ulf (ttt:apply-rule `(/ what.pro ,ka) ulf))
     (ulf-to-english output-ulf))
 ) ; END generate-proposal

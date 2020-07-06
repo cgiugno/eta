@@ -17,3 +17,9 @@
 ;; (((the.d (|Twitter| block.n)) to_the_left_of.p (the.d (|Texaco| block.n))))
 ;; (((the.d (|Target| block.n)) on.p (the.d (|Texaco| block.n))))
 ;; None
+
+;; (((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
+;; (((some.d block.n) to_the_left_of.p (the.d (|Texaco| block.n))))
+;; (((the.d (|Mercedes| block.n)) on.p (the.d (|Twitter| block.n))))
+;; (undo ((the.d (|McDonald's| block.n)) to_the_right_of.p (the.d (|Target| block.n))))
+;; (((the.d (|Mercedes| block.n)) on.p (the.d (|Twitter| block.n))))
