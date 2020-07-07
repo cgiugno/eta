@@ -290,8 +290,7 @@
 
     ; If no episodes in schema, return error
     (when (not (find :episodes plan))
-      (format t "~%*** Attempt to form plan ~a from schema ~a ~
-                  which contains no ':episodes' keyword" plan-name schema-name)
+      (format t "~%*** Attempt to form plan ~a from schema ~a which contains no ':episodes' keyword" plan-name schema-name)
       (return-from init-plan-from-schema nil))
 
     ; Substitute the arguments 'args' (if non-nil) for the variables in the
@@ -299,10 +298,7 @@
     ; plan. The substitution is destructive.
     (if args (setq plan (nsubst-schema-args args plan)))
 
-    ;; (format t "~%Schema to be used for plan ~a, with arguments instantiated~
-    ;;            ~% ~a" plan-name plan) ; DEBUGGING
-
-
+    ;; (format t "~%Schema to be used for plan ~a, with arguments instantiated~% ~a" plan-name plan) ; DEBUGGING
 
     ; Get schema sections. 'sections' is a hash table with schema sections as keys
     ; and their contents as values.
@@ -346,15 +342,13 @@
     ; Find first action variable, should be a list like (:episodes ?e1 ...)
     (setq ep-var (car episodes))
 
-    ;; (format t "~%Action list of argument-instantiated schema is~
-    ;;            ~% ~a" episodes) ; DEBUGGING
+    ;; (format t "~%Action list of argument-instantiated schema is~% ~a" episodes) ; DEBUGGING
     ;; (format t "~%The first action variable, ~a, has (variable? ~a) = ~a"
     ;;            ep-var ep-var (variable? ep-var)) ; DEBUGGING
 
     ; If first action variable does not start with '?', return error
     (when (not (variable? ep-var))
-      (format t "~%*** Attempt to form plan ~a from schema ~a ~
-                  which contains no episodes~%" plan-name schema-name)
+      (format t "~%*** Attempt to form plan ~a from schema ~a which contains no episodes~%" plan-name schema-name)
       (return-from init-plan-from-schema nil))
 
     ; Found the next action to be processed; set rest-of-plan pointer
@@ -387,23 +381,20 @@
 
     ; If no episodes in schema, return error
     (when (not (find :episodes plan))
-      (format t "~%*** Attempt to form subplan ~a ~
-                  which contains no ':episodes' keyword" plan-name)
+      (format t "~%*** Attempt to form subplan ~a which contains no ':episodes' keyword" plan-name)
       (return-from init-plan-from-episode-list nil))
 
     ; Find first action variable, should be a list like (:episodes ?e1 ...)
     (setq episode-list (member :episodes plan))
     (setq ep-var (second episode-list))
 
-    ;; (format t "~%Action list of argument-instantiated schema is~
-    ;;            ~% ~a" episode-list) ; DEBUGGING
+    ;; (format t "~%Action list of argument-instantiated schema is~% ~a" episode-list) ; DEBUGGING
     ;; (format t "~%The first action variable, ~a, has (variable? ~a) = ~a"
     ;;            ep-var ep-var (variable? ep-var)) ; DEBUGGING
 
     ; If first action variable does not start with '?', return error
     (when (not (variable? ep-var))
-      (format t "~%*** Attempt to form plan ~a ~
-                  which contains no episodes" plan-name)
+      (format t "~%*** Attempt to form plan ~a which contains no episodes" plan-name)
       (return-from init-plan-from-schema nil))
 
     ; Found the next action to be processed; set rest-of-plan pointer
@@ -492,8 +483,7 @@
 
   (let ((rest (get plan-name 'rest-of-plan)) ep-name subplan-name)
     (setq ep-name (car rest))
-    ;; (format t "~%~%'rest-of-plan' pointer of ~a at beginning of update~
-    ;;            ~% is (~a ~a ...)" plan-name ep-name (second rest)) ; DEBUGGING
+    ;; (format t "~%~%'rest-of-plan' pointer of ~a at beginning of update~% is (~a ~a ...)" plan-name ep-name (second rest)) ; DEBUGGING
     (cond
       ; Unexpected issues
       ((null rest) nil)
@@ -511,9 +501,7 @@
         ; The 'rest-of-plan' pointer of 'subplan-name' may now be
         ; nil, even if it was non-nil before the recursive update
         (when (null (get subplan-name 'rest-of-plan))
-          ;;  (format t "~%~%Since subplan ~a has a NIL 'rest-of-plan',~
-          ;;             ~% advance 'rest-of-plan' of ~a over step ~a~
-          ;;             ~% with WFF = ~a~%" subplan-name plan-name ep-name (second rest)) ; DEBUGGING
+          ;;  (format t "~%~%Since subplan ~a has a NIL 'rest-of-plan',~% advance 'rest-of-plan' of ~a over step ~a~% with WFF = ~a~%" subplan-name plan-name ep-name (second rest)) ; DEBUGGING
           (delete-current-episode plan-name))))
 
     ;; (format t "~%~%'rest-of-plan' pointer of ~a at end of update ~% is (~a ~a ...)~%"
@@ -677,8 +665,7 @@
       (setq modifier (car restrictions)) (setq restrictions (second restrictions)))
     (setq lambda-descr restrictions)
     (setq candidates (find-all-instances-context lambda-descr))
-    (format t "given restriction ~a, found ~
-               candidates ~a~%" lambda-descr candidates) ; DEBUGGING
+    (format t "given restriction ~a, found candidates ~a~%" lambda-descr candidates) ; DEBUGGING
     (setq sk-name (cond
       ((equal modifier 'random.a)
         (car (shuffle candidates)))
@@ -703,7 +690,7 @@
         (wff (second rest)) (subplan-name (get ep-name 'subplan)))
 
   ;; (format t "~%  'rest-of-plan' of ~a is ~%   (~a ~a ...)"
-            ;; plan-name (car rest) (second rest)) ; DEBUGGING
+  ;; plan-name (car rest) (second rest)) ; DEBUGGING
 
   (error-check)
 
@@ -717,8 +704,7 @@
     ; Unexpected: if the subplan is fully executed, then the 'rest-of-plan'
     ; pointer should have been advanced
     ((null (get subplan-name 'rest-of-plan))
-      ;; (format t "~%**'find-curr-{sub}plan' applied to ~a ~
-      ;;           ~%   arrived at a completed subplan ~a" plan-name subplan-name)
+      ;; (format t "~%**'find-curr-{sub}plan' applied to ~a~%   arrived at a completed subplan ~a" plan-name subplan-name)
       (setf (get ep-name 'subplan) nil)
     )
     ; The subplan is not fully executed, so find & return the current
@@ -746,9 +732,8 @@
 ; clause fields, etc.)
 ;
 
-  ;; (format t "~% CURRENT ACTION ~a BEING DELETED FROM ~a, ALONG WITH ITS ~
-  ;;           ~%  WFF = ~a" (car (get {sub}plan-name 'rest-of-plan)) {sub}plan-name 
-  ;;                         (second (get {sub}plan-name 'rest-of-plan))) ; DEBUGGING
+  ;; (format t "~% CURRENT ACTION ~a BEING DELETED FROM ~a, ALONG WITH ITS ~%  WFF = ~a"
+  ;;    (car (get {sub}plan-name 'rest-of-plan)) {sub}plan-name (second (get {sub}plan-name 'rest-of-plan))) ; DEBUGGING
 
   (setf (get {sub}plan-name 'rest-of-plan) (cddr1 (get {sub}plan-name 'rest-of-plan)))
   (update-plan {sub}plan-name)
@@ -912,8 +897,7 @@
         user-gist-clauses user-gist-passage main-clause info topic suggestion query user-ulf
         ans alternates)
   
-    ;; (format t "~%WFF = ~a,~% in the ETA action ~a being ~
-              ;; processed~%" wff ep-name) ; DEBUGGING
+    ;; (format t "~%WFF = ~a,~% in the ETA action ~a being processed~%" wff ep-name) ; DEBUGGING
 
     ; Big conditional statement to determine the type of the current
     ; action, and to form the subsequent action accordingly.
@@ -1051,8 +1035,7 @@
         user-gist-clauses user-gist-passage proposal-gist main-clause info topic
         suggestion query ans perceptions perceived-actions sk-var sk-name)
   
-    ;; (format t "~%WFF = ~a,~% in the ETA action ~a being ~
-    ;;           processed~%" wff ep-name) ; DEBUGGING
+    ;; (format t "~%WFF = ~a,~% in the ETA action ~a being processed~%" wff ep-name) ; DEBUGGING
 
     ; Big conditional statement to determine the type of the current
     ; action, and to form the subsequent action accordingly.
@@ -1539,8 +1522,7 @@
         (wff (second rest)) bindings words expr user-ep-name1 wff1 wff1-arg eta-ep-name
         eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input user-try-ka-success)
 
-    ;; (format t "~%WFF = ~a,~%      in the user action ~a being ~
-    ;;           processed~%" wff user-ep-name) ; DEBUGGING
+    ;; (format t "~%WFF = ~a,~%      in the user action ~a being processed~%" wff user-ep-name) ; DEBUGGING
 
     ; Big conditional statement to observe different types of user actions
     (cond
@@ -1574,8 +1556,7 @@
 
           ; anything else is unexpected
           (t
-            (format t "~%*** SAY-ACTION ~a~%    BY THE USER ~
-                       SHOULD SPECIFY A QUOTED WORD LIST OR VARIABLE" expr)
+            (format t "~%*** SAY-ACTION ~a~%    BY THE USER SHOULD SPECIFY A QUOTED WORD LIST OR VARIABLE" expr)
             (return-from observe-next-user-action nil)))
 
         ; Prepare to "interpret" 'words', using the Eta output it is a response to;
@@ -1590,8 +1571,7 @@
         ; Also retrieve the item in the final argument position (if it exists).
         (setq wff1 (get user-ep-name1 'wff))
         (setq wff1-arg (car (last wff1)))
-        ;; (format t "~%User WFF1 = ~a, if correct,~%            ~
-        ;;           ends in a ETA action name" wff1) ; DEBUGGING
+        ;; (format t "~%User WFF1 = ~a, if correct,~%           ends in a ETA action name" wff1) ; DEBUGGING
         
         (cond
           ; If the superordinate reply-to.v action has specific gist clause(s)
@@ -1605,8 +1585,7 @@
           (t (setq eta-clauses nil)))
 
         ;; (format t "~%ETA action name is ~a" eta-ep-name)
-        ;; (format t "~%ETA gist clauses that the user is responding to ~
-        ;;           ~% = ~a " eta-clauses)
+        ;; (format t "~%ETA gist clauses that the user is responding to~% = ~a " eta-clauses)
         ;; (format t "~%using gist clause: ~a " (car (last eta-clauses))) ; DEBUGGING
 
         ; Compute the "interpretation" (gist clauses) of the user input,
@@ -1657,8 +1636,7 @@
       ((setq bindings (bindings-from-ttt-match '(^you paraphrase.v _!) wff))
         (setq expr (get-single-binding bindings))
         (when (not (quoted-sentence? expr))
-          (format t "~%*** PARAPHRASE-ACTION ~a~%    BY THE USER ~
-                    SHOULD SPECIFY A QUOTED WORD LIST" expr)
+          (format t "~%*** PARAPHRASE-ACTION ~a~%    BY THE USER SHOULD SPECIFY A QUOTED WORD LIST" expr)
           (return-from observe-next-user-action nil))
         ; Drop quote, leaving a singleton list of clauses
         (setq user-gist-clauses (cdr expr))
@@ -2443,8 +2421,7 @@
         (choose-result-for1 tagged-clause parts (get rule-node 'next))))
 
     ;; (format t "~% ***1*** Tagwords = ~a ~%" tagged-clause) ; DEBUGGING
-    ;; (format t "~% =====2==== Pattern/output to be matched in rule ~a = ~
-    ;;            ~%  ~a and directive = ~a" rule-node pattern directive) ; DEBUGGING
+    ;; (format t "~% =====2==== Pattern/output to be matched in rule ~a = ~%  ~a and directive = ~a" rule-node pattern directive) ; DEBUGGING
   
     ; Big conditional statement for dealing with all possible directives.
     ; We first deal with cases requiring further tree-descent (with possible
@@ -2588,9 +2565,7 @@
 
       ; A directive is not recognized
       (t
-        (format t "~%*** UNRECOGNIZABLE DIRECTIVE ~s ENCOUNTERED ~
-                  FOR RULE ~s~%    FOR THE FOLLOWING PATTERN AND TAGGED ~
-                  CLAUSE: ~%    ~s,  ~s" directive rule-node pattern tagged-clause))
+        (format t "~%*** UNRECOGNIZABLE DIRECTIVE ~s ENCOUNTERED FOR RULE ~s~%    FOR THE FOLLOWING PATTERN AND TAGGED CLAUSE: ~%    ~s,  ~s" directive rule-node pattern tagged-clause))
     )
 )) ; END choose-result-for1
 

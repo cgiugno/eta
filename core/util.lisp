@@ -1266,9 +1266,7 @@
             (setq main-conjunct conjunct)
             (return nil))) ; exit loop
     (when (null main-conjunct)
-          (format t "~%*** Description ~s ~
-                     ~%      given to 'find-all-instances' didn't contain ~
-                     ~%      a predication that covers all variables" descr)
+          (format t "~%*** Description ~s~%      given to 'find-all-instances' didn't contain ~%      a predication that covers all variables" descr)
           (return-from find-all-instances nil))
 
     ; Retrieve the facts in curr-state-ht matching main-conjunct
@@ -1699,20 +1697,17 @@
     (dolist (x predication)
       (if (variable? x) (push x vars)))
     (when (null vars) ; unexpected
-      (format t "~%@@@ Warning: Attempt to substitute values ~
-                ~%    ~a~%    in header ~a, which has no variables"
+      (format t "~%@@@ Warning: Attempt to substitute values~%    ~a~%    in header ~a, which has no variables"
                 args predication)
       (return-from nsubst-schema-args schema))
     (setq vars (reverse vars))
     (cond
       ((> (length args) (length vars))
-        (format t "~%@@@ Warning: More values supplied, viz., ~
-                  ~%    ~a,~%    than header ~a has variables"
+        (format t "~%@@@ Warning: More values supplied, viz.,~%    ~a,~%    than header ~a has variables"
                   args predication)
         (setq args (butlast args (- (length args) (length vars)))))
       ((< (length args) (length vars))
-        (format t "~%@@@ Warning: Fewer values supplied, viz., ~
-                  ~%    ~a,~%    than header ~a has variables"
+        (format t "~%@@@ Warning: Fewer values supplied, viz.,~%    ~a,~%    than header ~a has variables"
                   args predication)
         (setq vars (butlast vars (- (length vars) (length args))))))
             
@@ -1758,8 +1753,7 @@
 ; episode name to be substituted in for the variable (e.g., 'EP38').
 ;
   (when (not (char-equal #\? (car (explode ep-var))))
-    (format t "~%***Attempt to form episode name from ~
-               ~%   non-question-mark variable ~a" ep-var)
+    (format t "~%***Attempt to form episode name from ~%   non-question-mark variable ~a" ep-var)
     (return-from episode-name nil))
   (gensym "EP")
 ) ; END episode-name
@@ -1787,8 +1781,7 @@
 ;
   (let ((chars (explode dual-var)) ep-var ep-name prop-name result)
     (when (not (char-equal #\? (car chars)))
-      (format t "~%***Attempt to form episode and proposition ~
-                 name from~%   non-question-mark variable ~a" dual-var)
+      (format t "~%***Attempt to form episode and proposition name from~%   non-question-mark variable ~a" dual-var)
       (return-from episode-and-proposition-name nil))
     (setq ep-var dual-var) ; will be used if there's no final period
     (setq ep-name (gensym "EP"))
@@ -2703,16 +2696,14 @@
             ((equal n (caar stack))
               ; Let 'next' of previous rule point to new rule
               (setf (get (cdar stack) 'next) name)
-              ;; (format t "~%@@ 'next' pointer of ~s has been ~
-              ;;           set to ~s" (get (cdar stack) 'next) name) ; DEBUGGING
+              ;; (format t "~%@@ 'next' pointer of ~s has been set to ~s" (get (cdar stack) 'next) name) ; DEBUGGING
               (rplaca stack (cons n name)))
 
             ; New rule at greater depth?
             ((> n (caar stack))
               ; Let 'children' of previous rule point to new rule
               (setf (get (cdar stack) 'children) name)
-              ;; (format t "~%@@ 'children' pointer of ~s has been ~
-              ;;           set to ~s" (get (cdar stack) 'children) name) ; DEBUGGING
+              ;; (format t "~%@@ 'children' pointer of ~s has been set to ~s" (get (cdar stack) 'children) name) ; DEBUGGING
               ; Push new (level . rule name) pair onto stack
               (setq stack (cons (cons n name) stack)))
 
@@ -2724,8 +2715,7 @@
               (dotimes (dummyvar n) (setq stack (cdr stack)))
               ; Resulting top element must be same depth, so set 'next' pointer to new rule
               (setf (get (cdar stack) 'next) name)
-              ;; (format t "~%@@ 'next' pointer of ~s has been ~
-              ;;           set to ~s" (get (cdar stack) 'next) name) ; DEBUGGING
+              ;; (format t "~%@@ 'next' pointer of ~s has been set to ~s" (get (cdar stack) 'next) name) ; DEBUGGING
               (rplaca stack (cons (caar stack) name)))))
 
         ; If n is a (latency directive) pair rather than depth number
