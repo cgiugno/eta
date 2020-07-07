@@ -73,7 +73,7 @@
   ; if the user is new, or it's a new day ... The opening could be more concise
   ; for repeat users.
   ?e1 (^me say-to.v ^you 
-       '(OK\, let\'s start building\.))
+       '(OK\, let\'s start building a simple example\.))
 
   ?e2 (:repeat-until (?e2 finished2.a)
 
@@ -112,8 +112,8 @@
           ; (5a)
           (:if (?ka1 = (ka (do2.v nothing.pro)))
 
-            ; Next step is to do nothing; goal structure realized.
-            ?e6 (^me say-to.v ^you '(The goal structure is complete\.))
+            ;; ; Next step is to do nothing; goal structure realized.
+            ?e6 (^me say-to.v ^you '(Looks like the structure is completed\.))
 
             ; Terminate conversation.
             ?e7 (^me commit-to-STM.v (that (?e2 finished2.a))))
@@ -302,9 +302,6 @@
         ; selected such that examples can be built with the available blocks
         ; in the first place.
         ?e51 (^me commit-to-STM.v (that (?e2 finished2.a))))))
-
-  ; David says goodbye after conversation is over.
-  ?e100 (^me say-to.v ^you '(Goodbye for now!))
 )
 
 

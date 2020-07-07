@@ -755,12 +755,24 @@
 ; Checks if a ULF is an indefinite noun phrase.
 ;
   (and (det-np? ulf) (or
-    (member (first ulf) '(a.d some.d any.d))
+    (member (first ulf) '(a.d an.d some.d any.d))
     (set-of? ulf)
     (kind? ulf)
     (quan? ulf)
     (and (equal (first ulf) 'np+preds) (indefinite-np? (second ulf)))))
 ) ; END indefinite-np?
+
+
+(defun create-indefinite-np (noun)
+; ``````````````````````````````````
+; Creates an indefinite np from a noun (using a.d, an.d, and some.d as appropriate).
+;
+  (if (and (listp noun) (equal (car noun) 'plur))
+    `(some.d ,noun)
+    (if (member (car (explode noun)) '(#\A #\E #\I #\O #\U))
+      `(an.d ,noun)
+      `(a.d ,noun)))
+) ; END create-indefinite-np
 
 
 (defun set-of? (ulf)

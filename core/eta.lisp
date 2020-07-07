@@ -1077,7 +1077,7 @@
           ; Primitive say-to.v act: drop the quote, say it, increment the
           ; *count* variable, and advance the 'rest-of-plan' pointer
           ((eq (car expr) 'quote)
-            (setq expr (second expr))
+            (setq expr (flatten (second expr)))
             (setq *count* (1+ *count*))
             (if *live* (say-words expr) (print-words expr))
             ;; (print-current-plan-status {sub}plan-name); DEBUGGING

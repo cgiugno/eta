@@ -64,13 +64,12 @@
 
 
 
-(defun verbalize-goal-rep.f (x)
-; ```````````````````````````````
-; Temporary
+(defun concept-name.f (x)
+; ````````````````````````
+; Maps a concept name to an English string.
 ;
-  (let (goal-rep-record)
-    (setq goal-rep-record (get-record-structure x))
-    (if goal-rep-record
-      `(quote (Building a ,(caar (get-keyword-contents goal-rep-record '(:header))) \.))
-      ''(No goal representation found \.)))
-) ; END verbalize-goal-rep.f
+  (let ((name (generic-name-to-np (get-generic-name x))))
+    (when (null name)
+      (return-from concept-name.f '(an unnamed concept)))
+    name)
+) ; END concept-name.f

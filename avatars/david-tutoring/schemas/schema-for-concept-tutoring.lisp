@@ -75,217 +75,45 @@
 
 :episodes (
 
+  ; David introduces himself.
+  ?e1 (^me say-to.v ^you 
+        '(Hi\, my name is David\. I\'m ready to teach you some spatial concept \.))
+
   ; TODO: it might make more sense for this action to be "(^me try.v (to (choose.v ...)))",
   ; since something may go wrong - for instance, you might already understand all the concepts
   ; that Eta has available.
   ;; ?e1 (^me choose.v (a.d ?c ((most.mod-a simple.a)
   ;;       (:l (?x) (and (?x member-of.p ?cc) (not (^you understand.v ?x)))))))
-  ?e1 (^me choose.v (a.d ?c (random.a
+  ?e2 (^me choose.v (a.d ?c (random.a
         (:l (?x) (and (?x member-of.p ?cc) (not (^you understand.v ?x)))))))
 
+  ; Eta announces the name of the chosen concept to the user.
+  ?e3 (^me say-to.v ^you '(I would like to teach you the concept of (concept-name.f ?c) \.))
+
+  ; Eta forms (through querying the BW system) the goal representation for the
+  ; simplest possible example of the concept.
   ; TODO: likewise - Eta might not have any visual/BW concepts, the concepts may be ill-formed, etc.
-  ;; ?e2 (^me form.v ($goal-rep ($goal-rep goal-schema1.n) ($goal-rep instance-of.n $c)))
-  ?e2 (^me form-spatial-representation.v (a.d ?goal-rep
+  ?e4 (^me form-spatial-representation.v (a.d ?goal-rep
         (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
 
-  ?e3 (^me guide-BW-construction.v ^you ?goal-rep)
+  ; Eta guides the user through construction of the simple example.
+  ?e5 (^me guide-BW-construction.v ^you ?goal-rep)
 
-  ?e4 (^me commit-to-STM.v (that (^you understand.v ?c)))
+  ; Here, Eta assumes that the user now understands the concept after seeing them follow
+  ; the instructions to build a simple example. However, in the future Eta needs to allow
+  ; (or prompt) the user to choose a more complex example, and guide them through making
+  ; it in a more "hands-off" way.
+  ?e6 (^me say-to.v ^you '(Excellent\. You now understand the concept of (concept-name.f ?c) \.))
 
-  ;; ; David starts conversation. It would be nice to gave opening greetings
-  ;; ; if the user is new, or it's a new day ... The opening could be more concise
-  ;; ; for repeat users.
+  ; Eta commits to memory that the user understands the concept.
+  ; TODO: this needs to be stored in persistent long-term memory eventually,
+  ; not just short-term context.
+  ?e7 (^me commit-to-STM.v (that (^you understand.v ?c)))
 
-  ;; ?e1 (^me say-to.v ^you 
-  ;;      '(OK\, Here\'s what I\'ll try to do\: I\'ll try to teach you a concept  
-  ;;       that can be illustrated with the blocks in front of us\, ok?))
+  ; David says goodbye after conversation is over.
+  ?e100 (^me say-to.v ^you '(Goodbye for now!))
 
-  ;; ?e2 (^you reply-to.v ?e1)
-  ;; ; This would presumably be handled with a subschema or ad hoc subplan?
-  ;; ; If the reply is positive ("OK", "Go ahead", "Why not?", etc.), we should 
-  ;; ; just move on to the next step. If the user wants to terminate right there,
-  ;; ; then there should be good-byes; if the user raises a question about the
-  ;; ; process, responding "I'm about to tell you more" might be good enough.
-  ;; ;
-  ;; ; One general kind of reply that would be nice to be able to handle is
-  ;; ; "Can you repeat that?", where perhaps the repetition might use a slightly
-  ;; ; different wording ...
 
-  ;; ?e3 (^me say-to.v ^you
-  ;;      '(So what I\'ll do is to pick a concept that I understand\, and then
-  ;;        I\'ll guide you in the construction of an example of the concept \...
-  ;;        Ready?))
-
-  ;; ?e4 (^you reply-to.v ?e3)
-  ;; ; We might ignore the reply ... It's just good to allow for acknowledgement
-
-  ;; ;; ?e5 (a.d ?c ((?c member-of.n ?cc) and (not (^you understand.v ?c))) 
-  ;; ;;             (^me choose.v ?c))
-  ;; ?e5 (^me choose.v ($c ($c member-of.n ?cc) (not (^you understand.v $c))))
-  ;; ; Assume dynamic semantics for ?c. When instantiating, it can be replaced
-  ;; ; by a concept designator (also in later occurrences of ?c), dropping the 
-  ;; ; quantifier. Example designator: (k BW-arch.n).
- 
-  ;; ?e6 (^me say-to.v ^you
-  ;;      '(OK\, in my mind I've picked a concept. I won\'t name it\, because that
-  ;;        might bias how you interpret examples. I\'ll now try to give you 
-  ;;        step-by-step instructions for building an example of the concept.))
-
-  ;; ?e7 (^you acknowledge.v ?e6)
-  ;; ; This should succeed even if there' no "OK", just a couple of seconds of silence
-
-  ;; ;; ?e8 (a.d ?goal-rep ((?goal-rep goal-schema1.n) and (?goal-rep instance-of.n ?c))
-  ;; ;;                    (^me create.v ?goal-rep))
-  ;; ?e8 (^me form.v ($goal-rep ($goal-rep goal-schema1.n) ($goal-rep instance-of.n $c)))
-
-  ;; ?e2 (:repeat-until (:in-context (?e2 finished2.a))
-  ;; ; LKS: I lean towards (:repeat-until (?e2 finished2.a), on the assumption 
-  ;; ; that loop termination and branching tests always check in contextual memory 
-  ;; ; (except when the test is for the value of a variable), where absence means
-  ;; ; negation (CWA). The very fact that (?e2 finished2.a) appears as a test
-  ;; ; should tell the schema executor that (?e2 finished2.a) should be put int
-  ;; ; contextual memory if it becomes true.
-
-  ;;   ; David attempts to find next step (an action type) to realize goal structure.
-  ;;   ; NOTE: ?ka1 becomes bound to a reified action corresponding to the planner
-  ;;   ; output; if this is done successfully, ((pair ^me ?e3) successful.a) is 
-  ;;   ; stored in context.
-  ;;   ; ====== TODO ======
-  ;;   ; try.v should take some (reified) action schema which can possibly fail, and
-  ;;   ; store ((pair ^me ?e3) successful.a) if the action succeeds.
-  ;;   ; In this case, find.v should find some entity (e.g., (ka (place.v ...))))
-  ;;   ; such that the entity is a step-toward the goal representation.
-  ;;   ?e3 (^me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
-  ;;   ; LKS: I've dropped the (kind1-of.n action1.n) constraint on the assumption
-  ;;   ; this is entailed anyway by being a step toward a goal schema. 
-
-  ;;   ; LKS: Everything that follows is really more concerned with collaborative 
-  ;;   ; building rather than building an example of a concept, and when done,
-  ;;   ; testing if the user already thinks s/he has an idea of what the concept
-  ;;   ; is, etc.
-
-  ;;   ; Either (4a) next step found successfully, or (4b) failure to do so.
-  ;;   ?e4 (:cond
-
-  ;;       ; (4a)
-  ;;       ((:in-context ((pair ^me ?e3) successful.a))
-  ;;       ; LKS: Again, I think (:cond ((pair ^me ?e3) successful.a) ...) should
-  ;;       ; suffice.
-
-  ;;         ; Either (5a) goal structure has been reached, or (5b) goal structure
-  ;;         ; not yet reached.
-  ;;         ?e5 (:cond
-
-  ;;           ; (5a)
-  ;;           (?ka1 = (ka (do2.v nothing.pro))); tentatively changed from (:equal ...)
-  ;;           ; LKS: When this test is made, ?ka1 will probably have been replaced 
-  ;;           ; by a Skolem name for the kind of action -- though an expression
-  ;;           ; of form (ka <pred>) is also a name for a kind of action, and we
-  ;;           ; could substitute this throughout. If a Skolem name was used,
-  ;;           ; then this needs to be equated to the (ka <pred>) expression.
-  ;;           ; If the action-denoting expression was substituted for ?ka1
-  ;;           ; directly, then the above check can probably done at the syntactic
-  ;;           ; level -- i.e., are the expressions the same? Otherwise, the equality
-  ;;           ; (stored in contextual memory) needs to be consulted. Interestingly,
-  ;;           ; in either case "lookup" may not be enough, because there can in
-  ;;           ; principle be different expressions for the same action type.
-  ;;           ; (e.g., (ka (do2.v nothing-at-all.pro)) here, though this is not
-  ;;           ; a likely example).
-
-  ;;             ; Next step is to do nothing; goal structure realized.
-  ;;             ?e6 (^me say-to.v ^you '(The goal structure is complete\.))
-
-  ;;             ; Terminate conversation.
-  ;;             ?e7 (:store-in-context '(?e2 finished2.a)))
-  ;;             ; LKS: I'm a little bit dubious even about ':store-in-context';
-  ;;             ; Maybe use ?e7 (^me commit-to-STM.v (that (?e2 finished2.a)))
-
-  ;;           ; (5b)
-  ;;           (:default
-
-  ;;             ; David proposes the next step to the user.
-  ;;             ; ====== TODO ======
-  ;;             ; Should embed reified action in ?ka1 in a ULF like
-  ;;             ; (you.pro ((pres should.aux-s) ...)) and then convert it to English.
-  ;;             ?e8 (^me propose1-to.v ^you ?ka1)
-
-  ;;             ; Allow for user follow-up questions until the user accepts/rejects
-  ;;             ; the proposal by saying something like "yes", "okay", or "no", 
-  ;;             ; or (ideally - see note below) just making a move.
-  ;;             ?e9 (:repeat-until (:in-context (^you accept.v ?e8))
-              
-  ;;               ; User says something to David. Either acknowledgement, or 
-  ;;               ; a query of some sort.
-  ;;               ; NOTE: it's entirely possible that the user does not say 
-  ;;               ; anything at all, and gives "tacit" acceptance or rejection
-  ;;               ; of the proposal by making the proposed move, or making 
-  ;;               ; a different move than the proposed one, respectively.
-  ;;               ; This isn't supported in the current form of this schema,
-  ;;               ; and I'm a bit at a loss as to how to "encode" these sorts 
-  ;;               ; of tacit statements in the framework of this schema while 
-  ;;               ; simultaneously allowing for iterated follow-up questions 
-  ;;               ; by the user.
-  ;;               ?e10 (^you say-to.v ^me ?ulf)
-
-  ;;               ; Either (11a) user accepts proposal, (11b) user rejects
-  ;;               ; proposal, (11c) makes a termination ; request, or (11d) asks 
-  ;;               ; some query.
-  ;;               ?e11 (:cond
-
-  ;;                 ; (11a)
-  ;;                 ((:equal ?ulf '(YES.YN))
-                  
-  ;;                   ; If accepted, store that the proposal has been accepted 
-  ;;                   ; in context.
-  ;;                   ?e12 (:store-in-context '(^you accept.v ?e8)))
-
-  ;;                 ; (11b)
-  ;;                 ((:equal ?ulf '(NO.YN))
-
-  ;;                   ; If rejected issue correction.
-  ;;                   ; NOTE: according to this schema David is rather inflexible,
-  ;;                   ; simply repeating the same proposal over and over again to 
-  ;;                   ; the user until they do the right move. However, ideally 
-  ;;                   ; it seems that David should try to find a new plan consistent
-  ;;                   ; with the user's own proposed move, or even try to find a 
-  ;;                   ; new goal structure consistent with the user's proposed 
-  ;;                   ; move. Both of these would add another level of complexity
-  ;;                   ; to the current schema.
-  ;;                   ; ====== TODO ======
-  ;;                   ?e13 (^me issue-correction-to.v ^you ?ka1))
-
-  ;;                 ; (11c)
-  ;;                 ((:equal ?ulf '(GOODBYE.GR))
-                  
-  ;;                   ; If user requests to terminate conversation prematurely, 
-  ;;                   ; store that the outer loop is finished.
-  ;;                   ?e14. (:store-in-context '(?e2 finished2.a)))
-
-  ;;                 ; (11d)
-  ;;                 (:default
-
-  ;;                   ; If the user said something other than a clear acceptance 
-  ;;                   ; or rejection of the proposed action, David should reply 
-  ;;                   ; to it - instantiating the appropriate subschema such as 
-  ;;                   ; reactions-to-historical-question or reactions-to-spatial-
-  ;;                   ; question.
-  ;;                   ?e15 (^me reply-to.v ?e10.))))))
-
-  ;;       ; (4b)
-  ;;       (:default
-
-  ;;         ; Failure to find next step; goal structure not possible.
-  ;;         ?e16 (^me say-to.v ^you
-  ;;                 '(I cannot build the structure with the available blocks\.))
-
-  ;;         ; For now, the dialogue just terminates in the case of a failure at
-  ;;         ; any stage in the session. However, we might want to explore recovery
-  ;;         ; options, like finding a new goal structure compatible with the 
-  ;;         ; blocks at time of failure.
-  ;;         ?e17 (:store-in-context '(?e2 finished2.a)))))
-
-  ;; ; David says goodbye after conversation is over.
-  ;; ?e18 (^me say-to.v ^you '(Goodbye for now!))
 )
 
 

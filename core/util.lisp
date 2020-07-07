@@ -1036,6 +1036,29 @@
 
 
 
+(defun get-generic-name (canonical-name)
+;``````````````````````````````````````````
+; Gets the generic name (i.e. a reified noun, such as (k BW-arch.n)).
+;
+  (find-if #'kind? (get-aliases canonical-name))
+) ; END get-generic-name
+
+
+
+(defun generic-name-to-np (generic-name)
+;`````````````````````````````````````````
+; Converts a generic name to a noun-phrase (also "normalizing" it by removing
+; the BW-prefix in the case of any BW-specific names).
+;
+  (let ((noun (second generic-name)))
+    (if (null noun) (return-from generic-name-to-np nil))
+    (when (equal 'BW- (car (sym-split noun 3 :front t)))
+      (setq noun (second (sym-split noun 3 :front t))))
+    (butlast (ulf-to-english (create-indefinite-np noun)))
+)) ; END generic-name-to-np
+
+
+
 (defun storage-keys (fact)
 ;``````````````````````````
 ; Find the list of keys for hash-table storage of 'fact': the fact as a whole, 
