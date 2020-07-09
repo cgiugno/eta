@@ -144,6 +144,10 @@
   ; of spatial-ending words).
   (READRULES '*trim-suffix-tree*
   '(
+    1 (3 where 0 need to be ?)
+      2 (*trim-prefix-tree* (1 2 3 4 5 6 ?)) (0 :subtree+clause)
+    1 (3 where 1 should 0 be ?)
+      2 (*trim-prefix-tree* (1 2 3 4 5 6 ?)) (0 :subtree+clause)
     1 (0 spatial-ending ?)
       2 (*trim-prefix-tree* (1 2 ?)) (0 :subtree+clause)
     1 (0 spatial-ending)

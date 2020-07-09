@@ -867,6 +867,12 @@
     1 (where should pron verb-rel 2 np-bw 3 ?); e.g., where should I move the Twitter block ?
        2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (lex-ulf! pro 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) ?)
           ((sub 1 (2 3 (4 5 *h))) ?)) (0 :ulf-recur)
+    1 (where do 2 np-bw 3 necessity to be ?); e.g., where does the Twitter block need to be ?
+       2 (((lex-ulf! wh-pred 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 8) ?)
+          ((sub 1 ((pres need.aux-v) 2 (3 *h))) ?)) (0 :ulf-recur)
+    1 (where do pron necessity to verb-rel 2 np-bw 3 ?); e.g., where do I need to move the Twitter block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! pro 3) (lex-ulf! v- 6) (*np-ulf-tree* 7 8 9) ?)
+          ((sub 1 ((pres need.aux-v) 2 (3 4 *h))) ?)) (0 :ulf-recur)
 
 )) ; END *where-question-ulf-tree*
 
