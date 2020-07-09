@@ -231,6 +231,8 @@
       ; remove redundant 'relative to/with respect to' adjuncts in where questions
       (/ (_!1 ((tense? verb?) (prep? _!2) (adv-a ((! relative_to.p with_respect_to.p) _!3))))
          (_!1 ((tense? verb?) (prep? _!2))))
+      ; swap 'should'/'need' position in ULF (should this be in 'uninvert-question'?)
+      (/ ((tense? (! should.aux-s need.aux-v)) _! (verb? _*)) (_! ((tense? !) (verb? _*))))
       ; TODO: temporary fix for "toppest"
       (/ (most-n top.a _*) (topmost.a _*))
       )

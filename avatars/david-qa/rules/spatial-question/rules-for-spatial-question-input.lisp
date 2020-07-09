@@ -21,6 +21,7 @@
     (kinds types sorts kind type sort formats format)
     (question questions)
     (answer understand hear interpret parse)
+    (specifically exactly precisely)
     (here here\'s heres)
     (directions left right top bottom back front)
   ))
@@ -175,6 +176,8 @@
   ; use as an opening, e.g. "my question is ...".
   (READRULES '*trim-prefix-tree*
   '(
+    1 (where specifically 0)
+      2 (*trim-prefix-tree* (1 3)) (0 :subtree+clause)
     1 (yes I do \, 0)
       2 (*trim-prefix-tree* (5)) (0 :subtree+clause)
     1 (yes I do 0)
