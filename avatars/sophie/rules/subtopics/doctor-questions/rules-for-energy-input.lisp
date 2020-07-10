@@ -4,11 +4,22 @@
   (trouble troubles problem problems)
   (concentrate concentrating focus focusing)
   (ment-health anxiety anxious depression depressed)
+  (work working help helping treat treating effective)
+  (med-take take taking get getting use using)
+  (med-give recommend recommending recommended recommend advise advising advises advised suggests suggesting suggested suggest gives give given giving prescribe prescribes prescribed prescribed)
+  (antidepressant SSRI Prozac fluoxetine sertraline Zoloft Celexa citalopram Lexapro escitalopram paroxetine Paxil Pexeva)
+  (therapy therapist counseling counselor)
   ))
 
 
 (READRULES '*energy-input*
 '(
+  1 (0 med-give 5 antidepressant)
+    2 (I can give you an antidepressant \.) (medicine-request)) (0 :gist)
+  1 (0 med-take 5 antidepressant)
+    2 ((You should take an antidepressant \.) (medicine-request)) (0 :gist)
+  1 (0 therapy 0)
+    2 ((You should see a therapist \.) (energy) (0 :gist)
   1 (0)
     2 *general-input* (0 :subtree)
 ))
