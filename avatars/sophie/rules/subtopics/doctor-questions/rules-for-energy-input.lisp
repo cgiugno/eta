@@ -42,5 +42,16 @@
 
 (READRULES '*energy-reaction*
 '(
-
+  1 (I can give you an antidepressant \.)
+    2 (*have-subdialogue* ((I see\. Would this help me with my pain ?)
+                           ((Will an antidepressant help with my pain ?)))) (100 :schema+args)
+    2 (Okay\. You\'ll give the antidepressant medication a shot\.) (0 :out)
+  1 (You should take an antidepressant \.)
+    2 (*have-subdialogue* ((I see\. Would this help me with my pain ?)
+                           ((Will an antidepressant help with my pain ?)))) (100 :schema+args)
+    2 (Okay\. You\'ll give the antidepressant medication a shot\.) (0 :out)
+  1 (You should see a therapist \.)
+    2 (*have-subdialogue* ((I\'m not sure\. Do you think there\'s any medication I can try first ?)
+                           ((Should I try medication before I try therapy ?)))) (100 :schema+args)
+    2 (Okay\. You\'ll give the therapy a shot\.) (0 :out)
 ))
