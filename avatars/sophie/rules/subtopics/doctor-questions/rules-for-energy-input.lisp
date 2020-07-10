@@ -3,7 +3,8 @@
   (have having)
   (trouble troubles problem problems)
   (concentrate concentrating focus focusing)
-))
+  (anxiety anxious depression depressed)
+  ))
 
 
 (READRULES '*energy-input*
@@ -15,6 +16,8 @@
 
 (READRULES '*energy-question*
 '(
+  1 (0 be-aux 5 ment-health 5)
+    2 ((How is your mental health ?) (energy)) (0 :gist)
   1 (0 trouble 1 concentrate 0)
     2 ((Have you had trouble concentrating ?) (energy)) (0 :gist)
   1 (0 you 1 have 1 energy 0)
