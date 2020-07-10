@@ -19,7 +19,6 @@
 ; [Re indexicals ^me, ^you, ^now, ... Original suggestion was @me, @you, @now, ...
 ; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
 ; where '@' is the EL operator for "true at the time of"]
-; Changed it to ^me, ^you, and ~now because '^' doesn't play nicely with TTT. -B.K.
 
 :types (
   !t1 (^you person.n)
@@ -68,7 +67,7 @@
 
 
 :episodes (
-
+  
   ; David starts conversation. It would be nice to gave opening greetings
   ; if the user is new, or it's a new day ... The opening could be more concise
   ; for repeat users.
@@ -112,7 +111,7 @@
           ; (5a)
           (:if (?ka1 = (ka (do2.v nothing.pro)))
 
-            ;; ; Next step is to do nothing; goal structure realized.
+            ; Next step is to do nothing; goal structure realized.
             ?e6 (^me say-to.v ^you '(Looks like the structure is completed\.))
 
             ; Terminate conversation.
@@ -121,176 +120,14 @@
           ; (5b)
           (:else
 
-            ; David proposes the next step to the user.
-            ; ====== TO BE IMPLEMENTED ======
-            ; It seems like this ought to be fairly straightforward. Eta embeds the
-            ; reified action ?ka1 in a ULF (might be good to allow multiple phrasings,
-            ; to allow for the diversity of the example dialogue) such as (you.pro
-            ; ((pres should.aux-s) ...)), and then converts the ULF to surface English
-            ; using Gene's ulf2english lib.
-            ?e8 (^me propose1-to.v ^you ?ka1)
-
-            ; Either (9a) user acknowledges proposal (including silence), (9b) user
-            ; asks question (including seeking clarification), (9c) user makes pause
-            ; request, or (9d) user makes termination request.
-            ; NOTE: should silence be taken as acknowledgement, as opposed to the user
-            ; requiring clarification?
-            ; TODO: For the time being, there needs to be an (implicit or explicit) 
-            ; input by the user before the conditionals are tried, which stores facts
-            ; like (^you acknowledge.v ?e8) in context depending on what the user said.
-            ?e9 (^you acknowledge.v ?e8) ; TODO: need to create associated gist clause rule tree
-            ;; ?e10 (^me guide-BW-action.v ^you ?ka1)
-            ?e10 (^you try1.v ?ka1)
-            ;; ?e9 (:try-in-sequence
-            
-            ;;   ; (9a)
-            ;;   (:if (^you acknowledge.v ?e8)
-            ;;     ;; ?e10 (^me guide-BW-action.v ^you ?ka1)
-            ;;     ?e11 (^me say-to.v ^you '(You acknowledged \.))
-            ;;   )
-
-            ;;   ; (9b)
-            ;;   (:if (^you ask.v ?question)
-            ;;     ;; ?e14 (^me answer-to.v ^you ?question)
-            ;;     ?e14 (^me say-to.v ^you '(You asked question \.))
-            ;;   )
-
-            ;;   ; (9c)
-            ;;   (:if (^you say-bye.v)
-            ;;     ;; ?e15 (^me commit-to-STM.v (that (?e2 finished2.a)))
-            ;;     ?e15 (^me say-to.v ^you '(You said bye \.))
-            ;;   )
-
-            ;;   ; (9d)
-            ;;   (:if (^you ask-to-pause.v)
-            ;;     ;; ?e16 ((set-of ^me ^you) pause-conversation.v)
-            ;;     ?e16 (^me say-to.v ^you '(You asked to pause \.))
-            ;;   )
-            
-            ;; )
-
-
-
-
-
-            ;; ; David proposes the next step to the user.
-            ;; ; ====== TO BE IMPLEMENTED ======
-            ;; ; It seems like this ought to be fairly straightforward. Eta embeds the
-            ;; ; reified action ?ka1 in a ULF (might be good to allow multiple phrasings,
-            ;; ; to allow for the diversity of the example dialogue) such as (you.pro
-            ;; ; ((pres should.aux-s) ...)), and then converts the ULF to surface English
-            ;; ; using Gene's ulf2english lib.
-            ;; ?e8 (^me propose1-to.v ^you ?ka1)
-
-            ;; ; The system should not move on until the user correctly follows the action
-            ;; ; proposed in ?e8.
-            ;; ?e9 (:repeat-until (^you follow.v ?e8)
-
-            ;;   ; User says something in response to the system's proposal and/or
-            ;;   ; makes a move.
-            ;;   ; ====== TO BE IMPLEMENTED ======
-            ;;   ; The following two episodes are tricky. The user can do various actions
-            ;;   ; at this point, ranging from (a) moving a block to the correct location,
-            ;;   ; (b) moving the block to an incorrect location, (c) asking some sort of
-            ;;   ; spatial question or clarification (where we might want to make use of the
-            ;;   ; spatial factors, as in the explanation questions), or even (d) some complex
-            ;;   ; combination of the above, e.g. asking "here?" as they move a block to some
-            ;;   ; location.
-            ;;   ; Since the user may do two different types of primitive actions here - saying
-            ;;   ; and moving - I've tentatively used two consecutive episodes, one where Eta
-            ;;   ; observes the user doing some move action, and one where Eta observes the
-            ;;   ; user saying something. However, both of these should allow for the possibility
-            ;;   ; where the user doesn't do anything - i.e., the user may move a block without
-            ;;   ; saying anything, or the user may ask a question without moving a block. I'm
-            ;;   ; currently imagining the system waiting for up to a fixed amount of time while
-            ;;   ; trying to 'fill' both of these, but the tricky part is they need to be observed
-            ;;   ; simultaneously - otherwise, the user may say something while the system is waiting
-            ;;   ; for a move, or vice-versa.
-            ;;   ; With respect to observing moves, it seems like the BW system should simply tell
-            ;;   ; Eta whether the move was judged to be correct (within some bounds) or not. If the
-            ;;   ; former, ?ka2 is given the value of ?ka1. Otherwise, ?ka2 can be given a value
-            ;;   ; like (ka (not move.v ... (on.p ...))), or if needed, the BW system can send one
-            ;;   ; of the spatial relations which became true after the user's move and send that
-            ;;   ; to Eta, giving a value like (ka (move.v ... (near.p ...))).
-            ;;   ?e10 (^you acknowledge.v ?e8) ; acknowledge.v might not be the right predicate here,
-            ;;                                 ; since it might include the user asking a question.
-            ;;   ?e11 (^you perform.v ?ka2)
-
-            ;;   ; Either (12a) user moves block to correct location, (12b) no move was observed
-            ;;   ; within the fixed time, or (12c) user moves block to incorrect location.
-            ;;   ?e12 (:try-in-sequence
-              
-            ;;     ; (12a)
-            ;;     (:if (?ka1 = ?ka2)
-
-            ;;       ; If user's move is the same as the proposed move, store in context that 
-            ;;       ; the user followed David's proposal.
-            ;;       ?e13 (^me commit-to-STM.v (that (^you follow.v ?e8))))
-
-            ;;     ; (12b)
-            ;;     (:if (?ka2 = (ka (do2.v nothing.pro)))
-
-            ;;       ; Either (14a) the user makes a termination request, (14b) the user makes
-            ;;       ; a pause request, (14c) doesn't say anything within the fixed time, or
-            ;;       ; (14d) the user asks some question.
-            ;;       ?e14 (:try-in-sequence
-
-            ;;         ; (14a)
-            ;;         (:if ((ulf-of.f ?e10) = '(GOODBYE.GR))
-                    
-            ;;           ; If user terminates conversation prematurely, store that conversation finished.
-            ;;           ?e15 (^me commit-to-STM.v (that (?e2 finished2.a))))
-
-            ;;         ; (14b)
-            ;;         (:if ((ulf-of.f ?e10) = '(PAUSE.GR))
-                    
-            ;;           ; If user asks to pause, instantiate pause-conversation schema.
-            ;;           ?e16 ((set-of ^me ^you) pause-conversation.v))
-
-            ;;         ; (14c)
-            ;;         (:if ((ulf-of.f ?e10) = '()) ; not sure I like this syntax...
-                    
-            ;;           ; Currently the system does nothing if it didn't detect any user speech
-            ;;           ; within the fixed time, simply causing the loop to repeat. However, we
-            ;;           ; may want to allow for the opportunity of the system trying to give a
-            ;;           ; clarification if the user is silent for an extended period of time.
-            ;;           )
-
-            ;;         ; (14d)
-            ;;         (:else
-                    
-            ;;           ; If user asks a question David should react to them by answering the
-            ;;           ; question (i.e., instantiating the correct question-answering schema).
-            ;;           ?e17 (^me react-to.v ?e10))))
-
-            ;;     ; (12c)
-            ;;     (:else
-                
-            ;;       ; David issues correction to the user.
-            ;;       ; ====== TO BE IMPLEMENTED ======
-            ;;       ; A rather un-realistic approach would simply consist of David re-asserting
-            ;;       ; ?ka1. However, like in the example dialogue, it's natural to add modifiers
-            ;;       ; (e.g., "*directly* next to the Twitter block"), or clarifications relative
-            ;;       ; to the position where the user ended up moving the block (e.g., "okay,
-            ;;       ; now move it a little bit to the left").
-            ;;       ; The former of these seems achievable by having the modifiers such as "directly"
-            ;;       ; included in the relations that the BW sends Eta in the first place, but
-            ;;       ; these modifiers are dropped (as a pragmatic principle) during the propose1-to.v
-            ;;       ; action. When the action is re-asserted as a correction, the full un-ambiguous
-            ;;       ; action including modifiers is spoken.
-            ;;       ; The latter of these seems more difficult to me - particularly since the BW
-            ;;       ; system heretofore hasn't had to communicate such concepts as "move block A
-            ;;       ; to the left by X units" to Eta - only spatial reations which can be converted
-            ;;       ; to moves, as described above.
-            ;;       ?e18 (^me issue-correction-to.v ^you ?ka1))))
-                  
-      )))
+            ; David guides the user in making the proposed action.
+            ?e8 (^me guide-BW-action.v ^you ?ka1))))
 
       ; (4b)
       (:else
 
         ; Failure to find next step; goal structure not possible.
-        ?e50 (^me say-to.v ^you
+        ?e9 (^me say-to.v ^you
                 '(I\'m afraid the example structure I had in mind cannot
                   be built with the blocks currently on the table\.))
                   ; "Let me select another example ..."?
@@ -301,7 +138,7 @@
         ; should probably be another constraint on the concepts/goal-schemas
         ; selected such that examples can be built with the available blocks
         ; in the first place.
-        ?e51 (^me commit-to-STM.v (that (?e2 finished2.a))))))
+        ?e10 (^me commit-to-STM.v (that (?e2 finished2.a))))))
 )
 
 

@@ -1909,6 +1909,7 @@
       (format t "(subplan-of ~a):" superstep-name)
       (format t "(no superstep):" plan-name))
     (loop while cont do
+      (error-check :caller 'print-current-plan-status)
       (setq step-name (car rest))
       (when (null step-name)
         (format t "~%  No more steps in ~a." plan-name)
@@ -2760,13 +2761,15 @@
 
 
 
-(defun error-check ()
-;`````````````````````
+(defun error-check (&key caller)
+;`````````````````````````````````
 ; Checks whether program has entered an infinite loop using a counter
 ;
   (cond
-    ((> *error-check* 100)
-      (error-message "An error caused Eta to fall into an infinite loop. Check if the plan is being updated correctly." *live*)
+    ((> *error-check* 500)
+      (if caller
+        (error-message (format nil "An error caused Eta to fall into an infinite loop in '~a'. Check if the plan is being updated correctly." caller) *live*)
+        (error-message "An error caused Eta to fall into an infinite loop. Check if the plan is being updated correctly." *live*))
       (error))
     (t (setq *error-check* (1+ *error-check*))))
 ) ; END error-check
@@ -2774,7 +2777,7 @@
 
 
 (defun error-message (str mode)
-;``````````````````````````
+;````````````````````````````````
 ; Print error message to the console, and if in live mode, to output.txt
 ;
   (format t "~a~%" str)

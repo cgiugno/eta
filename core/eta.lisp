@@ -247,7 +247,7 @@
     ;; (print-current-plan-status '*dialog-plan*) ; DEBUGGING
     ;; (format t "~% here is after the print-current-plan-status -----------")
 
-    (error-check)
+    (error-check :caller 'eta)
 
     ; Update the 'rest-of-plan' pointers after processing the
     ; previous step.
@@ -479,7 +479,7 @@
 ; (the currently due step of 'plan-name' has been fully executed);
 ; then initialize its next episode (if any) using 'update-plan'.
 ;
-  (error-check)
+  (error-check :caller 'update-rest-of-plan-pointers)
 
   (let ((rest (get plan-name 'rest-of-plan)) ep-name subplan-name)
     (setq ep-name (car rest))
@@ -692,7 +692,7 @@
   ;; (format t "~%  'rest-of-plan' of ~a is ~%   (~a ~a ...)"
   ;; plan-name (car rest) (second rest)) ; DEBUGGING
 
-  (error-check)
+  (error-check :caller 'find-curr-{sub}plan)
 
   (cond
     ; Next action is top-level; may be primitive, or may need elaboration into subplan
@@ -1176,7 +1176,7 @@
       ;`````````````````````
       ; Eta: Saying hello
       ;`````````````````````
-      ((equal wff '(^me say-hello-to.v you))
+      ((equal wff '(^me say-hello-to.v ^you))
         (setq new-subplan-name (plan-saying-hello))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
@@ -1186,12 +1186,23 @@
       ;``````````````````````
       ; Eta: Saying good-bye
       ;``````````````````````
-      ((equal wff '(^me say-bye-to.v you))
+      ((equal wff '(^me say-bye-to.v ^you))
         (setq new-subplan-name (plan-saying-bye))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
         (add-subplan {sub}plan-name new-subplan-name))
+
+      ;```````````````````````````
+      ; Eta: Exiting conversation
+      ;```````````````````````````
+      ; NOTE: duplicated from the above (though different action arguments) -
+      ; meant to reflect a more "absolute" say-bye.v action where Eta directly/abruptly
+      ; exits the conversation, whereas say-bye-to.v might be used during the exchange of
+      ; pleasantries and farewells at the end of a standard conversation.
+      ((equal wff '(^me say-bye.v))
+        (delete-current-episode {sub}plan-name)
+        (exit))
 
       ;`````````````````````````````````````
       ; Eta: Recalling answer from history
@@ -1284,6 +1295,7 @@
           ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
           (t (setq proposal-gist (generate-proposal expr))))
         ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (setf (get ep-name 'gist-clauses) (list proposal-gist))
         (setq new-subplan-name (plan-proposal {sub}plan-name proposal-gist))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
@@ -1609,9 +1621,18 @@
         ; Get ulfs from user gist clauses and set them as an attribute to the current
         ; user action
         (setq user-ulfs (mapcar #'form-ulf-from-clause user-gist-clauses))
+        ;; (format t "Obtained ulfs ~a for episode ~a~%" user-ulfs user-ep-name1) ; DEBUGGING
 
         (setf (get user-ep-name 'ulf) user-ulfs)
         (setf (get user-ep-name1 'ulf) user-ulfs)
+
+        ; Get fine-grained user action type corresponding to gist clauses (e.g. (^you say-be.v)),
+        ; and store ((^you say-bye.v) * ?e1), where ?e1 is the ep-name of the parent of say-to.v.
+        (setq user-actions (mapcar #'form-user-action-types user-gist-clauses))
+        ;; (format t "Obtained user-actions ~a for episode ~a~%" user-actions user-ep-name1) ; DEBUGGING
+        (mapcar (lambda (action-type)
+            (store-in-context `((^you ,action-type) * ,user-ep-name1)))
+          user-actions)
 
         ; Add turn to dialogue history
         (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs)
@@ -1692,11 +1713,44 @@
         (list user-ep-name1 wff1))
 
       ;`````````````````````
+      ; User: Responding
+      ;`````````````````````
+      ; Currently, this is treated as a more "general" version of replying, and also
+      ; is aimed at more instantaneous verbal responses, i.e., occurring within 10
+      ; seconds after the previous action.
+      ; TODO: ultimately, it seems like a response could be verbal or non-verbal (e.g.
+      ; a gesture, following an instruction, etc.). But this invites certain parallel
+      ; processing issues, so currently I keep these separate. Also, it seems like the
+      ; distinction between replying and responding is somewhat arbitrary currently...
+      ((setq bindings (bindings-from-ttt-match '(^you respond-to.v _!) wff))
+        ; Read user input (within 10 secs if live mode)
+        (setq input (if *live* (hear-words :delay 10) (read-words)))
+        (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
+
+        ; Make sure that any final punctuation, such as ?, ., or !,
+        ; is separated from the final word (so as to not impair pattern matching)
+        (when (null input)
+          (delete-current-episode {sub}plan-name)
+          (return-from observe-next-user-action (list user-ep-name1 wff1)))
+        (setq input (detach-final-punctuation input))
+        ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
+        ; Create subplan
+        (setq new-subplan-name
+          (init-plan-from-episode-list
+            (list :episodes (episode-var) (create-say-to-wff input :reverse t))
+            {sub}plan-name))
+        ; Bidirectional hierarchical connections
+        (add-subplan {sub}plan-name new-subplan-name)
+        ;; (print-current-plan-status subplan-name) ; DEBUGGING
+        (list user-ep-name1 wff1)
+      )
+
+      ;`````````````````````
       ; User: Acknowledging
       ;`````````````````````
       ; Same as replying, but allows for "tacit approval" (10 secs of silence) as well.
       ((setq bindings (bindings-from-ttt-match '(^you acknowledge.v _!) wff))
-        ; Read user input (within 15 secs if live mode)
+        ; Read user input (within 10 secs if live mode)
         (setq input (if *live* (hear-words :delay 10) (read-words)))
         (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
@@ -1853,8 +1907,24 @@
   (let (tagged-clause ulf)
     (setq tagged-clause (mapcar #'tagword clause))
     (setq ulf (choose-result-for tagged-clause '*clause-ulf-tree*))
- ulf)
+  ulf)
 ) ; END form-ulf-from-clause
+
+
+
+
+
+(defun form-user-action-types (clause)
+;```````````````````````````````````````
+; Given a gist clause, find a corresponding 'action type'
+; (i.e., a predicate like say-bye.v) using hierarchical
+; pattern transduction.
+;
+  (let (tagged-clause action-type)
+    (setq tagged-clause (mapcar #'tagword clause))
+    (setq action-type (choose-result-for tagged-clause '*clause-action-type-tree*))
+  action-type)
+) ; END form-user-action-types
 
 
 
@@ -1943,7 +2013,7 @@
   (let* ((cnd (car expr)) (rst (cdr expr))
          (else-episodes (car (get-keyword-contents rst '(:else))))
          (if-episodes (if (not else-episodes) rst
-          (butlast (reverse (set-difference rst else-episodes))))))
+          (reverse (set-difference rst (member :else rst))))))
     (cond
       ; Try conditional
       ((eval-truth-value cnd)

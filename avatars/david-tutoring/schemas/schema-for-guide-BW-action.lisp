@@ -18,23 +18,73 @@
 
 :episodes (
 
-  ;; ?e1 (^me say-to.v ^you '(You try to make a move \.))
-  ?e1 (:repeat-until (?e1 finished2.a)
+  ; David proposes the action to the user.
+  ?e1 (^me propose1-to.v ^you ?ka1)
 
-    ; TODO: add "user trying" action, which (in the case of a BW action)
-    ; queries the BW system for whether ?ka1 was performed or not. If so,
-    ; store ((pair ^you ?e2) instance-of.n ?ka1).
-    ?e2 (^you try.v ?ka1)
+  ; The system tries to guide the user through a move until they do it successfully.
+  ; TODO: if this should be more flexible, i.e. giving the user the power to 'suggest'
+  ; or try a different move (for instance, if multiple valid paths exist towards the
+  ; goal), the schema will need to be revised.
+  ?e2 (:repeat-until (?e2 finished2.a)
 
-    (:if ((pair ^you ?e2) instance-of.n ?ka1)
+    ; The user responds to the proposal (could be silent acknowledgement).
+    ; TODO: in principle, a response could be anything, potentially subsuming the
+    ; "try to do move" action in the following episode. For now, I keep these separate.
+    ; TODO: this is crashing when the system loops, for some reason...
+    ?e3 (^you respond-to.v ?e1)
 
-      ; say some variant of "very good."?
-      ?e3 (^me commit-to-STM.v (that (?e1 finished2.a)))
+    ; Either (4a) the user asks a question, (4b) the user says goodbye, (4c) the user
+    ; asks to pause, or (4d) the user is assumed to acknowledge the proposal.
+    ?e4 (:try-in-sequence
     
-    :else
+      ; (4a)
+      (:if ((^you ask-question.v) * ?e3)
 
-      ; TODO: get new next step by querying the BW system
-      ?e4 (^me issue-correction-to.v ^you ?ka1)
+        ; David reacts to the user's question.
+        ?e5 (^me react-to.v ?e3))
+
+      ; (4b)
+      (:if ((^you say-bye.v) * ?e3)
+      
+        ; David says goodbye and exits.
+        ?e6 (^me react-to.v ?e3)
+        ?e7 (^me say-bye.v))
+
+      ; (4c)
+      (:if ((^you ask-to-pause.v) * ?e3)
+      
+        ; David reacts to the pause request and pauses the conversation.
+        ?e8 (^me react-to.v ?e3)
+        ?e9 ((set-of ^me ^you) pause-conversation.v))
+
+      ; (4d)
+      (:else
+      
+        ; The user attempts to make the proposed move.
+        ?e10 (^you try1.v ?ka1)
+
+        ; I'm unsure here as to whether corrections to the user (in the case that they
+        ; make a wrong move) should be handled as a separate episode in the schema (as in
+        ; the commented section below), or if they should be handled "implicitly" by the
+        ; next planner proposal, as is the case currently.
+        ?e11 (^me commit-to-STM.v (that (?e2 finished2.a)))
+
+        ;; ; Either the move made by the user was a (successful) instance
+        ;; ; of ?ka1 or the move was a failure to match the proposed move.
+        ;; ?e11 (:if ((pair ^you ?e10) instance-of.p ?ka1)
+          
+        ;;     ; Store that the user has done the proposed action in context.
+        ;;     ?e12 (^me commit-to-STM.v (that (?e2 finished2.a)))
+
+        ;;     :else (
+
+        ;;       ; Find and issue a correction.
+        ;;       ; TODO: it seems that there should probably be a 'issue-correction.v' action in the
+        ;;       ; schema. I will also have to see whether this is adequate for the BW system.
+        ;;       ?e13 (^me find4.v (some.d ?correction (:l (?x) (?x step1-toward.p ?goal-rep))))
+        ;;       ?e14 (^me propose1-to.v ^you ?correction)))
+
+      )
     
     )
 

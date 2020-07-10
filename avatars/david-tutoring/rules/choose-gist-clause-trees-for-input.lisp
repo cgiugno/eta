@@ -7,5 +7,5 @@
       1 (0 do 1 want 2 resume 1)
          2 (*request-input*) (0 :subtrees)
       1 (0)
-         2 (*request-input*) (0 :subtrees)
+         2 (*spatial-question-input*) (0 :subtrees)
 ))
