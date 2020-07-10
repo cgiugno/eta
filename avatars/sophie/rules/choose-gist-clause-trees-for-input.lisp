@@ -49,6 +49,8 @@
       2 (*energy-input*) (0 :subtrees)
    1 (I have had trouble concentrating \.)
       2 (*energy-input*) (0 :subtrees)
+   1 (I feel mildly depressed \.)
+      2 (*energy-input*) (0 :subtrees)
    1 (I don\'t have allergies to any medicine \.)
       2 (*medicine-input*) (0 :subtrees)
    1 (I am only taking Lortab to treat my pain \.)
