@@ -874,6 +874,8 @@
        2 (((lex-ulf! wh-pred 1) (lex-ulf! pro 3) (lex-ulf! v- 6) (*np-ulf-tree* 7 8 9) ?)
           ((sub 1 ((pres need.aux-v) 2 (3 4 *h))) ?)) (0 :ulf-recur)
 
+    ; Where do you want me to put the Twitter block ?
+
 )) ; END *where-question-ulf-tree*
 
 
@@ -1482,6 +1484,8 @@
           (((pres need.aux-v) 1 (2 3 4)) ?)) (0 :ulf-recur)
 
     ; Does not the Twitter block need to be on ...?
+
+    ; Do you want me to ... ?
 
 )) ; END *do-question-ulf-tree*
 
