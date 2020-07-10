@@ -2,21 +2,26 @@
 '(
   (sleep sleeping)
   (okay alright well good fine)
-  (problem problems issue issues hard)
+  (problem problems issue issues hard difficulty)
+  (sleep-prob problem insomnia)
   (lot much)
   (often frequent frequently much)
   (wake waking)
   (day daytime)
   (sleep-medication ambien nyquil lunesta)
   (work working effective help helping)
+  (cause causing causes caused triggering triggered triggers trigger provoke provokes provoking provoked)
   (spread spreading metastasized metastatic)
   (sleep-thought thought thoughts head mind brain)
+  (ment-health anxiety anxiousness depression anxious depressed)
+  (recently lately)
 ))
 
 
 (READRULES '*sleep-poorly-input*
 '(
-
+  
+  
   ; What medicine are you taking?
   1 (8 wh_ 1 medicine-gen 0)
     2 (*medicine-question* (what medicine are you taking ?)) (0 :subtree+clause)
@@ -33,6 +38,17 @@
   1 (0 be-aux 1 it 3 do anything 0)
     2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
 
+  ;You may be sleeping poorly because of anxiety/depression.
+  1 (0 be-aux 0 because 2 ment-health 0)
+    2 ((You are sleeping poorly because of your mental health \.) (sleeping-poorly)) (0 :gist)
+  1 (0 ment-health 3 cause 0)
+    2 ((You are sleeping poorly because of your mental health \.) (sleeping-poorly)) (0 :gist)
+  ;
+  
+  ;Have you been feeling more anxious/depressed recently?
+  1 (0 be-aux 5 ment-health 5)
+    2 (*energy-question* (how is your mental health ?)) (0 :subtree+clause)
+  
   1 (0 medicine-gen 1 neg 1 work 0)
     2 ((You are sleeping poorly because the pain medication is no longer working \.) (sleeping-poorly)) (0 :gist)
 
@@ -58,6 +74,8 @@
   1 (0 wh_ 3 sleep-thought 0)
     2 (*sleep-question* (what is on your mind when you try to sleep ?)) (0 :subtree+clause)
 
+
+  
   1 (0)
     2 *general-input* (0 :subtree)
   1 (0)
@@ -77,6 +95,10 @@
   1 (You are sleeping poorly because the cancer has spread \.)
     2 (*have-subdialogue* ((Does that mean that the cancer has gotten worse?)
                            ((Has the cancer gotten worse ?)))) (0 :schema+args)
+  1 (You are sleeping poorly because of your mental health \.)
+      (*have-subdialogue* ((You see\. You do try to keep carrying on\, but sometimes you just feel down\.) 
+                           ((I feel mildly depressed \.)))) (0 :schema+args)
+    
   1 (0)
     2 (You see\.) (0 :out)
 ))
