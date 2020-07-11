@@ -64,12 +64,24 @@
 
 
 
-(defun concept-name.f (x)
-; ````````````````````````
-; Maps a concept name to an English string.
+(defun concept-noun-phrase.f (x)
+; ````````````````````````````````
+; Maps a concept name to an English noun phrase.
 ;
-  (let ((name (generic-name-to-np (get-generic-name x))))
+  (let ((np (generic-name-to-np (get-generic-name x))))
+    (when (null np)
+      (return-from concept-noun-phrase.f '(an unnamed concept)))
+    np)
+) ; END concept-noun-phrase.f
+
+
+
+(defun concept-noun.f (x)
+; ``````````````````````````
+; Maps a concept name to an English noun.
+;
+  (let ((name (get-generic-name x)))
     (when (null name)
-      (return-from concept-name.f '(an unnamed concept)))
-    name)
-) ; END concept-name.f
+      (return-from concept-noun-phrase.f '(unnamed concept)))
+    (cdr (generic-name-to-np name)))
+) ; END concept-noun.f

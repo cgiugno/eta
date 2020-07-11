@@ -1036,6 +1036,15 @@
 
 
 
+(defun record-structure! (canonical-name)
+;``````````````````````````````````````````
+; TTT predicate for substituting record structure for name.
+;
+  (get-record-structure canonical-name)
+) ; END record-structure!
+
+
+
 (defun get-generic-name (canonical-name)
 ;``````````````````````````````````````````
 ; Gets the generic name (i.e. a reified noun, such as (k BW-arch.n)).
@@ -2141,15 +2150,15 @@
 
 
 
-(defun request-goal-rep (obj-schema)
-;`````````````````````````````````````
-; Writes a ulf to the file ulf.lisp, so that it can be used
-; by the blocksworld system.
+(defun request-goal-rep (wff)
+;`````````````````````````````
+; Writes a formula (containing an indefinite quantifier with a lambda abstract)
+; to the file goal-request.lisp, so that it can be processed by BW system.
 ;
   (with-open-file (outfile "./io/goal-request.lisp" :direction :output
                                                     :if-exists :supersede
                                                     :if-does-not-exist :create)
-    (format outfile "(setq *chosen-obj-schema* '~s)" obj-schema))
+    (format outfile "(setq *goal-request* '~s)" wff))
 ) ; END request-goal-rep
 
 

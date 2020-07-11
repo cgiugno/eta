@@ -585,37 +585,37 @@
 
 
 
-(defun form-spatial-representation ()
-;``````````````````````````````````````
-; Forms a spatial representation from the currently chosen BW-concept.n
-; (assuming such a choice has actually been made at this point), through
-; sending the BW system the chosen concept schema and receiving a goal
-; schema.
-; TODO: I'm not sold on how this is done currently, but I'm stumped on
-; how to do it more sensibly. The issue is that, for the lambda expression
-; + find-all-instances to work, the facts about the goal schema need to be
-; stored ahead-of-time, so the communication of the goal schema needs to be
-; done before the 'choice' step of the indefinite quantifier. This requires
-; sending the BW system the chosen concept schema, but the concept schema
-; name is nested inside the lambda extract, and messing with that here would
-; be a pretty messy approach. Instead, I check context for some individual such
-; that it is a BW-concept.n and Eta has chosen it.
-; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
-; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
-; in noun hierarchy.
-;
-  (let (concept-name goal-schema goal-name)
-    (setq concept-name (car (find-all-instances-context
-      '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
-    (request-goal-rep (cdr (get-record-structure concept-name)))
-    ; NOTE: currently no special offline (terminal mode) procedure
-    ; for getting goal schema.
-    (setq goal-schema (get-goal-rep))
-    (setq goal-name (gensym "BW-goal-rep"))
-    (add-alias (cons '$ goal-schema) goal-name)
-    (store-in-context (list goal-name 'goal-schema1.n))
-    (store-in-context (list goal-name 'instance-of.p concept-name)))
-) ; END form-spatial-representation
+;; (defun form-spatial-representation ()
+;; ;``````````````````````````````````````
+;; ; Forms a spatial representation from the currently chosen BW-concept.n
+;; ; (assuming such a choice has actually been made at this point), through
+;; ; sending the BW system the chosen concept schema and receiving a goal
+;; ; schema.
+;; ; TODO: I'm not sold on how this is done currently, but I'm stumped on
+;; ; how to do it more sensibly. The issue is that, for the lambda expression
+;; ; + find-all-instances to work, the facts about the goal schema need to be
+;; ; stored ahead-of-time, so the communication of the goal schema needs to be
+;; ; done before the 'choice' step of the indefinite quantifier. This requires
+;; ; sending the BW system the chosen concept schema, but the concept schema
+;; ; name is nested inside the lambda extract, and messing with that here would
+;; ; be a pretty messy approach. Instead, I check context for some individual such
+;; ; that it is a BW-concept.n and Eta has chosen it.
+;; ; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
+;; ; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
+;; ; in noun hierarchy.
+;; ;
+;;   (let (concept-name goal-schema goal-name)
+;;     (setq concept-name (car (find-all-instances-context
+;;       '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
+;;     (request-goal-rep (cdr (get-record-structure concept-name)))
+;;     ; NOTE: currently no special offline (terminal mode) procedure
+;;     ; for getting goal schema.
+;;     (setq goal-schema (get-goal-rep))
+;;     (setq goal-name (gensym "BW-goal-rep"))
+;;     (add-alias (cons '$ goal-schema) goal-name)
+;;     (store-in-context (list goal-name 'goal-schema1.n))
+;;     (store-in-context (list goal-name 'instance-of.p concept-name)))
+;; ) ; END form-spatial-representation
 
 
 
@@ -1033,7 +1033,8 @@
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest)) ep-name1
         (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
         user-gist-clauses user-gist-passage proposal-gist main-clause info topic
-        suggestion query ans perceptions perceived-actions sk-var sk-name)
+        suggestion query ans perceptions perceived-actions sk-var sk-name
+        concept-name goal-schema)
   
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being processed~%" wff ep-name) ; DEBUGGING
 
@@ -1416,17 +1417,29 @@
       ;```````````````````````````````````````
       ; Form some spatial representation of a concept (i.e., of an
       ; object schema). Given an episode like:
-      ; ?e2 (^me form-spatial-representation.v (a.d ?goal-rep
-      ;        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
-      ; First, Eta queries the BW system for the spatial representation, given
-      ; the concept schema. Eta then selects the spatial representation (goal schema)
-      ; after storing the two relevant facts, and substitutes it for the variable
-      ; in the rest of the plan.
+      ; ?e2 (^me form-spatial-representation.v (a.d ?goal-rep ((most.mod-a simple.a)
+      ;        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c))))))
+      ; First, Eta queries the BW system for the spatial representation, using the indefinite
+      ; quantifier. Then, Eta reads the goal representation from the BW system, generates a name for
+      ; the goal representation, and substitutes it in the schema.
       ((setq bindings (bindings-from-ttt-match '(^me form-spatial-representation.v _!) wff))
         (setq expr (get-single-binding bindings))
         (setq sk-var (second expr))
-        (form-spatial-representation)
-        (setq sk-name (choose-variable-restrictions sk-var (third expr)))
+        ; Substitute record structure for concept name in expr
+        (setq expr (ttt:apply-rule '(/ (_!1 instance-of.p _!2)
+                                       (_!1 instance-of.p (record-structure! _!2)))
+                      expr :max-n 1))
+        ; Request goal representation from BW system
+        (request-goal-rep expr)
+        ; Get goal representation from BW system
+        ; NOTE: currently no special offline (terminal mode) procedure for getting goal schema.
+        (setq goal-schema (get-goal-rep))
+        ; Generate skolem name, add alias and facts in context
+        (setq sk-name (gensym "BW-goal-rep"))
+        (add-alias (cons '$ goal-schema) sk-name)
+        (store-in-context (list sk-name 'goal-schema1.n))
+        (store-in-context (list sk-name 'instance-of.p concept-name))
+        ; Substitute skolem name for skolem var in schema
         (format t "formed representation ~a for variable ~a~%" sk-name sk-var)
         (nsubst-variable {sub}plan-name sk-name sk-var)
         (delete-current-episode {sub}plan-name))

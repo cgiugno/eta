@@ -88,13 +88,15 @@
         (:l (?x) (and (?x member-of.p ?cc) (not (^you understand.v ?x)))))))
 
   ; Eta announces the name of the chosen concept to the user.
-  ?e3 (^me say-to.v ^you '(I would like to teach you the concept of (concept-name.f ?c) \.))
+  ?e3 (^me say-to.v ^you '(I would like to teach you the concept of (concept-noun-phrase.f ?c) \.))
 
   ; Eta forms (through querying the BW system) the goal representation for the
   ; simplest possible example of the concept.
   ; TODO: likewise - Eta might not have any visual/BW concepts, the concepts may be ill-formed, etc.
-  ?e4 (^me form-spatial-representation.v (a.d ?goal-rep
-        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
+  ;; ?e4 (^me form-spatial-representation.v (a.d ?goal-rep
+  ;;       (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
+  ?e4 (^me form-spatial-representation.v (a.d ?goal-rep ((most.mod-a simple.a)
+        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c))))))
 
   ; Eta guides the user through construction of the simple example.
   ?e5 (^me guide-BW-construction.v ^you ?goal-rep)
@@ -103,7 +105,28 @@
   ; the instructions to build a simple example. However, in the future Eta needs to allow
   ; (or prompt) the user to choose a more complex example, and guide them through making
   ; it in a more "hands-off" way.
-  ?e6 (^me say-to.v ^you '(Excellent\. You now understand the concept of (concept-name.f ?c) \.))
+  ?e6 (^me say-to.v ^you '(Excellent\. You have now built the simplest possible (concept-noun.f ?c) \.))
+  ; "Do you think you understand the concept?"
+
+  ;; ; User may ask to make a variant, or just give an acknowledgement.
+  ;; ?e7 (^you respond-to.v ?e6)
+
+  ;; ?e8 (:if ((^you ask-to-extend-concept.v) * ?e6)
+  
+  ;;   ?e9 ()
+
+  ;;   :else (
+
+  ;;     ?e15 (^me say-to.v ^you '(Would you like to try building a bigger one ?))
+
+  ;;   )
+  
+  ;; )
+
+  ; ^you respond-to.v ?e6
+  ; if user asks to make a variant (e.g. a bigger one), parse and send to BW system
+  ; if other/no response, David can ask the user if they understand the concept, or just
+  ; suggest to build a variant chosen by David.
 
   ; Eta commits to memory that the user understands the concept.
   ; TODO: this needs to be stored in persistent long-term memory eventually,
