@@ -96,7 +96,7 @@
     2 (*have-subdialogue* ((Does that mean that the cancer has gotten worse?)
                            ((Has the cancer gotten worse ?)))) (0 :schema+args)
   1 (You are sleeping poorly because of your mental health \.)
-      (*have-subdialogue* ((You see\. You do try to keep carrying on\, but sometimes you just feel down\.) 
+      (*have-subdialogue* ((I see\. I do try to keep carrying on\, but sometimes I just feel down\.) 
                            ((I feel mildly depressed \.)))) (0 :schema+args)
     
   1 (0)
