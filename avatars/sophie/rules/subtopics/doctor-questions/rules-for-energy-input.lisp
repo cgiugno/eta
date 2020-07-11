@@ -15,11 +15,11 @@
 (READRULES '*energy-input*
 '(
   1 (0 med-give 5 antidepressant)
-    2 (I can give you an antidepressant \.) (medicine-request)) (0 :gist)
+    2 ((I can give you an antidepressant \.) (medicine-request)) (0 :gist)
   1 (0 med-take 5 antidepressant)
     2 ((You should take an antidepressant \.) (medicine-request)) (0 :gist)
   1 (0 therapy 0)
-    2 ((You should see a therapist \.) (energy) (0 :gist)
+    2 ((You should see a therapist \.) (energy)) (0 :gist)
   1 (0)
     2 *general-input* (0 :subtree)
 ))
