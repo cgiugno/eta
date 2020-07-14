@@ -31,7 +31,7 @@
     1 (spatial-question 0)
       2 *reaction-to-spatial-question-input* (0 :subtree)
     1 (Goodbye 0)
-      2 (Oh\, thank me for listening\. Good bye for now!) (0 :out)
+      2 (Oh\, thank me for participating\. Good bye for now!) (0 :out)
     1 (Pause 0)
       2 (Sure\, let you know when I want to continue\.) (0 :out)
     1 (Resume 0)

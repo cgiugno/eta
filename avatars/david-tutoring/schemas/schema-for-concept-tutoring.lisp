@@ -1,4 +1,4 @@
-;; *teach-BW-concept-to*: development version 7   [modified from Ben's June 5/20 version 6]
+;; *teach-BW-concept-to*: development version 7
 ;;
 ;; Dialogue for blocks world concept tutoring 
 ;; 
@@ -15,10 +15,6 @@
 ; feedback, and terminating when the user appears to understand the concept
 ; (or chooses to end the interaction). Some "small talk" may occur (currently
 ; disabled).
-;
-; [Re indexicals ^me, ^you, ^now, ... Original suggestion was @me, @you, @now, ...
-; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
-; where '@' is the EL operator for "true at the time of"]
 
 :types (
   !t1 (^you person.n)
@@ -79,63 +75,144 @@
   ?e1 (^me say-to.v ^you 
         '(Hi\, my name is David\. I\'m ready to teach you some spatial concept \.))
 
-  ; TODO: it might make more sense for this action to be "(^me try.v (to (choose.v ...)))",
-  ; since something may go wrong - for instance, you might already understand all the concepts
-  ; that Eta has available.
-  ;; ?e1 (^me choose.v (a.d ?c ((most.mod-a simple.a)
-  ;;       (:l (?x) (and (?x member-of.p ?cc) (not (^you understand.v ?x)))))))
+  ; David randomly selects one of the BW concepts he knows (assumed to be
+  ; of comparable complexity).
+  ; TODO: it might make more sense for this action to be
+  ; "(^me try.v (to (choose.v ...)))", since something may go wrong - for instance,
+  ; you might already understand all the concepts that Eta has available.
   ?e2 (^me choose.v (a.d ?c (random.a
         (:l (?x) (and (?x member-of.p ?cc) (not (^you understand.v ?x)))))))
 
-  ; Eta announces the name of the chosen concept to the user.
-  ?e3 (^me say-to.v ^you '(I would like to teach you the concept of (concept-noun-phrase.f ?c) \.))
+  ; David announces the name of the chosen concept to the user.
+  ?e3 (^me say-to.v ^you '(I would like to teach you the concept of
+                            (concept-noun-phrase.f ?c) \.))
 
-  ; Eta forms (through querying the BW system) the goal representation for the
+  ; David forms (through querying the BW system) the goal representation for the
   ; simplest possible example of the concept.
-  ; TODO: likewise - Eta might not have any visual/BW concepts, the concepts may be ill-formed, etc.
-  ;; ?e4 (^me form-spatial-representation.v (a.d ?goal-rep
-  ;;       (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
+  ; TODO: likewise - Eta might not have any visual/BW concepts,
+  ; the concepts may be ill-formed, etc.
   ?e4 (^me form-spatial-representation.v (a.d ?goal-rep ((most.mod-a simple.a)
         (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c))))))
 
   ; Eta guides the user through construction of the simple example.
   ?e5 (^me guide-BW-construction.v ^you ?goal-rep)
 
-  ; Here, Eta assumes that the user now understands the concept after seeing them follow
-  ; the instructions to build a simple example. However, in the future Eta needs to allow
-  ; (or prompt) the user to choose a more complex example, and guide them through making
-  ; it in a more "hands-off" way.
-  ?e6 (^me say-to.v ^you '(Excellent\. You have now built the simplest possible (concept-noun.f ?c) \.))
-  ; "Do you think you understand the concept?"
+  ; Eta says that the simple example has been built, and asks the user if
+  ; they now understand the concept.
+  ?e6 (^me say-to.v ^you '(Excellent\. You have now built the simplest possible
+                            (concept-noun.f ?c) \.))
+  ?e7 (^me say-to.v ^you '(Do you think you understand the concept ?))
 
-  ;; ; User may ask to make a variant, or just give an acknowledgement.
-  ;; ?e7 (^you respond-to.v ?e6)
+  ; Two generalizations need to be made in the following dialogue:
+  ; First, the system shouldn't assume that building one 'additional' extension
+  ; is sufficient for the user understanding the concept. The user might need to
+  ; go through multiple cycles of building extensions (e.g., first building a
+  ; taller one, then building a wider one, etc.) before understanding it.
+  ; Second, the BW system currently only supports the extensions "bigger" and
+  ; "smaller", which are tried as alternatives. Ultimately, a number of types of
+  ; extensions should be supported (like "taller", "longer", "wider", "diagonal", etc.),
+  ; and they should be parsed directly from user input (or from David's selection) and
+  ; used in the form-spatial-representation.v episode.
+  ; ````````````````````````````````````````````````````````````````````````````````````
+  ?e8 (^you respond-to.v ?e7)
 
-  ;; ?e8 (:if ((^you ask-to-extend-concept.v) * ?e6)
+  ; Either (9a) user says that they understand the concept, (9b) the user asks to
+  ; make a bigger example, (9c) the user asks to make a smaller example, or (9d)
+  ; the user says something else.
+  ?e9 (:try-in-sequence
   
-  ;;   ?e9 ()
+    ; (9a) If the user says that they understand the concept...
+    (:if ((^you say-yes.v) * ?e8)
+    
+      ; Take the user at their word and exit the dialogue.
+      ; But should David have the user make an extension anyways?
+      ?e10 (^me say-to.v ^you '(Great\. Thanks for playing pupil!))
+      ?e11 (^me commit-to-STM.v (that (^you understand.v ?c)))
+      ?e12 (^me say-to.v ^you '(Goodbye for now!))
+      ?e13 (^me say-bye.v))
 
-  ;;   :else (
+    ; (9b)
+    ; TODO: what if there aren't enough blocks to make a bigger one? Currently,
+    ; David will notice this and quit once it tries to find a plan to build the
+    ; goal structure, but he shouldn't ask the user to try to build a bigger
+    ; structure in the first place, in that case. He'll also still assume that
+    ; the user understands the concept even if the attempt to build the extension
+    ; fails, which is wrong. But how can Eta determine whether a goal representation
+    ; can be built or not before the planner actually trying to find a step? Should
+    ; such a failure condition be built into the act of forming a spatial representation
+    ; of the goal structure?
+    (:if ((^you ask-to-make-structure-bigger.v) * ?e8)
+    
+      ; David acknowledges user's request, prompts the user to try.
+      ?e15 (^me say-to.v ^you '(We certainly can make a bigger one\. Why don\'t you try it?))
+      ?e16 (^you acknowledge.v ?e15)
+      ; David finds a bigger goal structure as an extension.
+      ; TODO: bigger.a to be replaced once comparatives figured out.
+      ?e17 (^me form-spatial-representation.v (a.d ?goal-rep1 (bigger.a
+        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))))
 
-  ;;     ?e15 (^me say-to.v ^you '(Would you like to try building a bigger one ?))
+    ; (9c)
+    ; TODO: Same as the comment above on (^you ask-to-make-structure-bigger.v). This
+    ; will fail if the structure can't be made with fewer blocks (which will almost
+    ; certainly be the case if "most simple" corresponds to "smallest"), but David
+    ; will still ask the user to build the structure first, and will assume the user
+    ; understands the concept even in the case of such a failure.
+    (:if ((^you ask-to-make-structure-smaller.v) * ?e8)
+    
+      ; David acknowledges user's request, prompts the user to try.
+      ?e20 (^me say-to.v ^you '(We certainly can make a smaller one\. Why don\'t you try it?))
+      ?e21 (^you acknowledge.v ?e20)
+      ; David finds a bigger goal structure as an extension.
+      ; TODO: smaller.a to be replaced once comparatives figured out.
+      ?e22 (^me form-spatial-representation.v (a.d ?goal-rep1 (smaller.a
+        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))))
 
-  ;;   )
-  
-  ;; )
+    ; (9d)
+    (:else
+    
+      ; David asks if user wants to make a bigger example.
+      ?e25 (^me say-to.v ^you '(Do you want to try to make a bigger one?))
 
-  ; ^you respond-to.v ?e6
-  ; if user asks to make a variant (e.g. a bigger one), parse and send to BW system
-  ; if other/no response, David can ask the user if they understand the concept, or just
-  ; suggest to build a variant chosen by David.
+      ; The user responds to the request (possibly just silent acknowledgement).
+      ?e26 (^you respond-to.v ?e25)
 
-  ; Eta commits to memory that the user understands the concept.
+      ; If the user replies 'no'...
+      ?e27 (:if ((^you say-no.v) * ?e26)
+
+        ; For now, if the user is refusing, David should just exit the conversation.
+        ?e28 (^me say-to.v ^you '(Oh\, ok\. I must assume that you understand
+                                  the concept then\. Goodbye for now!))
+        ?e29 (^me commit-to-STM.v (that (^you understand.v ?c)))
+        ?e30 (^me say-bye.v))
+      
+      ; TODO: User might also try to clarify the meaning of "bigger" here,
+      ; which David should be able to answer.
+
+      ; David finds a bigger goal structure as an extension.
+      ; TODO: bigger.a to be replaced once comparatives figured out.
+      ?e31 (^me form-spatial-representation.v (a.d ?goal-rep1 (bigger.a
+        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c))))))))
+
+  ; David supervises the user in building ?goal-rep1.
+  ?e40 (^me supervise-BW-construction.v ^you ?goal-rep1)
+
+  ; David tells the user that they understand the concept upon completion.
+  ?e50 (^me say-to.v ^you '(Great! I think you\'ve got the idea of
+                            (concept-noun-phrase.f ?c) \. You\'ve caught on fast\.))
+
+  ; User acknowledges David (possibly just silence).
+  ; TODO: what if user replies that they still don't understand the concept?
+  ; Would require "looping" as the user builds more extensions of the concept,
+  ; but I'm currently avoiding this now for the purposes of the demo.
+  ?e51 (^you acknowledge.v ?e50)
+
+  ; David commits to memory that the user understands the concept.
   ; TODO: this needs to be stored in persistent long-term memory eventually,
   ; not just short-term context.
-  ?e7 (^me commit-to-STM.v (that (^you understand.v ?c)))
+  ?e52 (^me commit-to-STM.v (that (^you understand.v ?c)))
 
   ; David says goodbye after conversation is over.
-  ?e100 (^me say-to.v ^you '(Goodbye for now!))
-
+  ?e100 (^me say-to.v ^you '(Thanks for playing pupil! Goodbye for now!))
 
 )
 
@@ -192,7 +269,10 @@
 ;
 (mapcar #'(lambda (x) 
       (store-output-gist-clauses (first x) (second x) '*teach-BW-concept-to*))
-  '()
+  '(
+    (?e7 ((Do you understand the concept ?)))
+    (?e25 ((Do you want to make a bigger example of the concept ?)))
+  )
 ) ; END mapcar #'store-output-gist-clauses
 
 

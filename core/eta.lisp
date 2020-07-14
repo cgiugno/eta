@@ -139,6 +139,11 @@
   ; Certainty cutoff used to generate responses given a list of relations+certainties from the blocks world
   (defparameter *certainty-threshold* 0.7)
 
+  ; Maximum delays used in processing speech acts
+  (defparameter *delay-acknowledge.v* 5)
+  (defparameter *delay-respond-to.v* 10)
+  (defparameter *delay-say-to.v* 10)
+
   ; Number of Eta outputs generated so far (maintained
   ; for latency enforcement, i.e., not repeating a previously
   ; used response too soon).
@@ -1304,6 +1309,24 @@
         (add-subplan {sub}plan-name new-subplan-name))
 
       ;````````````````````````````
+      ; Eta: Issuing corrections
+      ;````````````````````````````
+      ; NOTE: currently equivalent to propose1-to.v, except proposals are processed differently
+      ; so as to suppress corrections on 'undo' actions and add corrective phrasing.
+      ((setq bindings (bindings-from-ttt-match '(^me issue-correction-to.v ^you _!) wff))
+        (setq expr (get-single-binding bindings))
+        (cond
+          ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
+          (t (setq proposal-gist (generate-proposal expr))))
+        ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (setf (get ep-name 'gist-clauses) (list proposal-gist))
+        (setq new-subplan-name (plan-correction {sub}plan-name proposal-gist))
+        (when (null new-subplan-name)
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (add-subplan {sub}plan-name new-subplan-name))
+
+      ;````````````````````````````
       ; Eta: Perceiving world
       ;````````````````````````````
       ((setq bindings (bindings-from-ttt-match '(^me perceive-world.v _! _!1 _!2) wff))
@@ -1545,7 +1568,8 @@
 ; 
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (user-ep-name (car rest))
         (wff (second rest)) bindings words expr user-ep-name1 wff1 wff1-arg eta-ep-name
-        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input user-try-ka-success)
+        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs user-action
+        input user-try-ka-success)
 
     ;; (format t "~%WFF = ~a,~%      in the user action ~a being processed~%" wff user-ep-name) ; DEBUGGING
 
@@ -1569,7 +1593,7 @@
                 (*read-log* (if (>= *log-ptr* (length *log-contents*))
                   (read-words "bye")
                   (read-words (first (nth *log-ptr* *log-contents*)))))
-                (*live* (hear-words))
+                (*live* (hear-words *delay-say-to.v*))
                 (t (read-words)))))
             (setq words (decompress input))
             (nsubst-variable {sub}plan-name `(quote ,input) expr))
@@ -1625,6 +1649,7 @@
 
         ; Remove contradiction
         (setq user-gist-clauses (remove-contradiction user-gist-clauses))
+        (format t "Obtained user gist clauses ~a for episode ~a~%" user-gist-clauses user-ep-name1) ; DEBUGGING
 
         ; Both the primitive user action and the immediately subordinate action
         ; recieve the gist-clause interpretation just computed.
@@ -1634,18 +1659,21 @@
         ; Get ulfs from user gist clauses and set them as an attribute to the current
         ; user action
         (setq user-ulfs (mapcar #'form-ulf-from-clause user-gist-clauses))
-        ;; (format t "Obtained ulfs ~a for episode ~a~%" user-ulfs user-ep-name1) ; DEBUGGING
+        (format t "Obtained ulfs ~a for episode ~a~%" user-ulfs user-ep-name1) ; DEBUGGING
 
         (setf (get user-ep-name 'ulf) user-ulfs)
         (setf (get user-ep-name1 'ulf) user-ulfs)
 
         ; Get fine-grained user action type corresponding to gist clauses (e.g. (^you say-be.v)),
-        ; and store ((^you say-bye.v) * ?e1), where ?e1 is the ep-name of the parent of say-to.v.
-        (setq user-actions (mapcar #'form-user-action-types user-gist-clauses))
-        ;; (format t "Obtained user-actions ~a for episode ~a~%" user-actions user-ep-name1) ; DEBUGGING
-        (mapcar (lambda (action-type)
-            (store-in-context `((^you ,action-type) * ,user-ep-name1)))
-          user-actions)
+        ; and store ((^you say-bye.v) * ?e1), where ?e1 is the ep-name of of say-to.v (and likewise
+        ; for the parent of the say-to.v episode, if it exists).
+        ; NOTE: for now, we assume that each user utterance is described by only one action type,
+        ; so the gist clauses are concatenated together first.
+        (setq user-action (form-user-action-type (apply #'append user-gist-clauses)))
+        (format t "Obtained user-action ~a for episode ~a~%" user-action user-ep-name1) ; DEBUGGING
+        (store-in-context `((^you ,user-action) * ,user-ep-name))
+        (when user-ep-name1
+          (store-in-context `((^you ,user-action) * ,user-ep-name1)))
 
         ; Add turn to dialogue history
         (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs)
@@ -1729,15 +1757,15 @@
       ; User: Responding
       ;`````````````````````
       ; Currently, this is treated as a more "general" version of replying, and also
-      ; is aimed at more instantaneous verbal responses, i.e., occurring within 10
+      ; is aimed at more instantaneous verbal responses, i.e., occurring within some
       ; seconds after the previous action.
       ; TODO: ultimately, it seems like a response could be verbal or non-verbal (e.g.
       ; a gesture, following an instruction, etc.). But this invites certain parallel
       ; processing issues, so currently I keep these separate. Also, it seems like the
       ; distinction between replying and responding is somewhat arbitrary currently...
       ((setq bindings (bindings-from-ttt-match '(^you respond-to.v _!) wff))
-        ; Read user input (within 10 secs if live mode)
-        (setq input (if *live* (hear-words :delay 10) (read-words)))
+        ; Read user input (within some secs if live mode)
+        (setq input (if *live* (hear-words :delay *delay-respond-to.v*) (read-words)))
         (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
         ; Make sure that any final punctuation, such as ?, ., or !,
@@ -1761,10 +1789,10 @@
       ;`````````````````````
       ; User: Acknowledging
       ;`````````````````````
-      ; Same as replying, but allows for "tacit approval" (10 secs of silence) as well.
+      ; Same as replying, but allows for "tacit approval" (some secs of silence) as well.
       ((setq bindings (bindings-from-ttt-match '(^you acknowledge.v _!) wff))
-        ; Read user input (within 10 secs if live mode)
-        (setq input (if *live* (hear-words :delay 10) (read-words)))
+        ; Read user input (within some secs if live mode)
+        (setq input (if *live* (hear-words :delay *delay-acknowledge.v*) (read-words)))
         (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
         ; Make sure that any final punctuation, such as ?, ., or !,
@@ -1799,8 +1827,17 @@
         (when user-try-ka-success
           (store-in-context `((pair ^you ,user-ep-name) successful.a))
           (store-in-context `((pair ^you ,user-ep-name) instance-of.p ,expr)))
-        (delete-current-episode {sub}plan-name)
-        (list user-ep-name wff))
+
+        ; As a subplan of this, Eta should percieve the world (assuming a BW system).
+        (setq new-subplan-name
+          (init-plan-from-episode-list
+            (list :episodes (episode-var)
+              '(^me perceive-world.v |Blocks-World-System| nil ?perceptions))
+            {sub}plan-name))
+        (when (null new-subplan-name)
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (add-subplan {sub}plan-name new-subplan-name))
 
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
@@ -1927,7 +1964,7 @@
 
 
 
-(defun form-user-action-types (clause)
+(defun form-user-action-type (clause)
 ;```````````````````````````````````````
 ; Given a gist clause, find a corresponding 'action type'
 ; (i.e., a predicate like say-bye.v) using hierarchical
@@ -1937,7 +1974,7 @@
     (setq tagged-clause (mapcar #'tagword clause))
     (setq action-type (choose-result-for tagged-clause '*clause-action-type-tree*))
   action-type)
-) ; END form-user-action-types
+) ; END form-user-action-type
 
 
 
@@ -2252,7 +2289,8 @@
     (setq choice (choose-result-for tagged-words '*output-for-proposal-tree*))
     ;; (format t "~% proposal choice is ~a ~% " choice) ; DEBUGGING
 
-    (if (null choice) (return-from plan-proposal nil))
+    (when (or (null choice) (equal choice '(:out)))
+      (return-from plan-proposal nil))
 
     (cond
       ; :out directive
@@ -2261,6 +2299,38 @@
           (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
           {sub}plan-name)))
 )) ; END plan-proposal
+
+
+
+
+
+(defun plan-correction ({sub}plan-name correction-gist)
+;````````````````````````````````````````````````````````
+; Given a correction gist clause, convert it to an utterance using
+; hierarchical transduction trees, starting at a top-level choice
+; tree root.
+; NOTE: the same as plan-proposal, but uses a different rule tree.
+;
+  (let (tagged-words choice)
+
+    (if (null correction-gist)
+      (return-from plan-correction nil))
+
+    (setq tagged-words (mapcar #'tagword correction-gist))
+    ;; (format t "~% correction tagwords are ~a ~% " tagged-words) ; DEBUGGING
+    (setq choice (choose-result-for tagged-words '*output-for-correction-tree*))
+    ;; (format t "~% correction choice is ~a ~% " choice) ; DEBUGGING
+
+    (when (or (null choice) (equal choice '(:out)))
+      (return-from plan-correction nil))
+
+    (cond
+      ; :out directive
+      ((eq (car choice) :out)
+        (init-plan-from-episode-list
+          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
+          {sub}plan-name)))
+)) ; END plan-correction
 
 
 

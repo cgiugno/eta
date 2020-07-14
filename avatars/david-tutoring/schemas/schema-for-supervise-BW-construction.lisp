@@ -1,6 +1,6 @@
 ;; *supervise-BW-construction*
 ;;
-;; Dialogue for blocks world structure building instruction
+;; Dialogue for blocks world structure building supervision
 ;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -9,16 +9,16 @@
 
 '(Event-schema ((^me supervise-BW-construction.v ^you ?goal-rep) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
-; Blocks world structure building instruction; such a session is expected to
-; consist of the agent (given a goal representation) instructing the user on
-; the steps required to create that goal representation, giving corrections
-; to the user when they make an incorrect move, possibly answering user
-; questions along the way, and terminating once the goal representation
-; is successfully created.
+; Blocks world structure building supervision; such a session is expected to
+; consist of the agent (given a goal representation) supervising the user building
+; the chosen goal structure, fielding any questions along the way, and issuing
+; corrections when the user makes a wrong move (according to the planner input
+; after each step), and terminating once the goal representation is created.
 ;
-; [Re indexicals ^me, ^you, ^now, ... Original suggestion was @me, @you, @now, ...
-; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
-; where '@' is the EL operator for "true at the time of"]
+; NOTE: currently this is exactly the same as the guide-BW-construction.v schema,
+; except minor differences in some of the speech outputs by David, and David
+; instantiates the supervise-BW-action.v schema instead of guide-BW-action.v.
+;
 
 :types (
   !t1 (^you person.n)
@@ -72,81 +72,59 @@
   ; if the user is new, or it's a new day ... The opening could be more concise
   ; for repeat users.
   ?e1 (^me say-to.v ^you 
-       '(OK\, let\'s start building a simple example\.))
+       '(OK\, try building it \.))
 
-  ; Repeats until structure finished:
-  ; David finds some step towards the goal (similar to guide-BW-construction)
-  ; User tries to make move (or asks question, etc.)
-  ; If user makes correct step, say 'good' or something and move on
-  ; If user makes wrong step, issue correction. Once correction is fixed, say something like
-  ; 'good, but you're not done yet', and then calculate the next step.
-  
+  ?e2 (:repeat-until (?e2 finished2.a)
 
-  ;; ?e2 (:repeat-until (?e2 finished2.a)
+    ; David attempts to find next step (an action type) to realize goal structure.
+    ; NOTE: ?ka1 becomes bound to a reified action corresponding to the planner
+    ; output; if this is done successfully, ((pair ^me ?e3) successful.a) is 
+    ; stored in context.
+    ; TODO: 'try1.v' action omitted for now.
+    ; ?e3 (^me try1.v (to (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))))
+    ?e3 (^me find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
 
-  ;;   ; David attempts to find next step (an action type) to realize goal structure.
-  ;;   ; NOTE: ?ka1 becomes bound to a reified action corresponding to the planner
-  ;;   ; output; if this is done successfully, ((pair ^me ?e3) successful.a) is 
-  ;;   ; stored in context.
-  ;;   ; ====== TO BE IMPLEMENTED ======
-  ;;   ; try.v should take some (reified) action corresponding to a schema which ca
-  ;;   ; possibly fail (in this case, finding something), and store ((pair ^me ?e3)
-  ;;   ; successful.a) if the action succeeds, or ((pair ^me ?e3) unsuccessful.a)
-  ;;   ; otherwise (or possibly just nothing, given that we're assuming absence-as-
-  ;;   ; negation for the context.
-  ;;   ; In this case, find.v should find some entity (e.g., (ka (place.v ...))))
-  ;;   ; such that the entity is a step-toward the goal representation. This is to
-  ;;   ; be done by querying the BW system (which is running the planner) with the
-  ;;   ; goal schema for the next move. The planner output will be a spatial relation
-  ;;   ; like ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))); Eta just
-  ;;   ; needs to turn this into a proper reified action, i.e.,
-  ;;   ; (ka (place.v (the.d (|Twitter| block.n)) (on.p (the.d (|Texaco| block.n))))).
-  ;;   ; Or, in the special case of the BW system returning nil, (ka (do2.v nothing.pro)).
-  ;;   ;; ?e3 (^me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
-  ;;   ;; ?e3 (^me try1.v (to (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))))
-  ;;   ?e3 (^me find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
+    ; Either (4a) next step found successfully, or (4b) failure to do so.
+    ?e4 (:try-in-sequence
 
-  ;;   ; Either (4a) next step found successfully, or (4b) failure to do so.
-  ;;   ?e4 (:try-in-sequence
+      ; (4a)
+      (:if ((pair ^me ?e3) successful.a)
 
-  ;;     ; (4a)
-  ;;     (:if ((pair ^me ?e3) successful.a)
+        ; Either (5a) goal structure has been reached, or (5b) goal
+        ; structure not yet reached.
+        ?e5 (:try-in-sequence
 
-  ;;       ; Either (5a) goal structure has been reached, or (5b) goal
-  ;;       ; structure not yet reached.
-  ;;       ?e5 (:try-in-sequence
+          ; (5a)
+          (:if (?ka1 = (ka (do2.v nothing.pro)))
 
-  ;;         ; (5a)
-  ;;         (:if (?ka1 = (ka (do2.v nothing.pro)))
+            ; Next step is to do nothing; goal structure realized.
+            ?e6 (^me say-to.v ^you '(Looks like the structure is completed\.))
 
-  ;;           ; Next step is to do nothing; goal structure realized.
-  ;;           ?e6 (^me say-to.v ^you '(Looks like the structure is completed\.))
+            ; Terminate conversation.
+            ?e7 (^me commit-to-STM.v (that (?e2 finished2.a))))
 
-  ;;           ; Terminate conversation.
-  ;;           ?e7 (^me commit-to-STM.v (that (?e2 finished2.a))))
+          ; (5b)
+          (:else
 
-  ;;         ; (5b)
-  ;;         (:else
+            ; David guides the user in making the proposed action.
+            ?e8 (^me supervise-BW-action.v ^you ?ka1))))
 
-  ;;           ; David guides the user in making the proposed action.
-  ;;           ?e8 (^me guide-BW-action.v ^you ?ka1))))
+      ; (4b)
+      (:else
 
-  ;;     ; (4b)
-  ;;     (:else
+        ; Failure to find next step; goal structure not possible.
+        ?e50 (^me say-to.v ^you
+                '(I\'m afraid the example structure cannot be built with the blocks
+                  currently on the table\.))
+                  ; "Let me select another example ..."?
 
-  ;;       ; Failure to find next step; goal structure not possible.
-  ;;       ?e9 (^me say-to.v ^you
-  ;;               '(I\'m afraid the example structure I had in mind cannot
-  ;;                 be built with the blocks currently on the table\.))
-  ;;                 ; "Let me select another example ..."?
-
-  ;;       ; For now, the dialogue just terminates in the case of a failure at
-  ;;       ; any stage in the session. However, it seems like David should select
-  ;;       ; a new example of the concept if this is the case. Actually, there
-  ;;       ; should probably be another constraint on the concepts/goal-schemas
-  ;;       ; selected such that examples can be built with the available blocks
-  ;;       ; in the first place.
-  ;;       ?e10 (^me commit-to-STM.v (that (?e2 finished2.a))))))
+        ; For now, the dialogue just terminates in the case of a failure at
+        ; any stage in the session. However, it seems like David should select
+        ; a new example of the concept if this is the case. Actually, there
+        ; should probably be another constraint on the concepts/goal-schemas
+        ; selected such that examples can be built with the available blocks
+        ; in the first place.
+        ?e51 (^me commit-to-STM.v (that (?e2 finished2.a))))))
 )
 
 

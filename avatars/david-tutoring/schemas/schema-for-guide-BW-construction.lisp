@@ -15,10 +15,6 @@
 ; to the user when they make an incorrect move, possibly answering user
 ; questions along the way, and terminating once the goal representation
 ; is successfully created.
-;
-; [Re indexicals ^me, ^you, ^now, ... Original suggestion was @me, @you, @now, ...
-; but his leads to unpleasant things like (@me teach-BW-concept-to.v @you) @ @now)
-; where '@' is the EL operator for "true at the time of"]
 
 :types (
   !t1 (^you person.n)
@@ -80,22 +76,8 @@
     ; NOTE: ?ka1 becomes bound to a reified action corresponding to the planner
     ; output; if this is done successfully, ((pair ^me ?e3) successful.a) is 
     ; stored in context.
-    ; ====== TO BE IMPLEMENTED ======
-    ; try.v should take some (reified) action corresponding to a schema which ca
-    ; possibly fail (in this case, finding something), and store ((pair ^me ?e3)
-    ; successful.a) if the action succeeds, or ((pair ^me ?e3) unsuccessful.a)
-    ; otherwise (or possibly just nothing, given that we're assuming absence-as-
-    ; negation for the context.
-    ; In this case, find.v should find some entity (e.g., (ka (place.v ...))))
-    ; such that the entity is a step-toward the goal representation. This is to
-    ; be done by querying the BW system (which is running the planner) with the
-    ; goal schema for the next move. The planner output will be a spatial relation
-    ; like ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))); Eta just
-    ; needs to turn this into a proper reified action, i.e.,
-    ; (ka (place.v (the.d (|Twitter| block.n)) (on.p (the.d (|Texaco| block.n))))).
-    ; Or, in the special case of the BW system returning nil, (ka (do2.v nothing.pro)).
-    ;; ?e3 (^me try1.v (to (find4.v (some ?ka1 (?ka1 step1-toward.n ?goal-rep)))))
-    ;; ?e3 (^me try1.v (to (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))))
+    ; TODO: 'try1.v' action omitted for now.
+    ; ?e3 (^me try1.v (to (find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))))
     ?e3 (^me find4.v (some.d ?ka1 (:l (?x) (?x step1-toward.p ?goal-rep))))
 
     ; Either (4a) next step found successfully, or (4b) failure to do so.

@@ -21,20 +21,21 @@
   ; David proposes the action to the user.
   ?e1 (^me propose1-to.v ^you ?ka1)
 
-  ; The system tries to guide the user through a move until they do it successfully.
-  ; TODO: if this should be more flexible, i.e. giving the user the power to 'suggest'
-  ; or try a different move (for instance, if multiple valid paths exist towards the
-  ; goal), the schema will need to be revised.
+  ; The system tries to guide the user
+  ; through a move until they do it successfully.
+  ; TODO: if this should be more flexible, i.e. giving the user the power
+  ; to 'suggest' or try a different move (for instance, if multiple valid
+  ; paths exist towards the goal), the schema will need to be revised.
   ?e2 (:repeat-until (?e2 finished2.a)
 
     ; The user responds to the proposal (could be silent acknowledgement).
-    ; TODO: in principle, a response could be anything, potentially subsuming the
-    ; "try to do move" action in the following episode. For now, I keep these separate.
-    ; TODO: this is crashing when the system loops, for some reason...
+    ; TODO: in principle, a response could be anything, potentially subsuming
+    ; the "try to do move" action below. For now, I keep these separate.
     ?e3 (^you respond-to.v ?e1)
 
-    ; Either (4a) the user asks a question, (4b) the user says goodbye, (4c) the user
-    ; asks to pause, or (4d) the user is assumed to acknowledge the proposal.
+    ; Either (4a) the user asks a question, (4b) the user says goodbye,
+    ; (4c) the user asks to pause, or (4d) the user is assumed to
+    ; acknowledge the proposal.
     ?e4 (:try-in-sequence
     
       ; (4a)
@@ -63,10 +64,11 @@
         ; The user attempts to make the proposed move.
         ?e10 (^you try1.v ?ka1)
 
-        ; I'm unsure here as to whether corrections to the user (in the case that they
-        ; make a wrong move) should be handled as a separate episode in the schema (as in
-        ; the commented section below), or if they should be handled "implicitly" by the
-        ; next planner proposal, as is the case currently.
+        ; TODO: I'm unsure here as to whether corrections to the user (in the case
+        ; that they make a wrong move) should be handled as a separate episode
+        ; in the schema (as in the commented section below), or if they should
+        ; be handled "implicitly" by the next planner proposal, as is the case
+        ; currently.
         ?e11 (^me commit-to-STM.v (that (?e2 finished2.a)))
 
         ;; ; Either the move made by the user was a (successful) instance
@@ -79,8 +81,6 @@
         ;;     :else (
 
         ;;       ; Find and issue a correction.
-        ;;       ; TODO: it seems that there should probably be a 'issue-correction.v' action in the
-        ;;       ; schema. I will also have to see whether this is adequate for the BW system.
         ;;       ?e13 (^me find4.v (some.d ?correction (:l (?x) (?x step1-toward.p ?goal-rep))))
         ;;       ?e14 (^me propose1-to.v ^you ?correction)))
 

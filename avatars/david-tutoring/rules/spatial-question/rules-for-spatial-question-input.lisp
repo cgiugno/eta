@@ -8,6 +8,7 @@
     (special-request bye goodbye pause stop exit moment minute that that\'s
       second bit quit resume david now today finished-word)
     (finished-word it all everything)
+    (correct right proper good)
 
     (spatial-beginning-pair2 spatial-beginning there)
     (spatial-beginning-pair1 spatial-beginning)
@@ -49,13 +50,19 @@
     ;;   2 ((Can you answer my question referring to a past question ?)) (0 :gist)
     ;; 1 (0 spatial-word-potential 0 that one 0)
     ;;   2 ((Can you answer my question referring to a past question ?)) (0 :gist)
+    ;; ----------------------
+    ;; Verification questions
+    ;; ----------------------
+    1 (2 be 1 that 1 correct 2)
+      2 ((Did I make the correct move ?)) (0 :gist)
+    1 (2 do 1 pron 1 correct 2)
+      2 ((Did I make the correct move ?)) (0 :gist)
     ;; ----------------------------------------
     ;; If spatial question, start preprocessing
     ;; ----------------------------------------
     1 (- 0 that is finished-word 0)
       2 (0 spatial-word 0)
         3 (*multi-token-word-tree* (1 2 3)) (0 :subtree+clause)
-    ;; -----------------
     ;; Special requests
     ;; -----------------
     1 (0 special-request 0)
