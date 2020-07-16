@@ -1129,7 +1129,9 @@
     (and
       (or (np? (first prop)) (nnp? (first prop)) (restricted-variable? (first prop)))
       (or (np? (first prop)) (nnp? (third prop)) (restricted-variable? (third prop)))
-      (or (prep? (second prop)) (equal '= (second prop))))))
+      (or (prep? (second prop))
+          (and (listp (second prop)) (adv-a? (first (second prop))) (prep? (second (second prop))))
+          (equal '= (second prop))))))
 ) ; END relation-prop?
 
 
