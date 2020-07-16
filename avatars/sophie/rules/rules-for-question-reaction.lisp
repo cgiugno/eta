@@ -164,7 +164,7 @@
   1 (What is your history with narcotics ?)
     2 (*have-subdialogue* ((I took some pain medication for a fractured ankle about fifteen or so years ago\, but I don\'t believe it was a narcotic\. 
                               Besides that\, my doctor prescribed me Lortab about three weeks ago\.)
-                           ((I have recently taken Lortab\.)))) (0 :schema+args)
+                           ((I do not have a history of narcotic abuse \.) (I am only taking Lortab to treat my pain \.)))) (0 :schema+args)
   1 (Do you need more medicine ?)
     2 (*have-subdialogue* ((I need a refill of my Lortab \.)
                            ((I would like a refill of medicine \.)))) (0 :schema+args)
