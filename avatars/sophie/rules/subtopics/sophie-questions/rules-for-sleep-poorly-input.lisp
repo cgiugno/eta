@@ -31,23 +31,29 @@
   ; When you take it does it take care of the pain?
   1 (0 be-aux 3 med-help 3 pain 0)
     2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
-  1 (0 be-aux 3 med-help 1 at all 0)
+  1 (0 be-aux 3 med-help 1 at acd Documll 0)
     2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
   1 (0 be-aux 3 med-help 1 little 0)
     2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
   1 (0 be-aux 1 it 3 do anything 0)
     2 (*medicine-question* (does your pain medicine help with the pain ?)) (0 :subtree+clause)
+  
+  ; How is your anxiety or depression?
+  1 (0 be-aux 3 ment-health 3 recently 0)
+    2 (*energy-question* (how is your mental health ?)) (0 :subtree+clause)
+  1 (0 how 5 think-gen 0)
+    2 (*energy-question* (how is your mental health ?)) (0 :subtree+clause)
+  1 (0 how 3 ment-health 5)
+    2 (*energy-question* (how is your mental health ?)) (0 :subtree+clause)
+  1 (0 wh_ 5 think-gen 0)
+    2 (*energy-question* (how is your mental health ?)) (0 :subtree+clause)
 
-  ;You may be sleeping poorly because of anxiety/depression.
+  
+  ; You may be sleeping poorly because of anxiety/depression.
   1 (0 be-aux 0 because 2 ment-health 0)
     2 ((You are sleeping poorly because of your mental health \.) (sleeping-poorly)) (0 :gist)
   1 (0 ment-health 3 cause 0)
     2 ((You are sleeping poorly because of your mental health \.) (sleeping-poorly)) (0 :gist)
-  ;
-  
-  ;Have you been feeling more anxious/depressed recently?
-  1 (0 be-aux 5 ment-health 5)
-    2 (*energy-question* (how is your mental health ?)) (0 :subtree+clause)
   
   1 (0 medicine-gen 1 neg 1 work 0)
     2 ((You are sleeping poorly because the pain medication is no longer working \.) (sleeping-poorly)) (0 :gist)
@@ -96,7 +102,7 @@
     2 (*have-subdialogue* ((Does that mean that the cancer has gotten worse?)
                            ((Has the cancer gotten worse ?)))) (0 :schema+args)
   1 (You are sleeping poorly because of your mental health \.)
-      (*have-subdialogue* ((I see\. I do try to keep carrying on\, but sometimes I just feel down\.) 
+     2 (*have-subdialogue* ((I see\. I do try to keep carrying on\, but sometimes I just feel down\.) 
                            ((I feel mildly depressed \.)))) (0 :schema+args)
     
   1 (0)
