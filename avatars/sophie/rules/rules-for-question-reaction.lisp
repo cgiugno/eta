@@ -161,6 +161,10 @@
                            ((I have a history of alcohol abuse \.) (I do not drink often now \.)))) (100 :schema+args)
     2 (At one time\, you suppose you used to have a drink or two maybe three or four days a week\. You\'ve cut back since then though\. 
           Now\, since the cancer diagnosis\, you only have a couple drinks a week \.) (0 :out)
+  1 (What is your history with smoking ?)
+    2 (*have-subdialogue* ((I was a pretty heavy smoker once\. I started my senior year in high school\, back when it was all the rage\, then smoked about a pack a day up until about six months ago\. Now I don\'t smoke at all\.)
+                           ((I have a history of smoking \.) (I quit smoking six months ago \.)))) (100 :schema+args)
+    2 (You\'ve been a heavy smoker since high school\, but you kicked the habit six months ago\.) (0 :out)
   1 (What is your history with med-narcotic ?)
     2 (*have-subdialogue* ((I took some pain medication for a fractured ankle about fifteen or so years ago\, but I don\'t believe it was a narcotic\. 
                               Besides that\, my doctor prescribed me Lortab about three weeks ago\.)
