@@ -1,6 +1,7 @@
 (MAPC 'ATTACHFEAT
   '(
     (med-take take taking get getting use using)
+    (med-past took taken used gotten prescribed)
     (work working help helping treat treating effective)
     (often frequent frequently much)
     (med-time every time times hour hours minute minutes day days week weeks)
@@ -72,13 +73,30 @@
   ; Do you want stronger pain medication?
   1 (0 do 1 you 3 want 3 med-better 1 medicine-taking 0)
     2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
-
+  1 (0 do 1 you 3 want 3 med-narcotic 0)
+    2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
+  1 (0 wh_ 5 think-gen 5 med-take 1 med-better 1 medicine-taking 0)
+    2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
+  1 (0 wh_ 5 think-gen 5 med-take 1 med-narcotic 0)
+    2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
+  1 (0 how 3 you 5 think-gen 5 med-take 1 med-better 1 medicine-taking 0)
+    2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
+  1 (0 how 3 you 5 think-gen 5 med-take 1 med-narcotic)
+    2 ((Do you want stronger pain medication ?) (medicine-request)) (0 :gist)
+  
   ; Do you need more medicine?
   1 (0 do 1 you 3 want 2 medicine-taking 0)
     2 ((Do you need more medicine ?) (medicine-refill)) (0 :gist)
   1 (0 how are you 1 medicine-taking 0); e.g., how are you on medicine?
     2 ((Do you need more medicine ?) (medicine-refill)) (0 :gist)
-))
+
+  ; Do you have a history with narcotics?
+  1 (0 be-aux 3 med-past 3 med-narcotic 0)
+    2 ((What is your history with med-narcotic ?) (medical-history)) (0 :gist)
+  1 (0 be-aux 3 history 3 med-narcotic 0)
+    2 ((What is your history with med-narcotic ?) (medical-history)) (0 :gist)
+  
+  ))
 
 
 (READRULES '*medicine-reaction*
