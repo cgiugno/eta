@@ -124,7 +124,7 @@
         ; should probably be another constraint on the concepts/goal-schemas
         ; selected such that examples can be built with the available blocks
         ; in the first place.
-        ?e51 (^me commit-to-STM.v (that (?e2 finished2.a))))))
+        ?e51 (^me say-bye.v))))
 )
 
 
