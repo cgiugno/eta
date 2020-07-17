@@ -155,6 +155,15 @@
                             What are the side effects?)
                            ((I want a stronger pain medication \.) (What are the side effects of stronger pain medication ?)))) (100 :schema+args)
     2 (You think having the stronger pain medication would help\.) (0 :out)
+  1 (Do you need more medicine ?)
+    2 (*have-subdialogue* ((I need a refill of my Lortab \.)
+                           ((I would like a refill of medicine \.)))) (0 :schema+args)
+  ; Comfort care
+  1 (Have you considered comfort care ?)
+    2 (*have-subdialogue* ((I haven\'t thought about it\, but it sounds like what I really need\. A way to maintain quality of life
+                            during the time I have left\. Can you tell me about it?)
+                           ((How does comfort care work ?)))) (0 :schema+args)
+  ;Questions about medical history
   1 (What is your history with alcohol ?)
     2 (*have-subdialogue* ((There was a point in my life that I drank fairly often\. But I cut back on my own\, and I don\'t really drink a lot now\.
                                   Truth be told\, ever since the diagnosis\, I\'ve kind of lost my taste for alcohol\.)
@@ -169,16 +178,16 @@
     2 (*have-subdialogue* ((I took some pain medication for a fractured ankle about fifteen or so years ago\, but I don\'t believe it was a narcotic\. 
                               Besides that\, my doctor prescribed me Lortab about three weeks ago\.)
                            ((I do not have a history of narcotic abuse \.) (I am only taking Lortab to treat my pain \.)))) (0 :schema+args)
-  1 (Do you need more medicine ?)
-    2 (*have-subdialogue* ((I need a refill of my Lortab \.)
-                           ((I would like a refill of medicine \.)))) (0 :schema+args)
-  ; Comfort care
-  1 (Have you considered comfort care ?)
-    2 (*have-subdialogue* ((I haven\'t thought about it\, but it sounds like what I really need\. A way to maintain quality of life
-                            during the time I have left\. Can you tell me about it?)
-                           ((How does comfort care work ?)))) (0 :schema+args)
-
-
+  1 (Does your family have a history of mental illness ?)
+    2 (*have-subdialogue* ((I don\'t think so\. As far as I know\, no one in my family has experienced that sort of thing\.)  ((My family does not have a history of mental illness \.)))) (3 :schema+args)
+    2 (*have-subdialogue* ((No\, no one in my family has any history of mental illness\.)  (0 :out)
+  1 (How did your parents die ?)
+    2 (*have-subdialogue* ((My parents passed on a few years ago\. Both at seventy three\, if you would believe it\. 
+                               My mother died from complications with her diabetes\. She was a smoker\, something she passed onto me\.
+                               My father\, though\, he died when his prostate cancer went into his bones\. Near the end of his life\, he was in a lot of pain\, which I guess is why I worry about my medications\.)
+                           ((My mother died of complications from her diabetes \.) (My father died of prostate cancer\.)))) (0 :schema+args)
+  
+                           
   1 (0)
     2 *reaction-to-question-minor* (0 :subtree)
 ))
