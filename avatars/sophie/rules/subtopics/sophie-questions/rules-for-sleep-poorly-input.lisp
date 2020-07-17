@@ -13,7 +13,7 @@
   (cause causing causes caused triggering triggered triggers trigger provoke provokes provoking provoked)
   (spread spreading metastasized metastatic)
   (sleep-thought thought thoughts head mind brain)
-  (ment-health anxiety anxiousness depression anxious depressed)
+  (ment-health anxiety anxiousness depression anxious depressed mental)
   (recently lately)
 ))
 
