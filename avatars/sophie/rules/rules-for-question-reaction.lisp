@@ -110,7 +110,7 @@
   1 (Have you had trouble concentrating ?)
     2 (*have-subdialogue* ((Only sometimes\.)
                            ((I have had trouble concentrating \.)))) (0 :schema+args)
-  1 (How is your mental health ?)
+  1 (how is your mental health ?)
     2 (*have-subdialogue* ((You see\. You do try to keep carrying on\, but sometimes you just feel down\.) 
                            ((I feel mildly depressed \.)))) (0 :schema+args)
 
