@@ -111,7 +111,7 @@
     2 (*have-subdialogue* ((Only sometimes\.)
                            ((I have had trouble concentrating \.)))) (0 :schema+args)
   1 (how is your mental health ?)
-    2 (*have-subdialogue* ((You see\. You do try to keep carrying on\, but sometimes you just feel down\.) 
+    2 (*have-subdialogue* ((Well\, I do try to keep carrying on\, but sometimes I just feel down\.) 
                            ((I feel mildly depressed \.)))) (0 :schema+args)
 
   ; Questions about medicine
