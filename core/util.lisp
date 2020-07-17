@@ -2192,6 +2192,18 @@
 ;   -> (ka (put.v |B1| (set-of (on.p |B2|) (behind.p |B3|))))
 ; (undo (|B1| on.p |B2|)) -> (ka (move.v |B1| (back.mod-a (on.p |B2|))))
 ;
+;
+; "put the Twitter block directly on the Texaco block"
+; ...
+; "move the Twitter block one block to the left"
+; (ka (make.v (the.d (|Twitter| block.n)) ((mod-a (by.p (one.d block.n))) to_the_left.a)))
+; "move the Twitter block one half block to the left"
+; (ka (make.v (the.d (|Twitter| block.n)) ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
+; "the Twitter block should be touching the Texaco block"
+; (ka (make.v (the.d (|Twitter| block.n)) (touching.p (the.d (|Texaco| block.n)))))
+; a chimney is only two blocks wide
+; (ka (make.v (the.d |BW-chimney|.n) ((mod-a (by.p (two.d (plur block.n)))) wide.a)))
+;
   (cond
     ((equal planner-input 'Failure) nil)
     ((equal planner-input 'None)
