@@ -3,7 +3,7 @@
   (have having)
   (trouble troubles problem problems)
   (concentrate concentrating focus focusing)
-  (ment-health anxiety anxious depression depressed)
+  (ment-health anxiety anxious depression depressed mental)
   (work working help helping treat treating effective)
   (med-take take taking get getting use using)
   (med-give recommend recommending recommended recommend advise advising advises advised suggests suggesting suggested suggest gives give given giving prescribe prescribes prescribed prescribed)
@@ -14,8 +14,15 @@
 
 (READRULES '*energy-input*
 '(
-  1 (0 med-give 5 antidepressant)
-    2 ((I can give you an antidepressant \.) (medicine-request)) (0 :gist)
+    1 (0 be-aux 3 ment-health 3 recently 0)
+    2 ((how is your mental health ?) (energy)) (0 :gist)
+  1 (0 how 5 think-gen 0)
+    2 ((how is your mental health ?) (energy)) (0 :gist)
+  1 (0 how 3 ment-health 5)
+    2 ((how is your mental health ?) (energy)) (0 :gist)
+  1 (0 wh_ 5 think-gen 0)
+    2 ((how is your mental health ?) (energy)) (0 :gist)
+  
   1 (0 med-take 5 antidepressant)
     2 ((You should take an antidepressant \.) (medicine-request)) (0 :gist)
   1 (0 therapy 0)
