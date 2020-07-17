@@ -1,7 +1,8 @@
 (MAPC 'ATTACHFEAT
 '(
   (quit quitting stop stopping stopped forgo forgoing)
-  (smoke smokes smoking smoked cigarettes cigarette tobacco)
+ (smoke smokes smoking smoked cigarettes cigarette tobacco)
+  (taken take used use smoke)
   (before prior lead)
   (know aware understand)
   (bring brings)
@@ -17,7 +18,8 @@
   (experienced experiencing having had have suffered suffering diagnosed)
   (parent parents mother father mom dad)
   (die died dead pass passed depart perish)
-))
+  (recreational drugs marijuana weed)
+  ))
 
 
 (READRULES '*medical-history-input*
@@ -56,6 +58,9 @@
     2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
   1 (0 wh_ 2 be-aux 3 parent 3 die 0)
     2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
+  
+  ;Have you ever taken any other drugs?
+  1 (0 be-aux 
   
   ;Questions related to symptoms
   1 (0 diagnosis-symptom 0)
