@@ -212,6 +212,7 @@
     2 (Yes\, you\'re staying with my daughter and her husband here in Rochester\, but you have a son out in Utica as well\.) (0 :out)
   1 (Are you married ?)
     2 (You were for about twenty years\. But as we got older and the kids went off to college\, things just didn\'t work out as well as we thought they would\. We separated about ten years ago and divorced two years later\.) (0 :out)
-  
+  1 (How are you doing today ?)
+    2 (You\'re fine\, thank me\. And me?) (0 :out)
   ; Questions about family (TODO)
 ))
