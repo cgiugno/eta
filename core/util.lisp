@@ -1061,10 +1061,54 @@
 ;
   (let ((noun (second generic-name)))
     (if (null noun) (return-from generic-name-to-np nil))
-    (when (equal 'BW- (car (sym-split noun 3 :front t)))
+    (when (BW-concept? noun)
       (setq noun (second (sym-split noun 3 :front t))))
     (butlast (ulf-to-english (create-indefinite-np noun)))
 )) ; END generic-name-to-np
+
+
+
+(defun BW-concept? (noun)
+;``````````````````````````
+; Checks if a symbol is a BW-concept, i.e. anything prefixed with "BW-".
+;
+  (and (atom noun) (equal 'BW- (car (sym-split noun 3 :front t))))
+) ; END BW-concept?
+
+
+
+(defun BW-concept-to-common-name! (noun)
+;`````````````````````````````````````````
+; Maps a blocksworld concept to a common name (e.g. |BW-arch|.n to arch.n).
+;
+  (if (BW-concept? noun)
+    (read-from-string (format nil "~a"
+      (second (sym-split noun 3 :front t)))))
+) ; END BW-concept-to-common-name!
+
+
+
+(defun concept-noun-phrase! (x)
+; ````````````````````````````````
+; Maps a concept name to an English noun phrase.
+;
+  (let ((np (generic-name-to-np (get-generic-name x))))
+    (when (null np)
+      (return-from concept-noun-phrase! '(an unnamed concept)))
+    np)
+) ; END concept-noun-phrase!
+
+
+
+(defun concept-noun! (x)
+; ``````````````````````````
+; Maps a concept name to an English noun.
+;
+  (let ((name (get-generic-name x)))
+    (when (null name)
+      (return-from concept-noun! '(unnamed concept)))
+    (cdr (generic-name-to-np name)))
+) ; END concept-noun!
 
 
 
@@ -2191,18 +2235,9 @@
 ; ((|B1| on.p |B2|) (|B1| behind.p |B3|))
 ;   -> (ka (put.v |B1| (set-of (on.p |B2|) (behind.p |B3|))))
 ; (undo (|B1| on.p |B2|)) -> (ka (move.v |B1| (back.mod-a (on.p |B2|))))
-;
-;
-; "put the Twitter block directly on the Texaco block"
-; ...
-; "move the Twitter block one block to the left"
-; (ka (make.v (the.d (|Twitter| block.n)) ((mod-a (by.p (one.d block.n))) to_the_left.a)))
-; "move the Twitter block one half block to the left"
-; (ka (make.v (the.d (|Twitter| block.n)) ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
-; "the Twitter block should be touching the Texaco block"
-; (ka (make.v (the.d (|Twitter| block.n)) (touching.p (the.d (|Texaco| block.n)))))
-; a chimney is only two blocks wide
-; (ka (make.v (the.d |BW-chimney|.n) ((mod-a (by.p (two.d (plur block.n)))) wide.a)))
+; (clarification (|B1| touching.p |B2|)) -> (ka (make.v |B1| (touching.p |B2|)))
+; (clarification (|B1| ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
+;   -> (ka (make.v |B1| ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
 ;
   (cond
     ((equal planner-input 'Failure) nil)
@@ -2217,7 +2252,12 @@
                   ,(make-set (mapcar #'cdr planner-input)))))
     ((undo-relation-prop? planner-input)
       `(ka (move.v ,(caadr planner-input)
-                    (back.mod-a ,(cdadr planner-input))))))
+                    (back.mod-a ,(cdadr planner-input)))))
+    ((clarification-relation-prop? planner-input)
+      `(ka (make.v ,(caadr planner-input)
+                   ,(if (cdr (cdadr planner-input))
+                      (cdadr planner-input)
+                      (cadadr planner-input))))))
 ) ; END planner-input-to-ka
 
 

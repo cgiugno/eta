@@ -68,10 +68,7 @@
 ; ````````````````````````````````
 ; Maps a concept name to an English noun phrase.
 ;
-  (let ((np (generic-name-to-np (get-generic-name x))))
-    (when (null np)
-      (return-from concept-noun-phrase.f '(an unnamed concept)))
-    np)
+  (concept-noun-phrase! x)
 ) ; END concept-noun-phrase.f
 
 
@@ -80,8 +77,5 @@
 ; ``````````````````````````
 ; Maps a concept name to an English noun.
 ;
-  (let ((name (get-generic-name x)))
-    (when (null name)
-      (return-from concept-noun-phrase.f '(unnamed concept)))
-    (cdr (generic-name-to-np name)))
+  (concept-noun! x)
 ) ; END concept-noun.f

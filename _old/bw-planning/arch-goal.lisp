@@ -20,9 +20,22 @@
 
 ;; (((the.d (|Twitter| block.n)) in.p (the.d (construction.n area.n))))
 ;; (((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
+;; (clarification ((the.d (|Twitter| block.n)) touching.p (the.d (|Texaco| block.n))))
+;; (clarification ((the.d (|Twitter| block.n)) ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
+;; (clarification ((the.d |BW-stack|.n) ((mod-a (by.p (two.d (plur block.n)))) wide.a)))
 ;; (((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))) ((the.d (|Twitter| block.n)) on.p (the.d (|Target| block.n))))
 ;; (((the.d (|Twitter| block.n)) (directly.adv-a on.p) (the.d (|Texaco| block.n))))
 ;; (((some.d block.n) to_the_left_of.p (the.d (|Texaco| block.n))))
 ;; (((the.d (|Mercedes| block.n)) on.p (the.d (|Twitter| block.n))))
-;; (undo ((the.d (|McDonald's| block.n)) to_the_right_of.p (the.d (|Target| block.n))))
+;; (undo ((the.d (|McDonald's| block.n)) to_the_right_of.p (the.d (|Target| block.n)))))
 ;; (((the.d (|Mercedes| block.n)) on.p (the.d (|Twitter| block.n))))
+
+
+; "move the Twitter block one block to the left"
+; (ka (make.v (the.d (|Twitter| block.n)) ((mod-a (by.p (one.d block.n))) to_the_left.a)))
+; "move the Twitter block one half block to the left"
+; (ka (make.v (the.d (|Twitter| block.n)) ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
+; "the Twitter block should be touching the Texaco block"
+; (ka (make.v (the.d (|Twitter| block.n)) (touching.p (the.d (|Texaco| block.n)))))
+; a chimney is only two blocks wide
+; (ka (make.v (the.d |BW-chimney|.n) ((mod-a (by.p (two.d (plur block.n)))) wide.a)))

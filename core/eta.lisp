@@ -1300,7 +1300,7 @@
         (cond
           ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
           (t (setq proposal-gist (generate-proposal expr))))
-        ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
         (setf (get ep-name 'gist-clauses) (list proposal-gist))
         (setq new-subplan-name (plan-proposal {sub}plan-name proposal-gist))
         (when (null new-subplan-name)

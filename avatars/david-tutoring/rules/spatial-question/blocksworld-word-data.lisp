@@ -93,7 +93,7 @@
 
   (noun-bw block table stack row edge face plane line circle pile object
         color structure left center right back front direction way other
-        one thing)
+        one thing pyramid wedge arch tower concept)
 
   (noun-total total all)
 

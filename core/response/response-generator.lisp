@@ -111,8 +111,9 @@
   (let (ulf output-ulf)
     (setq ulf '((the.d (next.a step.n)) ((pres be.v) (= what.pro))))
     (setq output-ulf (ttt:apply-rule `(/ what.pro ,ka) ulf))
-    (ulf-to-english output-ulf))
-) ; END generate-proposal
+    (setq output-ulf (ttt:apply-rule '(/ BW-concept? (BW-concept-to-common-name! BW-concept?)) output-ulf))
+    (ulf-to-english output-ulf)
+)) ; END generate-proposal
 
 
 (defun get-query-type (ulf)
