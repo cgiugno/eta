@@ -61,14 +61,20 @@
       (mapcar (lambda (d)
           (mapcar (lambda (f) (load f))
             (directory (concatenate 'string (namestring d) "/*.lisp")))
-          (load-files-recur (coerce (butlast (explode (namestring d))) 'string)))
+          (load-files-recur (concatenate 'string
+            (coerce (butlast (explode (namestring d))) 'string) "/*")))
         (remove nil (mapcar (lambda (p)
             ; This is pretty awkward, but has to be done to handle differences btwn ACL and SBCL
             (if (fboundp 'probe-directory)
               (if (probe-directory p) p)
               (if (not (pathname-name p)) p)))
-          (directory (concatenate 'string directory "/*")))))))
-    (load-files-recur (concatenate 'string "./avatars/" avatar-name)))
+          (directory directory))))))
+    ; Load all shared rules and schemas files
+    (load-files-recur (concatenate 'string "./avatars/" avatar-name "/schemas"))
+    (load-files-recur (concatenate 'string "./avatars/" avatar-name "/rules"))
+    ; If a multi-session avatar, load all files specific to that day
+    (when (and (boundp '*session-number*) (integerp *session-number*))
+      (load-files-recur (concatenate 'string "./avatars/" avatar-name "/" (format nil "day~a" *session-number*)))))
 ) ; END load-avatar-files
 
 
