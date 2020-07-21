@@ -180,7 +180,7 @@
                            ((I do not have a history of narcotic abuse \.) (I am only taking Lortab to treat my pain \.)))) (0 :schema+args)
   1 (Does your family have a history of mental illness ?)
     2 (*have-subdialogue* ((I don\'t think so\. As far as I know\, no one in my family has experienced that sort of thing\.)  ((My family does not have a history of mental illness \.)))) (3 :schema+args)
-    2 (*have-subdialogue* ((No\, no one in my family has any history of mental illness\.)  (0 :out)
+    2 (No\, no one in my family has any history of mental illness\.)  (0 :out)
   1 (How did your parents die ?)
     2 (*have-subdialogue* ((My parents passed on a few years ago\. Both at seventy three\, if you would believe it\. 
                                My mother died from complications with her diabetes\. She was a smoker\, something she passed onto me\.
@@ -211,7 +211,8 @@
   1 (Do you have any children ?)
     2 (Yes\, you\'re staying with my daughter and her husband here in Rochester\, but you have a son out in Utica as well\.) (0 :out)
   1 (Are you married ?)
-    2 (You were for about twenty years\. But as we got older and the kids went off to college\, things just didn\'t work out as well as we thought they would\. We separated about ten years ago and divorced two years later\.) (0 :out)
+    2 (You were for about twenty years\. But as we got older and the kids went off to college\, things just didn\'t work out as well as we thought they would\.
+          We separated about ten years ago and divorced two years later\.) (0 :out)
   1 (How are you doing today ?)
     2 (You\'re fine\, thank me\. And me?) (0 :out)
   ; Questions about family (TODO)
