@@ -19,10 +19,13 @@
 ;; None
 
 ;; (((the.d (|Twitter| block.n)) in.p (the.d (construction.n area.n))))
+;; (((the.d (|Twitter| block.n)) in.p (the.d (construction.n area.n))) ((the.d (|Twitter| block.n)) next_to.p (the.d (|Texaco| block.n))))
 ;; (((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
 ;; (clarification ((the.d (|Twitter| block.n)) touching.p (the.d (|Texaco| block.n))))
 ;; (clarification ((the.d (|Twitter| block.n)) ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
 ;; (clarification ((the.d |BW-stack|.n) ((mod-a (by.p (two.d (plur block.n)))) wide.a)))
+;; (clarification (((the.d (|Twitter| block.n)) ((mod-a (by.p (two.d (plur block.n)))) wide.a)) ((the.d (|Twitter| block.n)) touching.p (the.d (|Texaco| block.n)))))
+;; (clarification (((the.d (|Twitter| block.n)) touching.p (the.d (|Texaco| block.n))) ((the.d (|Twitter| block.n)) ((mod-a (by.p (two.d (plur block.n)))) wide.a))))
 ;; (((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))) ((the.d (|Twitter| block.n)) on.p (the.d (|Target| block.n))))
 ;; (((the.d (|Twitter| block.n)) (directly.adv-a on.p) (the.d (|Texaco| block.n))))
 ;; (((some.d block.n) to_the_left_of.p (the.d (|Texaco| block.n))))

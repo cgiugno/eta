@@ -23,6 +23,16 @@
 
 
 
+(defun cdr1 (x)
+;````````````````
+; Adaptive form of cdr which returns cdr if list contains more than
+; two atoms, otherwise it returns the second atom.
+;
+  (if (cddr x) (cdr x) (cadr x))
+) ; END cdr1
+
+
+
 (defun copy1 (list)
 ;````````````````````
 ; Creates top-level copy of list
@@ -2244,20 +2254,24 @@
     ((equal planner-input 'None)
       '(ka (do2.v nothing.pro)))
     ((atom planner-input) nil)
+    ; If single relation, convert to put.v ka
     ((relation-prop? planner-input)
       `(ka (put.v ,(car planner-input)
-                  ,(cdr planner-input))))
+                  ,(cdr1 planner-input))))
+    ; If multiple relations, convert to put.v ka with plural argument
     ((every #'relation-prop? planner-input)
       `(ka (put.v ,(caar planner-input)
-                  ,(make-set (mapcar #'cdr planner-input)))))
+                  ,(make-set (mapcar #'cdr1 planner-input)))))
+    ; If undo step, generate put.v ka and transform to 'move back' ka
     ((undo-relation-prop? planner-input)
-      `(ka (move.v ,(caadr planner-input)
-                    (back.mod-a ,(cdadr planner-input)))))
+      (ttt:apply-rule
+          '(/ (put.v _!1 _!2) (move.v _!1 (back.mod-a _!2)))
+        (planner-input-to-ka (second planner-input))))
+    ; If clarification step, generate put.v ka and transform to make.v ka
     ((clarification-relation-prop? planner-input)
-      `(ka (make.v ,(caadr planner-input)
-                   ,(if (cdr (cdadr planner-input))
-                      (cdadr planner-input)
-                      (cadadr planner-input))))))
+      (ttt:apply-rule
+          '(/ (put.v _!1 _!2) (make.v _!1 _!2))
+        (planner-input-to-ka (second planner-input)))))
 ) ; END planner-input-to-ka
 
 

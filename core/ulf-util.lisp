@@ -1143,7 +1143,8 @@
 ; (interpreted as 'put the Twitter block back on the Texaco block').
 ; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
 ;
-  (and (listp prop) (= 2 (length prop)) (equal 'undo (first prop)) (relation-prop? (second prop)))
+  (and (listp prop) (= 2 (length prop)) (equal 'undo (first prop))
+       (or (relation-prop? (second prop)) (every #'relation-prop? (second prop))))
 ) ; END undo-relation-prop?
 
 
@@ -1153,7 +1154,8 @@
 ; (interpreted as 'put the Twitter block back on the Texaco block').
 ; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
 ;
-  (and (listp prop) (= 2 (length prop)) (equal 'clarification (first prop)) (relation-prop? (second prop)))
+  (and (listp prop) (= 2 (length prop)) (equal 'clarification (first prop))
+       (or (relation-prop? (second prop)) (every #'relation-prop? (second prop))))
 ) ; END clarification-relation-prop?
 
 
