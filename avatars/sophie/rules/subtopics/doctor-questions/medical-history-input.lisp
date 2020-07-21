@@ -1,7 +1,7 @@
 (MAPC 'ATTACHFEAT
 '(
   (quit quitting stop stopping stopped forgo forgoing)
- (smoke smokes smoking smoked cigarettes cigarette tobacco)
+  (smoke smokes smoking smoked cigarettes cigarette tobacco)
   (taken take used use smoke)
   (before prior lead)
   (know aware understand)
@@ -27,41 +27,46 @@
  
  ;What is your history with drinking?
  1 (0 how 1 often 5 drink 0)
-    2 (*medical-history-question* (What is your history with alcohol ?)) (0 :subtree+clause)
+    2 ((What is your history with alcohol ?) (medical-history)) (0 :gist)
   1 (0 do 1 pron 5 drink 0)
-    2 (*medical-history-question* (What is your history with alcohol ?)) (0 :subtree+clause)
+    2 ((What is your history with alcohol ?) (medical-history)) (0 :gist)
   1 (0 be-aux 1 pron 5 drink 0)
-    2 (*medical-history-question* (What is your history with alcohol ?)) (0 :subtree+clause)
+    2 ((What is your history with alcohol ?) (medical-history)) (0 :gist)
   
   ;What is your history with smoking?
   1 (0 be-aux 1 pron 5 smoke 0)
-    2 (*medical-history-question* (What is your history with smoking ?)) (0 :subtree+clause)
+    2 ((What is your history with smoking ?) (medical-history)) (0 :gist)
   1 (0 do 1 pron 5 smoke 0)
-    2 (*medical-history-question* (What is your history with smoking ?)) (0 :subtree+clause)
+    2 ((What is your history with smoking ?) (medical-history)) (0 :gist)
   1 (0 how 1 often 5 smoke 0)
-    2 (*medical-history-question* (What is your history with smoking ?)) (0 :subtree+clause)
+    2 ((What is your history with smoking ?) (medical-history)) (0 :gist)
   
   ;What is your family's history with mental health ?
   1 (0 be-aux 1 family 5 history 5 ment-health 0)
-    2 (*medical-history-question* (Does your family have a history of mental illness ?)) (0 :subtree+clause)
+    2 ((Does your family have a history of mental illness ?) (medical-history)) (0 :gist)
   1 (0 have 8 family 3 experienced 5 ment-health 0)
-    2 (*medical-history-question* (Does your family have a history of mental illness ?)) (0 :subtree+clause)
+    2 ((Does your family have a history of mental illness ?) (medical-history)) (0 :gist)
   1 (0 history 3 ment-health 0)
-    2 (*medical-history-question* (Does your family have a history of mental illness ?)) (0 :subtree+clause)
+    2 ((Does your family have a history of mental illness ?) (medical-history)) (0 :gist)
   1 (0 family 1 be-aux 5 history 5 ment-health 0)
-    2 (*medical-history-question* (Does your family have a history of mental illness ?)) (0 :subtree+clause)
+    2 ((Does your family have a history of mental illness ?) (medical-history)) (0 :gist)
   
   ; Are your parents still alive?
   1 (0 be-aux 1 parent 3 alive 0)
-    2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
+    2 ((How did your parents die ?) (medical-history)) (0 :gist)
   1 (0 be-aux 1 parent 3 die 0)
-    2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
+    2 ((How did your parents die ?) (medical-history)) (0 :gist)
   1 (0 wh_ 2 be-aux 3 parent 3 die 0)
-    2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
+    2 ((How did your parents die ?) (medical-history)) (0 :gist)
   
   ;Have you ever taken any other drugs?
-  1 (0 be-aux 
-  
+  1 (0 be-aux 1 pron 3 recreational 0)
+    2 ((Have you ever taken any other drugs ?) (medical-history)) (0 :gist)
+  1 (0 pron 1 be-aux 3 recreational 0)
+    2 ((Have you ever taken any other drugs ?) (medical-history)) (0 :gist)
+  1 (0 pron 3 history 3 recreational 0)
+    2 ((Have you ever taken any other drugs ?) (medical-history)) (0 :gist)
+
   ;Questions related to symptoms
   1 (0 diagnosis-symptom 0)
     2 *diagnosis-details-input* (0 :subtree)
@@ -107,12 +112,20 @@
     
   ; Are your parents still alive?
   1 (0 be-aux 1 parent 3 alive 0)
-    2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
+    2 ((How did your parents die ?) (medical-history)) (0 :gist)
   1 (0 be-aux 1 parent 3 die 0)
-    2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
+    2 ((How did your parents die ?) (medical-history)) (0 :gist)
   1 (0 wh_ 2 be-aux 3 parent 3 die 0)
-    2 (*medical-history-question* (How did your parents die ?)) (0 :subtree+clause)
-  
+    2 ((How did your parents die ?) (medical-history)) (0 :gist)
+   
+  ;Have you ever taken any other drugs?
+  1 (0 be-aux 1 pron 3 recreational 0)
+    2 ((Have you ever taken any other drugs ?) (medical-history)) (0 :gist)
+  1 (0 pron 1 be-aux 3 recreational 0)
+    2 ((Have you ever taken any other drugs ?) (medical-history)) (0 :gist)
+  1 (0 pron 3 history 3 recreational 0)
+    2 ((Have you ever taken any other drugs ?) (medical-history)) (0 :gist)
+
   ))
 
 
