@@ -6,7 +6,7 @@
   (come came)
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
-  (energy mood concentrate concentration concentrating depression depressed)
+  (energy mood concentrate concentration concentrating depression depressed anxiety anxious)
   (medicine medicines medication drug drugs pill pills med meds dose doses)
   (medicine-gen medicine medicine-particular)
   (medicine-particular pain-med pain-med-other blood-pressure-med med-narcotic)
@@ -30,6 +30,10 @@
   (be-aux be aux)
   (frequently frequent often more)
   (sleep sleeping wake waking awake insomnia)
+  (drink drinking drank wine alcohol beer drunk inebriated)
+  (family parents siblings sibling grandparents)
+  (smoking smoke smokes smoked cigarettes cigarette tobacco)
+  (medical-history history drink smoking family )
 ))
 
 
@@ -78,6 +82,9 @@
     2 *comfort-care-question* (0 :subtree)
   1 (0 hospice 0)
     2 *comfort-care-question* (0 :subtree)
+  ;If the doctor asks about your medical history
+  1 (0 medical-history 0)
+    2 *medical-history-question* (0 :subtree)
     
   ; Interjections/prompts to continue
   ;; 1 (2 okay 2)
