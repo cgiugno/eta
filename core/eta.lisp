@@ -140,9 +140,9 @@
   (defparameter *certainty-threshold* 0.7)
 
   ; Maximum delays used in processing speech acts
-  (defparameter *delay-acknowledge.v* 5)
-  (defparameter *delay-respond-to.v* 10)
-  (defparameter *delay-say-to.v* 10)
+  (defparameter *delay-acknowledge.v* 10)
+  (defparameter *delay-respond-to.v* 15)
+  (defparameter *delay-say-to.v* 15)
 
   ; Number of Eta outputs generated so far (maintained
   ; for latency enforcement, i.e., not repeating a previously
