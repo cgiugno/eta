@@ -53,9 +53,11 @@
     ;; ----------------------
     ;; Verification questions
     ;; ----------------------
-    1 (2 be 1 that 1 correct 2)
+    1 (2 be 1 index-det 1 correct 2)
       2 ((Did I make the correct move ?)) (0 :gist)
     1 (2 do 1 pron 1 correct 2)
+      2 ((Did I make the correct move ?)) (0 :gist)
+    1 (2 like 1 index-det 2)
       2 ((Did I make the correct move ?)) (0 :gist)
     ;; ----------------------------------------
     ;; If spatial question, start preprocessing
