@@ -671,6 +671,7 @@
     (setq lambda-descr restrictions)
     (setq candidates (find-all-instances-context lambda-descr))
     (format t "given restriction ~a, found candidates ~a~%" lambda-descr candidates) ; DEBUGGING
+    (format t "using modifier ~a to choose~%" modifier) ; DEBUGGING
     (setq sk-name (cond
       ((equal modifier 'random.a)
         (car (shuffle candidates)))
