@@ -674,7 +674,10 @@
     (format t "using modifier ~a to choose~%" modifier) ; DEBUGGING
     (setq sk-name (cond
       ((equal modifier 'random.a)
-        (car (shuffle candidates)))
+        (let ((test (shuffle candidates)))
+          (format t "::~a~%" test)
+          (car test)
+        ))
       (t (car candidates))))
     ; Store fact that sk-name chosen in context (removing any existing choice).
     (remove-from-context '(^me choose.v ?x))
