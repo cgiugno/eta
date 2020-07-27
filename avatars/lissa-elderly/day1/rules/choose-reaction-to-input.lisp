@@ -112,10 +112,3 @@
     2 *reaction-to-things-in-neighborhood-input* (0 :subtree)
 ))
 
- 
-(READRULES '*reaction-to-unexpected*
-'(
-  1 (0 thank you 0)
-    2 *user-thanks-schema* (0 :schema)
-))
-

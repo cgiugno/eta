@@ -26,62 +26,74 @@
 ;;   ((what is your favorite food ?))
 ;;   ((How did you get here today ?))
 
-(eval-when (load eval)
-
-(mapc 'attachfeat ; needed for detecting alternatives in the
+(MAPC 'ATTACHFEAT ; needed for detecting alternatives in the
                   ; watching-or-reading question
-  '((spare-time-activity sports read reading watch watching play
-     playing hike hiking explore exploring walk walking walks hobby
-     hobbies painting); others? "make", "build" seem too general
-   ))
+'(
+   (spare-time-activity sports read reading watch watching play
+      playing hike hiking explore exploring walk walking walks hobby
+      hobbies painting); others? "make", "build" seem too general
+))
+
 
 (READRULES '*reaction-to-input*
-  ; Choose between reaction to a question and an assertion
-  ; Only one gist clause is expected here
- '(1 (0 wh_ 3 you 0)
-    2 *reaction-to-question* (0 :subtree)
+; Choose between reaction to a question and an assertion
+; Only one gist clause is expected here
+'(
+   1 (0 wh_ 3 you 0)
+      2 *reaction-to-question* (0 :subtree)
    1 (0 wh_ 3 your 0)
-    2 *reaction-to-question* (0 :subtree)
+      2 *reaction-to-question* (0 :subtree)
    1 (0 aux your 0)
-    2 *reaction-to-question* (0 :subtree)
+      2 *reaction-to-question* (0 :subtree)
    1 (0 aux you 0)
-    2 *reaction-to-question* (0 :subtree)
+      2 *reaction-to-question* (0 :subtree)
    1 (0 right-really 4 ?)
-    2 *reaction-to-question* (0 :subtree)
+      2 *reaction-to-question* (0 :subtree)
    1 (0); by default, it's an assertion
-    2 *reaction-to-assertion* (0 :subtree)
- ))
+      2 *reaction-to-assertion* (0 :subtree)
+))
+
 
 (READRULES '*reaction-to-assertion*
-  ; Very rough initial attempt.
-  ; Actually, it seems we could readily provide reactions
-  ; directly here, instead of delegating to specialized
-  ; choice trees. However, it seems we have better oversight
-  ; by using separate choice trees, specified in a file that
-  ; also contains the specialized features for the topic at
-  ; issue.
-  ;
-; e.g., (I had fruit for breakfast)
- '(   1 (0 I 0 been in Rochester 0)
-    2 *reaction-to-how-long-in-rochester-input* (0 :subtree)
-
-; e.g., (I do not like the weather in Rochester \.)
-;       We try this before "likes", so as to catch any negation
+; Very rough initial attempt.
+; Actually, it seems we could readily provide reactions
+; directly here, instead of delegating to specialized
+; choice trees. However, it seems we have better oversight
+; by using separate choice trees, specified in a file that
+; also contains the specialized features for the topic at
+; issue.
+;
+'(
+   ; rochester1
+   1 (0 I 0 been in Rochester 0)
+      2 *reaction-to-how-long-in-rochester-input* (0 :subtree)
    1 (0 I do not like 6 Rochester 0) 
-    2 *reaction-to-not-like-about-rochester-input* (0 :subtree)
-; e.g., (I like the restaurants in Rochester)
+      2 *reaction-to-not-like-about-rochester-input* (0 :subtree)
    1 (0 I like 6 Rochester 0)
-    2 *reaction-to-like-about-rochester-input* (0 :subtree)
-
-; e.g., (I would renovate the downtown area \.)
+      2 *reaction-to-like-about-rochester-input* (0 :subtree)
    1 (0 I would change 0 Rochester 0)
-    2 *reaction-to-changing-rochester-input* (0 :subtree)
-   ))
- 
- (READRULES '*reaction-to-unexpected*
-   '(1 (0 thank you 0)
-      2 *user-thanks-schema* (0 :schema))
- )
- 
-)
+      2 *reaction-to-changing-rochester-input* (0 :subtree)
+
+   ; rochester2
+   1 (0 I would take you 0)
+      2 *reaction-to-tour-of-rochester-input* (0 :subtree)
+   1 (0 My favorite place to eat 0)
+      2 *reaction-to-favorite-eatery-input* (0 :subtree)
+   1 (0 garbage plate 0)
+      2 *reaction-to-garbage-plate-input* (0 :subtree)
+   1 (0 I have 2 to 2 Dinosaur Barbecue 0)
+      2 *reaction-to-dinosaur-bbq-input* (0 :subtree)
+
+   ; pets
+   1 (0 I do not have a pet 0)
+      2 *reaction-to-have-a-pet-input* (0 :subtree)
+   1 (0 my pet is 0)
+      2 *reaction-to-have-a-pet-input* (0 :subtree)
+   1 (0 my family member has 0) 
+      2 *reaction-to-family-neighbor-pet-input* (0 :subtree)
+   1 (0 my neighbor has 0)
+      2 *reaction-to-family-neighbor-pet-input* (0 :subtree)
+   1 (0 I believe pets help their owners 0)
+      2 *reaction-to-pets-help-owners-input* (0 :subtree)
+))
 

@@ -764,9 +764,11 @@
 ; but should also be usable for gists about Eta, that Eta
 ; could consult in answering questions from the user.
 ;
-  (let ((gists (gethash keys kb)))
+  (let ((gists (remove nil (mapcar (lambda (key) (gethash key kb)) keys))))
     (if (not (member gist gists :test #'equal))
-      (setf (gethash keys kb) (cons gist gists)))
+      (mapcar (lambda (key)
+          (setf (gethash key kb) (cons gist (gethash key kb))))
+        keys))
 )) ; END store-gist
 
 

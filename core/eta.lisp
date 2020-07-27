@@ -768,7 +768,7 @@
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
     (if (null topic-keys) (return-from obviated-question nil))
-    (setq facts (gethash topic-keys *gist-kb-user*))
+    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
     ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
     ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
     ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
@@ -795,7 +795,7 @@
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
     (if (null topic-keys) (return-from obviated-action nil))
-    (setq facts (gethash topic-keys *gist-kb-user*))
+    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
     ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
     ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
     ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
