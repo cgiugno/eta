@@ -29,28 +29,34 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (3 do you live 2 yourself 0) 
-    2 (*specific-answer-from-live-alone-input* 
-       *unbidden-answer-from-live-alone-input*
-       *thematic-answer-from-live-alone-input*
-       *question-from-live-alone-input*) (0 :subtrees)
+'(
+   ; family
+   1 (3 do you live 2 yourself 0) 
+      2 (*live-alone-input*) (0 :subtrees)
    1 (3 how long 1 you lived 0) 
-    2 (*specific-answer-from-how-long-lived-there-input* 
-       *unbidden-answer-from-how-long-lived-there-input*
-       *thematic-answer-from-how-long-lived-there-input*
-       *question-from-how-long-lived-there-input*) (0 :subtrees)
+      2 (*how-long-lived-there-input*) (0 :subtrees)
    1 (3 do you have child 0)
-    2 (*specific-answer-from-children-input* 
-       *unbidden-answer-from-children-input*
-       *thematic-answer-from-children-input*
-       *question-from-children-input*) (0 :subtrees)
+      2 (*children-input*
+         *thematic-children-input*) (0 :subtrees)
    1 (3 do you 1 facebook 0)
-    2 (*specific-answer-from-use-facebook-input* 
-       *unbidden-answer-from-use-facebook-input*
-       *thematic-answer-from-use-facebook-input*
-       *question-from-use-facebook-input*) (0 :subtrees)
-   
-   )))
+      2 (*use-facebook-input*) (0 :subtrees)
+
+   ; gather-together
+   1 (3 what 2 you 3 holidays 0)
+      2 (*holidays-activities-input*) (0 :subtrees)
+   1 (3 what 2 best part 0)
+      2 (*holidays-best-part-input*) (0 :subtrees)
+   1 (3 what 2 holidays you 1 prefer 0)
+      2 (*holidays-you-prefer-input*) (0 :subtrees)
+   1 (3 have you 3 family gathering 1 recently 0)
+      2 (*family-gathering-input*) (0 :subtrees)
+
+   ; tell-me-about-you
+   1 (2 what 1 your best qualities 1)
+      2 (*your-best-quality-input*) (0 :subtrees)
+   1 (1 what 2 things 3 change about yourself 1) 
+      2 (*want-change-about-you-input*) (0 :subtrees)
+   1 (1 what 2 hopes and wishes 1)
+      2 (*hopes-and-wishes-input*) (0 :subtrees)
+))

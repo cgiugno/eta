@@ -1794,6 +1794,7 @@
     (dolist (sentence sentences)
       (let ((tagged-sentence (mapcar #'tagword sentence)))
         (setq clause (cdr (choose-result-for tagged-sentence specific-tree)))
+        (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
         (when clause
           (setq keys (second clause))
           (store-gist (car clause) keys *gist-kb-user*)
@@ -1803,6 +1804,7 @@
     ;``````````````````````````````````````````````````````````````````````
     (when (and (> (length sentences) 2) (null facts))
       (setq clause (cdr (choose-result-for (mapcar #'tagword words) thematic-tree)))
+      (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
       (when clause
         (setq keys (second clause))
         (store-gist (car clause) keys *gist-kb-user*)
