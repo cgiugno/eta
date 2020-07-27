@@ -1,22 +1,30 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
+;;	Tell me about a personal goal you are working on to stay healthy.
+;; (0 personal goal I am working on to stay healthy 0)
+;; goal-stay-healthy
+;; (What is a personal goal you are working on to stay healthy ?)
+;; (3 What 2 personal goal 3 working 3 healthy 3)
 
-  ;; MEETING WITH KIM NOTES (8/4/2017)
+;; NOTE: Proposed new gist clause: "(0 personal goal I am working on to stay healthy 0)"
+;; New tag: goal-stay-healthy
 
-  ;; New question prompt: "Tell me about a personal goal you're working on to stay healthy"
 
-  ;; Diet
-  ;; Excersize
-  ;; Excersizing their brain (crossword puzzle, sodoku, etc.)
-  ;; Being around other people
-  ;; Going to the gym
-  ;; Walking / running
-  ;; Silver Sneakers (program to go to YMCA for free)
-  ;; Diabetes / blood sugar
-  ;; Taking medicine
-  ;; Physical therapy
+;; MEETING WITH KIM NOTES (8/4/2017)
 
+;; New question prompt: "Tell me about a personal goal you're working on to stay healthy"
+
+;; Diet
+;; Excersize
+;; Excersizing their brain (crossword puzzle, sodoku, etc.)
+;; Being around other people
+;; Going to the gym
+;; Walking / running
+;; Silver Sneakers (program to go to YMCA for free)
+;; Diabetes / blood sugar
+;; Taking medicine
+;; Physical therapy
+
+(MAPC 'ATTACHFEAT
+'(
   (alt-diet diet dieting)
   (alt-exercise exercise exercising activity active train training fitness)
   (alt-brain brain mind)
@@ -32,21 +40,20 @@
 
   (exercise-types walk walking run running gym swim swimming yoga)
   (exercise-types-two working out physical therapy silver sneakers)
+))
+  
 
-  ))
-   
+(READRULES '*goal-stay-healthy-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+      2 (What is your personal goal to stay healthy ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+      2 (What is your personal goal to stay healthy ?) (0 :gist)
+  1 (0 do 2 you 2 goal 0 ?)
+      2 (What is your personal goal to stay healthy ?) (0 :gist)
 
-;;	Tell me about a personal goal you are working on to stay healthy.
-;; (0 personal goal I am working on to stay healthy 0)
-;; goal-stay-healthy
-;; (What is a personal goal you are working on to stay healthy ?)
-;; (3 What 2 personal goal 3 working 3 healthy 3)
-
-;; NOTE: Proposed new gist clause: "(0 personal goal I am working on to stay healthy 0)"
-;; New tag: goal-stay-healthy
-
-(READRULES '*specific-answer-from-goal-stay-healthy-input*
-  '(
+  ; Specific answers
   1 (0 alt-diet 0)
     2 ((A personal goal I am working on is to stay healthy is my diet \.) (goal-stay-healthy)) (0 :gist)
   1 (0 alt-exercise 2 alt-brain 0)
@@ -73,34 +80,14 @@
     2 ((A personal goal I am working on is to stay healthy is to monitor my blood sugar \.) (goal-stay-healthy)) (0 :gist)
   1 (0 alt-taking 2 alt-pills 0)
     2 ((A personal goal I am working on is to stay healthy is to remember my medicine \.) (goal-stay-healthy)) (0 :gist)
+
   1 (0)
-       2 ((NIL Gist \: nothing found for a personal goal I am working on to stay healthy \.) (goal-stay-health)) (0 :gist)
- ))  
-       
- (READRULES '*thematic-answer-from-goal-stay-healthy-input*
-  '(
-  
-  ))
+    2 ((NIL Gist \: nothing found for a personal goal I am working on to stay healthy \.) (goal-stay-health)) (0 :gist)
+))
 
- (READRULES '*unbidden-answer-from-goal-stay-healthy-input*
-  '(
-  
-  ))
-		
-  ;; NOTE: Proposed new question: "What is your personal goal to stay healthy ?"
-
- (READRULES '*question-from-goal-stay-healthy-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (What is your personal goal to stay healthy ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (What is your personal goal to stay healthy ?) (0 :gist)
-  1 (0 do 2 you 2 goal 0)
-     2 (What is your personal goal to stay healthy ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-goal-stay-healthy-input*
-  '(
+'(
   1 (0 to stay healthy 2 my diet 0)
     2 (Going on a diet is a great way to stay healthy\. It can be very challenging\, but is also very rewarding\.) (100 :out)
   1 (0 stay healthy 2 exercising my brain 0)
@@ -136,7 +123,7 @@
     2 (One good way to remember pills is to have a checklist which I keep next to my keys or some other important item\.) (100 :out)
   1 (0 stay healthy 2 change my weight 0)
     2 (You hope I can achieve the weight that helps you be healthy and feel confident about my body\.) (100 :out)
+    
   1 (0 NIL Gist 0)
     2 (It\'s super important to have some way to stay healthy as I get older\.) (100 :out)
-  ))
-); end of eval-when
+))

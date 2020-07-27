@@ -1,25 +1,33 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
+;;  What makes this goal important to you? How can it improve your life quality?
+;; (0 being healthier improves my life quality 0)
+;; being-healthier-life-quality
+;; (How can being healthier improve your life quality ?)
+;; (3 how 2 being healthier 2 improve your life quality 4)
 
-  ;; MEETING WITH KIM NOTES (8/4/2017)
+;; NOTE: Proposed new gist clause: "(0 being healthier improves my life quality by 0)"
+;; New tag: being-healthier-life-quality
 
-  ;; New question prompt: "How can being healthier improve your life quality?"
 
-  ;; Feel better about myself / happier
-  ;; Feel more confident / gives me more confidence
-  ;; Self esteem
-  ;; Get my doctor off my back
-  ;; Get my husband/wife/kids off my back
-  ;; Do things I like to do (taking walks, exercise)
-  ;; Helping memory
-  ;; Staying independent longer / not going to nursing home
-  ;; Living longer
-  ;; Not having a stroke
-  ;; Not needing surgery
-  ;; Not needing to take medicine / as much medicine
-  ;; Keeping blood sugar stable
+;; MEETING WITH KIM NOTES (8/4/2017)
 
+;; New question prompt: "How can being healthier improve your life quality?"
+
+;; Feel better about myself / happier
+;; Feel more confident / gives me more confidence
+;; Self esteem
+;; Get my doctor off my back
+;; Get my husband/wife/kids off my back
+;; Do things I like to do (taking walks, exercise)
+;; Helping memory
+;; Staying independent longer / not going to nursing home
+;; Living longer
+;; Not having a stroke
+;; Not needing surgery
+;; Not needing to take medicine / as much medicine
+;; Keeping blood sugar stable
+
+(MAPC 'ATTACHFEAT
+'(
   (alt-feel feel feeling think thinking be being make makes making get getting give gives giving)
   (alt-better GOODPROP happier happiness confident confidence)
   (alt-person alt-friend alt-doctor husband wife kid kids child children son sons daughter daughters)
@@ -34,20 +42,18 @@
   (alt-living living live alive survive)
   (alt-having having have needing need getting get)
   (alt-medical-issue stroke failure heart liver kidney diabetes imbalance surgery treatment treatments medicine pill pills)
+))
+  
 
-  ))
-   
-;;  What makes this goal important to you? How can it improve your life quality?
-;; (0 being healthier improves my life quality 0)
-;; being-healthier-life-quality
-;; (How can being healthier improve your life quality ?)
-;; (3 how 2 being healthier 2 improve your life quality 4)
-	
-;; NOTE: Proposed new gist clause: "(0 being healthier improves my life quality by 0)"
-;; New tag: being-healthier-life-quality
+(READRULES '*being-healthier-life-quality-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+      2 (How can being healthier improve your life quality ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+      2 (How can being healthier improve your life quality ?) (0 :gist)
 
-(READRULES '*specific-answer-from-being-healthier-life-quality-input*
-  '(
+  ; Specific answers
   1 (0 alt-feel 2 alt-better 0)
     2 ((Being healthier improves my life quality by making me feel happier about myself \.) (being-healthier-life-quality)) (0 :gist)
   1 (0 self 1 esteem 0)
@@ -76,32 +82,14 @@
     2 ((Being healthier improves my life quality by preventing medical issues \.) (being-healthier-life-quality)) (0 :gist)
   1 (0 alt-staying 2 blood sugar 0)
     2 ((Being healthier improves my life quality by preventing medical issues \.) (being-healthier-life-quality)) (0 :gist)
-   1 (0)
-       2 ((NIL Gist \: nothing found for how being healthier improves my life quality \.) (being-healthier-life-quality)) (0 :gist)
-))  
-       
- (READRULES '*thematic-answer-from-being-healthier-life-quality-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-being-healthier-life-quality-input*
-  '( 
-  
-  ))
+  1 (0)
+    2 ((NIL Gist \: nothing found for how being healthier improves my life quality \.) (being-healthier-life-quality)) (0 :gist)
+))
 
-  ;; NOTE: Proposed new question: "How can being healthier improve your life quality ?"
-		
- (READRULES '*question-from-being-healthier-life-quality-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (How can being healthier improve your life quality ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (How can being healthier improve your life quality ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-being-healthier-life-quality-input*
-  '(
+'(
   1 (0 making me feel happier about myself 0)
     2 (Though I should always try to have high self esteem\, it\'s especially easy when I know I am healthy\.) (100 :out)
   1 (0 getting people to stop nagging 0)
@@ -116,7 +104,7 @@
     2 (Living a healthy lifestyle is definitely the key to living a long time\. You hope you are able to live that long when you get older\.) (100 :out)
   1 (0 preventing medical issues 0)
     2 (Living with the threat of medical issues can be scary sometimes\. You are sure it\'s nice to get those fears off my back by being healthier\.) (100 :out)
+
   1 (0 NIL Gist 0)
     2 (Being healthier can feel like a breath of fresh air in many ways\. You hope I can stay healthy as me get older\.) (100 :out)
-  ))
-); end of eval-when
+))

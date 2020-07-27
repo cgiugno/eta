@@ -29,22 +29,29 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (3 how far 3 go in school 3)
-    2 (*specific-answer-from-education-how-far-input* 
-       *unbidden-answer-from-education-how-far-input*
-       *thematic-answer-from-education-how-far-input*
-       *question-from-education-how-far-input*) (0 :subtrees)
+'(
+   ; education
+   1 (3 how far 3 go in school 3)
+      2 (*education-how-far-input*) (0 :subtrees)
    1 (3 what part 3 education 2 most meaningful 3)
-    2 (*specific-answer-from-education-most-meaningful-input* 
-       *unbidden-answer-from-education-most-meaningful-input*
-       *thematic-answer-from-education-most-meaningful-input*
-       *question-from-education-most-meaningful-input*) (0 :subtrees)
+      2 (*education-most-meaningful-input*) (0 :subtrees)
    1 (3 what 2 think 3 lifelong learning 3)
-    2 (*specific-answer-from-thoughts-about-lifelong-learning-input* 
-       *unbidden-answer-from-thoughts-about-lifelong-learning-input*
-       *thematic-answer-from-thoughts-about-lifelong-learning-input*
-       *question-from-thoughts-about-lifelong-learning-input*) (0 :subtrees)
-)))
+      2 (*thoughts-about-lifelong-learning-input*) (0 :subtrees)
+
+   ; employment
+   1 (3 How 2 work benefit 3)
+      2 (*work-benefit-input*) (0 :subtrees)
+   1 (3 what 2 best part 2 retirement 3)
+      2 (*retirement-best-part-input*) (0 :subtrees)
+   1 (3 What 2 ways 3 give back to your community 3)
+      2 (*give-back-to-community-input*) (0 :subtrees)
+
+   ; life-goal
+   1 (3 What 2 personal goal 3 working 3 healthy 3)
+      2 (*goal-stay-healthy-input*) (0 :subtrees)
+   1 (3 how 2 being healthier 2 improve your life quality 4)
+      2 (*being-healthier-life-quality-input*) (0 :subtrees)
+   1 (3 What steps 4 achieve your goal 3)
+      2 (*steps-achieve-goal-input*) (0 :subtrees)
+))

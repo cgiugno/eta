@@ -1,20 +1,26 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
+;;	Sometimes work is one way to give back. What are some ways you give back to your community, others in your life, or society as a whole?
+;;	(0 way to give back to your community 0)
+;;	give-back-to-community
+;;	(What are some ways you give back to your community ?)
+;;	(3 What 2 ways 3 give back to your community 3)
 
-  ;; MEETING WITH KIM NOTES (8/4/2017)
 
-  ;; Volunteer with church / in schools / tutoring / RSVP (organization in town which helps older people volunteer)
-  ;; Involved in politics
-  ;; Visit other older people
-  ;; Help friends in senior living community
-  ;; Help with bills
-  ;; Check on neighbor
-  ;; Take care of a spouse
-  ;; Help with home delivered meals
-  ;; Donate money
-  ;; Help teach
+;; MEETING WITH KIM NOTES (8/4/2017)
 
+;; Volunteer with church / in schools / tutoring / RSVP (organization in town which helps older people volunteer)
+;; Involved in politics
+;; Visit other older people
+;; Help friends in senior living community
+;; Help with bills
+;; Check on neighbor
+;; Take care of a spouse
+;; Help with home delivered meals
+;; Donate money
+;; Help teach
+
+
+(MAPC 'ATTACHFEAT
+'(
   (organization-types church school schools teach teaching community hospital hospitals tutor tutoring charity kitchen RSVP festival)
   (alt-volunteer volunteer volunteering assist assisting help helping teach teaching support supporting)
   (alt-donate donate donating)
@@ -26,20 +32,20 @@
   (relative-types relative relatives family son daughter child children kids spouse husband wife grandson granddaughter grandchildren grandchild grandkids cousin niece nephew)
   (alt-deliver deliver delivered delivering)
   (alt-meal meal meals food dinner)
+))
+  
 
-  ))
-   
+(READRULES '*give-back-to-community-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+    2 (What are some ways you give back to your community ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (What are some ways you give back to your community ?) (0 :gist)
+  1 (0 do 2 you 2 alt-volunteer 0 ?)
+    2 (What are some ways you give back to your community ?) (0 :gist)
 
-;;	Sometimes work is one way to give back. What are some ways you give back to your community, others in your life, or society as a whole?
-;;	(0 way to give back to your community 0)
-;;	give-back-to-community
-;;	(What are some ways you give back to your community ?)
-;;	(3 What 2 ways 3 give back to your community 3)
-
-	
-
-(READRULES '*specific-answer-from-give-back-to-community-input*
-  '(
+  ; Specific answers
   1 (0 alt-volunteer 3 organization-types 0)
     2 ((A way to give back to your community is to volunteer at organization-types \.) (give-back-to-community)) (0 :gist)
   1 (0 community service 0)
@@ -60,32 +66,14 @@
     2 ((A way to give back to your community is delivering meals \.) (give-back-to-community)) (0 :gist)
   1 (0 alt-donate 0)
     2 ((A way to give back to your community is donating money \.) (give-back-to-community)) (0 :gist)
-  1 (0)
-       2 ((NIL Gist \: nothing found for a way to give back to your community \.) (give-back-to-community)) (0 :gist)
- ))
-         
- (READRULES '*thematic-answer-from-give-back-to-community-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-give-back-to-community-input*
-  '(
-  
-  ))
-		
- (READRULES '*question-from-give-back-to-community-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (What are some ways you give back to your community ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (What are some ways you give back to your community ?) (0 :gist)
-  1 (0 do 2 you 2 alt-volunteer 0)
-     2 (What are some ways you give back to your community ?) (0 :gist)
-  ))
+  1 (0)
+    2 ((NIL Gist \: nothing found for a way to give back to your community \.) (give-back-to-community)) (0 :gist)
+))
+
 
 (READRULES '*reaction-to-give-back-to-community-input*
-  '(
+'(
   1 (0 volunteer at organization-types 0)
     2 (0 church 0)
       3 (Helping with church seems like a good experience\. I get to have a direct part in spreading good morality\.) (100 :out)
@@ -128,7 +116,7 @@
     2 (That\'s very kind\, to help deliver food for other people to eat\.) (100 :out)
   1 (0 donating money 0)
     2 (Giving to charity is a great way to help those who need it most\.) (100 :out)
+
   1 (0 NIL Gist 0)
     2 (You feel very satisfied when you have the chance to give back to the community\.) (100 :out)
-  ))
-); end of eval-when
+))

@@ -1,35 +1,3 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-
-  ;; MEETING WITH KIM NOTES (8/4/2017)
-
-  ;; New question prompt: "What steps have you taken to achieve this goal?"
-
-  ;; See doctor
-  ;; Support group
-  ;; Take medicine / meds
-  ;; Keeping reminders / checking calendar
-  ;; Started an excersize routine
-  ;; Started diet / watched my eating
-  ;; Joining a gym
-  ;; Joining Silver Sneakers (YMCA program)
-  ;; Try to be more diligent
-  ;; Priorities / effort
-  ;; Commitment
-  ;; Decide to do it / Make up my mind to do it
-
-  (alt-see see seeing visit visiting go going talk talking appointment appointments)
-  (alt-doctor doctor doctors nurse nurses physician physicians)
-  (alt-keeping keeping keep checking check looking look writing write watching watch taking take)
-  (alt-reminder reminder reminders notes note calendar schedule record records)
-  (alt-routine routine routines plan plans procedure procedures pattern patterns schedule schedules method methods system systems)
-  (alt-watch watch watching monitor monitoring track tracking record recording check checking decrease decreasing)
-  (alt-eating eat eating food calories sugar intake consumption)
-  (alt-diligence diligence diligent priorities priority effort commitment committed commitments discipline disciplined)
-
-  ))
-   
 ;; NOTE: Proposed new gist clause: "(0 step that I have taken to achieve my goal 0)"
 ;; New tag: steps-achieve-goal
 
@@ -38,9 +6,47 @@
 ;; steps-achieve-goal
 ;; (What steps have you taken to achieve your goal ?)
 ;; (3 What steps 4 achieve your goal 3) 
-	
-(READRULES '*specific-answer-from-steps-achieve-goal-input*
-  '(
+
+
+;; MEETING WITH KIM NOTES (8/4/2017)
+
+;; New question prompt: "What steps have you taken to achieve this goal?"
+
+;; See doctor
+;; Support group
+;; Take medicine / meds
+;; Keeping reminders / checking calendar
+;; Started an excersize routine
+;; Started diet / watched my eating
+;; Joining a gym
+;; Joining Silver Sneakers (YMCA program)
+;; Try to be more diligent
+;; Priorities / effort
+;; Commitment
+;; Decide to do it / Make up my mind to do it
+
+(MAPC 'ATTACHFEAT
+'(
+  (alt-see see seeing visit visiting go going talk talking appointment appointments)
+  (alt-doctor doctor doctors nurse nurses physician physicians)
+  (alt-keeping keeping keep checking check looking look writing write watching watch taking take)
+  (alt-reminder reminder reminders notes note calendar schedule record records)
+  (alt-routine routine routines plan plans procedure procedures pattern patterns schedule schedules method methods system systems)
+  (alt-watch watch watching monitor monitoring track tracking record recording check checking decrease decreasing)
+  (alt-eating eat eating food calories sugar intake consumption)
+  (alt-diligence diligence diligent priorities priority effort commitment committed commitments discipline disciplined)
+))
+  
+
+(READRULES '*steps-achieve-goal-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+      2 (What steps have you taken to achieve your goal ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+      2 (What steps have you taken to achieve your goal ?) (0 :gist)
+
+  ; Specific answers
   1 (0 alt-see 2 alt-doctor 0)
     2 ((A step that I have taken to achieve my goal is seeing a doctor \.) (steps-achieve-goal)) (0 :gist)
   1 (0 support group 0)
@@ -73,32 +79,14 @@
     2 ((A step that I have taken to achieve my goal is making up my mind \.) (steps-achieve-goal)) (0 :gist)
   1 (0 decide 2 do 0)
     2 ((A step that I have taken to achieve my goal is making up my mind \.) (steps-achieve-goal)) (0 :gist)
+
   1 (0)
-     2 ((NIL Gist \: nothing found for step that I have taken to achieve my goal \.) (steps-achieve-goal)) (0 :gist)
+    2 ((NIL Gist \: nothing found for step that I have taken to achieve my goal \.) (steps-achieve-goal)) (0 :gist)
 ))
-       
- (READRULES '*thematic-answer-from-steps-achieve-goal-input*
-  '(
 
-  ))
-
- (READRULES '*unbidden-answer-from-steps-achieve-goal-input*
-  '(
-  
-  ))
-
-  ;; NOTE: Proposed new question: "What steps have you taken to achieve your goal ?"
-		
- (READRULES '*question-from-steps-achieve-goal-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (What steps have you taken to achieve your goal ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (What steps have you taken to achieve your goal ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-steps-achieve-goal-input*
-  '( 
+'( 
   1 (0 seeing a doctor 0)
     2 (Seeing my doctor frequently is an important step\! They can help me with things I may not know about myself\.) (100 :out)
   1 (0 going to a support group 0)
@@ -121,7 +109,7 @@
     2 (Diligence and hard work are necessary when trying to change myself for the better\.) (100 :out)
   1 (0 making up my mind 0)
     2 (Sometimes putting my mind to something and deciding to just do it is the most important step in achieving my goal\.) (100 :out)
+
   1 (0 NIL Gist 0)
     2 (Sometimes the most important parts of achieving my health goals are to have a solid plan\, to be dedicated\, and to just set my mind to it\.) (100 :out)
-  ))
-); end of eval-when
+))
