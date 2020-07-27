@@ -29,22 +29,29 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (2 what 2 recent outdoor activity 4)
-    2 (*specific-answer-from-recent-outdoor-activity-input* 
-       *unbidden-answer-from-recent-outdoor-activity-input*
-       *thematic-answer-from-recent-outdoor-activity-input*
-       *question-from-recent-outdoor-activity-input*) (0 :subtrees)
+'(
+   ; outdoors
+   1 (2 what 2 recent outdoor activity 4)
+      2 (*recent-outdoor-activity-input*) (0 :subtrees)
    1 (2 What 2 favorite season 2 outdoors 2) 
-    2 (*specific-answer-from-favorite-season-outdoors-input* 
-       *unbidden-answer-from-favorite-season-outdoors-input*
-       *thematic-answer-from-favorite-season-outdoors-input*
-       *question-from-favorite-season-outdoors-input*) (0 :subtrees)
+      2 (*favorite-season-outdoors-input*) (0 :subtrees)
    1 (2 What 2 enjoy 3 weather keeps you indoors 2)
-    2 (*specific-answer-from-things-enjoy-doing-indoors-input* 
-       *unbidden-answer-from-things-enjoy-doing-indoors-input*
-       *thematic-answer-from-things-enjoy-doing-indoors-input*
-       *question-from-things-enjoy-doing-indoors-input*) (0 :subtrees)
-)))
+      2 (*things-enjoy-doing-indoors-input*) (0 :subtrees)
+
+   ; travel
+   1 (2 What types of travel 2 enjoy 2)
+      2 (*travel-enjoy-input*) (0 :subtrees)
+   1 (2 What 2 favorite vacation 4)
+      2 (*favorite-vacation-input*) (0 :subtrees)
+   1 (3 if you won 1 free trip 1 where 2 you go 3)
+      2 (*free-trip-input*) (0 :subtrees)
+
+   ; plan-for-today
+   1 (2 What 2 plan after this session 2)
+      2 (*plan-after-this-session-input*) (0 :subtrees)
+   1 (2 What 2 you have 2 dinner tonight 2)
+      2 (*dinner-tonight-input*) (0 :subtrees)
+   1 (2 What 2 do 3 wind down before bed 2)
+      2 (*wind-down-before-bed-input*) (0 :subtrees)
+))
