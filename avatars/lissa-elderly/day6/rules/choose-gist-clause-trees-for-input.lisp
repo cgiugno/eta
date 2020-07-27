@@ -29,22 +29,29 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (2 What changes 1 happen 1 you 2 next few years 2)
-    2 (*specific-answer-from-life-changes-next-years-input* 
-       *unbidden-answer-from-life-changes-next-years-input*
-       *thematic-answer-from-life-changes-next-years-input*
-       *question-from-life-changes-next-years-input*) (0 :subtrees)
+'(
+   ; household-chores
+   1 (3 what 3 household chores 4 today 3)
+      2 (*householdChores-today-input*) (0 :subtrees)
+   1 (3 what 2 household chore 2 enjoy 3)
+      2 (*householdChore-enjoy-input*) (0 :subtrees)
+   1 (3 How 4 feel 3 helped 4 household chore 3)
+      2 (*householdChore-help-others-input*) (0 :subtrees)
+
+   ; money
+   1 (2 What 2 ways 1 manage 1 money 2)
+      2 (*manage-money-ways-input*) (0 :subtrees)
+   1 (2 Is managing money 2 stressful 5)
+      2 (*manage-money-stressful-input*) (0 :subtrees)
+   1 (2 How 2 learn 2 managing 2 money 2)
+      2 (*manage-money-learn-input*) (0 :subtrees)
+
+   ; growing-older
+   1 (2 What changes 1 happen 1 you 2 next few years 2)
+      2 (*life-changes-next-years-input*) (0 :subtrees)
    1 (2 What 2 hardest part 2 growing older 2)
-    2 (*specific-answer-from-growing-older-hardest-part-input* 
-       *unbidden-answer-from-growing-older-hardest-part-input*
-       *thematic-answer-from-growing-older-hardest-part-input*
-       *question-from-growing-older-hardest-part-input*) (0 :subtrees)
+      2 (*growing-older-hardest-part-input*) (0 :subtrees)
    1 (2 What 2 best part 2 growing older 2)
-    2 (*specific-answer-from-growing-older-best-part-input* 
-       *unbidden-answer-from-growing-older-best-part-input*
-       *thematic-answer-from-growing-older-best-part-input*
-       *question-from-growing-older-best-part-input*) (0 :subtrees)
-)))
+      2 (*growing-older-best-part-input**) (0 :subtrees)
+))

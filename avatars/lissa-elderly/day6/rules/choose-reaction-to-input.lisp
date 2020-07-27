@@ -25,56 +25,67 @@
 ;;  What is the hardest part of growing older ?
 ;;  What is the best part of growing older ? 
 
-(eval-when (load eval)
-
-(mapc 'attachfeat ; needed for detecting alternatives in the
+(MAPC 'ATTACHFEAT ; needed for detecting alternatives in the
                   ; watching-or-reading question
-  '( ))
+'(
+))
+
 
 (READRULES '*reaction-to-input*
-  ; Choose between reaction to a question and an assertion
-  ; Only one gist clause is expected here
- '(1 (0 wh_ 3 you 0)
+; Choose between reaction to a question and an assertion
+; Only one gist clause is expected here
+'(
+  1 (0 wh_ 3 you 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 wh_ 3 your 0)
+  1 (0 wh_ 3 your 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 aux your 0)
+  1 (0 aux your 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 aux you 0)
+  1 (0 aux you 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 right-really 4 ?)
+  1 (0 right-really 4 ?)
     2 *reaction-to-question* (0 :subtree)
-   1 (0); by default, it's an assertion
+  1 (0); by default, it's an assertion
     2 *reaction-to-assertion* (0 :subtree)
- ))
+))
+
 
 (READRULES '*reaction-to-assertion*
-  ; Very rough initial attempt.
-  ; Actually, it seems we could readily provide reactions
-  ; directly here, instead of delegating to specialized
-  ; choice trees. However, it seems we have better oversight
-  ; by using separate choice trees, specified in a file that
-  ; also contains the specialized features for the topic at
-  ; issue.
-  ;
-; e.g., 
- '(   1 (0 change 2 happen 3 next few years 0)
+; Very rough initial attempt.
+; Actually, it seems we could readily provide reactions
+; directly here, instead of delegating to specialized
+; choice trees. However, it seems we have better oversight
+; by using separate choice trees, specified in a file that
+; also contains the specialized features for the topic at
+; issue.
+'(
+  ; household-chores
+  1 (0 household chore 4 today 0)
+    2 *reaction-to-householdChores-today-input* (0 :subtree)
+  1 (0 household chore 4 enjoy 0) 
+    2 *reaction-to-householdChore-enjoy-input* (0 :subtree) 
+  1 (0 I helped someone with 0) 
+    2 *reaction-to-householdChore-help-others-input* (0 :subtree)
+  1 (0 felt 2 I helped someone with household chores 0)
+    2 *reaction-to-householdChore-help-others-input* (0 :subtree)
+
+  ; money
+  1 (0 way 3 manage 1 money 0)
+    2 *reaction-to-manage-money-ways-input* (0 :subtree) 
+  1 (0 managing money is not stressful 0)
+    2 *reaction-to-manage-money-stressful-input* (0 :subtree)
+  1 (0 managing money is stressful 0)
+    2 *reaction-to-manage-money-stressful-input* (0 :subtree)
+  1 (0 learned 2 managing money 0) 
+    2 *reaction-to-manage-money-learn-input* (0 :subtree)
+
+  ; growing-older
+  1 (0 change 2 happen 3 next few years 0)
     2 *reaction-to-life-changes-next-years-input* (0 :subtree)
-    
-; e.g., 
-   1 (0 hardest part 1 growing older 0)
-    2 *reaction-to-growing-older-hardest-part-input* (0 :subtree)
-
-	; e.g., 
-   1 (0 best part 1 growing older 0)
+  1 (0 hardest part 1 growing older 0)
+    2 *reaction-to-growing-older-hardest-part-input* (0 :subtree) 
+  1 (0 best part 1 growing older 0)
     2 *reaction-to-growing-older-best-part-input* (0 :subtree)
-
-   ))
+))
  
- (READRULES '*reaction-to-unexpected*
-   '(1 (0 thank you 0)
-      2 *user-thanks-schema* (0 :schema))
- )
- 
-)
 
