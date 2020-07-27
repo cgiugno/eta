@@ -28,22 +28,29 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (2 what 2 dishes 2 like to cook 3)
-    2 (*specific-answer-from-dishes-like-to-cook-input* 
-       *unbidden-answer-from-dishes-like-to-cook-input*
-       *thematic-answer-from-dishes-like-to-cook-input*
-       *question-from-dishes-like-to-cook-input*) (0 :subtrees)
+'(
+   ; weather
+   1 (2 how 2 weather 3)
+      2 (*how-is-weather-input*) (0 :subtrees)
+   1 (1 how 3 weather forecast 4) 
+      2 (*weather-forecast-input*) (0 :subtrees)
+   1 (1 what 2 favorite weather 3)
+      2 (*favorite-weather-input*) (0 :subtrees)
+
+   ; driving
+   1 (2 what 1 you remember 2 first car 3)
+      2 (*first-car-input*) (0 :subtrees)
+   1 (1 have you 4 road trip 4) 
+      2 (*road-trips-input*) (0 :subtrees)
+   1 (1 how 2 cope 1 giving up driving 3)
+      2 (*giving-up-driving-input*) (0 :subtrees)
+
+   ; cooking
+   1 (2 what 2 dishes 2 like to cook 3)
+      2 (*dishes-like-to-cook-input*) (0 :subtrees)
    1 (1 how 2 learn to cook 4) 
-    2 (*specific-answer-from-learn-to-cook-input* 
-       *unbidden-answer-from-learn-to-cook-input*
-       *thematic-answer-from-learn-to-cook-input*
-       *question-from-learn-to-cook-input*) (0 :subtrees)
+      2 (*learn-to-cook-input*) (0 :subtrees)
    1 (1 how 2 shared cooking 1 people 4)
-    2 (*specific-answer-from-share-cooking-with-others-input* 
-       *unbidden-answer-from-share-cooking-with-others-input*
-       *thematic-answer-from-share-cooking-with-others-input*
-       *question-from-share-cooking-with-others-input*) (0 :subtrees)
-)))
+      2 (*share-cooking-with-others-input*) (0 :subtrees)
+))
