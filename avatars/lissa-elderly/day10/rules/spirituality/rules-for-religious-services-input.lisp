@@ -1,15 +1,3 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-
-    ;; MEETING WITH KIM NOTES (8/8/2017)
-
-    ;; Temple, church, synagogue, etc.
-    ;; Just once a while
-    ;; Used to go but now they can’t drive, 
-
-  ))
-   
 ;;  Do you attend religious services?
 ;;	(0 go to 3 religious services 0) 
 ;;	religious-services
@@ -17,8 +5,35 @@
 ;;	(3 Do you 3 religious services 3)
 
 
-(READRULES '*specific-answer-from-religious-services-input*
-  '(
+;; MEETING WITH KIM NOTES (8/8/2017)
+
+;; Temple, church, synagogue, etc.
+;; Just once a while
+;; Used to go but now they can’t drive, 
+
+(MAPC 'ATTACHFEAT
+'(
+
+))
+
+
+(READRULES '*religious-services-input*
+'(
+  ; Questions
+  1 (0 what religion 2 you 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 are 2 you 2 religious 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 do 2 you 2 follow 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 what 2 you 0 ?)
+    2 (Do you attend religious services ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (Do you attend religious services ?) (0 :gist)
+  1 (0 do 2 you 2 attend 0 ?)
+    2 (Do you attend religious services ?) (0 :gist)
+
+  ; Specific answers
   1 (0 synagogue 0)
     2 ((I go to synagogue for religious services \.) (religious-services)) (0 :gist)
   1 (0 church 0)
@@ -41,38 +56,14 @@
     2 ((I do not go to religious services \.) (religious-services)) (0 :gist)
   1 (0 athiest 0)
     2 ((I do not go to religious services \.) (religious-services)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist \: nothing found for if I go to religious services \.) (religious-services)) (0 :gist)
 ))
-            
- (READRULES '*thematic-answer-from-religious-services-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-religious-services-input*
-  '(
-  
-  ))
-		
- (READRULES '*question-from-religious-services-input*
-  '(
-  1 (0 what religion 2 you 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 are 2 you 2 religious 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 do 2 you 2 follow 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 what 2 you 0)
-     2 (Do you attend religious services ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (Do you attend religious services ?) (0 :gist)
-  1 (0 do 2 you 2 attend 0)
-     2 (Do you attend religious services ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-religious-services-input*
-  '(
+'(
   1 (0 go to synagogue for religious services 0)
     2 (It\'s nice that I still go to synagogue\, you think religion can give someone hope in bad times\.) (100 :out)
   1 (0 go to church for religious services 0)
@@ -87,7 +78,7 @@
     2 (It\'s perfectly fine to not go to religious services\, everyone has their own way of introspection you think\.) (100 :out)
   1 (0 go to religious services 0)
     2 (It\'s nice that I still go to religious services\, you think religion can give someone hope in bad times\.) (100 :out)
+    
   1 (0 NIL Gist 0)
     2 (You think religion can give someone hope in bad times\, though you don\'t go to religious services yourself\.) (100 :out)
-  ))
-); end of eval-when
+))

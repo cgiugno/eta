@@ -1,25 +1,3 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-
-    ;; MEETING WITH KIM NOTES (8/8/2017)
-
-    ;; Pray
-    ;; Go to services
-    ;; Watching tv programs
-    ;; Doing meditation
-    ;; Reading books
-    ;; Being in nature
-
-    (alt-watch watch watching listen listening)
-    (alt-read read reading)
-    (alt-give give giving show showing teach teaching)
-    (alt-hope hope purpose meaning belonging belong mission destiny)
-    (alt-charity charity volunteer volunteering)
-
-  ))
-   
-
 ;; 	Many people I've talked with, tell me they find ways to experience and express some form of spirituality either parts of organized religion or not.
 ;;	What ways is spirituality a part of your life?
 ;;	(0 spirituality is not a part of my life 0)
@@ -27,9 +5,46 @@
 ;;	spirituality-part-of-life
 ;;	(What ways is spirituality a part of your life ?)
 ;;	(3 What ways 2 spirituality a part of your life 3)
-	
-(READRULES '*specific-answer-from-spirituality-part-of-life-input*
-  '(
+
+
+;; MEETING WITH KIM NOTES (8/8/2017)
+
+;; Pray
+;; Go to services
+;; Watching tv programs
+;; Doing meditation
+;; Reading books
+;; Being in nature
+
+(MAPC 'ATTACHFEAT
+'(
+  (alt-watch watch watching listen listening)
+  (alt-read read reading)
+  (alt-give give giving show showing teach teaching)
+  (alt-hope hope purpose meaning belonging belong mission destiny)
+  (alt-charity charity volunteer volunteering)
+))
+
+
+(READRULES '*spirituality-part-of-life-input*
+'(
+  ; Questions
+  1 (0 what religion 2 you 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 are 2 you 2 religious 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 do 2 you 2 follow 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 are 2 you 2 spiritual 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 is spirituality 4 your life 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 what 2 you 0 ?)
+    2 (What ways is spirituality a part of your life ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (What ways is spirituality a part of your life ?) (0 :gist)
+
+  ; Specific answers
   1 (0 pray 0)
     2 ((Spirituality is a part of my life by praying \.) (spirituality-part-of-life)) (0 :gist)
   1 (0 go 1 services 0)
@@ -58,40 +73,14 @@
     2 ((Spirituality is not a part of my life \.) (spirituality-part-of-life)) (0 :gist)
   1 (0 am 2 athiest 0)
     2 ((Spirituality is not a part of my life \.) (spirituality-part-of-life)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist \: nothing found for if spirituality is a part of my life \.) (spirituality-part-of-life)) (0 :gist)
 ))
-            
- (READRULES '*thematic-answer-from-spirituality-part-of-life-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-spirituality-part-of-life-input*
-  '(
-  
-  ))
-		
- (READRULES '*question-from-spirituality-part-of-life-input*
-  '(
-  1 (0 what religion 2 you 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 are 2 you 2 religious 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 do 2 you 2 follow 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 are 2 you 2 spiritual 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 is spirituality 4 your life 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 what 2 you 0)
-     2 (What ways is spirituality a part of your life ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (What ways is spirituality a part of your life ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-spirituality-part-of-life-input*
-  '(
+'(
   1 (0 spirituality is a part of my life 2 praying 0)
     2 (Sometimes praying can help guide my choice in tough decisions\.) (100 :out)
   1 (0 spirituality is a part of my life 2 going to services 0)
@@ -110,7 +99,7 @@
     2 (It\'s awesome that giving back to the community is meaningful to me\!) (100 :out)
   1 (0 spirituality is NEG 2 part of my life 0)
     2 (It\'s okay to not be spiritual\, there are other ways to find meaning in life\.) (100 :out)
+    
   1 (0 NIL Gist 0)
     2 (It\'s important to find meaning in my life\. You think spirituality is a common way to do this\, though there are others too\.) (100 :out)
-  ))
-); end of eval-when
+))

@@ -25,59 +25,69 @@
 ;;  What would you do to make you feel comfortable in your home ?
 ;;  What is a memory you have of one of your homes ?
 
-
-(eval-when (load eval)
-
-(mapc 'attachfeat ; needed for detecting alternatives in the
+(MAPC 'ATTACHFEAT ; needed for detecting alternatives in the
                   ; watching-or-reading question
-  '( ))
+'(
+))
+
 
 (READRULES '*reaction-to-input*
-  ; Choose between reaction to a question and an assertion
-  ; Only one gist clause is expected here
- '(1 (0 wh_ 3 you 0)
+; Choose between reaction to a question and an assertion
+; Only one gist clause is expected here
+'(
+  1 (0 wh_ 3 you 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 wh_ 3 your 0)
+  1 (0 wh_ 3 your 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 aux your 0)
+  1 (0 aux your 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 aux you 0)
+  1 (0 aux you 0)
     2 *reaction-to-question* (0 :subtree)
-   1 (0 right-really 4 ?)
+  1 (0 right-really 4 ?)
     2 *reaction-to-question* (0 :subtree)
-   1 (0); by default, it's an assertion
+  1 (0); by default, it's an assertion
     2 *reaction-to-assertion* (0 :subtree)
- ))
+))
+
 
 (READRULES '*reaction-to-assertion*
-  ; Very rough initial attempt.
-  ; Actually, it seems we could readily provide reactions
-  ; directly here, instead of delegating to specialized
-  ; choice trees. However, it seems we have better oversight
-  ; by using separate choice trees, specified in a file that
-  ; also contains the specialized features for the topic at
-  ; issue.
-  ;
-; e.g., 
- '( 1 (0 the place I live in is 0)
-       2 *reaction-to-place-you-live-input* (0 :subtree)
-	1 (0 I would prefer to live in 0)
-       2 *reaction-to-place-you-live-input* (0 :subtree)
-     1 (0 I would have difficulty to live in 3 because 4) 
-       2 *reaction-to-place-you-live-input* (0 :subtree)
-; e.g., 
-   1 (0 I would 6 at home to make me feel comfortable 0)
+; Very rough initial attempt.
+; Actually, it seems we could readily provide reactions
+; directly here, instead of delegating to specialized
+; choice trees. However, it seems we have better oversight
+; by using separate choice trees, specified in a file that
+; also contains the specialized features for the topic at
+; issue.
+;
+'(
+  ; home
+  1 (0 the place I live in is 0)
+    2 *reaction-to-place-you-live-input* (0 :subtree)
+  1 (0 I would prefer to live in 0)
+    2 *reaction-to-place-you-live-input* (0 :subtree)
+  1 (0 I would have difficulty to live in 3 because 4) 
+    2 *reaction-to-place-you-live-input* (0 :subtree)
+  1 (0 I would 6 at home to make me feel comfortable 0)
     2 *reaction-to-things-comfortable-home-input* (0 :subtree)
-	
-	
-   1 (0 memory I have of one of my homes 0)
+  1 (0 memory I have of one of my homes 0)
     2 *reaction-to-memory-from-home-input* (0 :subtree)
-   ))
- 
- (READRULES '*reaction-to-unexpected*
-   '(1 (0 thank you 0)
-      2 *user-thanks-schema* (0 :schema))
- )
- 
-)
+
+  ; staying-active
+  1 (0 to stay physically active 0)
+    2 *reaction-to-stay-physically-active-input* (0 :subtree)
+  1 (0 to keep my mind active 0)
+    2 *reaction-to-keep-brain-active-input* (0 :subtree)
+  1 (0 to cope with hearing or vision loss 0)
+    2 *reaction-to-hearing-vision-loss-cope-input* (0 :subtree)
+
+  ; spirituality
+  1 (0 go to 3 religious services 0) 
+    2 *reaction-to-religious-services-input* (0 :subtree)
+  1 (0 spirituality is not a part of my life 0)
+    2 *reaction-to-spirituality-part-of-life-input* (0 :subtree)
+  1 (0 spirituality is a part of my life 0)
+    2 *reaction-to-spirituality-part-of-life-input* (0 :subtree)
+  1 (0 spirituality helps me 0)
+    2 *reaction-to-spirituality-helps-you-input* (0 :subtree)
+))
 

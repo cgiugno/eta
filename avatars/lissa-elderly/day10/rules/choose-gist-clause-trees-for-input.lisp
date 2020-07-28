@@ -29,22 +29,29 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (3 do you live 2 apartment 2 house 3)
-    2 (*specific-answer-from-place-you-live-input* 
-       *unbidden-answer-from-place-you-live-input*
-       *thematic-answer-from-place-you-live-input*
-       *question-from-place-you-live-input*) (0 :subtrees)
+'(
+   ; home
+   1 (3 do you live 2 apartment 2 house 3)
+      2 (*place-you-live-input*) (0 :subtrees)
    1 (3 What 2 you do 2 make you feel comfortable 2 home 3)
-    2 (*specific-answer-from-things-comfortable-home-input* 
-       *unbidden-answer-from-things-comfortable-home-input*
-       *thematic-answer-from-things-comfortable-home-input*
-       *question-from-things-comfortable-home-input*) (0 :subtrees)
+      2 (*things-comfortable-home-input*) (0 :subtrees)
    1 (3 What 2 memory 6 your homes 3)
-    2 (*specific-answer-from-memory-from-home-input* 
-       *unbidden-answer-from-memory-from-home-input*
-       *thematic-answer-from-memory-from-home-input*
-       *question-from-memory-from-home-input*) (0 :subtrees)
-)))
+      2 (*memory-from-home-input*) (0 :subtrees)
+
+   ; staying-active
+   1 (3 How 2 stay physically active 3)
+      2 (*stay-physically-active-input*) (0 :subtrees)
+   1 (3 How 2 keep your brain active 3) 
+      2 (*keep-brain-active-input*) (0 :subtrees)
+   1 (3 how 2 cope with hearing 2 vision loss 3)
+      2 (*hearing-vision-loss-cope-input*) (0 :subtrees)
+
+   ; spirituality
+   1 (3 Do you 3 religious services 3)
+      2 (*religious-services-input*) (0 :subtrees)
+   1 (3 What ways 2 spirituality a part of your life 3)
+      2 (*spirituality-part-of-life-input*) (0 :subtrees)
+   1 (3 How does spirituality help you 3 )
+      2 (*spirituality-helps-you-input*) (0 :subtrees)
+))

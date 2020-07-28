@@ -1,32 +1,37 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-  
-    ;; MEETING WITH KIM NOTES (8/8/2017)
-
-    ;; Reading the newspaper
-    ;; Reading book
-    ;; Groups activity
-    ;; Play card games
-    ;; Sudoku
-    ;; Church
-    ;; Work volunteer
-    ;; Puzzles
-
-    (alt-religion church synagogue mosque)
-    (alt-learn learn learning education course courses study studying research researching)
-
-  ))
-   
-
 ;; 	I like to exercise my brain as well as my body. What are some ways you keep your brain active as you age?
 ;;	(0 to keep my mind active 0)
 ;;	keep-brain-active
 ;;	(How can you keep your brain active ?)
 ;;	(3 How 2 keep your brain active 3)
-	
-(READRULES '*specific-answer-from-keep-brain-active-input*
-  '(
+
+
+;; MEETING WITH KIM NOTES (8/8/2017)
+
+;; Reading the newspaper
+;; Reading book
+;; Groups activity
+;; Play card games
+;; Sudoku
+;; Church
+;; Work volunteer
+;; Puzzles
+
+(MAPC 'ATTACHFEAT
+'(
+  (alt-religion church synagogue mosque)
+  (alt-learn learn learning education course courses study studying research researching)
+))
+  
+
+(READRULES '*keep-brain-active-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+    2 (How can you keep your brain active ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (How can you keep your brain active ?) (0 :gist)
+
+  ; Specific answers
   1 (0 read 2 newspaper 0)
     2 ((To keep my mind active I read newspaper \.) (keep-brain-active)) (0 :gist)
   1 (0 read 2 book 0)
@@ -49,30 +54,14 @@
     2 ((To keep my mind active I volunteer \.) (keep-brain-active)) (0 :gist)
   1 (0 alt-learn 0)
     2 ((To keep my mind active I learn more \.) (keep-brain-active)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist \: nothing found for how to keep my mind active \.) (keep-brain-active)) (0 :gist)
 ))
-            
- (READRULES '*thematic-answer-from-keep-brain-active-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-keep-brain-active-input*
-  '(
-  
-  ))
-		
- (READRULES '*question-from-keep-brain-active-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (How can you keep your brain active ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (How can you keep your brain active ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-keep-brain-active-input*
-  '(
+'(
   1 (0 to keep my mind active 2 read newspaper 0)
     2 (It\'s great that I read the newspaper\, it\'s important to stay in touch with the news\.) (100 :out)
   1 (0 to keep my mind active 2 read books 0)
@@ -95,7 +84,7 @@
     2 (It\'s great that I can still maintain a sense of my community by volunteering\.) (100 :out)
   1 (0 to keep my mind active 2 learn more 0)
     2 (It\'s amazing how even when I think I know it all\, there\'s always something more to learn\.) (100 :out)
+    
   1 (0 NIL Gist 0)
     2 (You love doing small puzzles every day to try to keep your brain active\.) (100 :out)
-  ))
-); end of eval-when
+))

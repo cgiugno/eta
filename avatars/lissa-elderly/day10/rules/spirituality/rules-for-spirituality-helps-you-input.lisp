@@ -1,27 +1,3 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-
-    ;; MEETING WITH KIM NOTES (8/8/2017)
-
-    ;; Own death
-    ;; Someone’s loss
-    ;; Grief
-    ;; Comfort
-    ;; Other people’s support
-    ;; Things happen for reason
-    ;; Not alone
-    ;; Feeling connected with nature
-
-    (alt-cope cope coping deal dealing accept accepting)
-    (alt-people people people\'s person friend friends someone alt-family)
-    (alt-family family children grandchildren child grandchild son daughter grandson granddaughter niece nephew)
-    (alt-comfort comfort comfortable consolation solace happy happiness happier
-      joy content contentment contented)
-
-  ))
-   
-
 ;;	How does spirituality help you when life gets hard? 
 ;;	(0 spirituality helps me 0)
 ;;	spirituality-helps-you
@@ -29,10 +5,44 @@
 ;;	(3 How does spirituality help you 3 )
 
 
-	
+;; MEETING WITH KIM NOTES (8/8/2017)
 
-(READRULES '*specific-answer-from-spirituality-helps-you-input*
-  '(
+;; Own death
+;; Someone’s loss
+;; Grief
+;; Comfort
+;; Other people’s support
+;; Things happen for reason
+;; Not alone
+;; Feeling connected with nature
+
+(MAPC 'ATTACHFEAT
+'(
+  (alt-cope cope coping deal dealing accept accepting)
+  (alt-people people people\'s person friend friends someone alt-family)
+  (alt-family family children grandchildren child grandchild son daughter grandson granddaughter niece nephew)
+  (alt-comfort comfort comfortable consolation solace happy happiness happier
+    joy content contentment contented)
+))
+  
+
+(READRULES '*spirituality-helps-you-input*
+'(
+  ; Questions
+  1 (0 what religion 2 you 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 are 2 you 2 religious 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 do 2 you 2 follow 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 are 2 you 2 spiritual 0 ?)
+    2 (Are you religious ?) (0 :gist)
+  1 (0 what 2 you 0 ?)
+    2 (How does spirituality help you ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (How does spirituality help you ?) (0 :gist)
+
+  ; Specific answers
   1 (0 alt-cope 3 own death 0)
     2 ((Spirituality helps me cope with my own death \.) (spirituality-helps-you)) (0 :gist)
   1 (0 come 1 terms 3 own death 0)
@@ -53,39 +63,14 @@
     2 ((Spirituality helps me realize I am not alone \.) (spirituality-helps-you)) (0 :gist)
   1 (0 connected 2 nature 0)
     2 ((Spirituality helps me be connected with nature \.) (spirituality-helps-you)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist \: nothing found for how spirituality helps me \.) (spirituality-helps-you)) (0 :gist)
 ))
-            
- (READRULES '*thematic-answer-from-spirituality-helps-you-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-spirituality-helps-you-input*
-  '(
-  
-  ))
-		
- (READRULES '*question-from-spirituality-helps-you-input*
-  '(
-  1 (0 what religion 2 you 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 are 2 you 2 religious 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 do 2 you 2 follow 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 are 2 you 2 spiritual 0)
-     2 (Are you religious ?) (0 :gist)
-  1 (0 what 2 you 0)
-     2 (How does spirituality help you ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (How does spirituality help you ?) (0 :gist)
-  1 
-  ))
 
 (READRULES '*reaction-to-spirituality-helps-you-input*
-  '(
+'(
   1 (0 spirituality helps me cope with my own death 0)
     2 (You can see how spirituality would help me cope with death\. For example\, knowing that even though my body may die\, my essence lives on\.) (100 :out)
   1 (0 spirituality helps me cope with the loss of someone 0)
@@ -102,7 +87,7 @@
     2 (It\'s good to realize that whenever I am in a bad place\, there are people out there who care about me \.) (100 :out)
   1 (0 spirituality helps me be connected with nature 0)
     2 (You think it\'s important to realize the importance of living with nature\.) (100 :out)
+    
   1 (0 NIL Gist 0)
     2 (Personally\, spirituality helps you feel like you have some sense of purpose in the world\.) (100 :out)
-  ))
-); end of eval-when
+))
