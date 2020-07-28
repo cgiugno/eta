@@ -29,22 +29,29 @@
 ;;   This is why we don't simply use a verbatim match to Lissa's
 ;;   output.
 
-(eval-when (load eval)
-
 (READRULES '*gist-clause-trees-for-input*
- '(1 (3 What types of art 2 you enjoy 3)
-    2 (*specific-answer-from-art-type-you-enjoy-input* 
-       *unbidden-answer-from-art-type-you-enjoy-input*
-       *thematic-answer-from-art-type-you-enjoy-input*
-       *question-from-art-type-you-enjoy-input*) (0 :subtrees)
+'(
+   ; technology
+   1 (3 What 2 use your smartphone 6)
+      2 (*smartphone-use-input*) (0 :subtrees)
+   1 (3 what 3 best part of advances in technology 3)
+      2 (*technology-best-part-input*) (0 :subtrees)
+   1 (3 What 3 hardest part of advances in technology 3)
+      2 (*technology-hardest-part-input*) (0 :subtrees)
+
+   ; books-and-newspaper
+   1 (3 What kinds of books 2 like to read 3)
+      2 (*books-like-to-read-input*) (0 :subtrees)
+   1 (3 How often 2 read 2 newspaper 3) 
+      2 (*newspaper-how-often-input*) (0 :subtrees)
+   1 (3 Do you like 2 discuss politics 5)
+      2 (*like-politics-input*) (0 :subtrees)
+
+   ; arts
+   1 (3 What types of art 2 you enjoy 3)
+      2 (*art-type-you-enjoy-input*) (0 :subtrees)
    1 (3 Have you ever taken lessons 5 art 3)
-    2 (*specific-answer-from-art-lessons-input* 
-       *unbidden-answer-from-art-lessons-input*
-       *thematic-answer-from-art-lessons-input*
-       *question-from-art-lessons-input*) (0 :subtrees)
+      2 (*art-lessons-input*) (0 :subtrees)
    1 (3 How 2 art help 2 cope 2 negative emotions 3) 
-    2 (*specific-answer-from-ways-art-helps-input* 
-       *unbidden-answer-from-ways-art-helps-input*
-       *thematic-answer-from-ways-art-helps-input*
-       *question-from-ways-art-helps-input*) (0 :subtrees)
-)))
+      2 (*ways-art-helps-input*) (0 :subtrees)
+))

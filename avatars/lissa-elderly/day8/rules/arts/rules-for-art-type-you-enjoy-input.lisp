@@ -1,18 +1,28 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-  
-  ))
-   
-
 ;; 	What types of art do you enjoy, like paintings, music, dance, or theatre?
 ;;	(0 the type of art I enjoy 0) (0 do not enjoy any 2 art 0)
 ;;	art-type-you-enjoy
 ;;	(What types of art do you enjoy ?)
 ;;	(3 What types of art 2 you enjoy 3) 
-	
-(READRULES '*specific-answer-from-art-type-you-enjoy-input*
-  '(
+
+(MAPC 'ATTACHFEAT
+'(
+
+))
+  
+
+(READRULES '*art-type-you-enjoy-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+    2 (What types of art do you enjoy ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (What types of art do you enjoy ?) (0 :gist)
+  1 (0 do you like 1 art-types 0 ?)
+    2 (What types of art do you enjoy ?) (0 :gist)
+  1 (0 do you enjoy 1 art-types 0 ?)
+    2 (What types of art do you enjoy ?) (0 :gist)
+
+  ; Specific answers
   1 (0 art-types-paint 0)
     2 ((The type of art I enjoy is 2 \.) (art-type-you-enjoy)) (0 :gist)
   1 (0 art-types-draw 0)
@@ -36,34 +46,14 @@
     2 ((I do not enjoy any kind of art \.) (art-type-you-enjoy)) (0 :gist)
   1 (0 NEG really 0)
     2 ((I do not enjoy any kind of art \.) (art-type-you-enjoy)) (0 :gist)
+    
   1 (0)
     2 ((NIL Gist \: nothing found for the type of art I enjoy \.) (art-type-you-enjoy)) (0 :gist)
 ))
-          
- (READRULES '*thematic-answer-from-art-type-you-enjoy-input*
-  '(
 
-  ))
-
- (READRULES '*unbidden-answer-from-art-type-you-enjoy-input*
-  '(
-  
-  ))
-		
- (READRULES '*question-from-art-type-you-enjoy-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (What types of art do you enjoy ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (What types of art do you enjoy ?) (0 :gist)
-  1 (0 do you like 1 art-types 0)
-     2 (What types of art do you enjoy ?) (0 :gist)
-  1 (0 do you enjoy 1 art-types 0)
-     2 (What types of art do you enjoy ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-art-type-you-enjoy-input*
-  '( 
+'( 
   1 (0 NEG enjoy any 2 art 0)
     2 (You are sure there\'s some art out there which makes me happy\.) (100 :out)
   1 (0 art I enjoy 1 art-types-paint 0)
@@ -134,9 +124,7 @@
     2 (0 music-types-string 0)
       3 (2 is quite a nice instrument\. Very pleasing to listen to\.) (100 :out)
     2 (You are glad there are people making such beautiful music\, life would be quite boring without it\.) (100 :out)
-  
+
   1 (0 NIL Gist 0)
     2 (You are glad to live in a society where people can make such beautiful pieces of art\.) (100 :out)
-
-  ))
-); end of eval-when
+))

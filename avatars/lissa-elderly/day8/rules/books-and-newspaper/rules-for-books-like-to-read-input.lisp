@@ -1,14 +1,3 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-  (book-genre health fitness mystery mysteries suspense suspensful romance historical detective humor biographies
-  autobiography art literature philosophy religion ethics science horror satire diaries cookbooks cookbook poetry
-  fantasy funny comedy educational academic)
-  (book-genre-two non historical science realistic alt-fiction)
-  (alt-fiction fiction fictions)
-  ))
-   
-
 ;;	What kinds of books do you like to read?
 ;;	(0 I do not like to read books 0) 
 ;;	(0 I like 3 books 0)
@@ -16,10 +5,33 @@
 ;;	(What kinds of books do you like to read ?)
 ;;	(3 What kinds of books 2 like to read 3)
 
-	
+(MAPC 'ATTACHFEAT
+'(
+  (book-genre health fitness mystery mysteries suspense suspensful romance historical detective humor biographies
+    autobiography art literature philosophy religion ethics science horror satire diaries cookbooks cookbook poetry
+    fantasy funny comedy educational academic)
+  (book-genre-two non historical science realistic alt-fiction)
+  (alt-fiction fiction fictions)
+))
+  
 
-(READRULES '*specific-answer-from-books-like-to-read-input*
-  '(
+(READRULES '*books-like-to-read-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+    2 (What kinds of books do you like to read ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (What kinds of books do you like to read ?) (0 :gist)
+  1 (0 do you 1 like 0 ?)
+    2 (What kinds of books do you like to read ?) (0 :gist)
+  1 (0 have you 2 read 0 ?)
+    2 (Have you read this book ?) (0 :gist)
+  1 (0 have you 2 heard of 0 ?)
+    2 (Have you read this book ?) (0 :gist)
+  1 (0 do you 2 read 0 ?)
+    2 (Do you like to read ?) (0 :gist)
+
+  ; Specific answers
   1 (0 book-genre-two book-genre-two 0)
     2 ((I like 2 3 books \.)  (books-like-to-read)) (0 :gist)
   1 (0 book-genre 0)
@@ -28,39 +40,18 @@
     2 ((I like audio books \.)  (books-like-to-read)) (0 :gist)
   1 (0 NEG 2 alt-read 0)
     2 ((I do not like to read books \.)  (books-like-to-read)) (0 :gist)
-  1 (0)
-    2 ((NIL Gist \: nothing found for the genre I like to read in books \.) (books-like-to-read)) (0 :gist)
-))    
-       
- (READRULES '*thematic-answer-from-books-like-to-read-input*
-  '(
-  
-  ))
 
- (READRULES '*unbidden-answer-from-books-like-to-read-input*
-  '(
+  ; Unbidden answers
   1 (0 newspaper 0)
     2 ((I read newspaper \.)  (newspaper-how-often)) (0 :gist)
-  ))
-		
- (READRULES '*question-from-books-like-to-read-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (What kinds of books do you like to read ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (What kinds of books do you like to read ?) (0 :gist)
-  1 (0 do you 1 like 0)
-     2 (What kinds of books do you like to read ?) (0 :gist)
-  1 (0 have you 2 read 0)
-     2 (Have you read this book ?) (0 :gist)
-  1 (0 have you 2 heard of 0)
-     2 (Have you read this book ?) (0 :gist)
-  1 (0 do you 2 read 0)
-     2 (Do you like to read ?) (0 :gist)
-  ))
+
+  1 (0)
+    2 ((NIL Gist \: nothing found for the genre I like to read in books \.) (books-like-to-read)) (0 :gist)
+))
+
 
 (READRULES '*reaction-to-books-like-to-read-input*
-  '( 
+'( 
   1 (0 NEG like 1 read books 0)
     2 (It can be difficult to read sometimes\, it\'s okay to have fun doing other things\.) (0 :gist)
   1 (0 book-genre-two book-genre-two 0)
@@ -135,7 +126,7 @@
 
   1 (0 audio 0)
     2 (You listen to audio books sometimes while doing other tasks\, like driving\.) (100 :out)
+
   1 (0 NIL Gist 0)
     2 (You still have a lot of books on your reading list that you want to read eventually\.) (0 :out)
-  ))
-); end of eval-when
+))

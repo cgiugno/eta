@@ -1,13 +1,18 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
+;;  Have you ever taken lessons in music, dance, theatre, drawing, or another kind of art?
+;;	(0 I have not taken lessons in any kind of art 0)
+;;	(0 I have taken lessons in 0)
+;;	art-lessons
+;;	(Have you ever taken lessons in a kind of art ?)
+;;	(3 Have you ever taken lessons 5 art 3)
 
+(MAPC 'ATTACHFEAT
+'(
   (art-types art-types-paint art-types-draw art-types-photography art-types-clay art-types-dance art-types-theatre art-types-music)
-  
+
   (art-types-paint art paint painting paintings painting-types)
   (painting-types watercolor watercoloring oil oils acrylic abstract modern cubism surrealism surrealist impressionism
     impressionist medieval realistic realism colorful minimalistic minimalism)
-  
+
   (art-types-draw draw drawing sketch sketching)
 
   (art-types-photography photography photos photographs)
@@ -30,23 +35,28 @@
   (music-types-wind flute clarinet trumpet trombone bass oboe horn saxophone sax recorder)
   (music-types-string guitar violin cello viola bass)
   (music-types-other piano drum drums percussion)
-
+  ; Offering art lessons at senior living community
   (syn-lessons lesson lessons class classes school)
+))
 
-  ;; Offering art lessons at senior living community
 
-  ))
-   
-;;  Have you ever taken lessons in music, dance, theatre, drawing, or another kind of art?
-;;	(0 I have not taken lessons in any kind of art 0)
-;;	(0 I have taken lessons in 0)
-;;	art-lessons
-;;	(Have you ever taken lessons in a kind of art ?)
-;;	(3 Have you ever taken lessons 5 art 3)
-	
+(READRULES '*art-lessons-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+    2 (Have you ever taken lessons in a kind of art ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+    2 (Have you ever taken lessons in a kind of art ?) (0 :gist)
+  1 (0 have 2 you 0 ?)
+    2 (Have you ever taken lessons in a kind of art ?) (0 :gist)
+  1 (0 can 1 you 1 art-types 0 ?)
+    2 (Can you do art ?) (0 :gist)
+  1 (0 how do you 1 art-types 0 ?)
+    2 (Can you do art ?) (0 :gist)
+  1 (0 do you like 1 art-types 0 ?)
+    2 (What types of art do you enjoy ?) (0 :gist)
 
-(READRULES '*specific-answer-from-art-lessons-input*
-  '(
+  ; Specific answers
   1 (0 art-types-paint 0)
     2 ((I have taken lessons in painting \.) (art-lessons)) (0 :gist)
   1 (0 art-types-draw 0)
@@ -70,38 +80,14 @@
     2 ((I have not taken lessons in any kind of art \.) (art-lessons)) (0 :gist)
   1 (0 NEG really 0)
     2 ((I have not taken lessons in any kind of art \.) (art-lessons)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist \: nothing found for areas I have taken lessons in \.) (art-lessons)) (0 :gist)
-))   
-       
- (READRULES '*thematic-answer-from-art-lessons-input*
-  '(
-  
-  ))
+))
 
- (READRULES '*unbidden-answer-from-art-lessons-input*
-  '( 
-  
-  ))
-		
- (READRULES '*question-from-art-lessons-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (Have you ever taken lessons in a kind of art ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (Have you ever taken lessons in a kind of art ?) (0 :gist)
-  1 (0 have 2 you 0)
-     2 (Have you ever taken lessons in a kind of art ?) (0 :gist)
-  1 (0 can 1 you 1 art-types 0)
-     2 (Can you do art ?) (0 :gist)
-  1 (0 how do you 1 art-types 0)
-     2 (Can you do art ?) (0 :gist)
-  1 (0 do you like 1 art-types 0)
-     2 (What types of art do you enjoy ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-art-lessons-input*
-  '(
+'(
   1 (0 taken lessons 1 painting 0)
     2 (You think painting can be beautiful\, but you was never very good at it\. I am lucky I could get experience with it\.) (100 :out)
 
@@ -139,10 +125,10 @@
     2 (0 music-types-string 0)
       3 (You always found string instruments really difficult\. They sure sound nice though\!) (100 :out)
     2 (It\'s great that I had some music education growing up\!) (100 :out)
-  
+
   1 (0 NEG taken lessons 0)
     2 (Well\, it\'s never too late to start taking more art lessons\!) (100 :out)
+
   1 (0 NIL Gist 0)
     2 (You think it\'s important to have a way to express myself through art\.) (100 :out)
-  ))
-); end of eval-when
+))
