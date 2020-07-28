@@ -1,36 +1,3 @@
-(eval-when (load eval)
-  (MAPC 'ATTACHFEAT
-  '(
-
-  ;; MEETING WITH KIM NOTES (8/8/2017)
-
-  ;; Totally healthy / I don't have any health problems
-    ;; Response: "Could you give some examples of what you're doing to stay healthy?"
-
-  ;; Diabetes
-  ;; Arthritis
-  ;; Depression
-  ;; Back pain
-  ;; Heart conditions
-  ;; Breathing problems
-  ;; COPD
-  ;; Exercise 
-  ;; Physical therapy
-  ;; Knee replacements
-  ;; Vision loss
-  ;; Weight loss
-  ;; Sleep
-  ;; Parkinsons
-  ;; Alzheimers
-
-  ;; It's all too hard / too much
-  ;; I'm not managing anything well
-
-  (alt-COPD COPD bronchitis emphysema)
-
-  ))
-   
-
 ;;	Tell me about how you are managing one of your health concerns. 
 ;;	(0 I manage my health concerns 0)
 ;;	managing-health-concerns
@@ -38,10 +5,47 @@
 ;;	(3 how 2 you managing 2 health concerns 3)
 
 
-	
+;; MEETING WITH KIM NOTES (8/8/2017)
 
-(READRULES '*specific-answer-from-managing-health-concerns-input*
-  '(
+;; Totally healthy / I don't have any health problems
+;; Response: "Could you give some examples of what you're doing to stay healthy?"
+
+;; Diabetes
+;; Arthritis
+;; Depression
+;; Back pain
+;; Heart conditions
+;; Breathing problems
+;; COPD
+;; Exercise 
+;; Physical therapy
+;; Knee replacements
+;; Vision loss
+;; Weight loss
+;; Sleep
+;; Parkinsons
+;; Alzheimers
+
+;; It's all too hard / too much
+;; I'm not managing anything well
+
+(MAPC 'ATTACHFEAT
+'(
+  (alt-COPD COPD bronchitis emphysema)
+))
+
+
+(READRULES '*managing-health-concerns-input*
+'(
+  ; Questions
+  1 (0 what 2 you 0 ?)
+      2 (how are you managing your health concerns ?) (0 :gist)
+  1 (0 how 2 you 0 ?)
+      2 (how are you managing your health concerns ?) (0 :gist)
+  1 (0 do you 4 problems 0 ?)
+      2 (how are you managing your health concerns ?) (0 :gist)
+
+  ; Specific answers
   1 (0 diabetes 0)
     2 ((I manage my health concerns by treating my diabetes \.) (managing-health-concerns)) (0 :gist)
   1 (0 arthritis 0)
@@ -78,32 +82,14 @@
     2 ((I manage my health concerns badly \.) (managing-health-concerns)) (0 :gist)
   1 (0 NEG managing 0)
     2 ((I manage my health concerns badly \.) (managing-health-concerns)) (0 :gist)
+
   1 (0)
     2 ((NIL Gist \: nothing found for how I manage my health concerns \.) (managing-health-concerns)) (0 :gist)
-))    
-       
- (READRULES '*thematic-answer-from-managing-health-concerns-input*
-  '(
-  
-  ))
+))
 
- (READRULES '*unbidden-answer-from-managing-health-concerns-input*
-  '( 
-  
-  ))
-		
- (READRULES '*question-from-managing-health-concerns-input*
-  '(
-  1 (0 what 2 you 0)
-     2 (how are you managing your health concerns ?) (0 :gist)
-  1 (0 how 2 you 0)
-     2 (how are you managing your health concerns ?) (0 :gist)
-  1 (0 do you 4 problems 0)
-     2 (how are you managing your health concerns ?) (0 :gist)
-  ))
 
 (READRULES '*reaction-to-managing-health-concerns-input*
-  '(
+'(
   1 (0 manage my health concerns 3 diabetes 0)
     2 (Diabetes seems like a major annoyance\. You would hate having to monitor the food you eat\. You hope I can continue to manage it well\.) (100 :out)
   1 (0 manage my health concerns 3 arthritis 0)
@@ -134,7 +120,7 @@
     2 (It sounds very sad that I am struggling with Alzheimers\'s\. You hope I am successful in getting treatment for it\.) (100 :out)
   1 (0 manage my health concerns badly 0)
     2 (It nearly always helps to talk to a professional about health concerns\. You hope I try to do that\, if I haven\'t already\.) (100 :out)
+
   1 (0 NIL Gist 0)
     2 (You hope I am successful in managing all my health concerns\. Remember that there\'s always people I can talk to if I need them\.) (100 :out)
-  ))
-); end of eval-when
+))
