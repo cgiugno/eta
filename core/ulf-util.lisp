@@ -1120,16 +1120,20 @@
 
 (defun relation-prop? (prop)
 ; ````````````````````````````
-; Checks whether a proposition is a relation, i.e. ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))).
+; Checks whether a proposition is a relation, i.e. ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))),
+; or ((the.d (|Twitter| block.n)) central.a)
 ;
   (and (listp prop) (or
     (and
       (or (np? (first prop)) (nnp? (first prop)) (restricted-variable? (first prop)))
-      (adj? (second prop)))
+      (or (adj? (second prop))
+          (and (listp (second prop)) (mod-a? (first (second prop))) (adj? (second (second prop))))))
     (and
       (or (np? (first prop)) (nnp? (first prop)) (restricted-variable? (first prop)))
       (or (np? (first prop)) (nnp? (third prop)) (restricted-variable? (third prop)))
-      (or (prep? (second prop)) (equal '= (second prop))))))
+      (or (prep? (second prop))
+          (and (listp (second prop)) (adv-a? (first (second prop))) (prep? (second (second prop))))
+          (equal '= (second prop))))))
 ) ; END relation-prop?
 
 
@@ -1139,8 +1143,20 @@
 ; (interpreted as 'put the Twitter block back on the Texaco block').
 ; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
 ;
-  (and (listp prop) (= 2 (length prop)) (equal 'undo (first prop)) (relation-prop? (second prop)))
+  (and (listp prop) (= 2 (length prop)) (equal 'undo (first prop))
+       (or (relation-prop? (second prop)) (every #'relation-prop? (second prop))))
 ) ; END undo-relation-prop?
+
+
+(defun clarification-relation-prop? (prop)
+; ```````````````````````````````````````````
+; Checks whether a proposition is an 'clarification' relation, i.e. (clarification ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
+; (interpreted as 'put the Twitter block back on the Texaco block').
+; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
+;
+  (and (listp prop) (= 2 (length prop)) (equal 'clarification (first prop))
+       (or (relation-prop? (second prop)) (every #'relation-prop? (second prop))))
+) ; END clarification-relation-prop?
 
 
 (defun after-prop? (prop)

@@ -167,6 +167,10 @@
     1 (np-bw 3 verb-rel 1 prep 0 ?); e.g. A red block sits between two green blocks ?
        2 (((*spatial-sentence-ulf-tree* 1 2 3 4 5 6)) (1 ?)) (0 :ulf-recur)
 
+    ; declarative 'modal' questions with ellipses, e.g., next to the Twitter block ?
+    1 (1 prep 4 ?)
+       2 (*modal-question-ulf-tree* (should it be 1 2 3 ?)) (0 :subtree+clause)
+
     ; fallback rules
     1 (0 block 0 between 0)
        2 *fallback-between-spatial-question-ulf-tree* (0 :subtree)
@@ -673,9 +677,147 @@
 (READRULES '*modal-question-ulf-tree* 
 ; `````````````````````````````````````````
 ; Parses modal questions (e.g. can you see the NVidia block ?).
-; NOTE: currently unsupported.
+; 'should' questions added for purposes of concept tutoring (7/9/2020) -B.K.
 ;
 '(
+   ; Asking about conjunction of blocks
+    1 (modal np-bw 3 and np-bw 2 noun 0)
+       ; Standard
+       2 (modal np-bw 3 and np-bw 2 noun be rel-adj ?); e.g., should the NVidia block and the SRI block be touching ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! v- 8) (lex-ulf! adj 9) ?)
+             ((1 (set-of 2 3) (4 5)) ?)) (0 :ulf-recur)
+       2 (modal np-bw 3 and np-bw 2 noun be 1 rel-adj ?); e.g., should the NVidia block and the SRI block be directly touching ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! v- 8) (lex-ulf! adv-a 9) (lex-ulf! adj 10) ?)
+             ((1 (set-of 2 3) (4 5 6)) ?)) (0 :ulf-recur)
+       2 (modal np-bw 3 and np-bw 2 noun be 1 prep each other ?); e.g., should the NVidia block and the SRI block be touching each other ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (*np-ulf-tree* 5 6 7) (lex-ulf! v- 8) (*pp-ulf-tree* 9 10 11 12) ?)
+             ((1 (set-of 2 3) (4 5)) ?)) (0 :ulf-recur)
+
+    ; Asking about a single block
+    1 (modal 1 det 2 block 0)
+       ; Negation
+       2 (modal not det 2 block be 1 between np-bw 3 conj np-bw 3 ?); e.g., should not the NVidia block be between the SRI block and the Texaco block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 6) (*pp-between-ulf-tree* 7 8 9 10 11 12 13) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal not det 2 block be 1 prep np-bw 3 conj np-bw 3 ?); e.g., should not the NVidia block be above the SRI block and the Texaco block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 6) (*pp-ulf-tree* 7 8 9 10 11 12 13) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal not det 2 block be 1 prep 2 np-bw 3 ?); e.g., should not the NVidia block be on [a red block]/[it]/[red blocks] ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 6) (*pp-ulf-tree* 7 8 9 10 11) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal not det 2 block be adj ?); e.g., should not the NVidia block be clear/red/visible ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 6) (lex-ulf! adj 7) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal not det 2 block 4 be det 2 noun 4 ?); e.g., should not the Twitter block be the leftmost block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3 4 5 6) (lex-ulf! v- 7) (*np-ulf-tree* 8 9 10 11) ?)
+             ((1 not 2 (3 (= 4))) ?)) (0 :ulf-recur)
+       ; Standard
+       2 (modal det 2 block be 1 between np-bw 3 conj np-bw 3 ?); e.g., should the NVidia block be between the SRI block and the Texaco block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (lex-ulf! v- 5) (*pp-between-ulf-tree* 6 7 8 9 10 11 12) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal det 2 block be 1 prep np-bw 3 conj np-bw 3 ?); e.g., should the NVidia block be above the SRI block and the Texaco block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9 10 11 12) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal det 2 block be 1 prep 2 np-bw 3 ?); e.g., should the NVidia block be on [a red block]/[it]/[red blocks] ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9 10) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal det 2 block be adj ?); e.g., should the NVidia block be clear/red/visible ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4) (lex-ulf! v- 5) (lex-ulf! adj 6) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal det 2 block 4 be det 2 noun 4 ?); e.g., should the Twitter block be the leftmost block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2 3 4 5) (lex-ulf! v- 6) (*np-ulf-tree* 7 8 9 10) ?)
+             ((1 2 (3 (= 4))) ?)) (0 :ulf-recur)
+
+    ; Asking about a single block (by proper name)
+    1 (modal corp 0)
+       ; Standard
+       2 (modal corp be 1 between np-bw 3 conj np-bw 3 ?); e.g., should NVidia be between the SRI block and the Texaco block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*pp-between-ulf-tree* 4 5 6 7 8 9 10) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal corp be 1 prep np-bw 3 conj np-bw 3 ?); e.g., should NVidia be above the SRI block and the Texaco block ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*pp-ulf-tree* 4 5 6 7 8 9 10) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal corp be 1 prep 2 np-bw 3 ?); e.g., should NVidia be on [a red block]/[it]/[red blocks] ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*pp-ulf-tree* 4 5 6 7 8) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal corp be adj ?); e.g., should NVidia be clear/red/visible ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (lex-ulf! adj 4) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal corp be det 2 noun 4 ?); e.g., should Twitter be the leftmost block?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6 7) ?)
+             ((1 2 (3 (= 4))) ?)) (0 :ulf-recur)
+
+    ; Asking about a pronoun
+    1 (modal 1 pron 0)
+       ; Negation
+       2 (modal not pron be 1 prep 2 np-bw 3 ?); e.g., should not it be on top of [a red block]/[them]/[red blocks] ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3) (lex-ulf! v- 4) (*pp-ulf-tree* 5 6 7 8 9) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal not pron be adj ?); e.g., should not it be clear/red/visible ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 3) (lex-ulf! v- 4) (lex-ulf! adj 5) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       ; Standard
+       2 (modal pron be 1 prep 2 np-bw 3 ?); e.g., should it be on top of [a red block]/[them]/[red blocks] ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (*pp-ulf-tree* 4 5 6 7 8) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal pron be adj ?); e.g., should it be clear/red/visible ?
+          3 (((lex-ulf! v 1) (*np-ulf-tree* 2) (lex-ulf! v- 3) (lex-ulf! adj 4) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+
+    ; Spatial verb
+    1 (modal np-bw 2 not verb-rel 1 between 0 ?); e.g., should anything not sit between the two red blocks ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 5) (*pp-between-ulf-tree* 7 8) ?)
+          ((1 2 (not (3 (adv-a 4)))) ?))
+    1 (modal np-bw 2 not verb-rel 2 np-bw 3 ?); e.g., should any block not touch the NVidia block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) ?)
+          ((1 2 (not (3 4))) ?)) (0 :ulf-recur)
+    1 (modal np-bw 2 not verb-rel prep 2 np-bw 3 ?); e.g., should any block not sit on the red NVidia block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9) ?)
+          ((1 2 (not (3 (adv-a 4)))) ?)) (0 :ulf-recur)
+    1 (modal np-bw 2 verb-rel 1 between 0 ?); e.g., should anything sit between the two red blocks ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 4) (*pp-between-ulf-tree* 6 7) ?)
+          ((1 2 (3 (adv-a 4))) ?)) (0 :ulf-recur)
+    1 (modal np-bw 2 verb-rel 2 np-bw 3 ?); e.g., should any block support the NVidia block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) ?)
+          ((1 2 (3 4)) ?)) (0 :ulf-recur)
+    1 (modal np-bw 2 verb-rel prep 2 np-bw 3 ?); e.g., should any block sit on the red NVidia block ?
+       2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 4) (*pp-ulf-tree* 5 6 7 8) ?)
+          ((1 2 (3 (adv-a 4))) ?)) (0 :ulf-recur)
+    1 (modal pron verb-rel 2 np-bw 3 ?); e.g., should I move the Twitter block ?
+       2 (((lex-ulf! v 1) (lex-ulf! pro 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) ?)
+          ((1 2 (3 4)) ?)) (0 :ulf-recur)
+    1 (modal pron verb-rel det 2 noun 1 prep 2 np-bw 3 ?); e.g., should I put the Twitter block (directly) on the Texaco block ?
+      2 (((lex-ulf! v 1) (lex-ulf! pro 2) (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6) (*pp-ulf-tree* 7 8 9 10 11) ?)
+         ((1 2 (3 4 5)) ?)) (0 :ulf-recur)
+    1 (modal pron verb-rel pron 1 prep 2 np-bw 3 ?); e.g., should I put it (directly) on the Twitter block ?
+      2 (((lex-ulf! v 1) (lex-ulf! pro 2) (lex-ulf! v- 3) (*np-ulf-tree* 4) (*pp-ulf-tree* 5 6 7 8 9) ?)
+         ((1 2 (3 4 5)) ?)) (0 :ulf-recur)
+
+    ; Asking about an existential proposition
+    1 (modal there 0)
+       ; Negation
+       2 (modal not there be det 2 noun 1 between 0 ?); e.g., should not there be a red block between the Twitter block and the Texaco block ?
+          3 (((lex-ulf! v 1) there.pro (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7 8 9 10) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal not there be det 2 noun 1 prep 2 np-bw 3 ?); e.g., should not there be a red block on the Twitter block ?
+          3 (((lex-ulf! v 1) there.pro (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7 8 9 10 11 12) ?)
+             ((1 not 2 (3 4)) ?)) (0 :ulf-recur)
+       ; Standard
+       2 (modal there be det 2 noun 1 between 0 ?); e.g., should there be a red block between the Twitter block and the Texaco block ?
+          3 (((lex-ulf! v 1) there.pro (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6 7 8 9) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+       2 (modal there be det 2 noun 1 prep 2 np-bw 3 ?); e.g., should there be a red block on the Twitter block ?
+          3 (((lex-ulf! v 1) there.pro (lex-ulf! v- 3) (*np-ulf-tree* 4 5 6 7 8 9 10 11) ?)
+             ((1 2 (3 4)) ?)) (0 :ulf-recur)
+
+    
+    ; Should the Twitter block not be on ... ?
+
+    ; Should I have moved the ... ?
+    ; Should I have put the ... on ... ?
+    ; Should I not have moved the ... ?
+    ; Should not I have moved the ... ?
+
     1 (Sorry\, you are not handling modal questions yet\.) (0 :out)
 
 )) ; END *modal-question-ulf-tree*
@@ -711,6 +853,28 @@
     ; NOTE: does this make sense?
     1 (where be there 0); interpret like a y/n-question, i.e., drop the "where"
        2 (((*yn-question-ulf-tree* 2 3 4)) 1) (0 :ulf-recur)
+
+    ; Modal where-questions
+    1 (where should 2 np-bw 3 be prep-where-adv 2 np-bw 3 ?); e.g., where should the Twitter block be relative to the Texaco block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 6) (*pp-ulf-tree* 7 8 9 10) ?)
+          ((sub 1 (2 3 (4 *h (adv-a 5)))) ?)) (0 :ulf-recur)
+    1 (where should 2 np-bw 3 be ?); e.g., where should the Twitter block be ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 6) ?)
+          ((sub 1 (2 3 (4 *h))) ?)) (0 :ulf-recur)
+    1 (where should pron verb-rel 2 np-bw 3 prep-where-adv 2 np-bw 3 ?); e.g., where should I move the Twitter block relative to the Texaco block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (lex-ulf! pro 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) (*pp-ulf-tree* 8 9 10 11) ?)
+          ((sub 1 (2 3 (4 5 *h (adv-a 6)))) ?)) (0 :ulf-recur)
+    1 (where should pron verb-rel 2 np-bw 3 ?); e.g., where should I move the Twitter block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! v 2) (lex-ulf! pro 3) (lex-ulf! v- 4) (*np-ulf-tree* 5 6 7) ?)
+          ((sub 1 (2 3 (4 5 *h))) ?)) (0 :ulf-recur)
+    1 (where do 2 np-bw 3 necessity to be ?); e.g., where does the Twitter block need to be ?
+       2 (((lex-ulf! wh-pred 1) (*np-ulf-tree* 3 4 5) (lex-ulf! v- 8) ?)
+          ((sub 1 ((pres need.aux-v) 2 (3 *h))) ?)) (0 :ulf-recur)
+    1 (where do pron necessity to verb-rel 2 np-bw 3 ?); e.g., where do I need to move the Twitter block ?
+       2 (((lex-ulf! wh-pred 1) (lex-ulf! pro 3) (lex-ulf! v- 6) (*np-ulf-tree* 7 8 9) ?)
+          ((sub 1 ((pres need.aux-v) 2 (3 4 *h))) ?)) (0 :ulf-recur)
+
+    ; Where do you want me to put the Twitter block ?
 
 )) ; END *where-question-ulf-tree*
 
@@ -1064,6 +1228,32 @@
        2 (((*np-ulf-tree* 1 4 5) (lex-ulf! v 6) (lex-ulf! adj 7) ?)
           ((1 (2 3)) ?)) (0 :ulf-recur)
 
+    ; Modal wh-question
+    1 (wh_ 2 should not be between 0 ?); e.g., what block should not be between the Twitter block and the Texaco block ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! v- 5) (*pp-between-ulf-tree* 6 7) ?)
+          ((1 (2 not (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should be between 0 ?); e.g., what block should be between the Twitter block and the Texaco block ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! v- 4) (*pp-between-ulf-tree* 5 6) ?)
+          ((1 (2 (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should not be 1 prep 2 np-bw 3 ?); e.g., what block should not be on the Twitter block ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9 10) ?)
+          ((1 (2 not (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should be 1 prep 2 np-bw 3 ?); e.g., what block should be on the Twitter block ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! v- 4) (*pp-ulf-tree* 5 6 7 8 9) ?)
+          ((1 (2 (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should not be adj ?); e.g., what block should not be clear ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! v- 5) (lex-ulf! adj 6) ?)
+          ((1 (2 not (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should be adj ?); e.g., what block should be clear ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! v- 4) (lex-ulf! adj 5) ?)
+          ((1 (2 (3 4))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should pron verb-rel 1 prep 2 np-bw 3 ?); e.g., what block should I put on the Twitter block ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! pro 4) (lex-ulf! v- 5) (*pp-ulf-tree* 6 7 8 9 10) ?)
+          ((sub 1 (2 3 (4 *h 5))) ?)) (0 :ulf-recur)
+    1 (wh_ 2 should pron verb-rel ?); e.g., what block should I move ?
+       2 (((*np-ulf-tree* 1 2) (lex-ulf! v 3) (lex-ulf! pro 4) (lex-ulf! v- 5) ?)
+          ((sub 1 (2 3 (4 *h))) ?)) (0 :ulf-recur)
+
 )) ; END *wh-question-ulf-tree*
 
 
@@ -1272,6 +1462,30 @@
     1 (do np-bw 2 verb-rel prep 2 np-bw 3 ?); e.g., does any block sit on the red NVidia block ?
        2 (((lex-ulf! v 1) (*np-ulf-tree* 2 3) (lex-ulf! v- 4) (*pp-ulf-tree* 5 6 7 8) ?)
           ((1 2 (3 (adv-a 4))) ?)) (0 :ulf-recur)
+
+    ; Modal 'do'
+    1 (do 2 np-bw 3 necessity to be 1 between 0 ?); e.g., does the Twitter block need to be between the Texaco block and the Mercedes block ?
+       2 (((*np-ulf-tree* 2 3 4) (lex-ulf! v- 7) (*pp-between-ulf-tree* 8 9 10) ?)
+          (((pres need.aux-v) 1 (2 3)) ?)) (0 :ulf-recur)
+    1 (do 2 np-bw 3 necessity to be 1 prep 2 np-bw 3 ?); e.g., does the Twitter block need to be (directly) on the Texaco block ?
+       2 (((*np-ulf-tree* 2 3 4) (lex-ulf! v- 7) (*pp-ulf-tree* 8 9 10 11 12) ?)
+          (((pres need.aux-v) 1 (2 3)) ?)) (0 :ulf-recur)
+    1 (do 2 np-bw 3 necessity to be adj ?); e.g., does the Twitter block need to be clear ?
+       2 (((*np-ulf-tree* 2 3 4) (lex-ulf! v- 7) (lex-ulf! adj 8) ?)
+          (((pres need.aux-v) 1 (2 3)) ?)) (0 :ulf-recur)
+    1 (do pron necessity to verb-rel 2 np-bw 3 ?); e.g., do I need to move the Twitter block ?
+       2 (((lex-ulf! pro 2) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) ?)
+          (((pres need.aux-v) 1 (2 3)) ?)) (0 :ulf-recur)
+    1 (do pron necessity to verb-rel det 2 noun 1 prep 2 np-bw 3 ?); e.g., do I need to put the Twitter block (directly) on the Target block ?
+       2 (((lex-ulf! pro 2) (lex-ulf! v- 5) (*np-ulf-tree* 6 7 8) (*pp-ulf-tree* 9 10 11 12 13) ?)
+          (((pres need.aux-v) 1 (2 3 4)) ?)) (0 :ulf-recur)
+    1 (do pron necessity to verb-rel pron 1 prep 2 np-bw 3 ?); e.g., do I need to put it (directly) on the Target block ?
+       2 (((lex-ulf! pro 2) (lex-ulf! v- 5) (*np-ulf-tree* 6) (*pp-ulf-tree* 7 8 9 10 11) ?)
+          (((pres need.aux-v) 1 (2 3 4)) ?)) (0 :ulf-recur)
+
+    ; Does not the Twitter block need to be on ...?
+
+    ; Do you want me to ... ?
 
 )) ; END *do-question-ulf-tree*
 

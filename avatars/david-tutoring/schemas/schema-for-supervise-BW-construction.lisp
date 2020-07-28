@@ -1,20 +1,24 @@
-;; *guide-BW-construction*
+;; *supervise-BW-construction*
 ;;
-;; Dialogue for blocks world structure building instruction
+;; Dialogue for blocks world structure building supervision
 ;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defparameter *guide-BW-construction*
+(defparameter *supervise-BW-construction*
 
-'(Event-schema ((^me guide-BW-construction.v ^you ?goal-rep) ** ?e)
+'(Event-schema ((^me supervise-BW-construction.v ^you ?goal-rep) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
-; Blocks world structure building instruction; such a session is expected to
-; consist of the agent (given a goal representation) instructing the user on
-; the steps required to create that goal representation, giving corrections
-; to the user when they make an incorrect move, possibly answering user
-; questions along the way, and terminating once the goal representation
-; is successfully created.
+; Blocks world structure building supervision; such a session is expected to
+; consist of the agent (given a goal representation) supervising the user building
+; the chosen goal structure, fielding any questions along the way, and issuing
+; corrections when the user makes a wrong move (according to the planner input
+; after each step), and terminating once the goal representation is created.
+;
+; NOTE: currently this is exactly the same as the guide-BW-construction.v schema,
+; except minor differences in some of the speech outputs by David, and David
+; instantiates the supervise-BW-action.v schema instead of guide-BW-action.v.
+;
 
 :types (
   !t1 (^you person.n)
@@ -68,7 +72,7 @@
   ; if the user is new, or it's a new day ... The opening could be more concise
   ; for repeat users.
   ?e1 (^me say-to.v ^you 
-       '(OK\, let\'s start building a simple example\.))
+       '(OK\, try building it \.))
 
   ?e2 (:repeat-until (?e2 finished2.a)
 
@@ -103,15 +107,15 @@
           (:else
 
             ; David guides the user in making the proposed action.
-            ?e8 (^me guide-BW-action.v ^you ?ka1))))
+            ?e8 (^me supervise-BW-action.v ^you ?ka1))))
 
       ; (4b)
       (:else
 
         ; Failure to find next step; goal structure not possible.
-        ?e9 (^me say-to.v ^you
-                '(I\'m afraid the example structure I had in mind cannot
-                  be built with the blocks currently on the table\.))
+        ?e50 (^me say-to.v ^you
+                '(I\'m afraid the example structure cannot be built with the blocks
+                  currently on the table\.))
                   ; "Let me select another example ..."?
 
         ; For now, the dialogue just terminates in the case of a failure at
@@ -120,7 +124,7 @@
         ; should probably be another constraint on the concepts/goal-schemas
         ; selected such that examples can be built with the available blocks
         ; in the first place.
-        ?e10 (^me say-bye.v))))
+        ?e51 (^me say-bye.v))))
 )
 
 
@@ -139,15 +143,15 @@
 )
 
 
-)) ; END defparameter *guide-BW-construction*
+)) ; END defparameter *supervise-BW-construction*
 
 
 
 ;````````````````````````````````````````````````````````
 ; Store schema variable name under header in *schemas*
 ;
-(store-schema-name 'guide-BW-construction.v
-                  '*guide-BW-construction*)
+(store-schema-name 'supervise-BW-construction.v
+                  '*supervise-BW-construction*)
 
 
 
@@ -155,9 +159,9 @@
 ; Create empty hash tables for semantics,
 ; gist-clauses, and topic-keys
 ;
-(setf (get '*guide-BW-construction* 'semantics) (make-hash-table))
-(setf (get '*guide-BW-construction* 'gist-clauses) (make-hash-table))
-(setf (get '*guide-BW-construction* 'topic-keys) (make-hash-table))
+(setf (get '*supervise-BW-construction* 'semantics) (make-hash-table))
+(setf (get '*supervise-BW-construction* 'gist-clauses) (make-hash-table))
+(setf (get '*supervise-BW-construction* 'topic-keys) (make-hash-table))
 
 
 
@@ -165,7 +169,7 @@
 ; EL Semantics - Not yet used
 ;
 (mapcar #'(lambda (x)
-      (store-output-semantics (first x) (second x) '*guide-BW-construction*))
+      (store-output-semantics (first x) (second x) '*supervise-BW-construction*))
   '()
 ) ; END mapcar #'store-output-semantics
 
@@ -175,7 +179,7 @@
 ; Gist clauses
 ;
 (mapcar #'(lambda (x) 
-      (store-output-gist-clauses (first x) (second x) '*guide-BW-construction*))
+      (store-output-gist-clauses (first x) (second x) '*supervise-BW-construction*))
   '()
 ) ; END mapcar #'store-output-gist-clauses
 
@@ -185,6 +189,6 @@
 ; Topic keys
 ;
 (mapcar #'(lambda (x) 
-      (store-topic-keys (first x) (second x) '*guide-BW-construction*))
+      (store-topic-keys (first x) (second x) '*supervise-BW-construction*))
   '()
 ) ; END mapcar #'store-topic-keys

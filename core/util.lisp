@@ -23,6 +23,16 @@
 
 
 
+(defun cdr1 (x)
+;````````````````
+; Adaptive form of cdr which returns cdr if list contains more than
+; two atoms, otherwise it returns the second atom.
+;
+  (if (cddr x) (cdr x) (cadr x))
+) ; END cdr1
+
+
+
 (defun copy1 (list)
 ;````````````````````
 ; Creates top-level copy of list
@@ -1038,6 +1048,15 @@
 
 
 
+(defun record-structure! (canonical-name)
+;``````````````````````````````````````````
+; TTT predicate for substituting record structure for name.
+;
+  (get-record-structure canonical-name)
+) ; END record-structure!
+
+
+
 (defun get-generic-name (canonical-name)
 ;``````````````````````````````````````````
 ; Gets the generic name (i.e. a reified noun, such as (k BW-arch.n)).
@@ -1054,10 +1073,54 @@
 ;
   (let ((noun (second generic-name)))
     (if (null noun) (return-from generic-name-to-np nil))
-    (when (equal 'BW- (car (sym-split noun 3 :front t)))
+    (when (BW-concept? noun)
       (setq noun (second (sym-split noun 3 :front t))))
     (butlast (ulf-to-english (create-indefinite-np noun)))
 )) ; END generic-name-to-np
+
+
+
+(defun BW-concept? (noun)
+;``````````````````````````
+; Checks if a symbol is a BW-concept, i.e. anything prefixed with "BW-".
+;
+  (and (atom noun) (equal 'BW- (car (sym-split noun 3 :front t))))
+) ; END BW-concept?
+
+
+
+(defun BW-concept-to-common-name! (noun)
+;`````````````````````````````````````````
+; Maps a blocksworld concept to a common name (e.g. |BW-arch|.n to arch.n).
+;
+  (if (BW-concept? noun)
+    (read-from-string (format nil "~a"
+      (second (sym-split noun 3 :front t)))))
+) ; END BW-concept-to-common-name!
+
+
+
+(defun concept-noun-phrase! (x)
+; ````````````````````````````````
+; Maps a concept name to an English noun phrase.
+;
+  (let ((np (generic-name-to-np (get-generic-name x))))
+    (when (null np)
+      (return-from concept-noun-phrase! '(an unnamed concept)))
+    np)
+) ; END concept-noun-phrase!
+
+
+
+(defun concept-noun! (x)
+; ``````````````````````````
+; Maps a concept name to an English noun.
+;
+  (let ((name (get-generic-name x)))
+    (when (null name)
+      (return-from concept-noun! '(unnamed concept)))
+    (cdr (generic-name-to-np name)))
+) ; END concept-noun!
 
 
 
@@ -1911,6 +1974,7 @@
       (format t "(subplan-of ~a):" superstep-name)
       (format t "(no superstep):" plan-name))
     (loop while cont do
+      (error-check :caller 'print-current-plan-status)
       (setq step-name (car rest))
       (when (null step-name)
         (format t "~%  No more steps in ~a." plan-name)
@@ -2142,15 +2206,15 @@
 
 
 
-(defun request-goal-rep (obj-schema)
-;`````````````````````````````````````
-; Writes a ulf to the file ulf.lisp, so that it can be used
-; by the blocksworld system.
+(defun request-goal-rep (wff)
+;`````````````````````````````
+; Writes a formula (containing an indefinite quantifier with a lambda abstract)
+; to the file goal-request.lisp, so that it can be processed by BW system.
 ;
   (with-open-file (outfile "./io/goal-request.lisp" :direction :output
                                                     :if-exists :supersede
                                                     :if-does-not-exist :create)
-    (format outfile "(setq *chosen-obj-schema* '~s)" obj-schema))
+    (format outfile "(setq *goal-request* '~s)" wff))
 ) ; END request-goal-rep
 
 
@@ -2183,21 +2247,33 @@
 ; ((|B1| on.p |B2|) (|B1| behind.p |B3|))
 ;   -> (ka (put.v |B1| (set-of (on.p |B2|) (behind.p |B3|))))
 ; (undo (|B1| on.p |B2|)) -> (ka (move.v |B1| (back.mod-a (on.p |B2|))))
+; (clarification (|B1| touching.p |B2|)) -> (ka (make.v |B1| (touching.p |B2|)))
+; (clarification (|B1| ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
+;   -> (ka (make.v |B1| ((mod-a (by.p (one.d (half.a block.n)))) to_the_left.a)))
 ;
   (cond
     ((equal planner-input 'Failure) nil)
     ((equal planner-input 'None)
       '(ka (do2.v nothing.pro)))
     ((atom planner-input) nil)
+    ; If single relation, convert to put.v ka
     ((relation-prop? planner-input)
       `(ka (put.v ,(car planner-input)
-                  ,(cdr planner-input))))
+                  ,(cdr1 planner-input))))
+    ; If multiple relations, convert to put.v ka with plural argument
     ((every #'relation-prop? planner-input)
       `(ka (put.v ,(caar planner-input)
-                  ,(make-set (mapcar #'cdr planner-input)))))
+                  ,(make-set (mapcar #'cdr1 planner-input)))))
+    ; If undo step, generate put.v ka and transform to 'move back' ka
     ((undo-relation-prop? planner-input)
-      `(ka (move.v ,(caadr planner-input)
-                    (back.mod-a ,(cdadr planner-input))))))
+      (ttt:apply-rule
+          '(/ (put.v _!1 _!2) (move.v _!1 (back.mod-a _!2)))
+        (planner-input-to-ka (second planner-input))))
+    ; If clarification step, generate put.v ka and transform to make.v ka
+    ((clarification-relation-prop? planner-input)
+      (ttt:apply-rule
+          '(/ (put.v _!1 _!2) (make.v _!1 _!2))
+        (planner-input-to-ka (second planner-input)))))
 ) ; END planner-input-to-ka
 
 
@@ -2762,13 +2838,15 @@
 
 
 
-(defun error-check ()
-;`````````````````````
+(defun error-check (&key caller)
+;`````````````````````````````````
 ; Checks whether program has entered an infinite loop using a counter
 ;
   (cond
-    ((> *error-check* 100)
-      (error-message "An error caused Eta to fall into an infinite loop. Check if the plan is being updated correctly." *live*)
+    ((> *error-check* 500)
+      (if caller
+        (error-message (format nil "An error caused Eta to fall into an infinite loop in '~a'. Check if the plan is being updated correctly." caller) *live*)
+        (error-message "An error caused Eta to fall into an infinite loop. Check if the plan is being updated correctly." *live*))
       (error))
     (t (setq *error-check* (1+ *error-check*))))
 ) ; END error-check
@@ -2776,7 +2854,7 @@
 
 
 (defun error-message (str mode)
-;``````````````````````````
+;````````````````````````````````
 ; Print error message to the console, and if in live mode, to output.txt
 ;
   (format t "~a~%" str)

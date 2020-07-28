@@ -139,6 +139,11 @@
   ; Certainty cutoff used to generate responses given a list of relations+certainties from the blocks world
   (defparameter *certainty-threshold* 0.7)
 
+  ; Maximum delays used in processing speech acts
+  (defparameter *delay-acknowledge.v* 10)
+  (defparameter *delay-respond-to.v* 15)
+  (defparameter *delay-say-to.v* 15)
+
   ; Number of Eta outputs generated so far (maintained
   ; for latency enforcement, i.e., not repeating a previously
   ; used response too soon).
@@ -247,7 +252,7 @@
     ;; (print-current-plan-status '*dialog-plan*) ; DEBUGGING
     ;; (format t "~% here is after the print-current-plan-status -----------")
 
-    (error-check)
+    (error-check :caller 'eta)
 
     ; Update the 'rest-of-plan' pointers after processing the
     ; previous step.
@@ -479,7 +484,7 @@
 ; (the currently due step of 'plan-name' has been fully executed);
 ; then initialize its next episode (if any) using 'update-plan'.
 ;
-  (error-check)
+  (error-check :caller 'update-rest-of-plan-pointers)
 
   (let ((rest (get plan-name 'rest-of-plan)) ep-name subplan-name)
     (setq ep-name (car rest))
@@ -585,37 +590,37 @@
 
 
 
-(defun form-spatial-representation ()
-;``````````````````````````````````````
-; Forms a spatial representation from the currently chosen BW-concept.n
-; (assuming such a choice has actually been made at this point), through
-; sending the BW system the chosen concept schema and receiving a goal
-; schema.
-; TODO: I'm not sold on how this is done currently, but I'm stumped on
-; how to do it more sensibly. The issue is that, for the lambda expression
-; + find-all-instances to work, the facts about the goal schema need to be
-; stored ahead-of-time, so the communication of the goal schema needs to be
-; done before the 'choice' step of the indefinite quantifier. This requires
-; sending the BW system the chosen concept schema, but the concept schema
-; name is nested inside the lambda extract, and messing with that here would
-; be a pretty messy approach. Instead, I check context for some individual such
-; that it is a BW-concept.n and Eta has chosen it.
-; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
-; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
-; in noun hierarchy.
-;
-  (let (concept-name goal-schema goal-name)
-    (setq concept-name (car (find-all-instances-context
-      '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
-    (request-goal-rep (cdr (get-record-structure concept-name)))
-    ; NOTE: currently no special offline (terminal mode) procedure
-    ; for getting goal schema.
-    (setq goal-schema (get-goal-rep))
-    (setq goal-name (gensym "BW-goal-rep"))
-    (add-alias (cons '$ goal-schema) goal-name)
-    (store-in-context (list goal-name 'goal-schema1.n))
-    (store-in-context (list goal-name 'instance-of.p concept-name)))
-) ; END form-spatial-representation
+;; (defun form-spatial-representation ()
+;; ;``````````````````````````````````````
+;; ; Forms a spatial representation from the currently chosen BW-concept.n
+;; ; (assuming such a choice has actually been made at this point), through
+;; ; sending the BW system the chosen concept schema and receiving a goal
+;; ; schema.
+;; ; TODO: I'm not sold on how this is done currently, but I'm stumped on
+;; ; how to do it more sensibly. The issue is that, for the lambda expression
+;; ; + find-all-instances to work, the facts about the goal schema need to be
+;; ; stored ahead-of-time, so the communication of the goal schema needs to be
+;; ; done before the 'choice' step of the indefinite quantifier. This requires
+;; ; sending the BW system the chosen concept schema, but the concept schema
+;; ; name is nested inside the lambda extract, and messing with that here would
+;; ; be a pretty messy approach. Instead, I check context for some individual such
+;; ; that it is a BW-concept.n and Eta has chosen it.
+;; ; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
+;; ; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
+;; ; in noun hierarchy.
+;; ;
+;;   (let (concept-name goal-schema goal-name)
+;;     (setq concept-name (car (find-all-instances-context
+;;       '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
+;;     (request-goal-rep (cdr (get-record-structure concept-name)))
+;;     ; NOTE: currently no special offline (terminal mode) procedure
+;;     ; for getting goal schema.
+;;     (setq goal-schema (get-goal-rep))
+;;     (setq goal-name (gensym "BW-goal-rep"))
+;;     (add-alias (cons '$ goal-schema) goal-name)
+;;     (store-in-context (list goal-name 'goal-schema1.n))
+;;     (store-in-context (list goal-name 'instance-of.p concept-name)))
+;; ) ; END form-spatial-representation
 
 
 
@@ -666,9 +671,10 @@
     (setq lambda-descr restrictions)
     (setq candidates (find-all-instances-context lambda-descr))
     (format t "given restriction ~a, found candidates ~a~%" lambda-descr candidates) ; DEBUGGING
+    (format t "using modifier ~a to choose~%" modifier) ; DEBUGGING
     (setq sk-name (cond
       ((equal modifier 'random.a)
-        (car (shuffle candidates)))
+        (nth (random (length candidates)) candidates))
       (t (car candidates))))
     ; Store fact that sk-name chosen in context (removing any existing choice).
     (remove-from-context '(^me choose.v ?x))
@@ -692,7 +698,7 @@
   ;; (format t "~%  'rest-of-plan' of ~a is ~%   (~a ~a ...)"
   ;; plan-name (car rest) (second rest)) ; DEBUGGING
 
-  (error-check)
+  (error-check :caller 'find-curr-{sub}plan)
 
   (cond
     ; Next action is top-level; may be primitive, or may need elaboration into subplan
@@ -1033,7 +1039,8 @@
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest)) ep-name1
         (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
         user-gist-clauses user-gist-passage proposal-gist main-clause info topic
-        suggestion query ans perceptions perceived-actions sk-var sk-name)
+        suggestion query ans perceptions perceived-actions sk-var sk-name
+        concept-name goal-schema)
   
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being processed~%" wff ep-name) ; DEBUGGING
 
@@ -1176,7 +1183,7 @@
       ;`````````````````````
       ; Eta: Saying hello
       ;`````````````````````
-      ((equal wff '(^me say-hello-to.v you))
+      ((equal wff '(^me say-hello-to.v ^you))
         (setq new-subplan-name (plan-saying-hello))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
@@ -1186,12 +1193,23 @@
       ;``````````````````````
       ; Eta: Saying good-bye
       ;``````````````````````
-      ((equal wff '(^me say-bye-to.v you))
+      ((equal wff '(^me say-bye-to.v ^you))
         (setq new-subplan-name (plan-saying-bye))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
         (add-subplan {sub}plan-name new-subplan-name))
+
+      ;```````````````````````````
+      ; Eta: Exiting conversation
+      ;```````````````````````````
+      ; NOTE: duplicated from the above (though different action arguments) -
+      ; meant to reflect a more "absolute" say-bye.v action where Eta directly/abruptly
+      ; exits the conversation, whereas say-bye-to.v might be used during the exchange of
+      ; pleasantries and farewells at the end of a standard conversation.
+      ((equal wff '(^me say-bye.v))
+        (delete-current-episode {sub}plan-name)
+        (exit))
 
       ;`````````````````````````````````````
       ; Eta: Recalling answer from history
@@ -1283,8 +1301,27 @@
         (cond
           ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
           (t (setq proposal-gist (generate-proposal expr))))
-        ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (setf (get ep-name 'gist-clauses) (list proposal-gist))
         (setq new-subplan-name (plan-proposal {sub}plan-name proposal-gist))
+        (when (null new-subplan-name)
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (add-subplan {sub}plan-name new-subplan-name))
+
+      ;````````````````````````````
+      ; Eta: Issuing corrections
+      ;````````````````````````````
+      ; NOTE: currently equivalent to propose1-to.v, except proposals are processed differently
+      ; so as to suppress corrections on 'undo' actions and add corrective phrasing.
+      ((setq bindings (bindings-from-ttt-match '(^me issue-correction-to.v ^you _!) wff))
+        (setq expr (get-single-binding bindings))
+        (cond
+          ((null *responsive*) (setq proposal-gist '(Could not create proposal \: not in responsive mode \.)))
+          (t (setq proposal-gist (generate-proposal expr))))
+        ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
+        (setf (get ep-name 'gist-clauses) (list proposal-gist))
+        (setq new-subplan-name (plan-correction {sub}plan-name proposal-gist))
         (when (null new-subplan-name)
           (delete-current-episode {sub}plan-name)
           (return-from implement-next-eta-action nil))
@@ -1404,17 +1441,29 @@
       ;```````````````````````````````````````
       ; Form some spatial representation of a concept (i.e., of an
       ; object schema). Given an episode like:
-      ; ?e2 (^me form-spatial-representation.v (a.d ?goal-rep
-      ;        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c)))))
-      ; First, Eta queries the BW system for the spatial representation, given
-      ; the concept schema. Eta then selects the spatial representation (goal schema)
-      ; after storing the two relevant facts, and substitutes it for the variable
-      ; in the rest of the plan.
+      ; ?e2 (^me form-spatial-representation.v (a.d ?goal-rep ((most.mod-a simple.a)
+      ;        (:l (?x) (and (?x goal-schema1.n) (?x instance-of.p ?c))))))
+      ; First, Eta queries the BW system for the spatial representation, using the indefinite
+      ; quantifier. Then, Eta reads the goal representation from the BW system, generates a name for
+      ; the goal representation, and substitutes it in the schema.
       ((setq bindings (bindings-from-ttt-match '(^me form-spatial-representation.v _!) wff))
         (setq expr (get-single-binding bindings))
         (setq sk-var (second expr))
-        (form-spatial-representation)
-        (setq sk-name (choose-variable-restrictions sk-var (third expr)))
+        ; Substitute record structure for concept name in expr
+        (setq expr (ttt:apply-rule '(/ (_!1 instance-of.p _!2)
+                                       (_!1 instance-of.p (record-structure! _!2)))
+                      expr :max-n 1))
+        ; Request goal representation from BW system
+        (request-goal-rep expr)
+        ; Get goal representation from BW system
+        ; NOTE: currently no special offline (terminal mode) procedure for getting goal schema.
+        (setq goal-schema (get-goal-rep))
+        ; Generate skolem name, add alias and facts in context
+        (setq sk-name (gensym "BW-goal-rep"))
+        (add-alias (cons '$ goal-schema) sk-name)
+        (store-in-context (list sk-name 'goal-schema1.n))
+        (store-in-context (list sk-name 'instance-of.p concept-name))
+        ; Substitute skolem name for skolem var in schema
         (format t "formed representation ~a for variable ~a~%" sk-name sk-var)
         (nsubst-variable {sub}plan-name sk-name sk-var)
         (delete-current-episode {sub}plan-name))
@@ -1520,7 +1569,8 @@
 ; 
   (let* ((rest (get {sub}plan-name 'rest-of-plan)) (user-ep-name (car rest))
         (wff (second rest)) bindings words expr user-ep-name1 wff1 wff1-arg eta-ep-name
-        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs input user-try-ka-success)
+        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs user-action
+        input user-try-ka-success)
 
     ;; (format t "~%WFF = ~a,~%      in the user action ~a being processed~%" wff user-ep-name) ; DEBUGGING
 
@@ -1544,7 +1594,7 @@
                 (*read-log* (if (>= *log-ptr* (length *log-contents*))
                   (read-words "bye")
                   (read-words (first (nth *log-ptr* *log-contents*)))))
-                (*live* (hear-words))
+                (*live* (hear-words *delay-say-to.v*))
                 (t (read-words)))))
             (setq words (decompress input))
             (nsubst-variable {sub}plan-name `(quote ,input) expr))
@@ -1600,6 +1650,7 @@
 
         ; Remove contradiction
         (setq user-gist-clauses (remove-contradiction user-gist-clauses))
+        (format t "Obtained user gist clauses ~a for episode ~a~%" user-gist-clauses user-ep-name1) ; DEBUGGING
 
         ; Both the primitive user action and the immediately subordinate action
         ; recieve the gist-clause interpretation just computed.
@@ -1609,9 +1660,21 @@
         ; Get ulfs from user gist clauses and set them as an attribute to the current
         ; user action
         (setq user-ulfs (mapcar #'form-ulf-from-clause user-gist-clauses))
+        (format t "Obtained ulfs ~a for episode ~a~%" user-ulfs user-ep-name1) ; DEBUGGING
 
         (setf (get user-ep-name 'ulf) user-ulfs)
         (setf (get user-ep-name1 'ulf) user-ulfs)
+
+        ; Get fine-grained user action type corresponding to gist clauses (e.g. (^you say-be.v)),
+        ; and store ((^you say-bye.v) * ?e1), where ?e1 is the ep-name of of say-to.v (and likewise
+        ; for the parent of the say-to.v episode, if it exists).
+        ; NOTE: for now, we assume that each user utterance is described by only one action type,
+        ; so the gist clauses are concatenated together first.
+        (setq user-action (form-user-action-type (apply #'append user-gist-clauses)))
+        (format t "Obtained user-action ~a for episode ~a~%" user-action user-ep-name1) ; DEBUGGING
+        (store-in-context `((^you ,user-action) * ,user-ep-name))
+        (when user-ep-name1
+          (store-in-context `((^you ,user-action) * ,user-ep-name1)))
 
         ; Add turn to dialogue history
         (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs)
@@ -1692,12 +1755,45 @@
         (list user-ep-name1 wff1))
 
       ;`````````````````````
+      ; User: Responding
+      ;`````````````````````
+      ; Currently, this is treated as a more "general" version of replying, and also
+      ; is aimed at more instantaneous verbal responses, i.e., occurring within some
+      ; seconds after the previous action.
+      ; TODO: ultimately, it seems like a response could be verbal or non-verbal (e.g.
+      ; a gesture, following an instruction, etc.). But this invites certain parallel
+      ; processing issues, so currently I keep these separate. Also, it seems like the
+      ; distinction between replying and responding is somewhat arbitrary currently...
+      ((setq bindings (bindings-from-ttt-match '(^you respond-to.v _!) wff))
+        ; Read user input (within some secs if live mode)
+        (setq input (if *live* (hear-words :delay *delay-respond-to.v*) (read-words)))
+        (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
+
+        ; Make sure that any final punctuation, such as ?, ., or !,
+        ; is separated from the final word (so as to not impair pattern matching)
+        (when (null input)
+          (delete-current-episode {sub}plan-name)
+          (return-from observe-next-user-action (list user-ep-name1 wff1)))
+        (setq input (detach-final-punctuation input))
+        ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
+        ; Create subplan
+        (setq new-subplan-name
+          (init-plan-from-episode-list
+            (list :episodes (episode-var) (create-say-to-wff input :reverse t))
+            {sub}plan-name))
+        ; Bidirectional hierarchical connections
+        (add-subplan {sub}plan-name new-subplan-name)
+        ;; (print-current-plan-status subplan-name) ; DEBUGGING
+        (list user-ep-name1 wff1)
+      )
+
+      ;`````````````````````
       ; User: Acknowledging
       ;`````````````````````
-      ; Same as replying, but allows for "tacit approval" (10 secs of silence) as well.
+      ; Same as replying, but allows for "tacit approval" (some secs of silence) as well.
       ((setq bindings (bindings-from-ttt-match '(^you acknowledge.v _!) wff))
-        ; Read user input (within 15 secs if live mode)
-        (setq input (if *live* (hear-words :delay 10) (read-words)))
+        ; Read user input (within some secs if live mode)
+        (setq input (if *live* (hear-words :delay *delay-acknowledge.v*) (read-words)))
         (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
         ; Make sure that any final punctuation, such as ?, ., or !,
@@ -1732,8 +1828,17 @@
         (when user-try-ka-success
           (store-in-context `((pair ^you ,user-ep-name) successful.a))
           (store-in-context `((pair ^you ,user-ep-name) instance-of.p ,expr)))
-        (delete-current-episode {sub}plan-name)
-        (list user-ep-name wff))
+
+        ; As a subplan of this, Eta should percieve the world (assuming a BW system).
+        (setq new-subplan-name
+          (init-plan-from-episode-list
+            (list :episodes (episode-var)
+              '(^me perceive-world.v |Blocks-World-System| nil ?perceptions))
+            {sub}plan-name))
+        (when (null new-subplan-name)
+          (delete-current-episode {sub}plan-name)
+          (return-from implement-next-eta-action nil))
+        (add-subplan {sub}plan-name new-subplan-name))
 
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
@@ -1855,8 +1960,24 @@
   (let (tagged-clause ulf)
     (setq tagged-clause (mapcar #'tagword clause))
     (setq ulf (choose-result-for tagged-clause '*clause-ulf-tree*))
- ulf)
+  ulf)
 ) ; END form-ulf-from-clause
+
+
+
+
+
+(defun form-user-action-type (clause)
+;```````````````````````````````````````
+; Given a gist clause, find a corresponding 'action type'
+; (i.e., a predicate like say-bye.v) using hierarchical
+; pattern transduction.
+;
+  (let (tagged-clause action-type)
+    (setq tagged-clause (mapcar #'tagword clause))
+    (setq action-type (choose-result-for tagged-clause '*clause-action-type-tree*))
+  action-type)
+) ; END form-user-action-type
 
 
 
@@ -1945,7 +2066,7 @@
   (let* ((cnd (car expr)) (rst (cdr expr))
          (else-episodes (car (get-keyword-contents rst '(:else))))
          (if-episodes (if (not else-episodes) rst
-          (butlast (reverse (set-difference rst else-episodes))))))
+          (reverse (set-difference rst (member :else rst))))))
     (cond
       ; Try conditional
       ((eval-truth-value cnd)
@@ -2171,7 +2292,8 @@
     (setq choice (choose-result-for tagged-words '*output-for-proposal-tree*))
     ;; (format t "~% proposal choice is ~a ~% " choice) ; DEBUGGING
 
-    (if (null choice) (return-from plan-proposal nil))
+    (when (or (null choice) (equal choice '(:out)))
+      (return-from plan-proposal nil))
 
     (cond
       ; :out directive
@@ -2180,6 +2302,38 @@
           (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
           {sub}plan-name)))
 )) ; END plan-proposal
+
+
+
+
+
+(defun plan-correction ({sub}plan-name correction-gist)
+;````````````````````````````````````````````````````````
+; Given a correction gist clause, convert it to an utterance using
+; hierarchical transduction trees, starting at a top-level choice
+; tree root.
+; NOTE: the same as plan-proposal, but uses a different rule tree.
+;
+  (let (tagged-words choice)
+
+    (if (null correction-gist)
+      (return-from plan-correction nil))
+
+    (setq tagged-words (mapcar #'tagword correction-gist))
+    ;; (format t "~% correction tagwords are ~a ~% " tagged-words) ; DEBUGGING
+    (setq choice (choose-result-for tagged-words '*output-for-correction-tree*))
+    ;; (format t "~% correction choice is ~a ~% " choice) ; DEBUGGING
+
+    (when (or (null choice) (equal choice '(:out)))
+      (return-from plan-correction nil))
+
+    (cond
+      ; :out directive
+      ((eq (car choice) :out)
+        (init-plan-from-episode-list
+          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
+          {sub}plan-name)))
+)) ; END plan-correction
 
 
 
