@@ -80,7 +80,7 @@
    1 (I do not have a history of narcotic abuse \.)
       2 (*medicine-input*) (0 :subtrees)
    1 (My family does not have a history of mental illness \.)
-      2 (*medicine-input*) (0 :subtrees)
+      2 (*medical-history-input*) (0 :subtrees)
    1 (My mother died of complications from her diabetes\.)
       2 (*medicine-input*) (0 :subtrees)
    1 (My father died of prostate cancer\.)
@@ -104,4 +104,3 @@
       2 (*general-input*) (0 :subtrees)
 ))
 ;
- 
