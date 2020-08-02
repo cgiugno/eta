@@ -22,8 +22,12 @@
     2 ((how is your mental health ?) (energy)) (0 :gist)
   1 (0 wh_ 5 think-gen 0)
     2 ((how is your mental health ?) (energy)) (0 :gist)
-  
-  1 (0 med-take 5 antidepressant)
+  1 (0 do 1 pron 5 ment-health 0 )
+    2 ((how is your mental health ?) (energy)) (0 :gist)
+  1 (0 have 1 pron 5 ment-health 0)
+    2 ((how is your mental health ?) (energy)) (0 :gist)
+
+  1 (0 antidepressant 0)
     2 ((You should take an antidepressant \.) (medicine-request)) (0 :gist)
   1 (0 therapy 0)
     2 ((You should see a therapist \.) (energy)) (0 :gist)
@@ -42,8 +46,13 @@
     2 ((How is your energy ?) (energy)) (0 :gist)
   1 (0 trouble 1 energy 0)
     2 ((How is your energy ?) (energy)) (0 :gist)
+  1 (0 med-take 5 antidepressant)
+    2 ((You should take an antidepressant \.) (medicine-request)) (0 :gist)
+  1 (0 therapy 0)
+    2 ((You should see a therapist \.) (energy)) (0 :gist)
   1 (0)
     2 ((NIL Gist)) (0 :gist)
+
 ))
 
 
