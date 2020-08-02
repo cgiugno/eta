@@ -74,7 +74,12 @@
    2 *diagnosis-details-input* (0 :subtree)
   1 (0 diagnosis-tests 0)
     2 *diagnosis-details-input* (0 :subtree)
-    
+
+  ;Your history with mental health
+  1 (0 you 5 experienced 5 ment-health 0)
+    2 *energy-input* (0 :subtree)
+  
+
   1 (0)
     2 *general-input* (0 :subtree)
   1 (0)
