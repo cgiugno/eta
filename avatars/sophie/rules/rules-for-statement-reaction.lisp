@@ -1,6 +1,17 @@
 (MAPC 'ATTACHFEAT
-  '()
-)
+  '(
+   (smoke smokes smoking smoked cigarettes cigarette tobacco)
+   (drink drinking drank wine alcohol beer drunk inebriated)
+   (recreational drugs marijuana weed)
+   (history background past experience)
+   (med-history smoke drink recreational history)
+   (congratulations congrats congratulate commend)
+   (antidepressant SSRI Prozac fluoxetine sertraline Zoloft Celexa citalopram Lexapro escitalopram paroxetine Paxil Pexeva)
+   (therapy therapist counseling counselor)
+   (ment-treatment antidepressant therapy)
+   (energy mood depressed depression anxiety anxious mental)
+   
+))
 
 (READRULES '*reaction-to-statement*
 ; Here we match any non-question statements which the user might ask, and respond to them appropriately.
@@ -30,9 +41,7 @@
     2 *sleep-poorly-reaction* (0 :subtree)
   1 (0 medication 4 working 0 \.)
     2 *medicine-working-reaction* (0 :subtree)
-  1 (0 antidepressant 0 \.)
-    2 *energy-reaction* (0 :subtree)
-  1 (0 therapy 0 \.)
+  1 (0 energy 0 \.)
     2 *energy-reaction* (0 :subtree)
   1 (0 take 3 different \.)
     2 *medicine-working-reaction* (0 :subtree)
@@ -64,7 +73,11 @@
     2 *cancer-worse-reaction* (0 :subtree)
   1 (0 radiation 0)
     2 *radiation-reaction* (0 :subtree)
-
+  1 (0 congratulations 0)
+    2 *medical-history-reaction* (0 :subtree)
+  1 (0 ment-treatment 0)
+    2 *energy-reaction* (0 :subtree)
+ 
   1 (0)
     2 *general-reaction* (0 :subtree)
 ))
