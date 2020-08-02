@@ -17,7 +17,7 @@
   (med-chemotherapy carboplatin gemcitabine denosumab zometa)
   (med-ment-health antidepressant SSRI Prozac fluoxetine sertraline Zoloft Celexa citalopram Lexapro escitalopram paroxetine Paxil Pexeva)
   (blood-pressure-med cozar)
-  (energy mood concentrate concentration concentrating depression depressed anxiety anxious med-ment-health)
+  (energy mood concentrate concentration concentrating depression depressed anxiety anxious med-ment-health health illness)
   (drive drove driving)
   (diagnosis-symptom symptom symptoms weight skinny skinnier appetite eating constipation constipated)
   (diagnosis-non-symptom headache headaches chill chills fever fevers nausea eyesight eyes)
@@ -75,12 +75,15 @@
   ; If doctor asks something about sleep
   1 (0 sleep 0)
     2 *sleep-question* (0 :subtree)
-  ; If doctor asks something about patient's energy (or mood)
-  1 (0 energy 0)
-    2 *energy-question* (0 :subtree)
   ; If doctor asks something about medicine
   1 (0 medicine-gen 0)
     2 *medicine-question* (0 :subtree)
+  ;If the doctor asks about your medical history
+  1 (0 medical-history 0)
+    2 *medical-history-question* (0 :subtree)
+  ; If doctor asks something about patient's energy (or mood)
+  1 (0 energy 0)
+   2 *energy-question* (0 :subtree)
   ; If doctor asks something about prognosis
   1 (0 prognosis 0)
     2 *prognosis-question* (0 :subtree)
@@ -89,9 +92,7 @@
     2 *comfort-care-question* (0 :subtree)
   1 (0 hospice 0)
     2 *comfort-care-question* (0 :subtree)
-  ;If the doctor asks about your medical history
-  1 (0 medical-history 0)
-    2 *medical-history-question* (0 :subtree)
+
     
   ; Interjections/prompts to continue
   ;; 1 (2 okay 2)
