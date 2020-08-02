@@ -6,7 +6,6 @@
   (come came)
   (anyone-here-with-you here with alone by)
   (pain hurt hurting)
-  (energy mood concentrate concentration concentrating depression depressed anxiety anxious med-ment-health)
   (medicine medicines medication drug drugs pill pills med meds dose doses)
   (medicine-gen medicine medicine-particular)
   (medicine-particular pain-med pain-med-other blood-pressure-med med-narcotic)
@@ -18,6 +17,7 @@
   (med-chemotherapy carboplatin gemcitabine denosumab zometa)
   (med-ment-health antidepressant SSRI Prozac fluoxetine sertraline Zoloft Celexa citalopram Lexapro escitalopram paroxetine Paxil Pexeva)
   (blood-pressure-med cozar)
+  (energy mood concentrate concentration concentrating depression depressed anxiety anxious med-ment-health)
   (drive drove driving)
   (diagnosis-symptom symptom symptoms weight skinny skinnier appetite eating constipation constipated)
   (diagnosis-non-symptom headache headaches chill chills fever fevers nausea eyesight eyes)
@@ -35,6 +35,8 @@
   (family parents siblings sibling grandparents)
   (smoking smoke smokes smoked cigarettes cigarette tobacco)
   (medical-history history drink smoking family )
+  (child children grandchild grandchildren son daughter)
+  (married marriage spouse partner husband wife)
 ))
 
 
@@ -49,6 +51,10 @@
   1 (0 come anyone-here-with-you 0)
     2 *appointment-question* (0 :subtree)
   1 (0 drive 0)
+    2 *appointment-question* (0 :subtree)
+  1 (0 child 0)
+    2 *appointment-question* (0 :subtree)
+  1 (0 married 0)
     2 *appointment-question* (0 :subtree)
   ; If asked to elaborate about pain
   1 (0 pain 0)
