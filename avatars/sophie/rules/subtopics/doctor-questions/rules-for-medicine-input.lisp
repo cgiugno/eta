@@ -3,6 +3,7 @@
     (med-take take taking get getting use using)
     (med-past took taken used gotten prescribed)
     (work working help helping treat treating effective)
+    (med-narcotic narcotic narcotics oxycodone morphine)
     (often frequent frequently much)
     (med-time every time times hour hours minute minutes day days week weeks)
     (want need)
@@ -90,12 +91,15 @@
   1 (0 how are you 1 medicine-taking 0); e.g., how are you on medicine?
     2 ((Do you need more medicine ?) (medicine-refill)) (0 :gist)
 
+  1 (0 you 3 med-take 5 med-narcotic 0)
+    2 ((You should take a narcotic \.) (medicine-request)) (0 :gist)
+
   ; Do you have a history with narcotics?
   1 (0 be-aux 3 med-past 3 med-narcotic 0)
     2 ((What is your history with med-narcotic ?) (medical-history)) (0 :gist)
   1 (0 be-aux 3 history 3 med-narcotic 0)
     2 ((What is your history with med-narcotic ?) (medical-history)) (0 :gist)
-  
+
   ))
 
 
