@@ -3,9 +3,6 @@
 ;;
 ;; TODO: Write header
 ;;
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; -*- Common-Lisp -*-
 
 (setf *print-circle* t) ; needed to prevent recursive loop when printing plan-step
 
