@@ -4,7 +4,7 @@
 ;
 
 (defun special-op? (ulf)
-; ````````````````````````
+;`````````````````````````
 ; Checks whether a ULF is a special operator or macro, e.g. sub, k, set-of, etc.
 ;
   (and (atom ulf) (member ulf '(not plur past pres perf prog pasv k ka ke to that tht fquan nquan nmod amod
@@ -14,7 +14,7 @@
 
 
 (defun indiv? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks whether a ulf segment is an individual type (noun phrase,
 ; reified noun/action/sentence, etc.)
 ; TODO: until coref is improved, reified propositions/events/actions are not
@@ -36,7 +36,7 @@
 
 
 (defun reference? (ulf)
-; ```````````````````````
+;````````````````````````
 ; TTT predicate to match a reference (anything that's an individual
 ; and not a pronoun).
 ;
@@ -45,7 +45,7 @@
 
 
 (defun pron? (ulf)
-; ````````````````````
+;`````````````````````
 ; TTT predicate to match a pronoun (anything ending in .PRO, or a
 ; relative pronoun).
 ;
@@ -54,7 +54,7 @@
 
 
 (defun pronoun-perspective (pron)
-; `````````````````````````````````
+;``````````````````````````````````
 ; Gets the perspective of a pronoun, i.e. '1s for first person singular,
 ; '2s for second person singular, '1p for first person plural, etc.
 ;
@@ -70,7 +70,7 @@
 
 
 (defun male-pron? (pron)
-; ````````````````````````
+;`````````````````````````
 ; Checks if a pronoun is male.
 ;
   (and (atom pron) (member pron '(he.pro him.pro himself.pro)))
@@ -78,7 +78,7 @@
 
 
 (defun female-pron? (pron)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a pronoun is female.
 ;
   (and (atom pron) (member pron '(she.pro her.pro herself.pro)))
@@ -86,7 +86,7 @@
 
 
 (defun person-pron? (pron)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a pronoun is person (singular).
 ;
   (and (atom pron) (member pron '(I.pro you.pro me.pro myself.pro yourself.pro one.pro oneself.pro themself.pro)))
@@ -94,7 +94,7 @@
 
 
 (defun person-plur-pron? (pron)
-; ``````````````````````````````
+;```````````````````````````````
 ; Checks if a pronoun is person (plural).
 ;
   (and (atom pron) (member pron '(we.pro us.pro yourselves.pro)))
@@ -102,7 +102,7 @@
 
 
 (defun neutral-pron? (pron)
-; ```````````````````````````
+;````````````````````````````
 ; Checks if a pronoun is neutral.
 ;
   (and (atom pron) (member pron '(it.pro that.pro itself.pro)))
@@ -110,7 +110,7 @@
 
 
 (defun neutral-plur-pron? (pron)
-; ```````````````````````````````
+;````````````````````````````````
 ; Checks if a pronoun is neutral (plural).
 ;
   (and (atom pron) (member pron '(they.pro those.pro these.pro them.pro themselves.pro)))
@@ -118,7 +118,7 @@
 
 
 (defun existential-pron? (pron)
-; ``````````````````````````````
+;```````````````````````````````
 ; Checks if a pronoun is an existential pronoun.
 ;
   (and (atom pron) (member pron '(what.pro which.pro there.pro)))
@@ -126,7 +126,7 @@
 
 
 (defun ellipsis? (ulf)
-; `````````````````````
+;``````````````````````
 ; Check if a ULF is an ellipsis (i.e. curly brackets).
 ;
   (and (atom ulf) (equal (first (sym-split ulf 1 :front t)) '{))
@@ -134,7 +134,7 @@
 
 
 (defun replace-ellipsis! (ellipsis)
-; ``````````````````````````````````
+;```````````````````````````````````
 ; Replaces an ellipsed item with entity.n in the case of nouns (e.g. {ref1}.n to entity.n),
 ; or the item without curly brackets otherwise (e.g. {you}.pro).
 ;
@@ -144,7 +144,7 @@
 
 
 (defun det? (ulf)
-; ```````````````````````
+;````````````````````````
 ; Checks if a ULF is a determiner.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 2)) '.D))
@@ -152,7 +152,7 @@
 
 
 (defun mod? (ulf)
-; ````````````````
+;`````````````````
 ; Checks if a ULF is some simple noun phrase modifier (either adj or nominal predicate)
 ;
   (or (adj? ulf) (noun? ulf) (and (no-type? ulf) (not (proper-name? ulf))))
@@ -160,7 +160,7 @@
 
 
 (defun adj? (ulf)
-; ````````````````
+;`````````````````
 ; Checks if a ULF is an adjective.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 2)) '.A))
@@ -168,7 +168,7 @@
 
 
 (defun adv-e? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF is an adv-e word or phrase.
 ;
   (or (adv-e-lex? ulf)
@@ -177,7 +177,7 @@
 
 
 (defun adv-e-lex? (ulf)
-; ```````````````````````
+;````````````````````````
 ; Checks if a ULF is an adv-e word.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-E))
@@ -185,7 +185,7 @@
 
 
 (defun adv-f? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF is an adv-f word or phrase.
 ;
   (or (adv-f-lex? ulf)
@@ -194,7 +194,7 @@
 
 
 (defun adv-f-lex? (ulf)
-; ```````````````````````
+;````````````````````````
 ; Checks if a ULF is an adv-f word.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-F))
@@ -202,7 +202,7 @@
 
 
 (defun adv-s? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF is an adv-s word or phrase.
 ;
   (or (adv-s-lex? ulf)
@@ -211,7 +211,7 @@
 
 
 (defun adv-s-lex? (ulf)
-; ```````````````````````
+;````````````````````````
 ; Checks if a ULF is an adv-s word.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-S))
@@ -219,7 +219,7 @@
 
 
 (defun adv-a? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF is an adv-a word or phrase.
 ;
   (or (adv-a-lex? ulf)
@@ -228,7 +228,7 @@
 
 
 (defun adv-a-lex? (ulf)
-; ```````````````````````
+;````````````````````````
 ; Checks if a ULF is an adv-a word.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.ADV-A))
@@ -236,7 +236,7 @@
 
 
 (defun mod-a? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks if a ULF is a mod-a constituent.
 ;
   (or (mod-a-lex? ulf)
@@ -245,7 +245,7 @@
 
 
 (defun mod-a-lex? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks if a ULF is a mod-a word.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 6)) '.MOD-A))
@@ -253,7 +253,7 @@
 
 
 (defun non-adv? (ulf)
-; ````````````````````
+;`````````````````````
 ; Checks if a ULF is not an adv word (or a mod-a modifier).
 ;
   (and (not (adv-a? ulf)) (not (adv-e? ulf)) (not (adv-f? ulf)) (not (adv-s? ulf))
@@ -262,7 +262,7 @@
 
 
 (defun non-neg? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is a token other than 'not'.
 ;
   (and (atom ulf) (not (equal 'not ulf)))
@@ -270,7 +270,7 @@
 
 
 (defun noun? (ulf)
-; `````````````````
+;``````````````````
 ; Checks if a ULF is a nominal predicate.
 ;
   (or (and (atom ulf) (equal (second (sym-split ulf 2)) '.N))
@@ -279,7 +279,7 @@
 
 
 (defun verb-untensed? (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; Checks if a ULF is an untensed verb.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 2)) '.V))
@@ -287,7 +287,7 @@
 
 
 (defun verb-pres? (ulf)
-; ``````````````````````
+;```````````````````````
 ; Checks if a ULF is a verb in present tense (no aspect).
 ;
   (and (listp ulf) (equal (first ulf) 'PRES) (verb-untensed? (second ulf)))
@@ -295,7 +295,7 @@
 
 
 (defun verb-past? (ulf)
-; ``````````````````````
+;```````````````````````
 ; Checks if a ULF is a verb in past tense (no aspect).
 ;
   (and (listp ulf) (equal (first ulf) 'PAST) (verb-untensed? (second ulf)))
@@ -303,7 +303,7 @@
 
 
 (defun verb? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF is a verb in any tense.
 ; TODO: incomplete, needs aspects still. Might get a bit messy with both tense & aspect.
 ;
@@ -312,7 +312,7 @@
 
 
 (defun spatial-verb? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is a spatial verb.
 ;
   (if (and (atom ulf)
@@ -321,7 +321,7 @@
 
 
 (defun action-verb? (ulf)
-; ````````````````````````
+;`````````````````````````
 ; Checks if a ULF is an action verb.
 ;
   (if (and (atom ulf)
@@ -330,7 +330,7 @@
 
 
 (defun spatial-verb-to-prep! (ulf)
-; `````````````````````````````````
+;``````````````````````````````````
 ; Converts some spatial verbs to relational prepositions, e.g. touch.v => touching.p.
 ;
   (if (verb-untensed? ulf)
@@ -347,7 +347,7 @@
 
 
 (defun aux? (ulf)
-; `````````````````
+;``````````````````
 ; Checks if a ULF is an auxiliary verb (untensed).
 ;
   (and (atom ulf) (member (second (sym-split ulf 6)) '(.AUX-S .AUX-V)))
@@ -355,7 +355,7 @@
 
 
 (defun verb-phrase? (ulf)
-; ````````````````````````
+;`````````````````````````
 ; Checks if a ULF is a verb phrase.
 ; NOTE: no verb categorization checks are done here, this simply returns true if the car of the list
 ; is some individual, and the car of the second element of the list is a verb.
@@ -368,7 +368,7 @@
 
 
 (defun add-vp-tense! (vp+ tense)
-; ````````````````````````````````
+;`````````````````````````````````
 ; Adds the given tense marker to the given verb phrase.
 ; Recursively search for first *.v or *.aux in depth first search.
 ;
@@ -410,7 +410,7 @@
 
 
 (defun remove-question-do (ulf)
-; ``````````````````````````````
+;```````````````````````````````
 ; Removes any 'do' auxiliaries in a question ULF, unless followed by a negation.
 ; 
   (if (or
@@ -427,7 +427,7 @@
 
 
 (defun hole? (p)
-; ````````````````
+;`````````````````
 ; Matches hole/placeholder.
 ;
   (or (equal p '*H) (equal p '*P))
@@ -435,7 +435,7 @@
 
 
 (defun qmark? (p)
-; `````````````````
+;``````````````````
 ; Matches question mark.
 ;
   (equal p '?)
@@ -443,7 +443,7 @@
 
 
 (defun remove-question-mark (ulf)
-; `````````````````````````````````
+;``````````````````````````````````
 ; Removes question mark in ULF.
 ;
   (ttt:apply-rule '(/ (_* qmark?) _*) ulf)
@@ -451,7 +451,7 @@
 
 
 (defun apply-sub-macro (ulf)
-; ````````````````````````````
+;`````````````````````````````
 ; Applies the sub macro to a ULF.
 ;
   (nth-value 1 (ulf-lib:apply-sub-macro ulf :calling-package *package*))
@@ -459,7 +459,7 @@
 
 
 (defun uninvert-question (ulf)
-; ``````````````````````````````
+;```````````````````````````````
 ; Uninvert a ULF question by removing the question mark, applying sub macros, and removing auxiliary verbs such as "do".
 ;
   (setq ulf (remove-question-mark ulf))
@@ -470,7 +470,7 @@
 
 
 (defun remove-adv-f (ulf)
-; ````````````````````````
+;`````````````````````````
 ; Removes all adv-f modifiers from ULF.
 ;
   (ttt:apply-rules
@@ -483,7 +483,7 @@
 
 
 (defun remove-adv-e (ulf)
-; ````````````````````````````````````
+;`````````````````````````````````````
 ; Removes all adv-e modifiers from ULF.
 ;
   (ttt:apply-rules
@@ -497,7 +497,7 @@
 
 
 (defun freq-adverbial-phrase? (ulf)
-; ``````````````````````````````````
+;```````````````````````````````````
 ; Checks if a ULF is a frequency adverbial, i.e. (adv-f ...)
 ;
   (or
@@ -506,7 +506,7 @@
 
 
 (defun time-adverbial-phrase? (ulf)
-; ``````````````````````````````````
+;```````````````````````````````````
 ; Checks if a ULF is a time adverbial phrase, i.e. either (adv-e ...), (word.ps ...),
 ; or (word.mod-a (word.ps ...))
 ;
@@ -518,7 +518,7 @@
 
 
 (defun remove-not (ulf)
-; ```````````````````````
+;````````````````````````
 ; Removes all negations from ULF.
 ;
   (ttt:apply-rules '(
@@ -529,7 +529,7 @@
 
 
 (defun existential-there? (ulf)
-; ``````````````````````````````
+;```````````````````````````````
 ; Checks if ULF is an existential 'there'.
 ;
   (and (atom ulf) (equal ulf 'THERE.PRO))
@@ -537,7 +537,7 @@
 
 
 (defun relative? (ulf)
-; `````````````````````
+;``````````````````````
 ; Checks if a ULF is a relative pronoun.
 ;
   (and (atom ulf) (equal (second (sym-split ulf 4)) '.REL))
@@ -545,7 +545,7 @@
 
 
 (defun reflexive? (ulf)
-; ``````````````````````
+;```````````````````````
 ; Checks if a ULF is a reflexive pronoun.
 ;
   (and (pron? ulf)
@@ -555,7 +555,7 @@
 
 
 (defun anaphor? (ulf)
-; ``````````````````````
+;```````````````````````
 ; Checks if a ULF is an anaphoric pronoun.
 ;
   (and (pron? ulf)
@@ -564,7 +564,7 @@
 
 
 (defun prep? (ulf)
-; `````````````````
+;``````````````````
 ; Checks if a ULF is a preposition, e.g. on.p
 ;
   (and (symbolp ulf) (equal (second (sym-split ulf 2)) '.P))
@@ -572,7 +572,7 @@
 
 
 (defun prep-phrase? (ulf)
-; ````````````````````````````````
+;`````````````````````````````````
 ; Checks if a ULF is a prepositional phrase, e.g. (on.p (the.d table.n)).
 ;
   (and (listp ulf) (atom (car ulf)) (prep? (car ulf)))
@@ -580,7 +580,7 @@
 
 
 (defun prep-conjunction? (ulf)
-; `````````````````````````````
+;``````````````````````````````
 ; Checks if a ULF is a conjunction of two prepositions,
 ; e.g. ((before.p ...) and.cc (after.p ...))
 ;
@@ -590,7 +590,7 @@
 
 
 (defun sent-prep? (ulf)
-; ````````````````````````````````````
+;`````````````````````````````````````
 ; Checks if a ULF is a sentential preposition (because.ps, while.ps, etc.).
 ;
   (and (atom ulf) (equal (second (sym-split ulf 3)) '.PS))
@@ -598,7 +598,7 @@
 
 
 (defun ps-to-p! (ulf)
-; `````````````````````
+;``````````````````````
 ; Converts a sentential preposition, e.g. before.ps, to a normal preposition, e.g. before.p
 ;
   (if (sent-prep? ulf) (first (sym-split ulf 1)) ulf)
@@ -606,7 +606,7 @@
 
 
 (defun discourse-entity? (ulf)
-; ````````````````````````````
+;`````````````````````````````
 ; Checks if a ULF is a discourse entity (ends in .de).
 ;
   (and (atom ulf) (equal (second (sym-split ulf 3)) '.DE))
@@ -614,7 +614,7 @@
 
 
 (defun reified-sentence? (ulf)
-; `````````````````````````````
+;``````````````````````````````
 ; Checks if a ULF is a reified sentence ("that ...").
 ;
   (and (listp ulf) (member (car ulf) '(that tht ans-to whether)))
@@ -622,7 +622,7 @@
 
 
 (defun reified-action? (ulf)
-; `````````````````````````````
+;``````````````````````````````
 ; Checks if a ULF is a reified action ("to ...")
 ;
   (and (listp ulf) (member (car ulf) '(ka to)))
@@ -630,7 +630,7 @@
 
 
 (defun reified-event? (ulf)
-; `````````````````````````````
+;``````````````````````````````
 ; Checks if a ULF is a reified event ("ke ...")
 ;
   (and (listp ulf) (member (car ulf) '(ke)))
@@ -638,7 +638,7 @@
 
 
 (defun no-type? (ulf)
-; ````````````````````
+;`````````````````````
 ; Checks whether ULF is a proper name, e.g. |Ben|
 ;
   (and (symbolp ulf) (not (special-op? ulf)) (not (sym-contains ulf #\.)))
@@ -646,7 +646,7 @@
 
 
 (defun nnp? (ulf)
-; `````````````````
+;``````````````````
 ; Check if ULF is a proper names which can act as an nnp.
 ; TODO: See comment on proper-name?
 ;
@@ -656,7 +656,7 @@
 
 
 (defun proper-name? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is a proper name.
 ; TODO: Due to the way company names act as modifiers in the blocks world ULF, we have to do
 ; a check here so these aren't counted as individuals. This is a bit odd and should be changed
@@ -668,7 +668,7 @@
 
 
 (defun np? (ulf)
-; ```````````````
+;````````````````
 ; Checks if a ULF is a noun phrase starting with either a determiner or a type reifier, or a pronoun.
 ;
   (or (det-np? ulf) (kind? ulf) (pron? ulf) (quan? ulf))
@@ -676,7 +676,7 @@
 
 
 (defun det-np? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks if a ULF is a noun phrase starting with a determiner.
 ;
   (and (listp ulf) (det? (car ulf)))
@@ -684,7 +684,7 @@
 
 
 (defun definite-np? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is a definite noun phrase.
 ;
   (and (det-np? ulf) (or
@@ -694,7 +694,7 @@
 
 
 (defun quant-np? (ulf)
-; `````````````````````
+;``````````````````````
 ; Checks if a ULF is a quantificational noun phrase.
 ;
   (and (listp ulf) (numerical-det? (first ulf)))
@@ -702,7 +702,7 @@
 
 
 (defun count-np (np)
-; ```````````````````
+;````````````````````
 ; Converts an np such as "three turns", "a turn", "a few turns" to a number.
 ;
   (cond
@@ -715,7 +715,7 @@
 
 
 (defun indexical-np? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is an indexical noun phrase (e.g. "that block")
 ;
   (and (det-np? ulf) (or
@@ -725,7 +725,7 @@
 
 
 (defun wh-det? (ulf)
-; ````````````````````
+;`````````````````````
 ; Checks if a ULF is a wh-determiner.
 ;
   (and (det? ulf) (member ulf '(which.d what.d whichever.d whatever.d)))
@@ -733,7 +733,7 @@
 
 
 (defun wh-np? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is an wh-question noun phrase (e.g. "what block")
 ;
   (and (det-np? ulf) (or
@@ -743,7 +743,7 @@
 
 
 (defun wh-pron? (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Checks if a ULF is an wh-question noun phrase (e.g. "what block")
 ;
   (and (pron? ulf) (member ulf '(what.pro which.pro)))
@@ -751,7 +751,7 @@
 
 
 (defun indefinite-np? (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; Checks if a ULF is an indefinite noun phrase.
 ;
   (and (det-np? ulf) (or
@@ -764,7 +764,7 @@
 
 
 (defun create-indefinite-np (noun)
-; ``````````````````````````````````
+;```````````````````````````````````
 ; Creates an indefinite np from a noun (using a.d, an.d, and some.d as appropriate).
 ;
   (if (and (listp noun) (equal (car noun) 'plur))
@@ -776,7 +776,7 @@
 
 
 (defun set-of? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks if a ULF is a set-of some individuals.
 ;
   (and (listp ulf) (equal (first ulf) 'set-of))
@@ -784,7 +784,7 @@
 
 
 (defun kind? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF is a kind (e.g. using the k operator).
 ;
   (and (listp ulf) (equal (first ulf) 'k))
@@ -792,7 +792,7 @@
 
 
 (defun quan? (ulf)
-; ``````````````````
+;```````````````````
 ; Checks if a ULF has fquan or nquan.
 ;
   (and (listp ulf) (listp (first ulf)) (member (first (first ulf)) '(fquan nquan)))
@@ -800,7 +800,7 @@
 
 
 (defun plur? (ulf)
-; `````````````````
+;``````````````````
 ; Checks if a ULF is plural (recursively)
 ;
   (if (atom ulf) (equal ulf 'plur)
@@ -809,7 +809,7 @@
 
 
 (defun remove-plur (ulf)
-; ```````````````````````
+;````````````````````````
 ; Removes plur from ULF.
 ;
   (if (atom ulf) (if (equal ulf 'plur) nil ulf)
@@ -819,7 +819,7 @@
 
 
 (defun n+preds? (ulf)
-; ````````````````````
+;`````````````````````
 ; Checks if ULF is an n+preds.
 ;
   (and (listp ulf) (>= (length ulf) 3) (equal (first ulf) 'n+preds))
@@ -827,7 +827,7 @@
 
 
 (defun numerical-adj! (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; If ULF is a numerical adjective (e.g. "5.a" or "five.a"), return the corresponding
 ; number, or nil otherwise.
 ; 
@@ -849,7 +849,7 @@
 
 
 (defun numerical-adj? (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; Check if ULF is a numerical adjective.
 ;
   (if (and (symbolp ulf) (or
@@ -865,7 +865,7 @@
 
 
 (defun num-to-adj (num)
-; ````````````````````````
+;`````````````````````````
 ; Converts a number to a ULF adjective (e.g. 5 => FIVE.A)
 ; 
   (cond
@@ -883,7 +883,7 @@
 
 
 (defun numerical-det! (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; If ULF is a numerical determiner (e.g. "two.d"), return the corresponding
 ; number, or nil otherwise.
 ; 
@@ -899,7 +899,7 @@
 
 
 (defun numerical-det? (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; Check if ULF is a numerical determiner.
 ;
   (if (and (symbolp ulf) (or
@@ -915,7 +915,7 @@
 
 
 (defun numerical-mod-a! (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; If ULF is a numerical mod-a (e.g. "two.mod-a"), return the corresponding
 ; number, or nil otherwise.
 ; 
@@ -931,7 +931,7 @@
 
 
 (defun numerical-mod-a? (ulf)
-; ``````````````````````````
+;```````````````````````````
 ; Check if ULF is a numerical mod-a.
 ;
   (if (and (symbolp ulf) (or
@@ -947,7 +947,7 @@
 
 
 (defun num-to-det (num)
-; ````````````````````````
+;`````````````````````````
 ; Converts a number to a ULF determiner (e.g. 5 => FIVE.D)
 ; 
   (cond
@@ -965,7 +965,7 @@
 
 
 (defun split-np-modifiers (ulf)
-; ```````````````````````````````
+;````````````````````````````````
 ; Splits a complex np ulf into postmodifiers, premodifiers, and the head noun respectively (along
 ; with any mod-a/most-n preceding them).
 ;
@@ -999,7 +999,7 @@
 
 
 (defun tense? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks if ULF is a tense operator
 ; 
   (if (member ulf '(past pres)) t nil)
@@ -1007,7 +1007,7 @@
 
 
 (defun aspect? (ulf)
-; ```````````````````
+;````````````````````
 ; Checks if ULF is an aspect operator
 ; 
   (if (member ulf '(perf prog)) t nil)
@@ -1015,7 +1015,7 @@
 
 
 (defun get-head-noun (ulf)
-; `````````````````````````
+;``````````````````````````
 ; Gets the head noun of a ULF
 ;
   (ttt:apply-rule '(/ (^* (_* noun?)) noun?) ulf :shallow t)
@@ -1023,7 +1023,7 @@
 
 
 (defun get-tense (ulf)
-; `````````````````````
+;``````````````````````
 ; Gets the tense of a sentence ULF.
 ;
   (cond
@@ -1034,7 +1034,7 @@
 
 
 (defun get-aspect (ulf)
-; ``````````````````````
+;```````````````````````
 ; Gets the aspect of a sentence ULF.
 ;
   (cond
@@ -1045,7 +1045,7 @@
 
 
 (defun get-quan (ulf)
-; ````````````````````
+;`````````````````````
 ; Gets the quantity of a quantificational noun phrase. Returns the
 ; noun phrase without the quantificational modifier.
 ; NODE: Modify to return quantificational noun phrase without quant adj, along with number
@@ -1056,7 +1056,7 @@
 
 
 (defun remove-quan (ulf)
-; ```````````````````````
+;````````````````````````
 ; Removes quantificational modifier from ULF.
 ;
   (if (atom ulf) (if (numerical-adj! ulf) nil ulf)
@@ -1066,7 +1066,7 @@
 
 
 (defun make-set (list)
-; `````````````````````
+;``````````````````````
 ; Makes a set ULF (SET-OF ...) of the elements of a list, if multiple elements.
 ; If list has only a single element, just return that element.
 ;
@@ -1075,7 +1075,7 @@
 
 
 (defun copulative? (v)
-; `````````````````````
+;``````````````````````
 ; Checks whether v is a copulative verb, e.g. be.v
 ;
   (member v '(be.v))
@@ -1083,7 +1083,7 @@
 
 
 (defun equal-prop? (prop)
-; `````````````````````````
+;``````````````````````````
 ; Checks whether a proposition is an equality predicate, i.e.,
 ; ((the.d (|Twitter| block.n)) = (the.d (|Twitter| block.n))).
 ;
@@ -1092,7 +1092,7 @@
 
 
 (defun and-prop? (prop)
-; ```````````````````````
+;````````````````````````
 ; Checks whether a proposition is a conjunction, i.e.,
 ; (((the.d (|Twitter| block.n)) red.a) and ((the.d (|Texaco| block.n)) blue.a)).
 ;
@@ -1101,7 +1101,7 @@
 
 
 (defun or-prop? (prop)
-; ```````````````````````
+;````````````````````````
 ; Checks whether a proposition is a disjunction, i.e.,
 ; (((the.d (|Twitter| block.n)) red.a) or ((the.d (|Texaco| block.n)) blue.a)).
 ;
@@ -1110,7 +1110,7 @@
 
 
 (defun not-prop? (prop)
-; ``````````````````````
+;```````````````````````
 ; Checks whether a proposition is negated, i,e.,
 ; (not ((the.d (|Twitter| block.n)) red.a))
 ;
@@ -1119,7 +1119,7 @@
 
 
 (defun relation-prop? (prop)
-; ````````````````````````````
+;`````````````````````````````
 ; Checks whether a proposition is a relation, i.e. ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))),
 ; or ((the.d (|Twitter| block.n)) central.a)
 ;
@@ -1138,7 +1138,7 @@
 
 
 (defun undo-relation-prop? (prop)
-; `````````````````````````````````
+;``````````````````````````````````
 ; Checks whether a proposition is an 'undo' relation, i.e. (undo ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
 ; (interpreted as 'put the Twitter block back on the Texaco block').
 ; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
@@ -1149,7 +1149,7 @@
 
 
 (defun clarification-relation-prop? (prop)
-; ```````````````````````````````````````````
+;````````````````````````````````````````````
 ; Checks whether a proposition is an 'clarification' relation, i.e. (clarification ((the.d (|Twitter| block.n)) on.p (the.d (|Texaco| block.n))))
 ; (interpreted as 'put the Twitter block back on the Texaco block').
 ; TODO: this is rather unintuitive, and not really "ULF/EL compatible".
@@ -1160,7 +1160,7 @@
 
 
 (defun after-prop? (prop)
-; ````````````````````````````
+;`````````````````````````````
 ; Checks whether a proposition is an after relation, i.e. after.p.
 ;
   (and (listp prop) (>= (length prop) 2) (equal (second prop) 'after.p))
@@ -1168,7 +1168,7 @@
 
 
 (defun before-prop? (prop)
-; ````````````````````````````
+;`````````````````````````````
 ; Checks whether a proposition is an before relation, i.e. before.p.
 ;
   (and (listp prop) (>= (length prop) 2) (equal (second prop) 'before.p))
@@ -1176,7 +1176,7 @@
 
 
 (defun at-about-prop? (prop)
-; ````````````````````````````
+;`````````````````````````````
 ; Checks whether a proposition is an at-about relation, i.e. at-about.p.
 ;
   (and (listp prop) (>= (length prop) 2) (equal (second prop) 'at-about.p))
@@ -1184,7 +1184,7 @@
 
 
 (defun loc-record? (list)
-; `````````````````````````
+;``````````````````````````
 ; Checks whether a list is a location record of form ($ loc :x ?x :y ?y :z ?z)
 ;
   (ttt:match-expr '($ loc :x _!1 :y _!2 :z _!3) list)
@@ -1192,7 +1192,7 @@
 
 
 (defun date+time-record? (list)
-; ```````````````````````````````
+;````````````````````````````````
 ; Checks whether a list is a date-time record of form
 ; ($ date+time :year ?year :month ?month :day ?day :hour ?hour :minute ?minute :second ?second)
 ;
@@ -1201,7 +1201,7 @@
 
 
 (defun at-loc-prop? (prop)
-; ```````````````````````````
+;````````````````````````````
 ; Checks whether a proposition is an at-loc.p formula.
 ; i.e. ((the.d (|Twitter| block.n)) at-loc.p ($ loc :x ?x :y ?y :z ?z))
 ;
@@ -1210,7 +1210,7 @@
 
 
 (defun at-about-prop? (prop)
-; ```````````````````````````
+;````````````````````````````
 ; Checks whether a proposition is an at-about.p formula.
 ; i.e. (|Now1| at-about.p ($ date-time :year 2020 :month 3 :day 6 :hour 21 :minute 37 :second 15))
 ;
@@ -1219,7 +1219,7 @@
 
 
 (defun move-prop? (prop)
-; `````````````````````````
+;``````````````````````````
 ; Checks whether a proposition is a move.v formula.
 ; i.e. ((the.d (|Twitter| block.n)) ((past move.v)
 ;                                     (from.p-arg ($ loc :x ?x1 :y ?y1 :z ?z1))
@@ -1232,7 +1232,7 @@
 
 
 (defun ask-prop? (prop)
-; `````````````````````````
+;``````````````````````````
 ; Checks whether a proposition is a ask.v formula.
 ; i.e. (you ((past ask.v) '((sub (at.p (what.d place.n)) ...) ?)))
 ;
@@ -1242,7 +1242,7 @@
 
 
 (defun same-sentence? (de1 de2 ulf)
-; ``````````````````````````````````
+;```````````````````````````````````
 ; Checks whether de1 and de2 are in the same ulf sentence.
 ;
   (labels ((find-sk (de ulf-part)
@@ -1258,7 +1258,7 @@
 
 
 (defun precise-construct? (de1 de2 ulf)
-; ```````````````````````````````````````
+;````````````````````````````````````````
 ; Checks whether de2 is related to de1 through some precise construct, e.g. appositive, relative pronoun, etc.
 ;
   (or
@@ -1278,7 +1278,7 @@
 
 
 (defun embedded-in-n+preds? (phrase1 phrase2)
-; `````````````````````````````````````````````
+;``````````````````````````````````````````````
 ; Checks whether phase1 is an n+preds or np+preds embedding phrase2.
 ;
   (or
@@ -1288,7 +1288,7 @@
 
 
 (defun has-n+preds? (ulf)
-; ````````````````````````
+;`````````````````````````
 ; Checks whether a ulf contains an n+preds or np+preds.
 ;
   (ttt:match-expr '(^* (! np+preds n+preds)) ulf)
@@ -1296,7 +1296,7 @@
 
 
 (defun local? (phrase1 phrase2 ulf)
-; ``````````````````````````````````
+;```````````````````````````````````
 ; Checks whether phrase1 is a local ancestor to phrase2; i.e. if there is no other discourse entity standing
 ; between (blocking) phrase1 and phrase2, and phrase1 and phrase2 are both in the same sentence/clause.
 ;
@@ -1335,7 +1335,7 @@
 
 
 (defun c-command? (phrase1 phrase2 ulf)
-; ``````````````````````````````````````
+;```````````````````````````````````````
 ; Checks whether phrase1 c-commands phrase2 in a given ulf.
 ;
   (let ((phrase1-base (apply-sub-macro phrase1)) (phrase2-base (apply-sub-macro phrase2))
@@ -1345,7 +1345,7 @@
 
 
 (defun sym-split (sym n &key front)
-; ```````````````````````````````````
+;````````````````````````````````````
 ; Splits a symbol into two symbols at index n from the end.
 ; (or if :front t is given, n from the front)
 ;
@@ -1361,7 +1361,7 @@
 
 
 (defun sym-contains (sym char)
-; ``````````````````````````````
+;```````````````````````````````
 ; Returns true if a symbol contains the character given by char.
 ;
   (if (member char (explode sym) :test #'char-equal) t)

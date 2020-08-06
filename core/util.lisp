@@ -14,15 +14,6 @@
 
 
 
-(defun cddr1 (x)
-;`````````````````
-; For DEBUGGING
-;
-  (cddr x)
-) ; END cddr1
-
-
-
 (defun cdr1 (x)
 ;````````````````
 ; Adaptive form of cdr which returns cdr if list contains more than
@@ -1728,63 +1719,6 @@
 
 
 
-(defun nsubst-variable (plan-name val var)
-;``````````````````````````````````````````
-; Substitutes (destructively) a given value (val) for a given variable (var)
-; in a plan.
-;
-  (nsubst val var (get plan-name 'rest-of-plan))
-) ; END nsubst-variable
-
-
-
-(defun nsubst-schema-args (args schema)
-;```````````````````````````````````````
-; Substitute the successive arguments in the 'args' list for successive
-; variables occurring in the schema or plan header exclusive of the 
-; episode variable characterized by the header predication (for 
-; episodic headers). In relational schemas, headers are assumed to 
-; be simple (infix) predications,
-;          (<term> <pred> <term> ... <term>),
-; and for event schemas they are of form
-;          ((<term> <pred> <term> ... <term>) ** <term>).
-; We look for variables among the terms (exclusive of the one following
-; "**" in the latter header type), and replace them in succession by
-; the members of 'args'.
-;
-  (let (header predication vars)
-    (setq header (second schema))
-    (if (eq (second header) '**)
-      (setq predication (first header)) ; episodic
-      (setq predication header)) ; nonepisodic
-    (if (atom predication) ; unexpected
-      (return-from nsubst-schema-args schema))
-    (dolist (x predication)
-      (if (variable? x) (push x vars)))
-    (when (null vars) ; unexpected
-      (format t "~%@@@ Warning: Attempt to substitute values~%    ~a~%    in header ~a, which has no variables"
-                args predication)
-      (return-from nsubst-schema-args schema))
-    (setq vars (reverse vars))
-    (cond
-      ((> (length args) (length vars))
-        (format t "~%@@@ Warning: More values supplied, viz.,~%    ~a,~%    than header ~a has variables"
-                  args predication)
-        (setq args (butlast args (- (length args) (length vars)))))
-      ((< (length args) (length vars))
-        (format t "~%@@@ Warning: Fewer values supplied, viz.,~%    ~a,~%    than header ~a has variables"
-                  args predication)
-        (setq vars (butlast vars (- (length vars) (length args))))))
-            
-      ; Length of 'args' and 'vars' are equal (or have just been equalized)
-    (dotimes (i (length args))
-      (nsubst (pop args) (pop vars) schema))
-
-    schema
-)) ; END nsubst-schema-args
-
-
-
 (defun skolem (name)
 ;````````````````````
 ; Creates a unique skolem constant given a name.
@@ -1915,81 +1849,6 @@
           (remove nil (mapcan #'get-episode-vars plan))
           :test #'equal))))
 ) ; END get-episode-vars
-
-
-
-(defun subst-duplicate-variables (plan-name plan)
-;``````````````````````````````````````````````````
-; Substitutes all variables in a plan with duplicate variables, inheriting
-; the gist-clauses, ulf, etc. attached to them in the schema used (directly
-; or indirectly) to create the current plan.
-;
-  (let* ((episode-vars (get-episode-vars plan))
-        (new-episode-vars (mapcar (lambda (episode-var)
-          (duplicate-variable plan-name episode-var)) episode-vars))
-        (result plan))
-    (mapcar (lambda (var new-var)
-      (setq result (subst new-var var result)))
-      episode-vars new-episode-vars)
-  result)
-) ; END subst-duplicate-variables
-
-
-
-(defun duplicate-variable (plan-name var)
-;```````````````````````````````````````````````````
-; Duplicates an episode variable, inheriting the gist-clauses,
-; ulf, etc. attached to it in the schema used (directly or
-; indirectly) to create the current plan.
-;
-  (let (new-var schema-name)
-    ; Create new episode variable
-    (setq new-var
-      (intern (format nil "~a" (gentemp (string var)))))
-    (setq schema-name (get plan-name 'schema-name))
-    ; Inherit gist-clauses, semantics, and topic keys
-    (setf (gethash new-var (get schema-name 'gist-clauses))
-      (gethash var (get schema-name 'gist-clauses)))
-    (setf (gethash new-var (get schema-name 'semantics))
-      (gethash var (get schema-name 'semantics)))
-    (setf (gethash new-var (get schema-name 'topic-keys))
-      (gethash var (get schema-name 'topic-keys)))
-  ; Return new var
-  new-var)
-) ; END duplicate-variable
-
-
-
-(defun print-current-plan-status (plan-name)
-;`````````````````````````````````````````````
-; Show plan names, action names and wffs reached in following 
-; 'rest-of-plan' pointers from 'plan-name'; also show 'subplan-of'
-; pointers. This function is intended for debugging.
-;
-  (let ((rest (get plan-name 'rest-of-plan)) step-name wff
-        superstep-name subplan-name (cont t))
-    (format t "~%Status of ~a " plan-name)
-    (setq superstep-name (get plan-name 'subplan-of))
-    (if superstep-name
-      (format t "(subplan-of ~a):" superstep-name)
-      (format t "(no superstep):" plan-name))
-    (loop while cont do
-      (error-check :caller 'print-current-plan-status)
-      (setq step-name (car rest))
-      (when (null step-name)
-        (format t "~%  No more steps in ~a." plan-name)
-        (format t "~%  --------------------")
-        (return-from print-current-plan-status nil))
-      (setq wff (second rest))
-      (format t "~%  rest of ~a = (~a ~a ...)" plan-name step-name wff)
-      (setq subplan-name (get step-name 'subplan))
-      (when subplan-name
-        (format t "~%  subplan ~a of ~a:" subplan-name step-name)
-        (setq rest (get subplan-name 'rest-of-plan))
-        (setq plan-name subplan-name))
-      (unless subplan-name
-        (setq cont nil)))
-)) ; END print-current-plan-status
 
 
 

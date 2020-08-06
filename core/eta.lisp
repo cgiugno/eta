@@ -49,6 +49,29 @@
 ; (load "start")
 
 
+(setf *print-circle* t) ; needed to prevent recursive loop when printing plan-step
+
+(defstruct ds
+;```````````````````````````````
+; contains the following fields:
+; curr-plan        : points to the currently active dialogue plan
+; dialogue-history : should be three lists: surface form, gist clauses, and ULF interpretations
+; gist-kb-user     : hash table of all gist clauses + associated topic keys from user
+; gist-kb-eta      : hash table of all gist clauses + associated topic keys from Eta
+; context          : hash table of facts that are true at Now*, e.g., <wff3>
+; memory           : hash table of atemporal/"long-term" facts, e.g., (<wff3> ** E3) and (Now* during E3)
+; kb               : hash table of Eta's knowledge base, containing general facts
+;
+  curr-plan
+  dialogue-history
+  gist-kb-user
+  gist-kb-eta
+  context
+  memory
+  kb
+) ; END defstruct ds
+
+
 
 
 
@@ -73,6 +96,9 @@
 ;         tree) and many subsidiary gist-clause extraction trees
 ;         (formed from corresponding packets).
 ;
+  ; Global variable for dialogue record structure
+  (defvar *ds* (make-ds))
+
   ; Use response inhibition via latency numbers when *use-latency* = T
   (defvar *use-latency* t)
 
@@ -232,653 +258,32 @@
     (setq *log-answer* nil)
     (setq *log-ptr* -1))
 
-  ; Create a partially instantiated dialog plan from a schema,
-  ; starting with a copy of the schema with the first action variable
-  ; given a new name, and the 'rest-of-plan' property pointing to
-  ; the rest of the plan beginning with the new name.
-  (init-plan-from-schema '*dialog-plan* '*eta-schema* nil)
-  ;; (print-current-plan-status '*dialog-plan*) ; DEBUGGING
+  ; Initiate the dialogue plan. The schema named
+  ; *eta-schema* is used to create the top-level plan
+  (setf (ds-curr-plan *ds*) (init-plan-from-schema '*eta-schema* nil))
 
-  ; Call 'process-next-action' repeatedly, using the 'rest-of-plan'
-  ; pointer. Every time an action is completed, the 'rest-of-plan'
-  ; pointer is updated to point at a new action name (which may
-  ; be nonprimitive and in turn have a 'subplan' property). If an
-  ; action is primitive (e.g. (^me say-to.v ^you)) execute it, otherwise
-  ; form and initialize a subplan.
-  (loop while (and
-    (not (null (get '*dialog-plan* 'rest-of-plan)))
-    (not (eq (process-next-action '*dialog-plan*) 'exit)))
-  do
-    ;; (print-current-plan-status '*dialog-plan*) ; DEBUGGING
-    ;; (format t "~% here is after the print-current-plan-status -----------")
+  ;; (print-current-plan-status (ds-curr-plan *ds*)) ; DEBUGGING
 
-    (error-check :caller 'eta)
+  ; Execution of the plan continues so long as
+  ; the dialogue plan has another step
+  (loop while (has-next-step? (ds-curr-plan *ds*)) do
 
-    ; Update the 'rest-of-plan' pointers after processing the
-    ; previous step.
-    (update-rest-of-plan-pointers '*dialog-plan*)
+    ; Process next action of dialogue plan
+    (process-next-action (ds-curr-plan *ds*))
 
-    ;; (format t "~% here is after the update-rest-of-plan-pointers -----------")
-    ;; (print-current-plan-status '*dialog-plan*) ; DEBUGGING
-    ;; (format t "~% here is after the print-current-plan-status -----------")
-    ;; (format t "~%'rest-of-plan' pointers have been updated") ; DEBUGGING
+    ;; (print-current-plan-status (ds-curr-plan *ds*)) ; DEBUGGING
+    ;; (format t " here is after the print-current-plan-status -----------~%")
+
+    ;; (error-check :caller 'eta)
+
+    ; Update plan state after processing the previous step
+    (update-plan-state (ds-curr-plan *ds*))
+
+    ;; (format t " here is after the plan state has been updated -----------~%")
+    ;; (print-current-plan-status (ds-curr-plan *ds*)) ; DEBUGGING
   )
-
+  
 ) ; END eta
-
-
-
-
-
-(defun init-plan-from-schema (plan-name schema-name args)
-;``````````````````````````````````````````````````````````
-; (eval plan-name) is presumably nil, while (eval schema-name)
-; is the schema (starting with '(event-schema ((..) ** ?e) ... )')
-; that the plan will be based on. For non-nil 'args', we replace
-; successive variables occurring in the (..) part of the header
-; (i.e., exclusive of ?e) by successive elements of 'args'.
-;
-  (let (plan sections episodes ep-var sk-name)
-    (setf (get plan-name 'schema-name) schema-name)
-
-    ;; (format t "~%'schema-name' of ~a has been set to ~a" plan-name
-    ;;                         (get plan-name 'schema-name)) ; DEBUGGING
-  
-    ; Make full copy so that we can make destructive changes to plan
-    (set plan-name (copy-tree (eval schema-name)))
-
-    ;; (format t "~%Schema to be used to initialize plan ~a is ~% ~a" 
-    ;;                                    plan-name plan) ; DEBUGGING
-
-    (setq plan (eval plan-name))
-    (setq plan (cons 'plan (cdr plan)))
-
-    ; If no episodes in schema, return error
-    (when (not (find :episodes plan))
-      (format t "~%*** Attempt to form plan ~a from schema ~a which contains no ':episodes' keyword" plan-name schema-name)
-      (return-from init-plan-from-schema nil))
-
-    ; Substitute the arguments 'args' (if non-nil) for the variables in the
-    ; plan/schema header (other than the episode variable) throughout the
-    ; plan. The substitution is destructive.
-    (if args (setq plan (nsubst-schema-args args plan)))
-
-    ;; (format t "~%Schema to be used for plan ~a, with arguments instantiated~% ~a" plan-name plan) ; DEBUGGING
-
-    ; Get schema sections. 'sections' is a hash table with schema sections as keys
-    ; and their contents as values.
-    (setq sections (get-schema-sections plan))
-
-    ;`````````````````
-    ; :types
-    ;`````````````````
-    ; Add all types to context.
-    ; TODO: This is incomplete and needs to be updated in the future. Currently doesn't
-    ; do anything with the proposition variables e.g. !t1
-    (mapcar (lambda (type) (when (not (variable? type))
-        ; If typed variable, find value for variable through observation and
-        ; substitute in both type and in contents of each schema section.
-        (when (variable? (car type))
-          ; Get skolem name and replace in schema.
-          (setq sk-name (observe-variable-type (car type) (second type)))
-          (maphash (lambda (k v) (setf (gethash k sections)
-            (subst sk-name (car type) v))) sections)
-          (setq type (subst sk-name (car type) type)))
-        ; Store type as fact in context.
-        (store-in-context type)))
-      (gethash :types sections))
-
-    ;`````````````````
-    ; :rigid-conds
-    ;`````````````````
-    ; Add all rigid-conds to context.
-    ; TODO: This is incomplete and needs to be updated in the future. Currently doesn't handle
-    ; formula variables at all (e.g., for a rigid-cond like (?b1 red.a)), or do anything
-    ; with the proposition variables e.g. !r1
-    (mapcar (lambda (cond) (if (not (variable? cond))
-        (store-in-context cond)))
-      (gethash :rigid-conds sections))
-
-    ;`````````````````
-    ; :episodes
-    ;`````````````````
-    (setq episodes (gethash :episodes sections))
-
-    ; Find first action variable, should be a list like (:episodes ?e1 ...)
-    (setq ep-var (car episodes))
-
-    ;; (format t "~%Action list of argument-instantiated schema is~% ~a" episodes) ; DEBUGGING
-    ;; (format t "~%The first action variable, ~a, has (variable? ~a) = ~a"
-    ;;            ep-var ep-var (variable? ep-var)) ; DEBUGGING
-
-    ; If first action variable does not start with '?', return error
-    (when (not (variable? ep-var))
-      (format t "~%*** Attempt to form plan ~a from schema ~a which contains no episodes~%" plan-name schema-name)
-      (return-from init-plan-from-schema nil))
-
-    ; Found the next action to be processed; set rest-of-plan pointer
-    (setf (get plan-name 'rest-of-plan) episodes)
-
-    (process-plan-variables schema-name plan-name ep-var)
-
-  plan-name)
-) ; END init-plan-from-schema
-
-
-
-
-
-(defun init-plan-from-episode-list (episodes parent-plan-name)
-;``````````````````````````````````````````````````````````````
-; Creates a plan from a given 'episodes' list (:episodes ...)
-; The schema-name associated with the new plan is inherited from
-; the schema-name of the parent plan.
-;
-  (let (plan-name schema-name plan episode-list ep-var)
-    (setq plan-name (gentemp "SUBPLAN"))
-    
-    (setq schema-name (get parent-plan-name 'schema-name))
-    (setf (get plan-name 'schema-name) schema-name)
-  
-    ; Make full copy so that we can make destructive changes to plan
-    (setq plan episodes)
-    (setq plan (cons 'plan plan))
-
-    ; If no episodes in schema, return error
-    (when (not (find :episodes plan))
-      (format t "~%*** Attempt to form subplan ~a which contains no ':episodes' keyword" plan-name)
-      (return-from init-plan-from-episode-list nil))
-
-    ; Find first action variable, should be a list like (:episodes ?e1 ...)
-    (setq episode-list (member :episodes plan))
-    (setq ep-var (second episode-list))
-
-    ;; (format t "~%Action list of argument-instantiated schema is~% ~a" episode-list) ; DEBUGGING
-    ;; (format t "~%The first action variable, ~a, has (variable? ~a) = ~a"
-    ;;            ep-var ep-var (variable? ep-var)) ; DEBUGGING
-
-    ; If first action variable does not start with '?', return error
-    (when (not (variable? ep-var))
-      (format t "~%*** Attempt to form plan ~a which contains no episodes" plan-name)
-      (return-from init-plan-from-schema nil))
-
-    ; Found the next action to be processed; set rest-of-plan pointer
-    (setf (get plan-name 'rest-of-plan) (cdr episode-list))
-
-    (process-plan-variables schema-name plan-name ep-var)
-  plan-name)
-) ; END init-plan-from-episode-list
-
-
-
-
-
-(defun add-subplan ({sub}plan-name new-subplan-name)
-;````````````````````````````````````````````````````
-; Adds a subplan to the current {sub}plan by creating bidirectional links
-; between the current episode name of the current {sub}plan and the new subplan
-; name. Unless the new subplan to add already has an associated schema name, it
-; inherits the schema name of the schema used to create the subplan.
-;
-  (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest)))
-    (setf (get ep-name 'subplan) new-subplan-name)
-    (setf (get new-subplan-name 'subplan-of) ep-name)
-    (unless (get new-subplan-name 'schema-name)
-      (setf (get new-subplan-name 'schema-name) (get {sub}plan-name 'schema-name)))
-  )
-) ; END add-subplan
-
-
-
-
-
-(defun update-plan (plan-name)
-;```````````````````````````````
-; Similar to init-plan-from-schema, substitute dual constants for variables
-;
-  (let (schema-name ep-var)
-
-    (setq ep-var (car (get plan-name 'rest-of-plan)))
-
-    ; Should start with '?'
-    (when (not (variable? ep-var))
-      ;; (format t "~%@@ end of plan ~a reached" plan-name) ; DEBUGGING
-      (return-from update-plan nil))
-
-    (process-plan-variables schema-name plan-name ep-var)
-
-    ; Restart error count
-    (setq *error-check* 0)
-
-    (get plan-name 'rest-of-plan)
-  plan-name)
-) ; END update-plan
-
-
-
-
-
-(defun update-rest-of-plan-pointers (plan-name)
-;```````````````````````````````````````````````
-; This gets a plan & its subplans ready for processing the next
-; step by updating 'rest-of-plan' pointers and making sure that
-; for any completed step (at any level) the next step of the schema
-; being progressively instantiated has been initialized (given a
-; unique (dualized) step name, with a 'gist-clause' property, etc.) 
-; via 'update-plan'.
-;
-; If the rest-of-plan' pointer of 'plan-name' is nil, no pointer
-; updates are needed (the plan of 'plan-name' is fully executed).
-;    If the first step at the 'rest-of-plan' pointer of 'plan-name'
-; has no 'subplan' property, then no updates are needed -- the most
-; recent step executed was a primitive one, so that the 'rest-of-plan'
-; pointer was aleady updated and the next step was initialized (via
-; 'update-plan'). (Of course, that next step may require a subplan,
-; but in that case a 'subplan' property will be attached to it in the
-; process of implementing it.)
-;
-; Otherwise, after recursively updating the 'rest-of-plan' pointers
-; of the subplan (whose name is accessed via the first episode's
-; 'subplan' property), if the pointer for that episode has become nil,
-; advance the 'rest-of-plan' pointer of 'plan-name' by one step;
-; (the currently due step of 'plan-name' has been fully executed);
-; then initialize its next episode (if any) using 'update-plan'.
-;
-  (error-check :caller 'update-rest-of-plan-pointers)
-
-  (let ((rest (get plan-name 'rest-of-plan)) ep-name subplan-name)
-    (setq ep-name (car rest))
-    ;; (format t "~%~%'rest-of-plan' pointer of ~a at beginning of update~% is (~a ~a ...)" plan-name ep-name (second rest)) ; DEBUGGING
-    (cond
-      ; Unexpected issues
-      ((null rest) nil)
-      ((or (not (symbolp ep-name)) (null ep-name)) nil)
-      ; If no subplan, nothing needs to be done
-      ((null (get ep-name 'subplan)) nil)
-      ; Otherwise update plan pointers
-      (t (setq subplan-name (get ep-name 'subplan))
-        ; Unexpected: If subplan forms an infinite loop (in the case of :repeat-until) just return nil
-        (when (equal subplan-name (get (car (get subplan-name 'rest-of-plan)) 'subplan))
-          (setf (get ep-name 'subplan) nil)
-          (return-from update-rest-of-plan-pointers nil))
-        ; Do recursive updating of the 'rest-of-plan' pointers for 'subplan-name':
-        (update-rest-of-plan-pointers subplan-name)
-        ; The 'rest-of-plan' pointer of 'subplan-name' may now be
-        ; nil, even if it was non-nil before the recursive update
-        (when (null (get subplan-name 'rest-of-plan))
-          ;;  (format t "~%~%Since subplan ~a has a NIL 'rest-of-plan',~% advance 'rest-of-plan' of ~a over step ~a~% with WFF = ~a~%" subplan-name plan-name ep-name (second rest)) ; DEBUGGING
-          (delete-current-episode plan-name))))
-
-    ;; (format t "~%~%'rest-of-plan' pointer of ~a at end of update ~% is (~a ~a ...)~%"
-    ;;   plan-name (car (cddr1 rest)) (second (cddr1 rest))) ; DEBUGGING
-
-)) ; END update-rest-of-plan-pointers
-
-
-
-
-
-(defun process-plan-variables (schema-name plan-name ep-var)
-;```````````````````````````````````````````````````````````````````````
-; Handles the destructive substitution of episode variables in schema with
-; the instantiated episode names, as well as attaching properties to the
-; action from the associated hash tables, during the init-plan-from-schema
-; and update-plan functions.
-; NOTE: modified by Ben Kane (6/9/2020) after it was decided that we would
-; no longer use the reified proposition syntax, i.e., '?a1.'
-;
-  (let (ep-name gist-clauses interpretation topic-keys)
-
-    ; Instantiate an episode name and destructively substitute for variable in plan.
-    (setq ep-name (episode-name ep-var))
-    (nsubst-variable plan-name ep-name ep-var)
-
-    ;; (format t "~%Action list after substituting ~a for ~a: ~% ~a"
-    ;;           ep-name ep-var (get plan-name 'rest-of-plan)) ; DEBUGGING
-
-    ; Also we need to make action formulas available from the
-    ; propositions names:
-    (setf (get ep-name 'wff)
-      (second (get plan-name 'rest-of-plan)))
-
-    ; If schema name isn't specified explicitly, use the schema name attached to the plan
-    (unless schema-name
-      (setq schema-name (get plan-name 'schema-name)))
-
-    ; If this is a Eta action, transfer to it the gist clauses, interpretation,
-    ; and topic key list from the hash tables associated with 'schema-name':
-    (when (eq '^me (car (get ep-name 'wff)))
-      (when (get schema-name 'gist-clauses)
-        (setq gist-clauses (gethash ep-var (get schema-name 'gist-clauses)))
-        (setf (get ep-name 'gist-clauses) gist-clauses))
-      
-      ;; (format t "~%Gist clauses attached to ~a =~% ~a" ep-name
-      ;;                         (get ep-name 'gist-clauses)) ; DEBUGGING
-
-      (when (get schema-name 'semantics)
-        (setq interpretation (gethash ep-var (get schema-name 'semantics)))
-        (setf (get ep-name 'semantics) interpretation))
-
-      (when (get schema-name 'topic-keys)
-        (setq topic-keys (gethash ep-var (get schema-name 'topic-keys)))
-        (setf (get ep-name 'topic-keys) topic-keys))
-
-      ;; (format t "~%Topic keys attached to ~a =~% ~a" ep-name
-                                    ;; (get ep-name 'topic-keys)) ; DEBUGGING
-    )
-)) ; END process-plan-variables
-
-
-
-
-
-(defun observe-variable-type (sk-var type)
-;```````````````````````````````````````````
-; Through observation of the world, find an entity which can fill in
-; variable of type (variable assumed to be neither in schema header or
-; filled in at later point in schema).
-;
-  (let (sk-name sk-const)
-    (setq sk-const (skolem (implode (cdr (explode sk-var)))))
-    (setq sk-name
-      (car (find-all-instances-context `(:l (?x) (?x ,type)))))
-    (add-alias sk-const sk-name)
-    sk-name)
-) ; END observe-variable-type
-
-
-
-
-
-;; (defun form-spatial-representation ()
-;; ;``````````````````````````````````````
-;; ; Forms a spatial representation from the currently chosen BW-concept.n
-;; ; (assuming such a choice has actually been made at this point), through
-;; ; sending the BW system the chosen concept schema and receiving a goal
-;; ; schema.
-;; ; TODO: I'm not sold on how this is done currently, but I'm stumped on
-;; ; how to do it more sensibly. The issue is that, for the lambda expression
-;; ; + find-all-instances to work, the facts about the goal schema need to be
-;; ; stored ahead-of-time, so the communication of the goal schema needs to be
-;; ; done before the 'choice' step of the indefinite quantifier. This requires
-;; ; sending the BW system the chosen concept schema, but the concept schema
-;; ; name is nested inside the lambda extract, and messing with that here would
-;; ; be a pretty messy approach. Instead, I check context for some individual such
-;; ; that it is a BW-concept.n and Eta has chosen it.
-;; ; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
-;; ; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
-;; ; in noun hierarchy.
-;; ;
-;;   (let (concept-name goal-schema goal-name)
-;;     (setq concept-name (car (find-all-instances-context
-;;       '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
-;;     (request-goal-rep (cdr (get-record-structure concept-name)))
-;;     ; NOTE: currently no special offline (terminal mode) procedure
-;;     ; for getting goal schema.
-;;     (setq goal-schema (get-goal-rep))
-;;     (setq goal-name (gensym "BW-goal-rep"))
-;;     (add-alias (cons '$ goal-schema) goal-name)
-;;     (store-in-context (list goal-name 'goal-schema1.n))
-;;     (store-in-context (list goal-name 'instance-of.p concept-name)))
-;; ) ; END form-spatial-representation
-
-
-
-
-
-(defun observe-step-towards-goal (goal-rep)
-;`````````````````````````````````````````````
-; Observes next step towards the currently active BW goal-schema,
-; through reading IO file. Store fact in context.
-; TODO: might need changing - see note on 'find4.v' implementation.
-; Currently, the (?x step1-toward.p ?goal-rep) step is hard-coded
-; (based on the value of ?goal-rep extracted from the lambda function
-; in the find4.v action), which it shouldn't be.
-;
-  (let (step)
-    (setq step (if *live* (get-planner-input)
-                          (get-planner-input-offline)))
-    (remove-from-context `(?x step1-toward.p ,goal-rep))
-    (if step
-      (store-in-context `(,step step1-toward.p ,goal-rep))))
-) ; END observe-step-toward-goal
-
-
-
-
-
-(defun choose-variable-restrictions (sk-var restrictions)
-;``````````````````````````````````````````````````````````
-; Handles any indefinite quantification of a variable filled
-; through a choice  made by Eta, given a list of restrictions.
-; 'sk-var' is the variable to be replaced, e.g., '?c'.
-; 'restrictions' may be a lambda abstract, possibly preceded by
-; some adjective modifier, e.g.,
-; (random.a (:l (?x) (and (?x member-of.p ?cc)
-;                         (not (^you understand.v ?x)))))
-; The fact that some individual was chosen is also stored in context.
-; NOTE: does this make sense? i.e., should something being chosen be
-; stored in dialogue context? If the choosing occurs as part of a loop,
-; how is something "unchosen" at the end of the loop? Currently I do that
-; here, so basically only one (^me choose.v ?x) fact can be active in
-; context at once, but it's pretty ugly.
-;
-  (let (sk-name sk-const lambda-descr modifier candidates)
-    (setq sk-const (skolem (implode (cdr (explode sk-var)))))
-    ; Allow for initial modifier 
-    (when (not (lambda-descr? restrictions))
-      (setq modifier (car restrictions)) (setq restrictions (second restrictions)))
-    (setq lambda-descr restrictions)
-    (setq candidates (find-all-instances-context lambda-descr))
-    (format t "given restriction ~a, found candidates ~a~%" lambda-descr candidates) ; DEBUGGING
-    (format t "using modifier ~a to choose~%" modifier) ; DEBUGGING
-    (setq sk-name (cond
-      ((equal modifier 'random.a)
-        (nth (random (length candidates)) candidates))
-      (t (car candidates))))
-    ; Store fact that sk-name chosen in context (removing any existing choice).
-    (remove-from-context '(^me choose.v ?x))
-    (store-in-context `(^me choose.v ,sk-name))
-    sk-name)
-) ; END choose-variable-restrictions
-
-
-
-
-
-(defun find-curr-{sub}plan (plan-name)
-;``````````````````````````````````````
-; Find the deepest subplan of 'plan-name' (starting with the action
-; at the 'rest-of-plan' pointer of 'plan-name') with an immediately
-; pending action.
-;
-  (let* ((rest (get plan-name 'rest-of-plan)) (ep-name (car rest))
-        (wff (second rest)) (subplan-name (get ep-name 'subplan)))
-
-  ;; (format t "~%  'rest-of-plan' of ~a is ~%   (~a ~a ...)"
-  ;; plan-name (car rest) (second rest)) ; DEBUGGING
-
-  (error-check :caller 'find-curr-{sub}plan)
-
-  (cond
-    ; Next action is top-level; may be primitive, or may need elaboration into subplan
-    ((null subplan-name) plan-name)
-    ; Unexpected: If subplan forms an infinite loop (in the case of :repeat-until) just return subplan name
-    ((equal subplan-name (get (car (get subplan-name 'rest-of-plan)) 'subplan))
-      (setf (get ep-name 'subplan) nil)
-      subplan-name)
-    ; Unexpected: if the subplan is fully executed, then the 'rest-of-plan'
-    ; pointer should have been advanced
-    ((null (get subplan-name 'rest-of-plan))
-      ;; (format t "~%**'find-curr-{sub}plan' applied to ~a~%   arrived at a completed subplan ~a" plan-name subplan-name)
-      (setf (get ep-name 'subplan) nil)
-    )
-    ; The subplan is not fully executed, so find & return the current
-    ; {sub}subplan recursively:
-    (t (find-curr-{sub}plan subplan-name)))
-)) ; END find-curr-{sub}plan
-
-
-
-
-
-(defun delete-current-episode ({sub}plan-name)
-;```````````````````````````````````````````````
-; Skip over the action of {sub}plan-name pointed to by its
-; 'rest-of-plan' pointer. The original intention was to destructively
-; delete obviated actions, however since plans are currently represented
-; as simple list structures rather than doubly-linked lists, we would have
-; to search from the beginning of the plan to find the point where
-; we'd need to apply 'rplaca' to physically delete the name (and then wff)
-; of the skipped action.
-;
-; TODO: Ultimately, to facilitate general plan modifications, rearrangements,
-; etc. we should be using a doubly linked list - perhaps record-structures for
-; steps that have fields for preceding and following steps (and wff fields, gist
-; clause fields, etc.)
-;
-
-  ;; (format t "~% CURRENT ACTION ~a BEING DELETED FROM ~a, ALONG WITH ITS ~%  WFF = ~a"
-  ;;    (car (get {sub}plan-name 'rest-of-plan)) {sub}plan-name (second (get {sub}plan-name 'rest-of-plan))) ; DEBUGGING
-
-  (setf (get {sub}plan-name 'rest-of-plan) (cddr1 (get {sub}plan-name 'rest-of-plan)))
-  (update-plan {sub}plan-name)
-
-  ;; (format t "~% So the next plan is now  ~a" (get {sub}plan-name 'rest-of-plan)) ; DEBUGGING
-
-) ; END delete-current-episode
-
-
-
-
-
-(defun obviated-question (sentence eta-action-name)
-;````````````````````````````````````````````````````
-; Check whether this is a (quoted, bracketed) question.
-; If so, check what facts, if any, are stored in *gist-kb-user* under 
-; the 'topic-keys' obtained as the value of that property of
-; 'eta-action-name'. If there are such facts, check if they
-; seem to provide an answer to the gist-version of the question,
-; which will be the last gist clause stored under property
-; 'gist-clauses' of 'eta-action-name'.
-; NOTE: modified to check if gist clause contains question rather than surface
-; sentence (B.K. 4/17/2020)
-;
-  (let (gist-clauses topic-keys facts)
-    ;; (format t "~% ****** input sentence: ~a~%" sentence)
-    (setq gist-clauses (get eta-action-name 'gist-clauses))
-    ;; (format t "~% ****** gist clauses are ~a **** ~%" gist-clauses)
-    ;; (format t "~% ****** quoted question returns ~a **** ~%" (some #'question? gist-clauses)) ; DEBUGGING
-    (if (not (some #'question? gist-clauses))
-      (return-from obviated-question nil))
-    (setq topic-keys (get eta-action-name 'topic-keys))
-    ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
-    (if (null topic-keys) (return-from obviated-question nil))
-    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
-    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
-    ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
-    ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
-    (if (null facts) (return-from obviated-question nil))
-    ; We have an Eta question, corresponding to which we have stored facts
-    ; (as user gist clauses) that seem topically relevant.
-    ; NOTE: in this initial version, we don't try to verify that the facts
-    ; actually obviate the question, but just assume that they do. 
-  facts)
-) ; END obviated-question
-
-
-
-
-
-(defun obviated-action (eta-action-name)
-;`````````````````````````````````````````
-; Check whether this is an obviated action (such as a schema instantiation),
-; i.e. if the action has a topic-key(s) associated, check if any facts are stored
-; in *gist-kb-user* under the topic-key(s). If there are such facts, we assume that
-; these facts obviate the action, so the action can be deleted from the plan.
-;
-  (let (topic-keys facts)
-    (setq topic-keys (get eta-action-name 'topic-keys))
-    ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
-    (if (null topic-keys) (return-from obviated-action nil))
-    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
-    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
-    ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
-    ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
-    (if (null facts) (return-from obviated-action nil))
-  facts)
-) ; END obviated-action
-
-
-
-
-
-(defun process-next-action (plan-name)
-;``````````````````````````````````````````
-; As currently envisaged, 'plan-name' will always be the main Eta
-; plan, but in looking for the next action we potentially descend
-; into subplans.
-;
-; I.e., we follow 'rest-of-plan' and 'subplan' pointers to find the
-; next action in the current plan or subplan. If there are further
-; actions, the car of the rest of the (sub)plan is the name of an action
-; proposition, and the cdr begins with an action specification (a wff
-; characterizing the implicit event-- whose name can be obtained by
-; dropping the final period from the "action name"). 'Rest-of-plan'
-; pointers become nil when a (sub)plan has been fully executed, but
-; process-next-action only does this pointer-advancement when executing
-; a primitive action, whereas updating the pointers for any higher-level
-; actions is handled by 'update-rest-of-plan-pointers'.
-;
-; So, we process the action heading the rest of the (sub)plan, which
-; for a primitive action entails execution of the action and advancement
-; of the 'rest-of-plan' pointer of 'plan-name'. For a nonprimitive 
-; action it leads to the creation of an initialized subplan intended
-; to implement the nonprimitive action, with a name pointed to by
-; the 'subplan' property of 'plan-name'. We hold off on executing the
-; first step of such a subplan (leaving this to the next iteration
-; of 'process-next-action' as called for in the main eta program),
-; in order to give the main plan management program (eta) a chance
-; to evaluate the "proposed" subplan and possibly make amendments.
-; [This is just for future enhancements of the system, not immediately
-; used.] 
-;
-; Question: Why not use the names of nonprimitive steps themselves as
-; subplan names? Answer: We want to potentially allow for associating
-; multiple alternative subplans with a given step (if we do this, we
-; should change 'subplan' to 'subplans', which will point to a *list* 
-; of subplan names); when one subplan fails, the step may still be
-; achievable with an alternative subplan. (For user inputs, different
-; subplans represent alternative expectations about user behavior, and
-; this eventually opens the door to an AND-OR style of planning, as in
-; two-person games.)
-;
-  (let ((rest (get plan-name 'rest-of-plan)) {sub}plan-name wff)
-
-    ; If no next action, return nil so the system will terminate
-    (if (null rest) (return-from process-next-action nil))
-  
-    ; Find the next action (at the lowest level), by following
-    ; 'subplan' pointers (if any) to the deepest level where there
-    ; is a subplan with a non-nil 'rest-of-plan' pointer.
-    (setq {sub}plan-name (find-curr-{sub}plan plan-name))
-
-    (setq rest (get {sub}plan-name 'rest-of-plan))
-
-    ;; (format t "~%'rest-of-plan' of currently due ~a is~% ~a~%"
-    ;;           {sub}plan-name rest) ; DEBUGGING
-
-    (setq wff (second rest))
-
-    ; Match '(^me ...)' (Eta) actions, or '(^you ...)' (User) actions, and
-    ; act accordingly.
-    (cond
-      ((eq (car wff) '^me)
-        (implement-next-eta-action {sub}plan-name))
-      ((eq (car wff) '^you)
-        (observe-next-user-action {sub}plan-name))
-      (t (implement-next-plan-episode {sub}plan-name)))
-)) ; END process-next-action
 
 
 
@@ -1849,214 +1254,6 @@
 
 
 
-(defun form-gist-clauses-from-input (words prior-gist-clause)
-;``````````````````````````````````````````````````````````````
-; Find a list of gist-clauses corresponding to the user's 'words',
-; interpreted in the context of 'prior-gist-clause' (usually a
-; question output by the system). Use hierarchically related 
-; choice trees for extracting gist clauses.
-;
-; The gist clause extraction patterns will be similar to the
-; ones in the choice packets for reacting to inputs, used in
-; the previous version; whereas the choice packets for reacting
-; will become simpler, based on the gist clauses extracted from
-; the input.
-;
-; - look for a final question -- either yes-no, starting
-;   with auxiliary + "you{r}", or wh-question, starting with
-;   a wh-word and with "you{r}" coming within a few words.
-;   "What about you" isa fairly common pattern. (Sometimes the
-;   wh-word is not detected but "you"/"your" is quite reliable.)
-;   The question, by default, is reciprocal to Eta's question.
-;
-  (let ((n (length words)) tagged-prior-gist-clause tagged-words relevant-trees sentences
-        specific-tree thematic-tree facts gist-clauses)
-
-    ; Get the relevant pattern transduction tree given the gist clause of Eta's previous utterance.
-    ;````````````````````````````````````````````````````````````````````````````````````````````````
-    ;; (format t "~% prior-gist-clause = ~a" prior-gist-clause) ; DEBUGGING
-    (setq tagged-prior-gist-clause (mapcar #'tagword prior-gist-clause))
-    ;; (format t "~% tagged prior gist clause = ~a" tagged-prior-gist-clause) ; DEBUGGING
-    (setq relevant-trees (cdr
-      (choose-result-for tagged-prior-gist-clause '*gist-clause-trees-for-input*)))
-    ;; (format t "~% this is a clue == ~a" (choose-result-for tagged-prior-gist-clause
-    ;;   '*gist-clause-trees-for-input*))
-    ;; (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING   
-    (setq specific-tree (first relevant-trees)) 
-    (setq thematic-tree (second relevant-trees))  
-
-    ;; ; Get the list of gist clauses from the user's utterance, using the contextually
-    ;; ; relevant pattern transduction tree.
-    ;; ;```````````````````````````````````````````````````````````````````````````````````````````````````````
-    ;; (setq tagged-words (mapcar #'tagword words))
-    ;; ;; (format t "~% tagged words = ~a" tagged-words) ; DEBUGGING
-    ;; (setq facts (cdr (choose-result-for tagged-words relevant-tree)))
-    ;; (format t "~% gist clauses = ~a" facts) ; DEBUGGING
-
-    ; Split user's reply into sentences for extracting specific gist clauses
-    ;`````````````````````````````````````````````````````````````````````````
-    (setq sentences (split-sentences words))
-    (dolist (sentence sentences)
-      (let ((tagged-sentence (mapcar #'tagword sentence)))
-        (setq clause (cdr (choose-result-for tagged-sentence specific-tree)))
-        (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
-        (when clause
-          (setq keys (second clause))
-          (store-gist (car clause) keys *gist-kb-user*)
-          (push (car clause) facts))))
-
-    ; Form thematic answer from input (if no specific facts are extracted)
-    ;``````````````````````````````````````````````````````````````````````
-    (when (and (> (length sentences) 2) (null facts))
-      (setq clause (cdr (choose-result-for (mapcar #'tagword words) thematic-tree)))
-      (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
-      (when clause
-        (setq keys (second clause))
-        (store-gist (car clause) keys *gist-kb-user*)
-        (push (car clause) facts)))
-
-    ; The results obtained will be stored as the 'gist-clauses'
-    ; property of the name of the user input. So, 'facts' should
-    ; be a concatenation of the above results in the order in
-    ; which they occur in the user's input; in reacting, Eta will
-    ; pay particular attention to the first clause, and any final question.
-    (setq gist-clauses (reverse facts))
-
-    ;; (format t "~% extracted gist clauses: ~a" gist-clauses) ; DEBUGGING
-	
-	  ; Allow arbitrary unexpected inputs to be processed
-    ; replace nil with (null gist-clauses)
-    (if nil (list words)
-		  gist-clauses)
-)) ; END form-gist-clauses-from-input
-
-
-
-
-
-(defun form-ulf-from-clause (clause)
-;`````````````````````````````````````
-; Find the ULF corresponding to the user's 'clause' (a gist clause).
-; **Right now, this uses *spatial-question-ulf-tree* directly, instead of
-;   using, say *clause-ulf-tree*, as a general starting point for any
-;   sentential input. When *clause-ulf-tree* has been designed 
-;   (branching to subtrees for assertions, questions, requests, etc.)
-;   it should replace *spatial-question-ulf-tree* below.
-;
-; **For initial experimentation, the "raw" question rather than any
-;   gist clause derived from it is processed. The idea is that we
-;   would transform inputs like "What's to the right of it?" or
-;   "Add another one" into gist clauses, using the prior utterance
-;   or action. This should be possible with the existing gist clause
-;   mechanisms. For example, if the prior utterance was "Put a red
-;   block on the NVidia block", then "Add another one" should be
-;   interpretable as "Put another red block on the current structure",
-;   or something like that. The present program would be applied 
-;   to this. Cf., the use of the tagged prior gist clause in
-;   'form-gist-clauses-from-input'.
-;
-; Use hierarchical choice trees for extracting the ULF.
-;
-  (let (tagged-clause ulf)
-    (setq tagged-clause (mapcar #'tagword clause))
-    (setq ulf (choose-result-for tagged-clause '*clause-ulf-tree*))
-  ulf)
-) ; END form-ulf-from-clause
-
-
-
-
-
-(defun form-user-action-type (clause)
-;```````````````````````````````````````
-; Given a gist clause, find a corresponding 'action type'
-; (i.e., a predicate like say-bye.v) using hierarchical
-; pattern transduction.
-;
-  (let (tagged-clause action-type)
-    (setq tagged-clause (mapcar #'tagword clause))
-    (setq action-type (choose-result-for tagged-clause '*clause-action-type-tree*))
-  action-type)
-) ; END form-user-action-type
-
-
-
-
-
-(defun commit-perceptions-to-memory (perceptions user-ulf)
-;``````````````````````````````````````````````````````````
-; Given perceptions by the system (e.g., block moves) and/or a
-; query ULF, store these facts in short-term memory (context).
-; The facts are deindexed and stored in context as, e.g.,
-; ((you.pro ((past move.v) |B1|)) @ NOW1), though the indexical
-; formula is also stored hashed on the time NOW1.
-; TODO: as indicated, many aspects of this will need changing.
-; I'm also not sure that such historical temporal facts should
-; be stored in short-term memory/context at all, versus some
-; form of long-term memory.
-;
-  ; Store move.v facts in context, deindexed at the current time
-  ; TODO: COME BACK TO THIS
-  ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
-  ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
-  (let ((action-perceptions (remove-if-not #'verb-phrase? perceptions)))
-    (when action-perceptions
-      (setq *time-prev* *time*)
-      (mapcar (lambda (perception)
-          (let ((perception1 (list perception '@ *time*)))
-            (update-time)
-            (store-in-context perception1)
-          ))
-        action-perceptions)))
-
-  ; Store ULF of user utterance in context, deindexed at the current time
-  ; TODO: COME BACK TO THIS
-  ; This should probably be done elsewhere (e.g. at the time of Eta processing the say-to.v episode),
-  ; but then the utterance would come temporally before any block moves, whereas it should be the other
-  ; way around. The perceive-world.v action in general needs to be rethought (since really observing a
-  ; user say-to.v action, much like a move.v action or any other action, IS a perceive world action).
-  ; Update Eta's current time
-  (when user-ulf
-    (let ((utterance-prop `((^you ((past ask.v) ,user-ulf)) @ ,*time*)))
-      (update-time)
-      (store-in-context utterance-prop)
-    ))
-) ; END commit-perceptions-to-memory
-
-
-
-
-
-(defun eval-truth-value (wff)
-;```````````````````````````````
-; Evaluates the truth of a conditional schema action.
-; This assumes a CWA, i.e., if something is not found in
-; context, it is assumed to be false.
-;
-  (cond
-    ; (wff1 = wff2)
-    ((equal-prop? wff)
-      (setq wff (eval-functions wff))
-      (equal (first wff) (third wff)))
-    ; (not wff1)
-    ((not-prop? wff)
-      (not (eval-truth-value (second wff))))
-    ; (wff1 and wff2)
-    ((and-prop? wff)
-      (and (eval-truth-value (first wff))
-           (eval-truth-value (third wff))))
-    ; (wff1 or wff2)
-    ((or-prop? wff)
-      (or  (eval-truth-value (first wff))
-           (eval-truth-value (third wff))))
-    ; Otherwise, check to see if wff is true in context
-    (t (get-from-context wff))
-)) ; END eval-truth-value
-
-
-
-
-
 (defun plan-if-else ({sub}plan-name expr)
 ;``````````````````````````````````````````
 ; expr = (cond name1 wff1 name2 wff2 ... :else name3 wff3 name4 wff4 ...)
@@ -2406,6 +1603,389 @@
 ;```````````````````````````````
   ; TBC
 ) ; END plan-saying-bye
+
+
+
+
+
+(defun observe-variable-type (sk-var type)
+;```````````````````````````````````````````
+; Through observation of the world, find an entity which can fill in
+; variable of type (variable assumed to be neither in schema header or
+; filled in at later point in schema).
+;
+  (let (sk-name sk-const)
+    (setq sk-const (skolem (implode (cdr (explode sk-var)))))
+    (setq sk-name
+      (car (find-all-instances-context `(:l (?x) (?x ,type)))))
+    (add-alias sk-const sk-name)
+    sk-name)
+) ; END observe-variable-type
+
+
+
+
+
+;; (defun form-spatial-representation ()
+;; ;``````````````````````````````````````
+;; ; Forms a spatial representation from the currently chosen BW-concept.n
+;; ; (assuming such a choice has actually been made at this point), through
+;; ; sending the BW system the chosen concept schema and receiving a goal
+;; ; schema.
+;; ; TODO: I'm not sold on how this is done currently, but I'm stumped on
+;; ; how to do it more sensibly. The issue is that, for the lambda expression
+;; ; + find-all-instances to work, the facts about the goal schema need to be
+;; ; stored ahead-of-time, so the communication of the goal schema needs to be
+;; ; done before the 'choice' step of the indefinite quantifier. This requires
+;; ; sending the BW system the chosen concept schema, but the concept schema
+;; ; name is nested inside the lambda extract, and messing with that here would
+;; ; be a pretty messy approach. Instead, I check context for some individual such
+;; ; that it is a BW-concept.n and Eta has chosen it.
+;; ; TODO: BW-concept.n in lambda descr should be valid, reachable through subsumption
+;; ; relationship between BW-concept.n and BW-concept-structure.n/BW-concept-primitive.n
+;; ; in noun hierarchy.
+;; ;
+;;   (let (concept-name goal-schema goal-name)
+;;     (setq concept-name (car (find-all-instances-context
+;;       '(:l (?x) (and (?x BW-concept-structure.n) (^me choose.v ?x))))))
+;;     (request-goal-rep (cdr (get-record-structure concept-name)))
+;;     ; NOTE: currently no special offline (terminal mode) procedure
+;;     ; for getting goal schema.
+;;     (setq goal-schema (get-goal-rep))
+;;     (setq goal-name (gensym "BW-goal-rep"))
+;;     (add-alias (cons '$ goal-schema) goal-name)
+;;     (store-in-context (list goal-name 'goal-schema1.n))
+;;     (store-in-context (list goal-name 'instance-of.p concept-name)))
+;; ) ; END form-spatial-representation
+
+
+
+
+
+(defun observe-step-towards-goal (goal-rep)
+;`````````````````````````````````````````````
+; Observes next step towards the currently active BW goal-schema,
+; through reading IO file. Store fact in context.
+; TODO: might need changing - see note on 'find4.v' implementation.
+; Currently, the (?x step1-toward.p ?goal-rep) step is hard-coded
+; (based on the value of ?goal-rep extracted from the lambda function
+; in the find4.v action), which it shouldn't be.
+;
+  (let (step)
+    (setq step (if *live* (get-planner-input)
+                          (get-planner-input-offline)))
+    (remove-from-context `(?x step1-toward.p ,goal-rep))
+    (if step
+      (store-in-context `(,step step1-toward.p ,goal-rep))))
+) ; END observe-step-toward-goal
+
+
+
+
+
+(defun choose-variable-restrictions (sk-var restrictions)
+;``````````````````````````````````````````````````````````
+; Handles any indefinite quantification of a variable filled
+; through a choice  made by Eta, given a list of restrictions.
+; 'sk-var' is the variable to be replaced, e.g., '?c'.
+; 'restrictions' may be a lambda abstract, possibly preceded by
+; some adjective modifier, e.g.,
+; (random.a (:l (?x) (and (?x member-of.p ?cc)
+;                         (not (^you understand.v ?x)))))
+; The fact that some individual was chosen is also stored in context.
+; NOTE: does this make sense? i.e., should something being chosen be
+; stored in dialogue context? If the choosing occurs as part of a loop,
+; how is something "unchosen" at the end of the loop? Currently I do that
+; here, so basically only one (^me choose.v ?x) fact can be active in
+; context at once, but it's pretty ugly.
+;
+  (let (sk-name sk-const lambda-descr modifier candidates)
+    (setq sk-const (skolem (implode (cdr (explode sk-var)))))
+    ; Allow for initial modifier 
+    (when (not (lambda-descr? restrictions))
+      (setq modifier (car restrictions)) (setq restrictions (second restrictions)))
+    (setq lambda-descr restrictions)
+    (setq candidates (find-all-instances-context lambda-descr))
+    (format t "given restriction ~a, found candidates ~a~%" lambda-descr candidates) ; DEBUGGING
+    (format t "using modifier ~a to choose~%" modifier) ; DEBUGGING
+    (setq sk-name (cond
+      ((equal modifier 'random.a)
+        (nth (random (length candidates)) candidates))
+      (t (car candidates))))
+    ; Store fact that sk-name chosen in context (removing any existing choice).
+    (remove-from-context '(^me choose.v ?x))
+    (store-in-context `(^me choose.v ,sk-name))
+    sk-name)
+) ; END choose-variable-restrictions
+
+
+
+
+
+(defun obviated-question (sentence eta-action-name)
+;````````````````````````````````````````````````````
+; Check whether this is a (quoted, bracketed) question.
+; If so, check what facts, if any, are stored in *gist-kb-user* under 
+; the 'topic-keys' obtained as the value of that property of
+; 'eta-action-name'. If there are such facts, check if they
+; seem to provide an answer to the gist-version of the question,
+; which will be the last gist clause stored under property
+; 'gist-clauses' of 'eta-action-name'.
+; NOTE: modified to check if gist clause contains question rather than surface
+; sentence (B.K. 4/17/2020)
+;
+  (let (gist-clauses topic-keys facts)
+    ;; (format t "~% ****** input sentence: ~a~%" sentence)
+    (setq gist-clauses (get eta-action-name 'gist-clauses))
+    ;; (format t "~% ****** gist clauses are ~a **** ~%" gist-clauses)
+    ;; (format t "~% ****** quoted question returns ~a **** ~%" (some #'question? gist-clauses)) ; DEBUGGING
+    (if (not (some #'question? gist-clauses))
+      (return-from obviated-question nil))
+    (setq topic-keys (get eta-action-name 'topic-keys))
+    ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
+    (if (null topic-keys) (return-from obviated-question nil))
+    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
+    ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
+    ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
+    (if (null facts) (return-from obviated-question nil))
+    ; We have an Eta question, corresponding to which we have stored facts
+    ; (as user gist clauses) that seem topically relevant.
+    ; NOTE: in this initial version, we don't try to verify that the facts
+    ; actually obviate the question, but just assume that they do. 
+  facts)
+) ; END obviated-question
+
+
+
+
+
+(defun obviated-action (eta-action-name)
+;`````````````````````````````````````````
+; Check whether this is an obviated action (such as a schema instantiation),
+; i.e. if the action has a topic-key(s) associated, check if any facts are stored
+; in *gist-kb-user* under the topic-key(s). If there are such facts, we assume that
+; these facts obviate the action, so the action can be deleted from the plan.
+;
+  (let (topic-keys facts)
+    (setq topic-keys (get eta-action-name 'topic-keys))
+    ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
+    (if (null topic-keys) (return-from obviated-action nil))
+    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
+    ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
+    ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
+    (if (null facts) (return-from obviated-action nil))
+  facts)
+) ; END obviated-action
+
+
+
+
+
+(defun form-gist-clauses-from-input (words prior-gist-clause)
+;``````````````````````````````````````````````````````````````
+; Find a list of gist-clauses corresponding to the user's 'words',
+; interpreted in the context of 'prior-gist-clause' (usually a
+; question output by the system). Use hierarchically related 
+; choice trees for extracting gist clauses.
+;
+; The gist clause extraction patterns will be similar to the
+; ones in the choice packets for reacting to inputs, used in
+; the previous version; whereas the choice packets for reacting
+; will become simpler, based on the gist clauses extracted from
+; the input.
+;
+; - look for a final question -- either yes-no, starting
+;   with auxiliary + "you{r}", or wh-question, starting with
+;   a wh-word and with "you{r}" coming within a few words.
+;   "What about you" isa fairly common pattern. (Sometimes the
+;   wh-word is not detected but "you"/"your" is quite reliable.)
+;   The question, by default, is reciprocal to Eta's question.
+;
+  (let ((n (length words)) tagged-prior-gist-clause tagged-words relevant-trees sentences
+        specific-tree thematic-tree facts gist-clauses)
+
+    ; Get the relevant pattern transduction tree given the gist clause of Eta's previous utterance.
+    ;````````````````````````````````````````````````````````````````````````````````````````````````
+    ;; (format t "~% prior-gist-clause = ~a" prior-gist-clause) ; DEBUGGING
+    (setq tagged-prior-gist-clause (mapcar #'tagword prior-gist-clause))
+    ;; (format t "~% tagged prior gist clause = ~a" tagged-prior-gist-clause) ; DEBUGGING
+    (setq relevant-trees (cdr
+      (choose-result-for tagged-prior-gist-clause '*gist-clause-trees-for-input*)))
+    ;; (format t "~% this is a clue == ~a" (choose-result-for tagged-prior-gist-clause
+    ;;   '*gist-clause-trees-for-input*))
+    ;; (format t "~% relevant trees = ~a" relevant-trees) ; DEBUGGING   
+    (setq specific-tree (first relevant-trees)) 
+    (setq thematic-tree (second relevant-trees))  
+
+    ;; ; Get the list of gist clauses from the user's utterance, using the contextually
+    ;; ; relevant pattern transduction tree.
+    ;; ;```````````````````````````````````````````````````````````````````````````````````````````````````````
+    ;; (setq tagged-words (mapcar #'tagword words))
+    ;; ;; (format t "~% tagged words = ~a" tagged-words) ; DEBUGGING
+    ;; (setq facts (cdr (choose-result-for tagged-words relevant-tree)))
+    ;; (format t "~% gist clauses = ~a" facts) ; DEBUGGING
+
+    ; Split user's reply into sentences for extracting specific gist clauses
+    ;`````````````````````````````````````````````````````````````````````````
+    (setq sentences (split-sentences words))
+    (dolist (sentence sentences)
+      (let ((tagged-sentence (mapcar #'tagword sentence)))
+        (setq clause (cdr (choose-result-for tagged-sentence specific-tree)))
+        (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
+        (when clause
+          (setq keys (second clause))
+          (store-gist (car clause) keys *gist-kb-user*)
+          (push (car clause) facts))))
+
+    ; Form thematic answer from input (if no specific facts are extracted)
+    ;``````````````````````````````````````````````````````````````````````
+    (when (and (> (length sentences) 2) (null facts))
+      (setq clause (cdr (choose-result-for (mapcar #'tagword words) thematic-tree)))
+      (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
+      (when clause
+        (setq keys (second clause))
+        (store-gist (car clause) keys *gist-kb-user*)
+        (push (car clause) facts)))
+
+    ; The results obtained will be stored as the 'gist-clauses'
+    ; property of the name of the user input. So, 'facts' should
+    ; be a concatenation of the above results in the order in
+    ; which they occur in the user's input; in reacting, Eta will
+    ; pay particular attention to the first clause, and any final question.
+    (setq gist-clauses (reverse facts))
+
+    ;; (format t "~% extracted gist clauses: ~a" gist-clauses) ; DEBUGGING
+	
+	  ; Allow arbitrary unexpected inputs to be processed
+    ; replace nil with (null gist-clauses)
+    (if nil (list words)
+		  gist-clauses)
+)) ; END form-gist-clauses-from-input
+
+
+
+
+
+(defun form-ulf-from-clause (clause)
+;`````````````````````````````````````
+; Find the ULF corresponding to the user's 'clause' (a gist clause).
+; **Right now, this uses *spatial-question-ulf-tree* directly, instead of
+;   using, say *clause-ulf-tree*, as a general starting point for any
+;   sentential input. When *clause-ulf-tree* has been designed 
+;   (branching to subtrees for assertions, questions, requests, etc.)
+;   it should replace *spatial-question-ulf-tree* below.
+;
+; **For initial experimentation, the "raw" question rather than any
+;   gist clause derived from it is processed. The idea is that we
+;   would transform inputs like "What's to the right of it?" or
+;   "Add another one" into gist clauses, using the prior utterance
+;   or action. This should be possible with the existing gist clause
+;   mechanisms. For example, if the prior utterance was "Put a red
+;   block on the NVidia block", then "Add another one" should be
+;   interpretable as "Put another red block on the current structure",
+;   or something like that. The present program would be applied 
+;   to this. Cf., the use of the tagged prior gist clause in
+;   'form-gist-clauses-from-input'.
+;
+; Use hierarchical choice trees for extracting the ULF.
+;
+  (let (tagged-clause ulf)
+    (setq tagged-clause (mapcar #'tagword clause))
+    (setq ulf (choose-result-for tagged-clause '*clause-ulf-tree*))
+  ulf)
+) ; END form-ulf-from-clause
+
+
+
+
+
+(defun form-user-action-type (clause)
+;```````````````````````````````````````
+; Given a gist clause, find a corresponding 'action type'
+; (i.e., a predicate like say-bye.v) using hierarchical
+; pattern transduction.
+;
+  (let (tagged-clause action-type)
+    (setq tagged-clause (mapcar #'tagword clause))
+    (setq action-type (choose-result-for tagged-clause '*clause-action-type-tree*))
+  action-type)
+) ; END form-user-action-type
+
+
+
+
+
+(defun commit-perceptions-to-memory (perceptions user-ulf)
+;``````````````````````````````````````````````````````````
+; Given perceptions by the system (e.g., block moves) and/or a
+; query ULF, store these facts in short-term memory (context).
+; The facts are deindexed and stored in context as, e.g.,
+; ((you.pro ((past move.v) |B1|)) @ NOW1), though the indexical
+; formula is also stored hashed on the time NOW1.
+; TODO: as indicated, many aspects of this will need changing.
+; I'm also not sure that such historical temporal facts should
+; be stored in short-term memory/context at all, versus some
+; form of long-term memory.
+;
+  ; Store move.v facts in context, deindexed at the current time
+  ; TODO: COME BACK TO THIS
+  ; It seems like this should be somehow an explicit store-in-context step in schema, but which facts are
+  ; indexical? Should e.g. past moves in fact be stored in memory rather than context?
+  (let ((action-perceptions (remove-if-not #'verb-phrase? perceptions)))
+    (when action-perceptions
+      (setq *time-prev* *time*)
+      (mapcar (lambda (perception)
+          (let ((perception1 (list perception '@ *time*)))
+            (update-time)
+            (store-in-context perception1)
+          ))
+        action-perceptions)))
+
+  ; Store ULF of user utterance in context, deindexed at the current time
+  ; TODO: COME BACK TO THIS
+  ; This should probably be done elsewhere (e.g. at the time of Eta processing the say-to.v episode),
+  ; but then the utterance would come temporally before any block moves, whereas it should be the other
+  ; way around. The perceive-world.v action in general needs to be rethought (since really observing a
+  ; user say-to.v action, much like a move.v action or any other action, IS a perceive world action).
+  ; Update Eta's current time
+  (when user-ulf
+    (let ((utterance-prop `((^you ((past ask.v) ,user-ulf)) @ ,*time*)))
+      (update-time)
+      (store-in-context utterance-prop)
+    ))
+) ; END commit-perceptions-to-memory
+
+
+
+
+
+(defun eval-truth-value (wff)
+;```````````````````````````````
+; Evaluates the truth of a conditional schema action.
+; This assumes a CWA, i.e., if something is not found in
+; context, it is assumed to be false.
+;
+  (cond
+    ; (wff1 = wff2)
+    ((equal-prop? wff)
+      (setq wff (eval-functions wff))
+      (equal (first wff) (third wff)))
+    ; (not wff1)
+    ((not-prop? wff)
+      (not (eval-truth-value (second wff))))
+    ; (wff1 and wff2)
+    ((and-prop? wff)
+      (and (eval-truth-value (first wff))
+           (eval-truth-value (third wff))))
+    ; (wff1 or wff2)
+    ((or-prop? wff)
+      (or  (eval-truth-value (first wff))
+           (eval-truth-value (third wff))))
+    ; Otherwise, check to see if wff is true in context
+    (t (get-from-context wff))
+)) ; END eval-truth-value
 
 
 
