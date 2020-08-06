@@ -7,7 +7,7 @@
 
 (defparameter *supervise-BW-action*
 
-'(Event-schema ((^me supervise-BW-action.v ^you ?ka1) ** ?e)
+'(event-schema :header ((^me supervise-BW-action.v ^you ?ka1) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
 ; Blocks world action supervision; consists of the BW agent listening for any
 ; questions (or other requests) by the user, watching them try to make a move

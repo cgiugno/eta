@@ -7,7 +7,7 @@
 
 (defparameter *guide-BW-action*
 
-'(Event-schema ((^me guide-BW-action.v ^you ?ka1) ** ?e)
+'(event-schema :header ((^me guide-BW-action.v ^you ?ka1) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
 ; Blocks world action instruction; consists of the BW agent guiding the
 ; user through making a specific action (e.g., a block move). Consists of

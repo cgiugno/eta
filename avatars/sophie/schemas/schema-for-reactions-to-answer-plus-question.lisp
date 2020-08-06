@@ -25,8 +25,8 @@
 
 (defparameter *reactions-to-answer+question*
 
-'(Event-schema ((^me react-to-answer+question ?answer ?question) ** ?e)
-;`````````````````````````````````````````````````````````````````````
+'(event-schema :header ((^me react-to-answer+question ?answer ?question) ** ?e)
+;````````````````````````````````````````````````````````````````````````````````
 ; Eta reacts to one or more answer gist clauses plus a question
 ; gist clause from the user (in response to a Eta question).
 ;

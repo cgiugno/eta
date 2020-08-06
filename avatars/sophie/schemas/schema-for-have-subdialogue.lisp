@@ -7,8 +7,8 @@
 
 (defparameter *have-subdialogue*
 
-'(Event-schema (((set-of ^me ^you) have-subdialogue.v ?response ?gists) ** ?e)
-;``````````````````````````````````````````````````````````````````````````
+'(event-schema :header (((set-of ^me ^you) have-subdialogue.v ?response ?gists) ** ?e)
+;```````````````````````````````````````````````````````````````````````````````````````
 ;
 ;
 

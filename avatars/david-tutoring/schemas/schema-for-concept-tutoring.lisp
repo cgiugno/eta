@@ -7,8 +7,8 @@
 
 (defparameter *teach-BW-concept-to*
 
-'(Event-schema ((^me teach-BW-concept-to.v ^you) ** ?e)
-;```````````````````````````````````````````````````````````
+'(event-schema :header ((^me teach-BW-concept-to.v ^you) ** ?e)
+;``````````````````````````````````````````````````````````````````
 ; Blocks world concept tutoring session; such a session is expected to consist
 ; of the agent selecting a concept for which it has a concept schema, guiding 
 ; the user in the construction of instances of this concept, providing corrective

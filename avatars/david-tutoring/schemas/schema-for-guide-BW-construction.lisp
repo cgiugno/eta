@@ -7,7 +7,7 @@
 
 (defparameter *guide-BW-construction*
 
-'(Event-schema ((^me guide-BW-construction.v ^you ?goal-rep) ** ?e)
+'(event-schema :header ((^me guide-BW-construction.v ^you ?goal-rep) ** ?e)
 ;`````````````````````````````````````````````````````````````````````````````
 ; Blocks world structure building instruction; such a session is expected to
 ; consist of the agent (given a goal representation) instructing the user on

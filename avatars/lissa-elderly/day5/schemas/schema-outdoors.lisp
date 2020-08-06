@@ -11,8 +11,8 @@
 
 (defparameter *have-outdoors-dialog*
 
-'(Event-schema (((set-of ^me ^you) have-outdoors-dialog.v) ** ?e)
-;```````````````````````````````````````````````````````````
+'(event-schema :header (((set-of ^me ^you) have-outdoors-dialog.v) ** ?e)
+;``````````````````````````````````````````````````````````````````````````
 ; LISSA introduces herself, sets the scene, asks about the user's 
 ; major, responds to the user's reply, and starts the "Rochester"
 ; part of the dialog.

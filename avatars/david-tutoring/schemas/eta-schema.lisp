@@ -7,8 +7,8 @@
 
 (defparameter *eta-schema*
 
-'(Event-schema (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
-;```````````````````````````````````````````````````````````
+'(event-schema :header (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
+;`````````````````````````````````````````````````````````````````````
 ; Blocks world conversation. An expected blocks world dialogue consists
 ; of the agent repeatedly asking the user if they have a spatial question
 ; to ask, followed by a question from the user, followed by an appropriate

@@ -7,8 +7,8 @@
 
 (defparameter *supervise-BW-construction*
 
-'(Event-schema ((^me supervise-BW-construction.v ^you ?goal-rep) ** ?e)
-;`````````````````````````````````````````````````````````````````````````````
+'(event-schema :header ((^me supervise-BW-construction.v ^you ?goal-rep) ** ?e)
+;```````````````````````````````````````````````````````````````````````````````
 ; Blocks world structure building supervision; such a session is expected to
 ; consist of the agent (given a goal representation) supervising the user building
 ; the chosen goal structure, fielding any questions along the way, and issuing
