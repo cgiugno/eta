@@ -14,6 +14,14 @@
 
 
 
+;``````````````````````````````````````````````````````
+;
+; GENERAL UTILITY FUNCTIONS
+;
+;``````````````````````````````````````````````````````
+
+
+
 (defun cdr1 (x)
 ;````````````````
 ; Adaptive form of cdr which returns cdr if list contains more than
@@ -243,6 +251,35 @@
 
 
 
+(defun get-keyword-contents (lst keys)
+;``````````````````````````````````````
+; Gets the contents corresponding to a list of keywords in a record structure
+; (assuming the contents are a single element immediately following the keyword).
+;
+  (mapcar (lambda (key)
+    (if (keywordp key)
+      (second (member key lst)))) keys)
+) ; END get-keyword-contents
+
+
+
+(defun print-hash (ht)
+; `````````````````````
+; Print the contents of a hash table
+;
+  (maphash (lambda (k v) (format t "k: ~a~%  v: ~a~%" k v)) ht)
+) ; END print-hash
+
+
+
+;``````````````````````````````````````````````````````
+;
+; TYPE-CHECKING PREDICATES
+;
+;``````````````````````````````````````````````````````
+
+
+
 (defun symbol? (x)
 ;``````````````````
 ; Returns t if x is a symbol, nil otherwise.
@@ -454,184 +491,11 @@
 
 
 
-(defun ttt-non-initial-var? (x)
-;```````````````````````````````
-; Is x a TTT match variable starting with '_'?
+;``````````````````````````````````````````````````````
 ;
-  (let (chars)
-    (cond
-      ((not (symbolp x)) nil)
-      (t (setq chars (explode x))
-        (and
-          (char-equal (car chars) #\_)
-          (find (second chars)
-            '(#\! #\? #\+ #\*) :test 'char-equal))))
-)) ; END ttt-non-initial-var? 
-
-
-
-(defun ttt-initial-var? (x)
-;````````````````````````````
-; Is x a TTT match variable starting with on of {! ? + * ^}
-; or with <> or {}?
+; DISCOURSE UTIL
 ;
-  (let (chars)
-    (cond
-      ((not (symbolp x)) nil)
-      (t (setq chars (explode x))
-        (or
-          (find (car chars)
-            '(#\! #\? #\+ #\* #\^) :test 'char-equal)
-          (and
-            (char-equal (car chars) #\<)
-            (char-equal (second chars) #\>))
-          (and
-            (char-equal (car chars) #\{)
-            (char-equal (second chars) #\})))))
-)) ; END ttt-initial-var?
-
-
-
-(defun ttt-var? (x)
-;```````````````````
-; Is x a TTT match variable?
-;
-  (or (ttt-non-initial-var? x) (ttt-initial-var? x))
-) ; END ttt-var?
-
-
-
-(defun ensure-bound! (x)
-; ```````````````````````
-; Ensures that x isn't a TTT pred (i.e. any symbol with ? as the last character).
-;
-  (if (and (symbolp x) (char-equal (car (last (explode x))) #\?)) nil x)
-) ; END ensure-bound!
-
-
-
-(defun ttt-match-vars (patt)
-;````````````````````````````
-; Form a list of distinct TTT match-variables that occur in 'patt';
-; Duplicate variables that occur earlier in a left-to-right scan are
-; discarded.
-;
-  (let (var vars)
-    (cond
-      ; Base case - if patt is a symbol, return the pattern if it is a
-      ; non-initial var, or nil otherwise
-      ((symbolp patt)
-        (if (ttt-var? patt) `(,patt) nil))
-      ; Recursive case
-      (t
-        (remove-duplicates
-          (remove nil (mapcan #'ttt-match-vars patt))
-          :test #'equal))))
-) ; END ttt-match-vars
-
-
-
-(defun bindings-from-ttt-match (patt expr)
-;```````````````````````````````````````````
-; From the TTT pattern 'patt', create a rule that generates the
-; binding list for the match variables of 'expr', when matched
-; to that expression. Apply the rule to 'expr', hence obtain
-; a list of bindings. A non-sticky match is assumed.
-;
-(setq patt (hide-ttt-ops patt))
-(setq expr (hide-ttt-ops expr))
-(let ((vars (ttt-match-vars patt)) vals)
-  (if (null vars) (return-from bindings-from-ttt-match nil))
-  (setq vals (ttt:apply-rule `(/ ,patt ,(mapcar #'list vars)) expr :shallow t))
-  ; For rules that don't match a given expr, 'ttt:apply-rule' 
-  ; returns a result 'eq' to the expr.  Since that's a failure 
-  ; case, return nil for it:
-  (if (eq vals expr) (return-from bindings-from-ttt-match nil))
-  ; Otherwise return the variables matched with their values:
-  (mapcar #'list vars (mapcar #'unhide-ttt-ops vals))
-)) ; END bindings-from-ttt-match
-
-
-
-(defun hide-ttt-ops (wff)
-;`````````````````````````````````````
-; TAKEN FROM Gene's cl-util/ttt.lisp.
-; Wrap [..] around symbols like /, !, +, ?, *, @, ~, {}, or <>, or
-; ones starting this way, which we may want to use in some patterns
-; (e.g., in wff-patterns involving *, **, @, or ~), but can't
-; because of their special meanings in TTT. We're assuming that
-; the wffs we want to process don't *already* contain symbols in
-; square brackets, starting as above inside the brackets, and which
-; shouldn't have the brackets removed when we ultimately "unhide"
-; the hidden symbols in a formula.
-;
-  (let (str chars)
-       (cond ((symbolp wff)
-              (setq str (string wff))
-              (setq chars (coerce str 'list))
-              (cond ((or (equal chars '(#\^ #\*)) (equal chars '(#\^)))
-                     wff)
-                    ((or (equal chars '(#\!)) (equal chars '(#\+))
-                         (equal chars '(#\?)) (equal chars '(#\*)))
-                     wff)
-                    ((member (car chars) '(#\! #\+ #\? #\* #\@ #\~ #\/ #\^))
-                     (intern (concatenate 'string "[" str "]")))
-                    ((and (eq (car chars) #\{) (eq (second chars) #\}))
-                     (intern (concatenate 'string "[" str "]")))
-                    ((and (eq (car chars) #\<) (eq (second chars) #\>))
-                     (intern (concatenate 'string "[" str "]")))
-                    (t wff)))
-             ((atom wff) wff)
-             (t (cons (hide-ttt-ops (car wff))
-                      (hide-ttt-ops (cdr wff)))))
-)) ; END hide-ttt-ops
-
-
-
-(defun unhide-ttt-ops (wff)
-;`````````````````````````````````````
-; TAKEN FROM Gene's cl-util/ttt.lisp.
-; Remove the square brackets that have been added around ttt symbols
-; in wff by 'hide-ttt-ops':
-;
- (let (str chars)
-      (cond ((symbolp wff)
-             (setq str (string wff))
-             (setq chars (coerce str 'list))
-             (cond ((or (not (eq (car chars) #\[))
-                        (not (eq (car (last chars)) #\]))) wff)
-                   (t (setq chars (cdr (butlast chars)))
-                      (setq str (coerce chars 'string))
-                      (cond ((null chars) wff)
-                            ((member (car chars) '(#\! #\+ #\? #\* #\@ #\~ #\/ #\^))
-                             (intern str))
-                            ((and (eq (car chars) #\{) (eq (second chars) #\}))
-                             (intern str))
-                            ((and (eq (car chars) #\<) (eq (second chars) #\>))
-                             (intern str))
-                            (t wff)))))
-            ((atom wff) wff)
-            (t (cons (unhide-ttt-ops (car wff))
-                     (unhide-ttt-ops (cdr wff)))))
-)) ; END unhide-ttt-ops
-
-
-
-(defun get-single-binding (bindings)
-;````````````````````````````````````
-; Retrieves a single bound symbol from the first match variable.
-;
-  (car (second (car bindings)))
-) ; END get-first-single-binding
-
-
-
-(defun get-multiple-bindings (bindings)
-;```````````````````````````````````````
-; Retrieves multiple bound symbols from the first match variable.
-;
-  (second (car bindings))
-) ; END get-first-multiple-bindings
+;``````````````````````````````````````````````````````
 
 
 
@@ -726,34 +590,6 @@
 ;
   (setf (gethash var (get schema-name 'topic-keys)) keys)
 ) ; END store-topic-keys
-
-
-
-(defun store-schema-name (header schema-name)
-;````````````````````````````````````````````````````
-; Stores the schema variable name in the *schemas* hash table,
-; using the schema header as the key.
-;
-  (setf (gethash header *schemas*) schema-name)
-) ; END store-schema-name
-
-
-
-(defun schema-header? (x)
-;``````````````````````````
-; Predicate which returns true if x is a schema header, e.g. 'discuss-food.v'.
-;
-  (gethash x *schemas*)
-) ; END schema-header?
-
-
-
-(defun schema-name! (header)
-;`````````````````````````````
-; Gets the schema variable name given the header.
-;
-  (gethash header *schemas*)
-) ; END schema-name!
 
 
 
@@ -862,6 +698,184 @@
 
 
 
+(defun split-sentences (words)
+;```````````````````````````````
+; Given the list of words 'words', split into multiple lists of words for each sentence,
+; delimited by punctuation.
+;
+  (let (result cur)
+    ; Loop through each word, keeping a buffer which is emptied once punctuation is reached
+    (mapcar (lambda (word)
+        (cond
+          ((member word '(|.| ? !))
+            (setq result (cons (reverse (cons word cur)) result))
+            (setq cur nil))
+          (t
+            (setq cur (cons word cur)))))
+      words)
+    ; Empty buffer (in case the last sentence is missing punctuation)
+    (when cur
+      (setq result (cons (reverse cur) result)))
+  (reverse result))
+) ; END split-sentences
+
+
+
+(defun form-chunks (words) ; NOTE: currently unused
+;```````````````````````````
+; Given the list of words 'words', form 10-word chunks overlapping by
+; 5 words; if there are just 15 words or less, form a single chunk,
+; i.e., a singleton list containing the list of words. For non-initial
+; chunks whose first word is preceded in 'words' by a negative word,  
+; add that word to the beginning of the chunk (so that negatives
+; won't be mistaken for positives).
+;
+  (let ((n (length words)) chunks chunk negword changed result)
+    (cond
+      ; If less than 15 words, return only 1 chunk
+      ((< n 15) 
+        (return-from form-chunks (list words)))
+      ; Otherwise, form multiple word chunks, 10 words long,
+      ; overlapping by 5 words
+      (t
+        (loop
+          (setq n (- n 5))
+          (setq chunk (butlast words (- n 5)))
+          (setq words (last words n))
+          (push chunk chunks)
+          (when (<= n 10)
+            (push words chunks)
+            (return nil)))
+        (setq chunks (reverse chunks))
+        ; 'negword' copy-over:
+        (dolist (chunk chunks)
+          ;; (format t "~%negword = ~a" negword) ; DEBUGGING
+          ;; (format t "~%  chunk = ~a" chunk) ; DEBUGGING
+          (when negword (push negword chunk)
+                        (setq changed t))
+          (push chunk result)
+          (setq negword
+            (find (car (last chunk 6))
+                  '(no not don\'t cannot can\'t won\'t couldn\'t
+                    wouldn\'t never hardly))))
+        (if changed (reverse result) chunks)))
+)) ; END form-chunks
+
+
+
+(defun modify-response (resp)
+;``````````````````````````````
+; A set of word-level operations, formerly part of the main (doolittle)
+; program, to prepare choice-packet-derived responses for proper output.
+; Changes YOU ARE to YOU ARE2 in preparation for replacement of YOU ARE2
+; by I AM (whereas ARE remains ARE), and similarly for some other words.
+;
+  (compress
+    (dual
+      (presubst resp)))
+) ; END modify-response
+
+
+
+(defun dual (sentence)
+;``````````````````````
+; Replaces 'I' by 'you', 'you' by 'I', 'my' by 'your', etc.
+;
+  (cond
+    ((null sentence) nil)
+    ((numberp (car sentence))
+      (cons (car sentence) (dual (cdr sentence))))
+    ((null (get (car sentence) 'subst))
+      (cons (car sentence) (dual (cdr sentence))))
+    (t (cons (get (car sentence) 'subst)
+      (dual (cdr sentence)))))
+) ; END dual
+
+
+
+(defun duals (word1 word2)
+;``````````````````````````
+; Forms duals between two words
+;
+  (progn (setf (get word1 'subst) word2)
+         (setf (get word2 'subst) word1))
+) ; END duals
+
+
+
+(defun presubst (response)
+;`````````````````````````````
+; This function is applied to eta's responses before 
+; their "dual" is formed and printed out. It helps avoid 
+; outputs like
+;      WHY DO YOU SAY I ARE STUPID
+; (as the dual of WHY DO I SAY YOU ARE STUPID), while
+; still correctly producing
+;      WHY DO YOU SAY YOUR BROTHERS ARE STUPID
+; (as the dual of WHY DO I SAY YOUR BROTHERS ARE STUPID).
+;
+; It replaces ARE by ARE2 when preceded by YOU (In turn, DUAL
+; will replace YOU by I and ARE2 by AM, so that YOU ARE
+; becomes I AM (whereas WE ARE, THEY ARE, etc., remain
+; unchanged). Similarly it replaces YOU by YOU2 when it is
+; the last word, or when it is not one of the first two
+; words and is not preceded by certain conjunctions (AND,
+; OR, BUT, THAT, BECAUSE, IF, WHEN, THEN, WHY, ...) or
+; by certain subordinating verbs (THINK, BELIEVE, KNOW,...)
+; This is in preparation for replacement of YOU2 by ME
+; (rather than I) when DUAL is applied. This could be
+; done in a more sophisticated way by using MATCH! 
+; WAS -> WAS2 (after I) and WERE -> WERE2 (after YOU)
+; have not been implemented.
+;
+  (cond
+    ((null response) nil)
+    ; After the initial call, if the input is more than one word,
+    ; a number = max(1, no. of words processed) is maintained as
+    ; cdr of 'response', while the actual remainder of the response
+    ; is in 'car response'
+    ((null (cdr response))
+      (cond
+        ((member (car response) '(you you\. you! you?))
+          '(you2))
+        (t response)))
+    ((numberp (cdr response))
+      (cond
+        ((null (car response)) nil)
+        ((null (cdar response)) (presubst (car response)))
+        ; Response has a 0 or 1 flag as cdr, and the car contains
+        ; at least two words
+        (t (cond
+          ((and
+              (eq (caar response) 'you)
+              (eq (cadar response) 'are))
+            (cons 'you (cons 'are2 (presubst (cons (cddar response) 1)))))
+          ((= 0 (cdr response))
+            (cons (caar response) (presubst (cons (cdar response) 1))))
+          ; At least 1 word has been processed, i.e. cdr is 1, and there
+          ; are 2 or more words left
+          (t (cond
+            ((or
+                (not (eq (cadar response) 'you))
+                (and (cddar response) (eq (caddar response) 'are))
+                (member (caar response)
+                  '(and or but that because if so when then why think
+                  see guess believe hope than know i you - --))
+                (member (car (last (coerce (string (caar response)) 'list)))
+                  '(#\, #\. #\; #\! #\? #\:) :test #'char-equal))
+              (cons (caar response) (presubst (cons (cdar response) 1))))
+            ; You (second element of (car response)) to be replaced by you2
+            (t (cons (caar response)
+              (cons 'you2 (presubst (cons (cddar response) 1)))))))))))
+
+    ; (cdr response) is non-numeric, so that this is the first call, with
+    ; 'response' containing 2 or more words
+    (t (presubst (cons response 0)))
+    
+)) ; END presubst
+
+
+
 (defun store-turn (agent text &key gists ulfs)
 ;``````````````````````````````````````````````
 ; Stores a turn (consisting of some text, and lists of gist clauses and semantic interpretations, if any)
@@ -914,12 +928,11 @@
 
 
 
-(defun print-hash (ht)
-; `````````````````````
-; Print the contents of a hash table
+;``````````````````````````````````````````````````````
 ;
-  (maphash (lambda (k v) (format t "k: ~a~%  v: ~a~%" k v)) ht)
-) ; END print-hash
+; CONTEXT UTIL
+;
+;``````````````````````````````````````````````````````
 
 
 
@@ -981,6 +994,33 @@
 
 
 
+;``````````````````````````````````````````````````````
+;
+; NAME/CONCEPT/ALIAS/RECORD STRUCTURE UTIL
+;
+;``````````````````````````````````````````````````````
+
+
+
+(defun get-record-structure (canonical-name)
+;``````````````````````````````````````````````
+; Gets the record structure aliased to a canonical name,
+; if one exists.
+;
+  (find-if #'record-structure? (get-aliases canonical-name))
+) ; END get-record-structure
+
+
+
+(defun record-structure! (canonical-name)
+;``````````````````````````````````````````
+; TTT predicate for substituting record structure for name.
+;
+  (get-record-structure canonical-name)
+) ; END record-structure!
+
+
+
 (defun add-alias (alias canonical-name)
 ;````````````````````````````````````````
 ; Adds a given alias for a canonical name to the equality sets hash table,
@@ -1026,25 +1066,6 @@
       (format t "~a: ~a~%" canonical-name aliases))
     *equality-sets*)
 ) ; END print-aliases
-
-
-
-(defun get-record-structure (canonical-name)
-;``````````````````````````````````````````````
-; Gets the record structure aliased to a canonical name,
-; if one exists.
-;
-  (find-if #'record-structure? (get-aliases canonical-name))
-) ; END get-record-structure
-
-
-
-(defun record-structure! (canonical-name)
-;``````````````````````````````````````````
-; TTT predicate for substituting record structure for name.
-;
-  (get-record-structure canonical-name)
-) ; END record-structure!
 
 
 
@@ -1112,6 +1133,50 @@
       (return-from concept-noun! '(unnamed concept)))
     (cdr (generic-name-to-np name)))
 ) ; END concept-noun!
+
+
+
+(defun store-obj-schema (obj-type canonical-name schema)
+;``````````````````````````````````````````````````````````
+; Stores an object schema with an associated canonical name. Also stores the
+; generic name as an alias, e.g., (k BW-arch.n), generated from the header.
+;
+  (let (generic-name schema-record)
+    (setq schema-record (cons '$ schema))
+    (setq generic-name (list 'k (cadar (get-keyword-contents schema '(:header)))))
+    (add-alias generic-name canonical-name)
+    (add-alias schema-record canonical-name)
+    (store-in-context (list canonical-name obj-type)))
+) ; END store-obj-schema
+
+
+
+(defun store-concept-set (set-type canonical-name concept-set)
+;```````````````````````````````````````````````````````````````
+; Stores a concept set (i.e., set of object schema names) with an associated
+; canonical name. Also stores the generic name, i.e. a set of the generic
+; names of the objects in the set.
+;
+  (let (generic-name)
+    (setq generic-name (make-set (mapcar (lambda (concept)
+        (find-if (lambda (alias)
+          (equal (car alias) 'k)) (get-aliases concept)))
+      concept-set)))
+    (add-alias generic-name canonical-name)
+    (store-in-context (list canonical-name set-type))
+    (mapcar (lambda (concept)
+        (store-in-context
+          (list concept 'member-of.p canonical-name)))
+      concept-set))
+) ; END store-concept-set
+
+
+
+;``````````````````````````````````````````````````````
+;
+; FACT HASH TABLE STORAGE UTIL
+;
+;``````````````````````````````````````````````````````
 
 
 
@@ -1508,196 +1573,43 @@
     (if (null (cdr indices)); if just one index, "flatten" the result
         (setq result (apply #'append result)))
     (reverse result)
-)) ; END project-relation 
+)) ; END project-relation
 
 
 
-(defun update-prop (prop prop-list)
-;```````````````````````````````````
-; Given a proposition and a list of propositions, remove propositions in list with the same
-; predicate as the given proposition, and add the new one to the list.
+;``````````````````````````````````````````````````````
 ;
-  (subst prop (car prop) prop-list
-    :test (lambda (x y) (and (listp y) (>= (length y) 2) (equal (second prop) (second y)) (equal x (first y)))))
-) ; END update-prop
-
-
-
-(defun split-sentences (words)
-;```````````````````````````````
-; Given the list of words 'words', split into multiple lists of words for each sentence,
-; delimited by punctuation.
+; SCHEMA UTIL
 ;
-  (let (result cur)
-    ; Loop through each word, keeping a buffer which is emptied once punctuation is reached
-    (mapcar (lambda (word)
-        (cond
-          ((member word '(|.| ? !))
-            (setq result (cons (reverse (cons word cur)) result))
-            (setq cur nil))
-          (t
-            (setq cur (cons word cur)))))
-      words)
-    ; Empty buffer (in case the last sentence is missing punctuation)
-    (when cur
-      (setq result (cons (reverse cur) result)))
-  (reverse result))
-) ; END split-sentences
+;``````````````````````````````````````````````````````
 
 
 
-(defun form-chunks (words) ; NOTE: currently unused
-;```````````````````````````
-; Given the list of words 'words', form 10-word chunks overlapping by
-; 5 words; if there are just 15 words or less, form a single chunk,
-; i.e., a singleton list containing the list of words. For non-initial
-; chunks whose first word is preceded in 'words' by a negative word,  
-; add that word to the beginning of the chunk (so that negatives
-; won't be mistaken for positives).
+(defun store-schema-name (header schema-name)
+;````````````````````````````````````````````````````
+; Stores the schema variable name in the *schemas* hash table,
+; using the schema header as the key.
 ;
-  (let ((n (length words)) chunks chunk negword changed result)
-    (cond
-      ; If less than 15 words, return only 1 chunk
-      ((< n 15) 
-        (return-from form-chunks (list words)))
-      ; Otherwise, form multiple word chunks, 10 words long,
-      ; overlapping by 5 words
-      (t
-        (loop
-          (setq n (- n 5))
-          (setq chunk (butlast words (- n 5)))
-          (setq words (last words n))
-          (push chunk chunks)
-          (when (<= n 10)
-            (push words chunks)
-            (return nil)))
-        (setq chunks (reverse chunks))
-        ; 'negword' copy-over:
-        (dolist (chunk chunks)
-          ;; (format t "~%negword = ~a" negword) ; DEBUGGING
-          ;; (format t "~%  chunk = ~a" chunk) ; DEBUGGING
-          (when negword (push negword chunk)
-                        (setq changed t))
-          (push chunk result)
-          (setq negword
-            (find (car (last chunk 6))
-                  '(no not don\'t cannot can\'t won\'t couldn\'t
-                    wouldn\'t never hardly))))
-        (if changed (reverse result) chunks)))
-)) ; END form-chunks
+  (setf (gethash header *schemas*) schema-name)
+) ; END store-schema-name
 
 
 
-(defun modify-response (resp)
-;``````````````````````````````
-; A set of word-level operations, formerly part of the main (doolittle)
-; program, to prepare choice-packet-derived responses for proper output.
-; Changes YOU ARE to YOU ARE2 in preparation for replacement of YOU ARE2
-; by I AM (whereas ARE remains ARE), and similarly for some other words.
-;
-  (compress
-    (dual
-      (presubst resp)))
-) ; END modify-response
-
-
-
-(defun dual (sentence)
-;``````````````````````
-; Replaces 'I' by 'you', 'you' by 'I', 'my' by 'your', etc.
-;
-  (cond
-    ((null sentence) nil)
-    ((numberp (car sentence))
-      (cons (car sentence) (dual (cdr sentence))))
-    ((null (get (car sentence) 'subst))
-      (cons (car sentence) (dual (cdr sentence))))
-    (t (cons (get (car sentence) 'subst)
-      (dual (cdr sentence)))))
-) ; END dual
-
-
-
-(defun duals (word1 word2)
+(defun schema-header? (x)
 ;``````````````````````````
-; Forms duals between two words
+; Predicate which returns true if x is a schema header, e.g. 'discuss-food.v'.
 ;
-  (progn (setf (get word1 'subst) word2)
-         (setf (get word2 'subst) word1))
-) ; END duals
+  (gethash x *schemas*)
+) ; END schema-header?
 
 
 
-(defun presubst (response)
+(defun schema-name! (header)
 ;`````````````````````````````
-; This function is applied to eta's responses before 
-; their "dual" is formed and printed out. It helps avoid 
-; outputs like
-;      WHY DO YOU SAY I ARE STUPID
-; (as the dual of WHY DO I SAY YOU ARE STUPID), while
-; still correctly producing
-;      WHY DO YOU SAY YOUR BROTHERS ARE STUPID
-; (as the dual of WHY DO I SAY YOUR BROTHERS ARE STUPID).
+; Gets the schema variable name given the header.
 ;
-; It replaces ARE by ARE2 when preceded by YOU (In turn, DUAL
-; will replace YOU by I and ARE2 by AM, so that YOU ARE
-; becomes I AM (whereas WE ARE, THEY ARE, etc., remain
-; unchanged). Similarly it replaces YOU by YOU2 when it is
-; the last word, or when it is not one of the first two
-; words and is not preceded by certain conjunctions (AND,
-; OR, BUT, THAT, BECAUSE, IF, WHEN, THEN, WHY, ...) or
-; by certain subordinating verbs (THINK, BELIEVE, KNOW,...)
-; This is in preparation for replacement of YOU2 by ME
-; (rather than I) when DUAL is applied. This could be
-; done in a more sophisticated way by using MATCH! 
-; WAS -> WAS2 (after I) and WERE -> WERE2 (after YOU)
-; have not been implemented.
-;
-  (cond
-    ((null response) nil)
-    ; After the initial call, if the input is more than one word,
-    ; a number = max(1, no. of words processed) is maintained as
-    ; cdr of 'response', while the actual remainder of the response
-    ; is in 'car response'
-    ((null (cdr response))
-      (cond
-        ((member (car response) '(you you\. you! you?))
-          '(you2))
-        (t response)))
-    ((numberp (cdr response))
-      (cond
-        ((null (car response)) nil)
-        ((null (cdar response)) (presubst (car response)))
-        ; Response has a 0 or 1 flag as cdr, and the car contains
-        ; at least two words
-        (t (cond
-          ((and
-              (eq (caar response) 'you)
-              (eq (cadar response) 'are))
-            (cons 'you (cons 'are2 (presubst (cons (cddar response) 1)))))
-          ((= 0 (cdr response))
-            (cons (caar response) (presubst (cons (cdar response) 1))))
-          ; At least 1 word has been processed, i.e. cdr is 1, and there
-          ; are 2 or more words left
-          (t (cond
-            ((or
-                (not (eq (cadar response) 'you))
-                (and (cddar response) (eq (caddar response) 'are))
-                (member (caar response)
-                  '(and or but that because if so when then why think
-                  see guess believe hope than know i you - --))
-                (member (car (last (coerce (string (caar response)) 'list)))
-                  '(#\, #\. #\; #\! #\? #\:) :test #'char-equal))
-              (cons (caar response) (presubst (cons (cdar response) 1))))
-            ; You (second element of (car response)) to be replaced by you2
-            (t (cons (caar response)
-              (cons 'you2 (presubst (cons (cddar response) 1)))))))))))
-
-    ; (cdr response) is non-numeric, so that this is the first call, with
-    ; 'response' containing 2 or more words
-    (t (presubst (cons response 0)))
-    
-)) ; END presubst
+  (gethash header *schemas*)
+) ; END schema-name!
 
 
 
@@ -1793,18 +1705,6 @@
 
 
 
-(defun get-keyword-contents (lst keys)
-;``````````````````````````````````````
-; Gets the contents corresponding to a list of keywords in a record structure
-; (assuming the contents are a single element immediately following the keyword).
-;
-  (mapcar (lambda (key)
-    (if (keywordp key)
-      (second (member key lst)))) keys)
-) ; END get-keyword-contents
-
-
-
 (defun get-schema-sections (schema)
 ;```````````````````````````````````
 ; Gets a hash table containing each schema section as a key, and the
@@ -1849,6 +1749,14 @@
           (remove nil (mapcan #'get-episode-vars plan))
           :test #'equal))))
 ) ; END get-episode-vars
+
+
+
+;``````````````````````````````````````````````````````
+;
+; IO UTIL
+;
+;``````````````````````````````````````````````````````
 
 
 
@@ -2026,42 +1934,6 @@
 (mapcar (lambda (file) (load file))
     (directory "core/resources/obj-schemas/*.lisp"))
 ) ; END load-obj-schemas
-
-
-
-(defun store-obj-schema (obj-type canonical-name schema)
-;``````````````````````````````````````````````````````````
-; Stores an object schema with an associated canonical name. Also stores the
-; generic name as an alias, e.g., (k BW-arch.n), generated from the header.
-;
-  (let (generic-name schema-record)
-    (setq schema-record (cons '$ schema))
-    (setq generic-name (list 'k (cadar (get-keyword-contents schema '(:header)))))
-    (add-alias generic-name canonical-name)
-    (add-alias schema-record canonical-name)
-    (store-in-context (list canonical-name obj-type)))
-) ; END store-obj-schema
-
-
-
-(defun store-concept-set (set-type canonical-name concept-set)
-;```````````````````````````````````````````````````````````````
-; Stores a concept set (i.e., set of object schema names) with an associated
-; canonical name. Also stores the generic name, i.e. a set of the generic
-; names of the objects in the set.
-;
-  (let (generic-name)
-    (setq generic-name (make-set (mapcar (lambda (concept)
-        (find-if (lambda (alias)
-          (equal (car alias) 'k)) (get-aliases concept)))
-      concept-set)))
-    (add-alias generic-name canonical-name)
-    (store-in-context (list canonical-name set-type))
-    (mapcar (lambda (concept)
-        (store-in-context
-          (list concept 'member-of.p canonical-name)))
-      concept-set))
-) ; END store-concept-set
 
 
 
@@ -2405,6 +2277,14 @@
 
 
 
+;``````````````````````````````````````````````````````
+;
+; PATTERN UTIL
+;
+;``````````````````````````````````````````````````````
+
+
+
 (defun match1 (pattern input)
 ;``````````````````````````````
 ; For top-level match tracing
@@ -2688,12 +2568,11 @@
 
 
 
-(defun test-parse (tree input)
-;```````````````````````````````
-; Used to check pattern matching/parsing given a rule tree and input (list of words)
+;``````````````````````````````````````````````````````
 ;
-  (choose-result-for (mapcar #'tagword input) tree)
-) ; END test-parse
+; ERROR UTIL
+;
+;``````````````````````````````````````````````````````
 
 
 
