@@ -169,12 +169,15 @@
 ; plan step.
 ;
   (let ((steps (form-step-pairs episodes)) first-step prev-step curr-step)
+
+    ; Give error if first element of first pair isn't episode variable starting with '?'
+    (when (not (variable? (caar steps)))
+      (format t "*** malformed step ~a while trying to form plan ~a from schema ~a (doesn't begin with episode variable)~%"
+        (car steps) (plan-plan-name plan) (plan-schema-name plan))
+      (return-from process-schema-episodes nil))
+
+    ; Iterate over steps in episodes list
     (dolist (step steps)
-      ; Give error if first element of pair isn't episode variable starting with '?'
-      (when (not (variable? (first step)))
-        (format t "*** malformed step ~a while trying to form plan ~a from schema ~a (doesn't begin with episode variable)~%"
-          step (plan-plan-name plan) (plan-schema-name plan))
-        (return-from process-schema-episodes nil))
 
       ; Make plan step structure and set data
       (setq curr-step (make-plan-step))
@@ -305,8 +308,11 @@
     ; If no curr-step, return nil
     (if (null curr-step) (return-from instantiate-curr-step nil))
     
-    ; Generate a constant for the episode and destructively substitute in plan
+    ; Get episode-var (if already instantiated, return nil)
     (setq ep-var (plan-step-ep-name curr-step))
+    (if (not (variable? ep-var)) (return-from instantiate-curr-step nil))
+
+    ; Generate a constant for the episode and destructively substitute in plan
     (setq ep-name (episode-name ep-var))
     (nsubst-variable plan ep-name ep-var)
 

@@ -1689,8 +1689,8 @@
 ; Given an episode variable (e.g., '?e1'), generate and return a unique
 ; episode name to be substituted in for the variable (e.g., 'EP38').
 ;
-  (when (not (char-equal #\? (car (explode ep-var))))
-    (format t "~%***Attempt to form episode name from ~%   non-question-mark variable ~a" ep-var)
+  (when (not (variable? ep-var))
+    (format t "~%***Attempt to form episode name from ~%   non-question-mark variable ~a~%" ep-var)
     (return-from episode-name nil))
   (gensym "EP")
 ) ; END episode-name
