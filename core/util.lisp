@@ -1758,26 +1758,6 @@
 
 
 
-(defun get-episode-vars (plan)
-;``````````````````````````````
-; Form a list of all episode vars (in proposition form) from a plan.
-;
-  (let (var vars)
-    (cond
-      ; Base case - if plan is a symbol, return the symbol if it is an action
-      ; var, or nil otherwise.
-      ((symbolp plan)
-        (if (variable? plan)
-          `(,(if (ep-var? plan) (intern (format nil "~a" plan)) plan)) nil))
-      ; Recursive case
-      (t
-        (remove-duplicates
-          (remove nil (mapcan #'get-episode-vars plan))
-          :test #'equal))))
-) ; END get-episode-vars
-
-
-
 ;``````````````````````````````````````````````````````
 ;
 ; IO UTIL

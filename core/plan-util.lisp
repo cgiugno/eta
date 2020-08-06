@@ -578,6 +578,26 @@
 
 
 
+(defun get-episode-vars (episodes)
+;```````````````````````````````````
+; Form a list of all episode vars (in proposition form) from a list of episodes.
+;
+  (let (var vars)
+    (cond
+      ; Base case - if episodes is a symbol, return the symbol if it is an action
+      ; var, or nil otherwise.
+      ((symbolp episodes)
+        (if (variable? episodes)
+          `(,(if (ep-var? episodes) (intern (format nil "~a" episodes)) episodes)) nil))
+      ; Recursive case
+      (t
+        (remove-duplicates
+          (remove nil (mapcan #'get-episode-vars episodes))
+          :test #'equal))))
+) ; END get-episode-vars
+
+
+
 (defun print-current-plan-steps (plan) ;[*]
 ;``````````````````````````````````````
 ; Prints each subsequent step in a plan, starting from the current

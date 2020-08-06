@@ -289,24 +289,16 @@
 
 
 
-(defun implement-next-plan-episode ({sub}plan-name)
-;````````````````````````````````````````````````````
-; We assume that every {sub}plan name has a 'rest-of-plan' property
-; pointing to the remainder of the plan that has not been fully executed
-; (i.e., the first step of this remainder has been at most partially
-; executed). Further, every action name for a nonprimitive action has,
-; or needs to be supplied with, a 'subplan' property pointing to the
-; name of a subplan, which will again have a 'rest-of-plan' property.
-; Also, the subplan name will have a 'subplan-of' property that points
-; back to the name of the action it expands.
+(defun implement-next-plan-episode (subplan)
+;``````````````````````````````````````````````
+; TBC
 ;
 ; This program is called if an episode is a general event or control flow
 ; formula, rather than an action formula starting with "Me" or "You".
 ;
-  (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest))
-        (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
-        user-gist-clauses user-gist-passage main-clause info topic suggestion query user-ulf
-        ans alternates)
+  (let* ((curr-step (plan-curr-step subplan)) bindings expr new-subplan var-bindings
+         (ep-name (plan-step-ep-name curr-step)) (wff (plan-step-wff curr-step))
+         args-list)
   
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being processed~%" wff ep-name) ; DEBUGGING
 
@@ -321,14 +313,8 @@
       ; binding yields ((_+ (cond1 name1 wff1 name2 wff2 ... :else name3 wff3 ...)))
       ((setq bindings (bindings-from-ttt-match '(:if _+) wff))
         (setq expr (get-multiple-bindings bindings))
-        ; Generate a subplan
-        (setq new-subplan-name (plan-if-else {sub}plan-name expr))
-        ; Make bidirectional connection to the new subplan (if not nil)
-        (cond
-          ; Add subplan if one was found
-          (new-subplan-name (add-subplan {sub}plan-name new-subplan-name))
-          ; Otherwise, update the plan
-          (t (delete-current-episode {sub}plan-name))))
+        ; Generate and subplan (possibly nil)
+        (setq new-subplan (plan-if-else expr)))
 
       ;``````````````````````````````````````````
       ; Plan: Sequence of conditionals
@@ -340,13 +326,7 @@
       ((setq bindings (bindings-from-ttt-match '(:try-in-sequence _+) wff))
         (setq expr (get-multiple-bindings bindings))
         ; Generate a subplan for the 1st action-wff with a true condition:
-        (setq new-subplan-name (plan-try-in-sequence {sub}plan-name expr))
-        ; Make bidirectional connection to the new subplan (if not nil)
-        (cond
-          ; Add subplan if one was found
-          (new-subplan-name (add-subplan {sub}plan-name new-subplan-name))
-          ; Otherwise, update the plan
-          (t (delete-current-episode {sub}plan-name))))
+        (setq new-subplan (plan-try-in-sequence expr)))
 
       ;`````````````````````
       ; Plan: Looping
@@ -358,15 +338,7 @@
       ((setq bindings (bindings-from-ttt-match '(:repeat-until _+) wff))
         (setq expr (get-multiple-bindings bindings))
         ; Generate a subplan for the 1st action-wff with a true condition:
-        (setq new-subplan-name (plan-repeat-until {sub}plan-name ep-name expr))
-        ; If this is nil, the stop condition holds, & we drop the loop:
-        (cond
-          ; An iteration (and repeat-loop copy) was added as subplan, so
-          ; make bidirectional connection to new subplan.
-          (new-subplan-name (add-subplan {sub}plan-name new-subplan-name))
-          ; If nil, the stop condition holds, so we drop the loop by associating wff0
-          ; with 'ep-name', and updating the plan.
-          (t (delete-current-episode {sub}plan-name))))
+        (setq new-subplan (plan-repeat-until subplan ep-name expr)))
 
       ;````````````````````````````````
       ; Plan: Subschema Instantiation
@@ -376,26 +348,29 @@
                                                   schema-header? (? _*)) wff))
         (setq bindings (cdr bindings))
         (setq args-list (get-multiple-bindings bindings))
-        ; Before instantiating the schema, check whether the episode is an obviated action
-        (when (not (null (obviated-action ep-name)))
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (setq new-subplan-name (gensym "SUBPLAN"))
-        ; Instantiate schema from schema name
-        (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
-        (add-subplan {sub}plan-name new-subplan-name))
+        ; If episode is an obviated action, skip, otherwise generate subplan from schema name
+        (cond
+          ((obviated-action ep-name)
+            (setq new-subplan nil))
+          (t (setq new-subplan (init-plan-from-schema (schema-name! (second wff)) args-list)))))
       
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
     )
+
+    ; Return new subplan (possibly nil) and any variable bindings
+    (list var-bindings new-subplan)
+
 )) ; END implement-next-plan-episode
 
 
 
 
 
-(defun implement-next-eta-action ({sub}plan-name)
+(defun implement-next-eta-action (subplan)
 ;``````````````````````````````````````````````````
+; TBC (rewrite)
+;
 ; We assume that every {sub}plan name has a 'rest-of-plan' property
 ; pointing to the remainder of the plan that has not been fully executed
 ; (i.e., the first step of this remainder has been at most partially
@@ -406,8 +381,7 @@
 ; back to the name of the action it expands.
 ;
 ; We assume that this program is called only if the first action of
-; 'rest-of-plan' of '{sub}plan-name' is already known to be of type
-; (^me ...), i.e., an action by Eta.
+; the plan  is already known to be of type (^me ...), i.e., an action by Eta.
 ;
 ; TODO: IT SEEMS THAT THIS PROGRAM COULD ITSELF BE
 ;   REFORMULATED AS A KIND OF CHOICE TREE THAT SELECTS A SUBPLAN
@@ -441,12 +415,12 @@
 ; for step elaboration typically elaborate (^me react-to.v ...) actions
 ; into single or multiple (^me say-to.v ^you '(...)) subactions.
 ;
-  (let* ((rest (get {sub}plan-name 'rest-of-plan)) (ep-name (car rest)) ep-name1
-        (wff (second rest)) bindings expr user-ep-name user-ulf n new-subplan-name
-        user-gist-clauses user-gist-passage proposal-gist main-clause info topic
-        suggestion query ans perceptions perceived-actions sk-var sk-name
-        concept-name goal-schema)
-  
+  (let* ((curr-step (plan-curr-step subplan)) bindings expr new-subplan var-bindings
+         (ep-name (plan-step-ep-name curr-step)) (wff (plan-step-wff curr-step))
+         superstep ep-name1 user-ep-name user-ulf n user-gist-clauses user-gist-passage
+         proposal-gist main-clause info topic suggestion query ans perceptions
+         perceived-actions sk-var sk-name concept-name goal-schema)
+
     ;; (format t "~%WFF = ~a,~% in the ETA action ~a being processed~%" wff ep-name) ; DEBUGGING
 
     ; Big conditional statement to determine the type of the current
@@ -460,34 +434,26 @@
       ; or nil, for non-match
       ((setq bindings (bindings-from-ttt-match '(^me say-to.v ^you _+) wff))
         (setq expr (eval-functions (get-single-binding bindings)))
-        ; If the current "say" action is a question (final question mark,
-        ; can also check for wh-words & other cues), then use 'topic-keys'
-        ; and 'gist-clauses' of current ep-name and the *gist-kb-user*
-        ; to see if question has already been answered. If so, omit action.
-        (when (not (null (obviated-question expr ep-name)))
-          (delete-current-episode {sub}plan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
         (cond
+          ; If the current "say" action is a question, then use 'topic-keys'
+          ; and 'gist-clauses' of current ep-name and *gist-kb-user* to see
+          ; if question has already been answered. If so, omit action.
+          ; TODO: investigate why this required advancing the plan twice...
+          ((not (null (obviated-question expr ep-name)))
+            (advance-plan subplan)
+            (setq new-subplan nil))
           ; Primitive say-to.v act: drop the quote, say it, increment the
-          ; *count* variable, and advance the 'rest-of-plan' pointer
+          ; *count* variable, advance the 'rest-of-plan' pointer, and
+          ; store the turn in the dialogue history
           ((eq (car expr) 'quote)
             (setq expr (flatten (second expr)))
             (setq *count* (1+ *count*))
             (if *live* (say-words expr) (print-words expr))
-            ;; (print-current-plan-status {sub}plan-name); DEBUGGING
-            (delete-current-episode {sub}plan-name)
-            ;; (print-current-plan-status {sub}plan-name); DEBUGGING
-
-            ; Add turn to dialogue history
-            (store-turn '^me expr :gists (get ep-name 'gist-clauses) :ulfs (list (get ep-name 'ulf)))
-          )
+            (store-turn '^me expr :gists (get ep-name 'gist-clauses) :ulfs (list (get ep-name 'semantics))))
           ; Nonprimitive say-to.v act (e.g. (^me say-to.v ^you (that (?e be.v finished.a)))):
           ; Should probably be illegal action specification since we can use 'tell.v' for
           ; inform acts. For the moment however, handle equivalently to tell.v.
-          (t
-            (setq new-subplan-name (plan-tell expr))
-            (add-subplan {sub}plan-name new-subplan-name))))
+          (t (setq new-subplan (plan-tell expr)))))
 
       ; For now, saying something is the only primitive action, so everything
       ; beyond this point is non-primitive actions, to be expanded using choice packets.
@@ -500,18 +466,10 @@
         (setq user-ep-name (get-single-binding bindings))
         ; Get user gist clauses and ulf from bound user action
         (setq user-gist-clauses (get user-ep-name 'gist-clauses))
-        (setq user-ulf (resolve-references (get user-ep-name 'ulf)))
+        (setq user-ulf (resolve-references (get user-ep-name 'semantics)))
         (format t "~% user gist clause is ~a ~%" user-gist-clauses) ; DEBUGGING
         (format t "~% user ulf is ~a ~%" user-ulf) ; DEBUGGING
-        (setq new-subplan-name (plan-reaction-to {sub}plan-name user-gist-clauses user-ulf))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-
-        ; 'new-subplan-name' will be the name of a subplan with some amount of primitive
-        ; or nonprimitive steps (usually just a single say-to.v action). Link eta action
-        ; to subplan bidirectionally (in case bidirectional plan traversals are used in future)
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-reaction-to user-gist-clauses user-ulf)))
 
       ; NOTE: Apart from saying and reacting, assume that Eta actions
       ; also allow telling, describing, suggesting, asking, saying 
@@ -532,11 +490,7 @@
       ; _! will have as a binding the (wh ...) expression.
       ((setq bindings (bindings-from-ttt-match '(^me tell.v ^you _!) wff))
         (setq info (get-single-binding bindings))
-        (setq new-subplan-name (plan-tell info))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-tell info)))
 
       ;`````````````````````
       ; Eta: Describing
@@ -555,11 +509,7 @@
       ; a describe-act directly into a tell-act with a complex meaning-of.f argument.
       ((setq bindings (bindings-from-ttt-match '(^me describe-to.v ^you _!) wff))
         (setq topic (get-single-binding bindings))
-        (setq new-subplan-name (plan-description topic))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-description topic)))
 
       ;`````````````````````
       ; Eta: Suggesting
@@ -567,11 +517,7 @@
       ; e.g. (that (^you provide-to.v ^me (K ((attr extended.a) (plur answer.n)))))
       ((setq bindings (bindings-from-ttt-match '(^me suggest-to.v ^you _!) wff))
         (setq suggestion (get-single-binding bindings))
-        (setq new-subplan-name (plan-suggest suggestion))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-suggest suggestion)))
 
       ;`````````````````````
       ; Eta: Asking
@@ -579,31 +525,19 @@
       ; e.g. (ans-to (wh ?x (^you have-as.v major.n ?x)))
       ((setq bindings (bindings-from-ttt-match '(^me ask.v ^you _!) wff))
         (setq query (get-single-binding bindings))
-        (setq new-subplan-name (plan-question query))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-question query)))
 
       ;`````````````````````
       ; Eta: Saying hello
       ;`````````````````````
       ((equal wff '(^me say-hello-to.v ^you))
-        (setq new-subplan-name (plan-saying-hello))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-saying-hello)))
 
       ;``````````````````````
       ; Eta: Saying good-bye
       ;``````````````````````
       ((equal wff '(^me say-bye-to.v ^you))
-        (setq new-subplan-name (plan-saying-bye))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-saying-bye)))
 
       ;```````````````````````````
       ; Eta: Exiting conversation
@@ -613,7 +547,6 @@
       ; exits the conversation, whereas say-bye-to.v might be used during the exchange of
       ; pleasantries and farewells at the end of a standard conversation.
       ((equal wff '(^me say-bye.v))
-        (delete-current-episode {sub}plan-name)
         (exit))
 
       ;`````````````````````````````````````
@@ -633,9 +566,8 @@
           (setq ans `(quote ,(recall-answer object-locations (eval user-ulf))))
           (setq ans '()))
         (format t "recalled answer: ~a~%" ans) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans-relations) in plan
-        (nsubst-variable {sub}plan-name ans expr)
-        (delete-current-episode {sub}plan-name))
+        ; Bind ans to variable given in plan (e.g. ?ans-relations)
+        (setq var-bindings (cons (list expr ans) var-bindings)))
 
       ;````````````````````````````````````````
       ; Eta: Seek answer from external source
@@ -648,8 +580,7 @@
         (cond
           ((null *live*) (write-ulf user-ulf))
           ((eq system '|Blocks-World-System|) (write-ulf user-ulf))
-          (t (write-ulf user-ulf)))
-        (delete-current-episode {sub}plan-name))
+          (t (write-ulf user-ulf))))
 
       ;``````````````````````````````````````````
       ; Eta: Recieve answer from external source
@@ -668,9 +599,8 @@
         (if (not (answer-list? (eval ans)))
           (setq ans '()))
         (format t "received answer: ~a~% (for variable ~a)~%" ans expr) ; DEBUGGING
-        ; Substitute ans for given variable (e.g. ?ans-relations) in plan
-        (nsubst-variable {sub}plan-name ans expr)
-        (delete-current-episode {sub}plan-name))
+        ; Bind ans to variable given in plan (e.g. ?ans-relations)
+        (setq var-bindings (cons (list expr ans) var-bindings)))
 
       ;````````````````````````````
       ; Eta: Conditionally saying
@@ -688,15 +618,9 @@
         (when *read-log*
           (setq *log-answer* (modify-response ans)))
         ; Create say-to.v subplan from answer
-        (setq new-subplan-name
+        (setq new-subplan
           (init-plan-from-episode-list
-            (list :episodes (episode-var) (create-say-to-wff ans))
-            {sub}plan-name))
-        ; If subplan creation is successful, attach as subplan (otherwise delete).
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+            (list :episodes (episode-var) (create-say-to-wff ans)))))
 
       ;````````````````````````````
       ; Eta: Proposing
@@ -708,11 +632,7 @@
           (t (setq proposal-gist (generate-proposal expr))))
         (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
         (setf (get ep-name 'gist-clauses) (list proposal-gist))
-        (setq new-subplan-name (plan-proposal {sub}plan-name proposal-gist))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-proposal proposal-gist)))
 
       ;````````````````````````````
       ; Eta: Issuing corrections
@@ -726,11 +646,7 @@
           (t (setq proposal-gist (generate-proposal expr))))
         ;; (format t "proposal gist: ~a~%" proposal-gist) ; DEBUGGING
         (setf (get ep-name 'gist-clauses) (list proposal-gist))
-        (setq new-subplan-name (plan-correction {sub}plan-name proposal-gist))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+        (setq new-subplan (plan-correction proposal-gist)))
 
       ;````````````````````````````
       ; Eta: Perceiving world
@@ -755,13 +671,14 @@
         ; When in terminal mode and perceptive mode, update block coordinates after user gives move and add to perceptions
         (when (or *read-log* (and (null *live*) *perceptive*))
           (setq perceptions (update-block-coordinates (remove-if-not #'verb-phrase? perceptions))))
-        ; Substitute quoted perceptions for var in plan
-        (nsubst-variable {sub}plan-name `(quote ,perceptions) expr)
-
+ 
         (format t "received perceptions: ~a~% (for variable ~a)~%" perceptions expr) ; DEBUGGING
-        (commit-perceptions-to-memory perceptions user-ulf)        
+
+        ; Commit perceptions to memory
+        (commit-perceptions-to-memory perceptions user-ulf)       
         
-        (delete-current-episode {sub}plan-name))
+        ; Bind quoted perceptions for var in plan
+        (setq var-bindings (cons (list expr `(quote ,perceptions)) var-bindings)))
 
       ;`````````````````````````
       ; Eta: Committing to STM
@@ -774,8 +691,7 @@
       ((setq bindings (bindings-from-ttt-match '(^me commit-to-STM.v (that _!)) wff))
         (setq expr (get-single-binding bindings))
         ; Store each formula in context
-        (store-in-context expr)
-        (delete-current-episode {sub}plan-name))
+        (store-in-context expr))
 
       ;````````````````````````````
       ; Eta: Trying
@@ -788,14 +704,9 @@
       ; action, which needs to be changed once I hear back from Len.
       ((setq bindings (bindings-from-ttt-match '(^me try1.v (to _!)) wff))
         (setq expr (get-single-binding bindings))
-        (setq new-subplan-name
+        (setq new-subplan
           (init-plan-from-episode-list
-            (list :episodes (episode-var) (cons '^me expr))
-            {sub}plan-name))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+            (list :episodes (episode-var) (cons '^me expr)))))
 
       ;````````````````````````````
       ; Eta: Finding
@@ -812,12 +723,14 @@
         (observe-step-towards-goal (third (third (third expr)))); desperately needs changing
         (setq sk-name (choose-variable-restrictions sk-var (third expr)))
         (format t "found ~a for variable ~a~%" sk-name sk-var)
-        ;; (setq ep-name1 (get {sub}plan-name 'subplan-of))
+        ;; (setq superstep (plan-subplan-of subplan))
+        ;; (setq ep-name1 (plan-step-ep-name superstep))
         (setq ep-name1 ep-name)
         (if (and sk-name ep-name1)
           (store-in-context `((pair ^me ,ep-name1) successful.a))); also desperately needs changing
-        (nsubst-variable {sub}plan-name sk-name sk-var)
-        (delete-current-episode {sub}plan-name))
+
+        ; Bind variable to skolem constant in plan
+        (setq var-bindings (cons (list sk-var sk-name) var-bindings)))
 
       ;````````````````````````````
       ; Eta: Choosing
@@ -838,8 +751,9 @@
         (setq sk-var (second expr))
         (setq sk-name (choose-variable-restrictions sk-var (third expr)))
         (format t "chose value ~a for variable ~a~%" sk-name sk-var) ; DEBUGGING
-        (nsubst-variable {sub}plan-name sk-name sk-var)
-        (delete-current-episode {sub}plan-name))
+
+        ; Bind variable to skolem constant in plan
+        (setq var-bindings (cons (list sk-var sk-name) var-bindings)))
 
       ;```````````````````````````````````````
       ; Eta: Forming a spatial representation
@@ -870,34 +784,38 @@
         (store-in-context (list sk-name 'instance-of.p concept-name))
         ; Substitute skolem name for skolem var in schema
         (format t "formed representation ~a for variable ~a~%" sk-name sk-var)
-        (nsubst-variable {sub}plan-name sk-name sk-var)
-        (delete-current-episode {sub}plan-name))
+        
+        ; Bind variable to skolem constant in plan
+        (setq var-bindings (cons (list sk-var sk-name) var-bindings)))
 
       ;````````````````````````````
       ; Eta: Initiating Subschema
       ;````````````````````````````
       ((setq bindings (bindings-from-ttt-match '(^me schema-header? ^you (? _*)) wff))
         (setq args-list (get-multiple-bindings bindings))
-        ; Before instantiating the schema, check whether the episode is an obviated action
-        (when (not (null (obviated-action ep-name)))
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (setq new-subplan-name (gensym "SUBPLAN"))
-        ; Instantiate schema from schema name
-        (init-plan-from-schema new-subplan-name (schema-name! (second wff)) args-list)
-        (add-subplan {sub}plan-name new-subplan-name))
+        ; If episode is an obviated action, skip, otherwise generate subplan from schema name
+        (cond
+          ((obviated-action ep-name)
+            (setq new-subplan nil))
+          (t (setq new-subplan (init-plan-from-schema (schema-name! (second wff)) args-list)))))
       
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
     )
+
+    ; Return new subplan (possibly nil) and any variable bindings
+    (list var-bindings new-subplan)
+
 )) ; END implement-next-eta-action
 
 
 
 
 
-(defun observe-next-user-action ({sub}plan-name)
-;`````````````````````````````````````````````````
+(defun observe-next-user-action (subplan)
+;```````````````````````````````````````````````
+; TBC (rewrite)
+;
 ; '{sub}plan-name' provides the name of a (sub)plan whose
 ; 'rest-of-plan' pointer points to a user action, i.e., the
 ; name of a user action followed by a wff of type (^you ...).
@@ -972,12 +890,12 @@
 ; to the desired context information for interpreting the user input 
 ; utterance. (In future the 'interpretation' property is to be used.)
 ; 
-  (let* ((rest (get {sub}plan-name 'rest-of-plan)) (user-ep-name (car rest))
-        (wff (second rest)) bindings words expr user-ep-name1 wff1 wff1-arg eta-ep-name
-        eta-clauses user-gist-clauses main-clause new-subplan-name user-ulfs user-action
-        input user-try-ka-success)
+  (let* ((curr-step (plan-curr-step subplan)) bindings expr new-subplan var-bindings
+         (ep-name (plan-step-ep-name curr-step)) (wff (plan-step-wff curr-step))
+         words superstep ep-name1 wff1 wff1-arg eta-ep-name eta-clauses user-gist-clauses
+         main-clause user-ulfs user-action input user-try-ka-success)
 
-    ;; (format t "~%WFF = ~a,~%      in the user action ~a being processed~%" wff user-ep-name) ; DEBUGGING
+    ;; (format t "~%WFF = ~a,~%      in the user action ~a being processed~%" wff ep-name) ; DEBUGGING
 
     ; Big conditional statement to observe different types of user actions
     (cond
@@ -1002,7 +920,8 @@
                 (*live* (hear-words *delay-say-to.v*))
                 (t (read-words)))))
             (setq words (decompress input))
-            (nsubst-variable {sub}plan-name `(quote ,input) expr))
+            ; Bind input words to variable in plan
+            (setq var-bindings (cons (list expr `(quote ,input)) var-bindings)))
 
           ; if say-to.v act has a quoted word list argument, e.g., '(nice to meet you \.)',
           ; it should unquote and decompress the words.
@@ -1011,22 +930,19 @@
 
           ; anything else is unexpected
           (t
-            (format t "~%*** SAY-ACTION ~a~%    BY THE USER SHOULD SPECIFY A QUOTED WORD LIST OR VARIABLE" expr)
-            (return-from observe-next-user-action nil)))
+            (format t "~%*** SAY-ACTION ~a~%    BY THE USER SHOULD SPECIFY A QUOTED WORD LIST OR VARIABLE" expr)))
 
         ; Prepare to "interpret" 'words', using the Eta output it is a response to;
-        ; first we need the superordinate action
-        (setq user-ep-name1 (get {sub}plan-name 'subplan-of))
-        ;; (format t "~%User action name1 = ~a" user-ep-name1) ; DEBUGGING
-        ;; (format t "~%User words = ~a" words) ; DEBUGGING
-        
-        ; Next we find the Eta action name referred to in the wff of the
-        ; (nonprimitive) superordinate action (if such a superordinate action
-        ; exists); this wff is expected to be of form (^you reply-to.v <eta action>).
-        ; Also retrieve the item in the final argument position (if it exists).
-        (setq wff1 (get user-ep-name1 'wff))
-        (setq wff1-arg (car (last wff1)))
-        ;; (format t "~%User WFF1 = ~a, if correct,~%           ends in a ETA action name" wff1) ; DEBUGGING
+        ; first we need the superordinate action (wff should be in the form (^you reply-to.v <eta action>))
+        (setq superstep (plan-subplan-of subplan))
+        (when superstep
+          (setq ep-name1 (plan-step-ep-name superstep))
+          (setq wff1 (plan-step-wff superstep))
+          (setq wff1-arg (car (last wff1))))
+
+        ;; (format t "~%User action name1 = ~a" ep-name1)
+        ;; (format t "~%User words = ~a" words)
+        ;; (format t "~%User WFF1 = ~a, if correct,~%    ends in a ETA action name" wff1) ; DEBUGGING
         
         (cond
           ; If the superordinate reply-to.v action has specific gist clause(s)
@@ -1055,20 +971,20 @@
 
         ; Remove contradiction
         (setq user-gist-clauses (remove-contradiction user-gist-clauses))
-        (format t "Obtained user gist clauses ~a for episode ~a~%" user-gist-clauses user-ep-name1) ; DEBUGGING
+        (format t "Obtained user gist clauses ~a for episode ~a~%" user-gist-clauses ep-name1) ; DEBUGGING
 
         ; Both the primitive user action and the immediately subordinate action
         ; recieve the gist-clause interpretation just computed.
-        (setf (get user-ep-name 'gist-clauses) user-gist-clauses)
-        (setf (get user-ep-name1 'gist-clauses) user-gist-clauses)
+        (setf (get ep-name 'gist-clauses) user-gist-clauses)
+        (setf (get ep-name1 'gist-clauses) user-gist-clauses)
 
         ; Get ulfs from user gist clauses and set them as an attribute to the current
         ; user action
         (setq user-ulfs (mapcar #'form-ulf-from-clause user-gist-clauses))
-        (format t "Obtained ulfs ~a for episode ~a~%" user-ulfs user-ep-name1) ; DEBUGGING
+        (format t "Obtained ulfs ~a for episode ~a~%" user-ulfs ep-name1) ; DEBUGGING
 
-        (setf (get user-ep-name 'ulf) user-ulfs)
-        (setf (get user-ep-name1 'ulf) user-ulfs)
+        (setf (get ep-name 'semantics) user-ulfs)
+        (setf (get ep-name1 'semantics) user-ulfs)
 
         ; Get fine-grained user action type corresponding to gist clauses (e.g. (^you say-be.v)),
         ; and store ((^you say-bye.v) * ?e1), where ?e1 is the ep-name of of say-to.v (and likewise
@@ -1076,20 +992,13 @@
         ; NOTE: for now, we assume that each user utterance is described by only one action type,
         ; so the gist clauses are concatenated together first.
         (setq user-action (form-user-action-type (apply #'append user-gist-clauses)))
-        (format t "Obtained user-action ~a for episode ~a~%" user-action user-ep-name1) ; DEBUGGING
-        (store-in-context `((^you ,user-action) * ,user-ep-name))
-        (when user-ep-name1
-          (store-in-context `((^you ,user-action) * ,user-ep-name1)))
+        (format t "Obtained user-action ~a for episode ~a~%" user-action ep-name1) ; DEBUGGING
+        (store-in-context `((^you ,user-action) * ,ep-name))
+        (when ep-name1
+          (store-in-context `((^you ,user-action) * ,ep-name1)))
 
         ; Add turn to dialogue history
-        (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs)
-
-        ; Advance the 'rest-of-plan' pointer of the primitive plan past the
-        ; action name and wff just processed, and initialize the next action (if any)
-        ;; (print-current-plan-status {sub}plan-name) ; DEBUGGING
-        (delete-current-episode {sub}plan-name)
-        ;; (print-current-plan-status {sub}plan-name) ; DEBUGGING
-        (list user-ep-name wff))
+        (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs))
 
       ;`````````````````````
       ; User: Paraphrasing
@@ -1103,18 +1012,13 @@
       ; again (as was done above for (^you say-to.v ^me '(...)) actions).
       ((setq bindings (bindings-from-ttt-match '(^you paraphrase.v _!) wff))
         (setq expr (get-single-binding bindings))
-        (when (not (quoted-sentence? expr))
-          (format t "~%*** PARAPHRASE-ACTION ~a~%    BY THE USER SHOULD SPECIFY A QUOTED WORD LIST" expr)
-          (return-from observe-next-user-action nil))
-        ; Drop quote, leaving a singleton list of clauses
-        (setq user-gist-clauses (cdr expr))
-        (setf (get user-ep-name 'gist-clauses) user-gist-clauses)
-        ; Advance the 'rest-of-plan' ptr of the primitive plan past the action name
-        ; and wff just processed, and initialize the next action (if any)
-        ;; (print-current-plan-status {sub}plan-name) ; DEBUGGING
-        (delete-current-episode {sub}plan-name)
-        ;; (print-current-plan-status {sub}plan-name) ; DEBUGGING
-        (list user-ep-name wff))
+        (cond
+          ((not (quoted-sentence? expr))
+            (format t "~%*** PARAPHRASE-ACTION ~a~%    BY THE USER SHOULD SPECIFY A QUOTED WORD LIST" expr))
+          (t
+            ; Drop quote, leaving a singleton list of clauses
+            (setq user-gist-clauses (cdr expr))
+            (setf (get ep-name 'gist-clauses) user-gist-clauses))))
 
       ;`````````````````````
       ; User: Replying
@@ -1142,22 +1046,19 @@
 
         ;; (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
-        ; Make sure that any final punctuation, such as ?, ., or !,
-        ; is separated from the final word (so as to not impair pattern matching)
-        (when (null input)
-          (delete-current-episode {sub}plan-name)
-          (return-from observe-next-user-action nil))
-        (setq input (detach-final-punctuation input))
-        ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
-        ; Create subplan
-        (setq new-subplan-name
-          (init-plan-from-episode-list
-            (list :episodes (episode-var) (create-say-to-wff input :reverse t))
-            {sub}plan-name))
-        ; Bidirectional hierarchical connections
-        (add-subplan {sub}plan-name new-subplan-name)
-        ;; (print-current-plan-status subplan-name) ; DEBUGGING
-        (list user-ep-name1 wff1))
+        (cond
+          ((null input) (setq new-subplan nil))
+          (t
+            ; Make sure that any final punctuation, such as ?, ., or !,
+            ; is separated from the final word (so as to not impair pattern matching)
+            (setq input (detach-final-punctuation input))
+
+            ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
+
+            ; Create subplan
+            (setq new-subplan
+              (init-plan-from-episode-list
+                (list :episodes (episode-var) (create-say-to-wff input :reverse t)))))))
 
       ;`````````````````````
       ; User: Responding
@@ -1174,23 +1075,19 @@
         (setq input (if *live* (hear-words :delay *delay-respond-to.v*) (read-words)))
         (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
-        ; Make sure that any final punctuation, such as ?, ., or !,
-        ; is separated from the final word (so as to not impair pattern matching)
-        (when (null input)
-          (delete-current-episode {sub}plan-name)
-          (return-from observe-next-user-action (list user-ep-name1 wff1)))
-        (setq input (detach-final-punctuation input))
-        ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
-        ; Create subplan
-        (setq new-subplan-name
-          (init-plan-from-episode-list
-            (list :episodes (episode-var) (create-say-to-wff input :reverse t))
-            {sub}plan-name))
-        ; Bidirectional hierarchical connections
-        (add-subplan {sub}plan-name new-subplan-name)
-        ;; (print-current-plan-status subplan-name) ; DEBUGGING
-        (list user-ep-name1 wff1)
-      )
+        (cond
+          ((null input) (setq new-subplan nil))
+          (t
+            ; Make sure that any final punctuation, such as ?, ., or !,
+            ; is separated from the final word (so as to not impair pattern matching)
+            (setq input (detach-final-punctuation input))
+
+            ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
+
+            ; Create subplan
+            (setq new-subplan
+              (init-plan-from-episode-list
+                (list :episodes (episode-var) (create-say-to-wff input :reverse t)))))))
 
       ;`````````````````````
       ; User: Acknowledging
@@ -1201,23 +1098,19 @@
         (setq input (if *live* (hear-words :delay *delay-acknowledge.v*) (read-words)))
         (format t "~% input is equal to ~a ~%" input) ; DEBUGGING
 
-        ; Make sure that any final punctuation, such as ?, ., or !,
-        ; is separated from the final word (so as to not impair pattern matching)
-        (when (null input)
-          (delete-current-episode {sub}plan-name)
-          (return-from observe-next-user-action (list user-ep-name1 wff1)))
-        (setq input (detach-final-punctuation input))
-        ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
-        ; Create subplan
-        (setq new-subplan-name
-          (init-plan-from-episode-list
-            (list :episodes (episode-var) (create-say-to-wff input :reverse t))
-            {sub}plan-name))
-        ; Bidirectional hierarchical connections
-        (add-subplan {sub}plan-name new-subplan-name)
-        ;; (print-current-plan-status subplan-name) ; DEBUGGING
-        (list user-ep-name1 wff1)
-      )
+        (cond
+          ((null input) (setq new-subplan nil))
+          (t
+            ; Make sure that any final punctuation, such as ?, ., or !,
+            ; is separated from the final word (so as to not impair pattern matching)
+            (setq input (detach-final-punctuation input))
+
+            ;; (format t "~%echo of input: ~a" input) ; DEBUGGING
+
+            ; Create subplan
+            (setq new-subplan
+              (init-plan-from-episode-list
+                (list :episodes (episode-var) (create-say-to-wff input :reverse t)))))))
 
       ;````````````````````````````
       ; User: Trying
@@ -1231,30 +1124,29 @@
                                              (get-user-try-ka-success-offline)))
         (format t "~% user-try-ka-success is equal to ~a ~%" user-try-ka-success) ; DEBUGGING
         (when user-try-ka-success
-          (store-in-context `((pair ^you ,user-ep-name) successful.a))
-          (store-in-context `((pair ^you ,user-ep-name) instance-of.p ,expr)))
+          (store-in-context `((pair ^you ,ep-name) successful.a))
+          (store-in-context `((pair ^you ,ep-name) instance-of.p ,expr)))
 
         ; As a subplan of this, Eta should percieve the world (assuming a BW system).
-        (setq new-subplan-name
+        (setq new-subplan
           (init-plan-from-episode-list
             (list :episodes (episode-var)
-              '(^me perceive-world.v |Blocks-World-System| nil ?perceptions))
-            {sub}plan-name))
-        (when (null new-subplan-name)
-          (delete-current-episode {sub}plan-name)
-          (return-from implement-next-eta-action nil))
-        (add-subplan {sub}plan-name new-subplan-name))
+              '(^me perceive-world.v |Blocks-World-System| nil ?perceptions)))))
 
       ; Unrecognizable step
       (t (format t "~%*** UNRECOGNIZABLE STEP ~a " wff) (error))
     )
+
+    ; Return new subplan (possibly nil) and any variable bindings
+    (list var-bindings new-subplan)
+
 )) ; END observe-next-user-action
 
 
 
 
 
-(defun plan-if-else ({sub}plan-name expr)
+(defun plan-if-else (expr)
 ;``````````````````````````````````````````
 ; expr = (cond name1 wff1 name2 wff2 ... :else name3 wff3 name4 wff4 ...)
 ; Expr is a condition followed by consecutive name & wff pairs. Optionally,
@@ -1267,19 +1159,17 @@
     (cond
       ; Try conditional
       ((eval-truth-value cnd)
-        (init-plan-from-episode-list
-          (cons :episodes if-episodes) {sub}plan-name))
+        (init-plan-from-episode-list (cons :episodes if-episodes)))
       ; Otherwise try else, if it exists
       (else-episodes
-        (init-plan-from-episode-list
-          (cons :episodes else-episodes) {sub}plan-name))))
+        (init-plan-from-episode-list (cons :episodes else-episodes)))))
 ) ; END plan-if-else
 
 
 
 
 
-(defun plan-try-in-sequence ({sub}plan-name expr)
+(defun plan-try-in-sequence (expr)
 ;``````````````````````````````````````````````````
 ; expr = ((:if cond1 name1.1 wff1.1 name1.2 wff1.2 ...)
 ;         (:if cond2 name2.1 wff2.1 name2.2 wff2.2 ...) ...
@@ -1296,18 +1186,16 @@
       ((null expr) nil)
       ; If the condition is satisfied, create a subplan from the episode list
       ((or else1 (eval-truth-value cond1))
-        (init-plan-from-episode-list
-          (cons :episodes episodes1)
-          {sub}plan-name))
+        (init-plan-from-episode-list (cons :episodes episodes1)))
       ; Otherwise, try next condition & episodes
-      (t (plan-try-in-sequence {sub}plan-name (cdr expr))))
+      (t (plan-try-in-sequence (cdr expr))))
 )) ; END plan-try-in-sequence
 
 
 
 
 
-(defun plan-repeat-until ({sub}plan-name ep-name expr)
+(defun plan-repeat-until (subplan ep-name expr)
 ;`````````````````````````````````````````````````````````
 ; expr = (ep-var cond name1 wff1 name2 wff2 ...)
 ;
@@ -1328,28 +1216,27 @@
 ; THESE SHOULD BE PRETTY SIMPLE, JUST LISTING THE ACTIONS & PROVIDING
 ; seq-ep, consec-ep, ETC. RELATIONS IN THE SUBPLAN. 
 ;
-  (let ((cond1 (first expr)) (expr-rest (cdr expr)) truth-val subplan-name)
+  (let ((cond1 (first expr)) (expr-rest (cdr expr)) truth-val new-subplan)
     ; First check termination condition
     (setq truth-val (eval-truth-value cond1))
     ; Substitute expr-rest with duplicate variables
-    (setq expr-rest (subst-duplicate-variables {sub}plan-name expr-rest))
+    (setq expr-rest (subst-duplicate-variables subplan expr-rest))
     (cond
       ; Termination has been reached - return nil so the calling program can delete loop
       (truth-val nil)
       ; Otherwise, create a subplan that has the steps of the loop & a recursive copy of the loop
-      (t (setq subplan-name
+      (t (setq new-subplan
           (init-plan-from-episode-list
-            (cons :episodes (append expr-rest (list ep-name (cons :repeat-until expr))))
-            {sub}plan-name))
-        subplan-name))
+            (cons :episodes (append expr-rest (list ep-name (cons :repeat-until expr))))))
+        new-subplan))
 )) ; END plan-repeat-until
 
 
 
 
 
-(defun plan-reaction-to ({sub}plan-name user-gist-clauses user-ulf)
-;```````````````````````````````````````````````````````````````````
+(defun plan-reaction-to (user-gist-clauses user-ulf)
+;````````````````````````````````````````````````````````````````
 ; Starting at a top-level choice tree root, choose an action or
 ; subschema suitable for reacting to 'user-gist-clauses' (which
 ; is one or more sentences, without tags (and with a final detached
@@ -1377,8 +1264,7 @@
 ; in light of the meaning of these reactive comments...More thought
 ; required.
 ;
-  (let (user-gist-words choice tagged-words wff subplan-name
-        schema-name args)
+  (let (user-gist-words choice tagged-words wff schema-name args)
     
     (if (null user-gist-clauses)
       (return-from plan-reaction-to nil))
@@ -1390,12 +1276,10 @@
     ; say-to.v subplan directly
     ; TODO: this is not very elegant - not sure it makes sense for the value
     ; of the user's ULF to be an out directive by Eta...
-    (cond
-      ((and user-ulf (eq (car user-ulf) :out))
-        (return-from plan-reaction-to
-          (init-plan-from-episode-list
-            (list :episodes (episode-var) (create-say-to-wff (cdr user-ulf)))
-            {sub}plan-name))))
+    (when (and user-ulf (eq (car user-ulf) :out))
+      (return-from plan-reaction-to
+        (init-plan-from-episode-list
+          (list :episodes (episode-var) (create-say-to-wff (cdr user-ulf))))))
 
     ; Remove 'nil' gist clauses (unless the only gist clause is the 'nil' gist clause)
     (setq user-gist-clauses_p (purify-func user-gist-clauses))
@@ -1435,14 +1319,12 @@
       ; :out directive
       ((eq (car choice) :out)
         (init-plan-from-episode-list
-          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
-          {sub}plan-name))
+          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))))
 
       ; :schema directive
       ((eq (car choice) :schema)
         (setq schema-name (cdr choice))
-        (setq subplan-name (gensym "SUBPLAN"))
-        (init-plan-from-schema subplan-name schema-name nil))
+        (init-plan-from-schema schema-name nil))
 
       ; :schema+args directive
       ((eq (car choice) :schema+args)
@@ -1453,24 +1335,22 @@
         ; steps of the schema. These are provided as sublists in 
         ; <argument list>.
         (setq schema-name (first (cdr choice)) args (second (cdr choice)))
-        (setq subplan-name (gensym "SUBPLAN"))
-        (init-plan-from-schema subplan-name schema-name args))
+        (init-plan-from-schema schema-name args))
 
       ; :schema+ulf directive
       ((eq (car choice) :schema+ulf)
         ; TODO: Just a temporary directive to test spatial-question schema. Needs changing.
         (setq schema-name (cdr choice) args (list `(quote ,(resolve-references user-ulf)) nil))
-        (setq subplan-name (gensym "SUBPLAN"))
-        (init-plan-from-schema subplan-name schema-name args))
-      )
+        (init-plan-from-schema schema-name args))
+    )
 )) ; END plan-reaction-to
 
 
 
 
 
-(defun plan-proposal ({sub}plan-name proposal-gist)
-;````````````````````````````````````````````````````
+(defun plan-proposal (proposal-gist)
+;````````````````````````````````````````````````
 ; Given a proposal gist clause, convert it to an utterance using
 ; hierarchical transduction trees, starting at a top-level choice
 ; tree root.
@@ -1496,16 +1376,15 @@
       ; :out directive
       ((eq (car choice) :out)
         (init-plan-from-episode-list
-          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
-          {sub}plan-name)))
+          (list :episodes (episode-var) (create-say-to-wff (cdr choice))))))
 )) ; END plan-proposal
 
 
 
 
 
-(defun plan-correction ({sub}plan-name correction-gist)
-;````````````````````````````````````````````````````````
+(defun plan-correction (correction-gist)
+;````````````````````````````````````````````````````
 ; Given a correction gist clause, convert it to an utterance using
 ; hierarchical transduction trees, starting at a top-level choice
 ; tree root.
@@ -1528,8 +1407,7 @@
       ; :out directive
       ((eq (car choice) :out)
         (init-plan-from-episode-list
-          (list :episodes (episode-var) (create-say-to-wff (cdr choice)))
-          {sub}plan-name)))
+          (list :episodes (episode-var) (create-say-to-wff (cdr choice))))))
 )) ; END plan-correction
 
 
