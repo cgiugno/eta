@@ -263,6 +263,32 @@
 
 
 
+(defun sym-split (sym n &key front)
+;````````````````````````````````````
+; Splits a symbol into two symbols at index n from the end.
+; (or if :front t is given, n from the front)
+;
+  (if (numberp sym) (setq sym (write-to-string sym))) ; if sym is a number
+  (if (and (atom sym) (> (length (string sym)) n))
+    (let ((lex (string sym)))
+      (if front
+        (list (intern (subseq lex 0 n))
+          (intern (subseq lex n (length lex))))
+        (list (intern (subseq lex 0 (- (length lex) n)))
+          (intern (subseq lex (- (length lex) n) (length lex)))))))
+) ; END sym-split
+
+
+
+(defun sym-contains (sym char)
+;```````````````````````````````
+; Returns true if a symbol contains the character given by char.
+;
+  (if (member char (explode sym) :test #'char-equal) t)
+) ; END sym-contains
+
+
+
 (defun print-hash (ht)
 ; `````````````````````
 ; Print the contents of a hash table
