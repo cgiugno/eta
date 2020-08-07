@@ -56,14 +56,23 @@
 ; contains the following fields:
 ; curr-plan        : points to the currently active dialogue plan
 ; dialogue-history : should be three lists: surface form, gist clauses, and ULF interpretations
+; reference-list   : contains a list of discourse entities to be used in ULF coref
+; equality-sets    : hash table containing a list of aliases, keyed by canonical name
 ; gist-kb-user     : hash table of all gist clauses + associated topic keys from user
 ; gist-kb-eta      : hash table of all gist clauses + associated topic keys from Eta
 ; context          : hash table of facts that are true at Now*, e.g., <wff3>
 ; memory           : hash table of atemporal/"long-term" facts, e.g., (<wff3> ** E3) and (Now* during E3)
 ; kb               : hash table of Eta's knowledge base, containing general facts
 ;
+; TODO: currently reference-list and equality-sets are separate things, though they serve a similar
+; purpose, namely keeping track of which entities co-refer (e.g. skolem variable and noun phrase).
+; These should eventually become unified once we have a systemic way of doing coreference over all
+; propositions, versus the current module built over the ULF interpretation.
+;
   curr-plan
   dialogue-history
+  reference-list
+  equality-sets
   gist-kb-user
   gist-kb-eta
   context
@@ -96,45 +105,31 @@
 ;         tree) and many subsidiary gist-clause extraction trees
 ;         (formed from corresponding packets).
 ;
-  ; Global variable for dialogue record structure
-  (defvar *ds* (make-ds))
-
   ; Use response inhibition via latency numbers when *use-latency* = T
   (defvar *use-latency* t)
 
-  ; Initialized from a dialogue schema, which is destructively
-  ; modified as the plan is implemented. It retains already
-  ; completed actions, but the 'rest-of-plan' property tells us
-  ; where we are in the plan currently. Action names can have a
-  ; 'subplan' property which in turn has a 'rest-of-plan' property, etc.
-  (defvar *dialog-plan*)
+  ; Global variable for dialogue record structure
+  (defvar *ds* (make-ds))
 
-  ; Here we maintain various histories of the conversation (surface text,
-  ; ulf, gist, and references, respectively).
-  ; Currently these are just lists - maybe in the future they should be
-  ; hash tables (hashed on time)?
-  (defparameter *discourse-history* nil)
-  (defparameter *reference-list* nil)
+  ; Dialogue record keeps track of three kinds of history - surface words,
+  ; gist clauses, and semantic interpretations
+  (let ((dialogue-history (make-hash-table :test #'equal)))
+    (setf (gethash 'words dialogue-history) nil)
+    (setf (gethash 'gist-clauses dialogue-history) nil)
+    (setf (gethash 'semantics dialogue-history) nil)
+    (setf (ds-dialogue-history *ds*) dialogue-history))
 
-  ; Hash table of gist clauses attributed to each person
-  ; involved in the conversation.
-  (defparameter *gist-kb-user* (make-hash-table :test #'equal))
-  (defparameter *gist-kb-eta* (make-hash-table :test #'equal))
+  ; Initialize hash table for aliases/equality sets
+  (setf (ds-equality-sets *ds*) (make-hash-table :test #'equal))
 
-  ; Context
-  ; Stores facts that Eta knows.
-  ; This is a hash table with propositions hashed on the full proposition, the predicate, the subject,
-  ; and possibly the time that the formula is true in.
-  (defparameter *context* (make-hash-table :test #'equal))
+  ; Initialize hash tables for User and Eta topic keys/gist clauses
+  (setf (ds-gist-kb-user *ds*) (make-hash-table :test #'equal))
+  (setf (ds-gist-kb-eta *ds*) (make-hash-table :test #'equal))
 
-  ; Memory
-  ; TODO: Currently unused. Intended to store facts that are no longer "relevant", but that the system remembers
-  ; from previous contexts.
-  (defparameter *memory* (make-hash-table :test #'equal))
-
-  ; Equality sets
-  ; Stores coreference/equality sets, which indexes to the canonical name
-  (defparameter *equality-sets* (make-hash-table :test #'equal))
+  ; Initialize fact hash tables
+  (setf (ds-context *ds*) (make-hash-table :test #'equal))
+  (setf (ds-memory *ds*) (make-hash-table :test #'equal))
+  (setf (ds-kb *ds*) (make-hash-table :test #'equal))
 
   ; Load object schemas
   (load-obj-schemas)
@@ -436,7 +431,7 @@
         (setq expr (eval-functions (get-single-binding bindings)))
         (cond
           ; If the current "say" action is a question, then use 'topic-keys'
-          ; and 'gist-clauses' of current ep-name and *gist-kb-user* to see
+          ; and 'gist-clauses' of current ep-name and gist-kb-user to see
           ; if question has already been answered. If so, omit action.
           ; TODO: investigate why this required advancing the plan twice...
           ((not (null (obviated-question expr ep-name)))
@@ -449,7 +444,8 @@
             (setq expr (flatten (second expr)))
             (setq *count* (1+ *count*))
             (if *live* (say-words expr) (print-words expr))
-            (store-turn '^me expr :gists (get ep-name 'gist-clauses) :ulfs (list (get ep-name 'semantics))))
+            (store-turn '^me expr (get ep-name 'gist-clauses) (list (get ep-name 'semantics))
+              (ds-dialogue-history *ds*)))
           ; Nonprimitive say-to.v act (e.g. (^me say-to.v ^you (that (?e be.v finished.a)))):
           ; Should probably be illegal action specification since we can use 'tell.v' for
           ; inform acts. For the moment however, handle equivalently to tell.v.
@@ -998,7 +994,7 @@
           (store-in-context `((^you ,user-action) * ,ep-name1)))
 
         ; Add turn to dialogue history
-        (store-turn '^you words :gists user-gist-clauses :ulfs user-ulfs))
+        (store-turn '^you words user-gist-clauses user-ulfs (ds-dialogue-history *ds*)))
 
       ;`````````````````````
       ; User: Paraphrasing
@@ -1603,7 +1599,7 @@
 (defun obviated-question (sentence eta-action-name)
 ;````````````````````````````````````````````````````
 ; Check whether this is a (quoted, bracketed) question.
-; If so, check what facts, if any, are stored in *gist-kb-user* under 
+; If so, check what facts, if any, are stored in gist-kb-user under 
 ; the 'topic-keys' obtained as the value of that property of
 ; 'eta-action-name'. If there are such facts, check if they
 ; seem to provide an answer to the gist-version of the question,
@@ -1622,8 +1618,8 @@
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
     (if (null topic-keys) (return-from obviated-question nil))
-    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
-    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
+    (setq facts (remove nil (mapcar (lambda (key) (gethash key (ds-gist-kb-user *ds*))) topic-keys)))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" (ds-gist-kb-user *ds*))
     ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
     ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
     (if (null facts) (return-from obviated-question nil))
@@ -1642,15 +1638,15 @@
 ;`````````````````````````````````````````
 ; Check whether this is an obviated action (such as a schema instantiation),
 ; i.e. if the action has a topic-key(s) associated, check if any facts are stored
-; in *gist-kb-user* under the topic-key(s). If there are such facts, we assume that
+; in gist-kb-user under the topic-key(s). If there are such facts, we assume that
 ; these facts obviate the action, so the action can be deleted from the plan.
 ;
   (let (topic-keys facts)
     (setq topic-keys (get eta-action-name 'topic-keys))
     ;; (format t "~% ****** topic key is ~a ****** ~%" topic-keys) ; DEBUGGING
     (if (null topic-keys) (return-from obviated-action nil))
-    (setq facts (remove nil (mapcar (lambda (key) (gethash key *gist-kb-user*)) topic-keys)))
-    ;; (format t "~% ****** gist-kb ~a ****** ~%" *gist-kb-user*)
+    (setq facts (remove nil (mapcar (lambda (key) (gethash key (ds-gist-kb-user *ds*))) topic-keys)))
+    ;; (format t "~% ****** gist-kb ~a ****** ~%" (ds-gist-kb-user *ds*))
     ;; (format t "~% ****** list facts about this topic = ~a ****** ~%" facts)
     ;; (format t "~% ****** There is no fact about this topic. ~a ****** ~%" (null facts)) ; DEBUGGING
     (if (null facts) (return-from obviated-action nil))
@@ -1714,7 +1710,7 @@
         (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
         (when clause
           (setq keys (second clause))
-          (store-gist (car clause) keys *gist-kb-user*)
+          (store-gist (car clause) keys (ds-gist-kb-user *ds*))
           (push (car clause) facts))))
 
     ; Form thematic answer from input (if no specific facts are extracted)
@@ -1724,7 +1720,7 @@
       (when (atom (car clause)) (setq clause (list clause))) ; in case no topic-key
       (when clause
         (setq keys (second clause))
-        (store-gist (car clause) keys *gist-kb-user*)
+        (store-gist (car clause) keys (ds-gist-kb-user *ds*))
         (push (car clause) facts)))
 
     ; The results obtained will be stored as the 'gist-clauses'

@@ -902,15 +902,15 @@
 
 
 
-(defun store-turn (agent text &key gists ulfs)
-;``````````````````````````````````````````````
-; Stores a turn (consisting of some text, and lists of gist clauses and semantic interpretations, if any)
-; in the discourse history, along with the agent taking the turn.
-; NOTE: currently *discourse-history* is just a list. If it's changed to a hash table in the future,
-; this will need to be modified.
+(defun store-turn (agent words gist-clauses semantics ht)
+;````````````````````````````````````````````````````````````
+; Given a hash table of different kinds of dialogue histories,
+; store a turn (consisting of surface words, gist clauses, and
+; semantic interpretations) in respective history lists.
 ;
-  (let ((turn (list agent (list text gists ulfs))))
-    (setq *discourse-history* (cons turn *discourse-history*)))
+  (push (list agent words) (gethash 'words ht))
+  (push (list agent gist-clauses) (gethash 'gist-clauses ht))
+  (push (list agent semantics) (gethash 'semantics ht))
 ) ; END store-turn
 
 
@@ -930,7 +930,7 @@
                                           :append :if-does-not-exist :create)
           (format outfile "~% ~a   ~a" key val))
         (format t "~% ~a   ~a" key val))))
-  *gist-kb-user*)
+  (ds-gist-kb-user *ds*))
 ) ; END print-gist-kb
 
 
@@ -939,17 +939,21 @@
 ;```````````````````````
 ; Pretty-prints the discourse history in order.
 ;
-  (let ((i 1))
-    (mapcar (lambda (turn)
-      (let ((agent (first turn)) (text (first (second turn)))
-            (gists (second (second turn))) (ulfs (third (second turn))))
-        (format t "~a. ~a : ~a~%" i agent text)
-        (mapcar (lambda (gist)
-          (format t "   gist: ~a~%" (if gist gist "None"))) gists)
+  (let ((ht (ds-dialogue-history *ds*)) (i 1))
+    (mapcar (lambda (turn-words turn-gist-clauses turn-semantics)
+      (let ((agent (first turn-words)) (words (second turn-words))
+            (gist-clauses (second turn-gist-clauses)) (semantics (second turn-semantics)))
+        (if (or (null gist-clauses) (not (listp (car gist-clauses))))
+          (setq gist-clauses (list gist-clauses)))
+        (format t "~a. ~a : ~a~%" i agent words)
+        (mapcar (lambda (gist-clause)
+          (format t "   gist: ~a~%" (if gist-clause gist-clause "None"))) gist-clauses)
         (mapcar (lambda (ulf)
-          (format t "   ulf: ~a~%" (if ulf ulf "None"))) ulfs))
+          (format t "   ulf: ~a~%" (if ulf ulf "None"))) semantics))
       (setq i (1+ i)))
-    (reverse *discourse-history*)))
+    (reverse (gethash 'words ht))
+    (reverse (gethash 'gist-clauses ht))
+    (reverse (gethash 'semantics ht))))
 ) ; END print-history
 
 
@@ -970,7 +974,7 @@
   (let (l1 l2)
     (maphash (lambda (k v)
       (if (equal v t) (setq l1 (cons k l1))
-        (setq l2 (cons (list k v) l2)))) *context*)
+        (setq l2 (cons (list k v) l2)))) (ds-context *ds*))
     (mapcar (lambda (f)
       (format t "~a~%" f)) l1)
     (format t "~%")
@@ -988,7 +992,7 @@
 ; store in context.
 ;
   (let ((fact (if (equal (car wff) 'quote) (eval wff) wff)))
-    (store-fact fact *context*))
+    (store-fact fact (ds-context *ds*)))
 ) ; END store-in-context
 
 
@@ -997,7 +1001,7 @@
 ;````````````````````````````````````
 ; Retrieves a fact from context
 ;
-  (get-matching-facts pred-patt *context*)
+  (get-matching-facts pred-patt (ds-context *ds*))
 ) ; END get-from-context
 
 
@@ -1006,7 +1010,7 @@
 ;```````````````````````````````````````
 ; Removes a fact from context
 ;
-  (remove-facts (get-from-context pred-patt) *context*)
+  (remove-facts (get-from-context pred-patt) (ds-context *ds*))
 ) ; END remove-from-context
 
 
@@ -1015,7 +1019,7 @@
 ;```````````````````````````````````````````
 ; Given a lambda description, find all instances
 ; from context (see 'find-all-instances').
-  (find-all-instances descr *context*)
+  (find-all-instances descr (ds-context *ds*))
 ) ; END find-all-instances-context
 
 
@@ -1055,11 +1059,11 @@
 ; set (|BW-concept-3| (k BW-arch.n)) hashed on |BW-concept-3|, or else appends
 ; (k BW-arch.n) to the existing set under that index.
 ;
-  (if (member alias (gethash canonical-name *equality-sets*) :test #'equal)
+  (if (member alias (gethash canonical-name (ds-equality-sets *ds*)) :test #'equal)
     (return-from add-alias nil))
-  (when (not (gethash canonical-name *equality-sets*))
-    (push canonical-name (gethash canonical-name *equality-sets*)))
-  (push alias (gethash canonical-name *equality-sets*))
+  (when (not (gethash canonical-name (ds-equality-sets *ds*)))
+    (push canonical-name (gethash canonical-name (ds-equality-sets *ds*))))
+  (push alias (gethash canonical-name (ds-equality-sets *ds*)))
 ) ; END add-alias
 
 
@@ -1068,7 +1072,7 @@
 ;````````````````````````````````````
 ; Gets a list of aliases for a particular canonical name.
 ;
-  (gethash canonical-name *equality-sets*)
+  (gethash canonical-name (ds-equality-sets *ds*))
 ) ; END get-aliases
 
 
@@ -1077,9 +1081,9 @@
 ;```````````````````````````````````````````
 ; Removes a given alias for a canonical name.
 ;
-  (when (gethash canonical-name *equality-sets*)
-    (setf (gethash canonical-name *equality-sets*) 
-      (remove alias (gethash canonical-name *equality-sets*) :test #'equal)))
+  (when (gethash canonical-name (ds-equality-sets *ds*))
+    (setf (gethash canonical-name (ds-equality-sets *ds*)) 
+      (remove alias (gethash canonical-name (ds-equality-sets *ds*)) :test #'equal)))
 ) ; END remove-alias
 
 
@@ -1090,7 +1094,7 @@
 ;
   (maphash (lambda (canonical-name aliases)
       (format t "~a: ~a~%" canonical-name aliases))
-    *equality-sets*)
+    (ds-equality-sets *ds*))
 ) ; END print-aliases
 
 

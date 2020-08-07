@@ -23,7 +23,7 @@
 ; ``````````````````````````
 ; Adds an entity to the reference list.
 ;
-  (setq *reference-list* (cons entity *reference-list*))
+  (push entity (ds-reference-list *ds*))
 ) ; END add-entity
 
 
@@ -45,7 +45,7 @@
     (setf (get de2 'type) (get de1 'type)))
   (setf (get de2 'mods)
     (remove-duplicates (append (get de1 'mods) (get de2 'mods)) :test #'equal))
-  (setq *reference-list* (cons de2 (remove de1 *reference-list*)))
+  (setf (ds-reference-list *ds*) (cons de2 (remove de1 (ds-reference-list *ds*))))
 ) ; END corefer
 
 
@@ -54,7 +54,7 @@
 ; Prunes the reference list of all discourse entities past a certain recency threshold (keeping a DE
 ; in the case that it doesn't have a recency assigned).
 ;
-  (remove-if (lambda (de) (and (get de 'recency) (< recency (get de 'recency)))) *reference-list*)
+  (remove-if (lambda (de) (and (get de 'recency) (< recency (get de 'recency)))) (ds-reference-list *ds*))
 ) ; END prune-reference-list
 
 
@@ -63,8 +63,8 @@
 ; Updates the reference list after a sentence by incrementing the recency of all entities which are assigned
 ; a recency.
 ;
-  (setq *reference-list* (mapcar (lambda (de)
-    (if (and (get de 'recency)) (setf (get de 'recency) (1+ (get de 'recency)))) de) *reference-list*))
+  (setf (ds-reference-list *ds*) (mapcar (lambda (de)
+    (if (and (get de 'recency)) (setf (get de 'recency) (1+ (get de 'recency)))) de) (ds-reference-list *ds*)))
 ) ; END update-reference-list
 
 
@@ -76,7 +76,7 @@
     (lambda (x) (if verbose (format t "entity: ~a~% |- type: ~a~% |- mods: ~a~% |- recency: ~a~% |- salience: ~a~%"
                               x (get x 'type) (get x 'mods) (get x 'recency) (get x 'salience))
                             (format t "- ~a~%" x)) x)
-    *reference-list*)
+    (ds-reference-list *ds*))
 ) ; END print-entities
 
 
