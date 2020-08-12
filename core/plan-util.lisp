@@ -46,7 +46,7 @@
 
 
 
-(defun init-plan-from-schema (schema-name args) ;[*]
+(defun init-plan-from-schema (schema-name args) 
 ;````````````````````````````````````````````````
 ; Given a schema name (e.g. '*eta-schema*), instantiate the
 ; schema that a plan is to be based on. For non-nil 'args', we
@@ -99,7 +99,7 @@
 
 
 
-(defun init-plan-from-episode-list (episodes) ;[*]
+(defun init-plan-from-episode-list (episodes) 
 ;```````````````````````````````````````````````
 ; Given a list of episodes, create a plan corresponding to that
 ; sequence of episodes. Used for creating subplans from certain
@@ -121,7 +121,7 @@
 
 
 
-(defun process-schema-types (plan types) ;[-]
+(defun process-schema-types (plan types) 
 ;`````````````````````````````````````````
 ; Add all types to context.
 ; TODO: This is incomplete and needs to be updated in the future.
@@ -135,19 +135,18 @@
       ; If typed variable, find value for variable through observation and
       ; substitute in both type and in contents of each schema section.
       (when (variable? (car type))
-        (push (car type) (plan-vars plan)))
+        (push (car type) (plan-vars plan))
         ; Get skolem name and replace in schema.
-        ;; (setq sk-name (observe-variable-type (car type) (second type))) ; UNDO
-        ;; (nsubst sk-name (car type) schema) ; UNDO
-        ;; (setq type (subst sk-name (car type) type))) ; UNDO
+        (setq sk-name (observe-variable-type (car type) (second type)))
+        (nsubst sk-name (car type) (plan-schema-contents plan))
+        (setq type (subst sk-name (car type) type)))
       ; Store type as fact in context.
-      ;; (store-in-context type) ; UNDO
-      ))
+      (store-in-context type)))
 ) ; END process-schema-types
 
 
 
-(defun process-schema-rigid-conds (plan rigid-conds) ;[*]
+(defun process-schema-rigid-conds (plan rigid-conds) 
 ;`````````````````````````````````````````````````````
 ; Add all rigid-conds to context.
 ; TODO: This is incomplete and needs to be updated in the future.
@@ -162,7 +161,7 @@
 
 
 
-(defun process-schema-episodes (plan episodes) ;[*]
+(defun process-schema-episodes (plan episodes) 
 ;```````````````````````````````````````````````
 ; Converts episodes contents of schema to a linked list
 ; representing the steps in a plan. Returns the first
@@ -204,7 +203,7 @@
 
 
 
-(defun form-step-pairs (episodes) ;[*]
+(defun form-step-pairs (episodes) 
 ;`````````````````````````````````
 ; Groups episodes into a list of (ep-name wff) pairs.
 ;
@@ -216,7 +215,7 @@
 
 
 
-(defun add-subplan-curr-step (plan subplan) ;[*]
+(defun add-subplan-curr-step (plan subplan) 
 ;````````````````````````````````````````````
 ; Given a plan and a subplan, attaches the subplan to the
 ; currently active step of the plan using the add-subplan function.
@@ -233,7 +232,7 @@
 
 
 
-(defun add-subplan (plan-step subplan) ;[*]
+(defun add-subplan (plan-step subplan) 
 ;```````````````````````````````````````````
 ; Adds a subplan to a given plan-step using bidirectional links.
 ;
@@ -243,7 +242,7 @@
 
 
 
-(defun advance-plan (plan) ;[*]
+(defun advance-plan (plan) 
 ;```````````````````````````
 ; Advances the curr-step in plan to the next step.
 ;
@@ -267,7 +266,7 @@
 
 
 
-(defun update-plan-state (plan) ;[*]
+(defun update-plan-state (plan) 
 ;`````````````````````````````````
 ; Updates the state of the plan by advancing any step whose
 ; subplan has been completed, i.e. has no more steps left.
@@ -295,7 +294,7 @@
 
 
 
-(defun instantiate-curr-step (plan) ;[*]
+(defun instantiate-curr-step (plan) 
 ;`````````````````````````````````````
 ; Instantiates the first episode in the plan, destructively substituting
 ; the skolemized episode wherever it occurs in the plan. Also attaches
@@ -354,7 +353,7 @@
 
 
 
-(defun find-curr-subplan (plan) ;[*]
+(defun find-curr-subplan (plan) 
 ;`````````````````````````````````
 ; Finds the deepest subplan of the given plan (starting with current step)
 ; with an immediately pending step.
@@ -387,7 +386,7 @@
 
 
 
-(defun has-next-step? (plan) ;[*]
+(defun has-next-step? (plan) 
 ;`````````````````````````````
 ; Returns t if plan has another step, nil otherwise.
 ;
@@ -396,7 +395,7 @@
 
 
 
-(defun process-next-action (plan) ;[*]
+(defun process-next-action (plan) 
 ;```````````````````````````````````````
 ; Executes the immediately pending action in the plan, which is the
 ; current step of the deepest active subplan.
@@ -470,7 +469,7 @@
 
 
 
-(defun nsubst-variable (plan val var) ;[*]
+(defun nsubst-variable (plan val var) 
 ;```````````````````````````````````````
 ; Traverses the linked list of steps, starting from the current step,
 ; and destructively substitutes val for var in the ep-name and wff
@@ -495,7 +494,7 @@
 
 
 
-(defun nsubst-schema-args (args schema) ;[*]
+(defun nsubst-schema-args (args schema) 
 ;```````````````````````````````````````
 ; Substitute the successive arguments in the 'args' list for successive
 ; variables occurring in the schema or plan header exclusive of the 
@@ -542,7 +541,7 @@
 
 
 
-(defun subst-duplicate-variables (plan episodes) ;[*]
+(defun subst-duplicate-variables (plan episodes) 
 ;``````````````````````````````````````````````````
 ; Substitutes all variables in an episode list with duplicate variables,
 ; inheriting the gist-clauses, ulf, etc. attached to them in the schema
@@ -560,7 +559,7 @@
 
 
 
-(defun duplicate-variable (plan var) ;[*]
+(defun duplicate-variable (plan var) 
 ;`````````````````````````````````````````````
 ; Duplicates an episode variable, inheriting the gist-clauses,
 ; ulf, etc. attached to it in the schema used (directly or
@@ -604,7 +603,7 @@
 
 
 
-(defun print-current-plan-steps (plan) ;[*]
+(defun print-current-plan-steps (plan) 
 ;``````````````````````````````````````
 ; Prints each subsequent step in a plan, starting from the current
 ; step, showing the ep-name and wff of each. Does not include subplans.
@@ -620,7 +619,7 @@
 
 
 
-(defun print-current-plan-status (plan) ;[*]
+(defun print-current-plan-status (plan) 
 ;````````````````````````````````````````
 ; Prints the current plan status. Shows ep-name and wff of
 ; current pending step in plan, as well as the status of
