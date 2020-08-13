@@ -253,6 +253,11 @@
     (setq *log-answer* nil)
     (setq *log-ptr* -1))
 
+  ; If '*eta-schema* is not bound, return an error
+  (when (not (boundp '*eta-schema*))
+    (format t "***  *eta-schema* is not bound. If using a multi-session avatar, make sure *session-number* is set.~%")
+    (return-from eta nil))
+
   ; Initiate the dialogue plan. The schema named
   ; *eta-schema* is used to create the top-level plan
   (setf (ds-curr-plan *ds*) (init-plan-from-schema '*eta-schema* nil))
