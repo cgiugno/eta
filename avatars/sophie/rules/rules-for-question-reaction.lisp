@@ -110,6 +110,9 @@
   1 (Have you had trouble concentrating ?)
     2 (*have-subdialogue* ((Only sometimes\.)
                            ((I have had trouble concentrating \.)))) (0 :schema+args)
+  1 (how is your mental health ?)
+    2 (*have-subdialogue* ((Well\, I do try to keep carrying on\, but sometimes I just feel down\.) 
+                           ((I feel mildly depressed \.)))) (0 :schema+args)
 
   ; Questions about medicine
   1 (Do you have allergies to any medicine ?)
@@ -160,8 +163,31 @@
     2 (*have-subdialogue* ((I haven\'t thought about it\, but it sounds like what I really need\. A way to maintain quality of life
                             during the time I have left\. Can you tell me about it?)
                            ((How does comfort care work ?)))) (0 :schema+args)
-
-
+  ;Questions about medical history
+  1 (What is your history with alcohol ?)
+    2 (*have-subdialogue* ((There was a point in my life that I drank fairly often\. But I cut back on my own\, and I don\'t really drink a lot now\.
+                                  Truth be told\, ever since the diagnosis\, I\'ve kind of lost my taste for alcohol\.)
+                           ((I have a history of alcohol abuse \.) (I do not drink often now \.)))) (100 :schema+args)
+    2 (At one time\, you suppose you used to have a drink or two maybe three or four days a week\. You\'ve cut back since then though\. 
+          Now\, since the cancer diagnosis\, you only have a couple drinks a week \.) (0 :out)
+  1 (What is your history with smoking ?)
+    2 (*have-subdialogue* ((I was a pretty heavy smoker once\. I started my senior year in high school\, back when it was all the rage\, then smoked about a pack a day up until about six months ago\. Now I don\'t smoke at all\.)
+                           ((I have a history of smoking \.) (I quit smoking six months ago \.)))) (100 :schema+args)
+    2 (You\'ve been a heavy smoker since high school\, but you kicked the habit six months ago\.) (0 :out)
+  1 (What is your history with med-narcotic ?)
+    2 (*have-subdialogue* ((I took some pain medication for a fractured ankle about fifteen or so years ago\, but I don\'t believe it was a narcotic\. 
+                              Besides that\, my doctor prescribed me Lortab about three weeks ago\.)
+                           ((I do not have a history of narcotic abuse \.) (I am only taking Lortab to treat my pain \.)))) (0 :schema+args)
+  1 (Does your family have a history of mental illness ?)
+    2 (*have-subdialogue* ((I don\'t think so\. As far as I know\, no one in my family has experienced that sort of thing\.)  ((My family does not have a history of mental illness \.)))) (3 :schema+args)
+    2 (No\, no one in my family has any history of mental illness\.)  (0 :out)
+  1 (How did your parents die ?)
+    2 (*have-subdialogue* ((My parents passed on a few years ago\. Both at seventy three\, if you would believe it\. 
+                               My mother died from complications with her diabetes\. She was a smoker\, something she passed onto me\.
+                               My father\, though\, he died when his prostate cancer went into his bones\. Near the end of his life\, he was in a lot of pain\, which I guess is why I worry about my medications\.)
+                           ((My mother died of complications from her diabetes \.) (My father died of prostate cancer\.)))) (0 :schema+args)
+  
+                           
   1 (0)
     2 *reaction-to-question-minor* (0 :subtree)
 ))
@@ -173,8 +199,20 @@
 '(
   ; Questions about daughter
   1 (Where does your daughter work ?)
-    2 (She works as a school nurse in the county school system\.) (0 :out)
+    2 (She works as a school nurse in the county school system\. She\'s very diligent\. They gave her an award last year\, but I\'m blanking on the name of it\.) (0 :out)
+  1 (Where does your son work ?)
+    2 (He\'s in construction management\, out over in Utica\. He supervised the team that built the new firehouse there last year\.) (0 :out)
   1 (How old is your daughter ?)
     2 (She\'s thirty four\. Turning thirty five in a few months\.) (0 :out)
+  1 (How old is your son ?)
+    2 (He\'ll be celebrating his fortieth this year\, and is not happy about it\.) (0 :out)
+  1 (Do you have any grandchildren ?)
+    2 (Yes\, one grandson\. He\'s starting middle school this year and is absolutely thrilled about it\.) (0 :out)
+  1 (Do you have any children ?)
+    2 (Yes\, you\'re staying with my daughter and her husband here in Rochester\, but you have a son out in Utica as well\.) (0 :out)
+  1 (Are you married ?)
+    2 (You were for about twenty years\. But as we got older and the kids went off to college\, things just didn\'t work out as well as we thought they would\. We separated about ten years ago and divorced two years later\.) (0 :out)
+  1 (How are you doing today ?)
+    2 (You\'re fine\, thank me\. And me?) (0 :out)
   ; Questions about family (TODO)
 ))
