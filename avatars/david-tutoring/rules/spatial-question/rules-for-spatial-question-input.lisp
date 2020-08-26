@@ -8,18 +8,21 @@
     (special-request bye goodbye pause stop exit moment minute that that\'s
       second bit quit resume david now today finished-word)
     (finished-word it all everything)
+    (correct right proper good)
 
-    (spatial-beginning-pair spatial-beginning there)
+    (spatial-beginning-pair2 spatial-beginning there)
+    (spatial-beginning-pair1 spatial-beginning)
     (spatial-beginning spatial-verb between prep conj-prep)
     (spatial-verb be modal wh_ do)
     (spatial-ending noun adj there directions ana-pron prep conj-prep facing
       adv-hist-word prep-history-adj verb-rel that this those corp)
     (spatial-word noun-bw ana-pron supporting corp adj
-      uppermost under close touching farthest rotated)
+      uppermost under close touching farthest rotated verb-rel)
     (spatial-word-potential spatial-word be wh_ prep conj-prep)
     (kinds types sorts kind type sort formats format)
     (question questions)
     (answer understand hear interpret parse)
+    (specifically exactly precisely)
     (here here\'s heres)
     (directions left right top bottom back front)
   ))
@@ -47,13 +50,21 @@
     ;;   2 ((Can you answer my question referring to a past question ?)) (0 :gist)
     ;; 1 (0 spatial-word-potential 0 that one 0)
     ;;   2 ((Can you answer my question referring to a past question ?)) (0 :gist)
+    ;; ----------------------
+    ;; Verification questions
+    ;; ----------------------
+    1 (2 be 1 index-det 1 correct 2)
+      2 ((Did I make the correct move ?)) (0 :gist)
+    1 (2 do 1 pron 1 correct 2)
+      2 ((Did I make the correct move ?)) (0 :gist)
+    1 (2 like 1 index-det 2)
+      2 ((Did I make the correct move ?)) (0 :gist)
     ;; ----------------------------------------
     ;; If spatial question, start preprocessing
     ;; ----------------------------------------
     1 (- 0 that is finished-word 0)
       2 (0 spatial-word 0)
         3 (*multi-token-word-tree* (1 2 3)) (0 :subtree+clause)
-    ;; -----------------
     ;; Special requests
     ;; -----------------
     1 (0 special-request 0)
@@ -77,6 +88,12 @@
   ; e.g. "burger king" into a single word, joined by an underscore.
   (READRULES '*multi-token-word-tree*
   '(
+    1 (0 how many 0)
+      2 (*multi-token-word-tree* (1 how_many 4)) (0 :subtree+clause)
+    1 (0 relative to 0)
+      2 (*multi-token-word-tree* (1 relative_to 4)) (0 :subtree+clause)
+    1 (0 with respect to 0)
+      2 (*multi-token-word-tree* (1 with_respect_to 5)) (0 :subtree+clause)
     1 (0 burger king 0)
       2 (*multi-token-word-tree* (1 burger_king 4)) (0 :subtree+clause)
     1 (0 sri international 0)
@@ -136,6 +153,10 @@
   ; of spatial-ending words).
   (READRULES '*trim-suffix-tree*
   '(
+    1 (3 where 0 need to be ?)
+      2 (*trim-prefix-tree* (1 2 3 4 5 6 ?)) (0 :subtree+clause)
+    1 (3 where 1 should 0 be ?)
+      2 (*trim-prefix-tree* (1 2 3 4 5 6 ?)) (0 :subtree+clause)
     1 (0 spatial-ending ?)
       2 (*trim-prefix-tree* (1 2 ?)) (0 :subtree+clause)
     1 (0 spatial-ending)
@@ -168,6 +189,8 @@
   ; use as an opening, e.g. "my question is ...".
   (READRULES '*trim-prefix-tree*
   '(
+    1 (where specifically 0)
+      2 (*trim-prefix-tree* (1 3)) (0 :subtree+clause)
     1 (yes I do \, 0)
       2 (*trim-prefix-tree* (5)) (0 :subtree+clause)
     1 (yes I do 0)
@@ -196,9 +219,9 @@
       2 ((spatial-question 7)) (0 :gist)
     1 (0 aux you 1 tell 0)
       2 ((spatial-question 6)) (0 :gist)
-    1 (0 spatial-beginning-pair spatial-beginning-pair spatial-beginning-pair ; meant to match something
-        spatial-beginning-pair 0)                                             ; like "is there...what is next
-                                                                              ; to the red block?"
+    1 (0 spatial-beginning-pair1 spatial-beginning-pair2 spatial-beginning-pair1 ; meant to match something
+        spatial-beginning-pair2 0)                                               ; like "is there...what is next
+                                                                                 ; to the red block?"
       2 ((spatial-question 4 5 6)) (0 :gist)
     1 (between spatial-beginning 0)
       2 ((spatial-question 1 2 3)) (0 :gist)
@@ -504,6 +527,8 @@
        2 (*grammar-fix-tree* (at 1 2 3 4 5)) (0 :subtree+clause)
     1 (wh-det noun-history 0 verb-rel 0); e.g., what turn did I move the Twitter block ?
        2 (*grammar-fix-tree* (at 1 2 3 4 5)) (0 :subtree+clause)
+    1 (0 have not I 0); have not I => have I not
+       2 (*grammar-fix-tree* (1 have I not 5)) (0 :subtree+clause)
     1 (0)
       2 (*detect-smalltalk-tree* (1)) (0 :subtree+clause)
   ))

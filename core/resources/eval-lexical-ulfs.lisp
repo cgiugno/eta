@@ -78,6 +78,8 @@
          ((v verb) (case word-sym
                      (can '(pres can.aux-s)) (could '(past can.aux-s))
                      ((do does) '(pres do.aux-s)) (did '(past do.aux-s))
+                     ((should shall) '(pres should.aux-s))
+                     ((need needs) '(pres need.aux-v)) (needed '(past need.aux-v))
                      ((is are) '(pres be.v)) (be 'be.v) ((was were) '(past be.v))
                      ((support supports) '(pres support.v)) (supported '(past support.v))
                      ((sit sits) '(pres sit.v)) (sat '(past sit.v))
@@ -115,9 +117,10 @@
          ; Untensed verb
          ((v- verb-untensed)
             ; This is a bit hacky...
-            (if (equal (second (lex-ulf! 'v word-sym)) (intern (format nil "~a.V" word-sym)))
-                (intern (format nil "~a.V" word-sym))
-                (second (lex-ulf! 'v word-sym))))
+            (if (atom (lex-ulf! 'v word-sym)) (lex-ulf! 'v word-sym)
+                (if (equal (second (lex-ulf! 'v word-sym)) (intern (format nil "~a.V" word-sym)))
+                    (intern (format nil "~a.V" word-sym))
+                    (second (lex-ulf! 'v word-sym)))))
          (wh-pred (case word-sym
                      (where '(at.p (what.d place.n)))
                      (when '(at.p (what.d time.n)))

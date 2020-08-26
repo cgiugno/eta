@@ -7,8 +7,8 @@
 
 (defparameter *pause-conversation*
 
-'(Event-schema (((set-of ^me ^you) pause-conversation.v) ** ?e)
-;````````````````````````````````````````````````````````````````
+'(event-schema :header (((set-of ^me ^you) pause-conversation.v) ** ?e)
+;````````````````````````````````````````````````````````````````````````
 ; The user and the agent suspend dialogue until the user says something
 ; interpreted as a resumption request.
 ;

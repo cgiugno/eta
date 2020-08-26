@@ -31,8 +31,8 @@
 ;    called for when the question precedes an assertion, rather
 ;    than being preceded by an assertion.
 
-'(Event-schema ((^me react-to-question+clause ?question ?clause) ** ?e)
-;`````````````````````````````````````````````````````````````````````
+'(event-schema :header ((^me react-to-question+clause ?question ?clause) ** ?e)
+;```````````````````````````````````````````````````````````````````````````````
 ; Eta reacts to a gist-clause question plus a (brief) added gist 
 ; clause assertion from the user (in response to a Eta question).
 ;
