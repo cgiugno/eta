@@ -1,5 +1,10 @@
 (MAPC 'ATTACHFEAT
 '(
+  (med-chemotherapy chemotherapy chemo alkylating antitumor antimetabolites antimetabolite)
+  (palliative comfort)
+  (priorities priority preference preferences)
+  (depend depends conditional relies hinges)
+  (keep remain) 
 ))
 
 
@@ -22,6 +27,18 @@
 
   1 (0 quality 2 life 0)
     2 ((Maintaining good quality of life is a treatment option \.) (comfort-care)) (0 :gist)
+  1 (0 keep 2 comfortable 0)
+    2 ((Maintaining good quality of life is a treatment option \.) (comfort-care)) (0 :gist)
+
+  1 (0 wh_ 3 be-aux 3 pron 3 priorities 0) 
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+  1 (0 depend 4 priorities 0)
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+  1 (0 tell 5 priorities 0)
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+  1 (0 let 1 me 1 know 5 priorities 0)
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+
 
   1 (0)
     2 *general-input* (0 :subtree)
@@ -33,6 +50,14 @@
 (READRULES '*treatment-option-question*
 '(
 
+  1 (0 wh_ 3 be-aux 3 pron 3 priorities 0) 
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+  1 (0 depend 4 priorities 0)
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+  1 (0 tell 5 priorities 0)
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+  1 (0 let 1 me 1 know 5 priorities 0)
+    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
 ))
 
 
