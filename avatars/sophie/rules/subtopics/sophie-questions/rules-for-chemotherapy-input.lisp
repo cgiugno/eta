@@ -1,5 +1,9 @@
 (MAPC 'ATTACHFEAT
 '(
+ (palliative comfort)
+ (think feel)
+ (thinking feeling)
+ (thoughts feelings views opinions impressions opinion impression)
 ))
 
 
@@ -33,6 +37,16 @@
   1 (0 NEG 1 think-gen 0)
     2 ((I do not think you need chemotherapy \.) (chemotherapy)) (0 :gist)
 
+  1 (0 radiation 0)
+    2 ((Radiation is a treatment option \.) (radiation)) (0 :gist)
+  1 (0 surgery 0)
+    2 ((Surgery is a treatment option \.) (surgery)) (0 :gist)
+
+  1 (0 quality 2 life 0)
+    2 ((Maintaining good quality of life is a treatment option \.) (comfort-care)) (0 :gist)
+  1 (0 keep 2 comfortable 0)
+    2 ((Maintaining good quality of life is a treatment option \.) (comfort-care)) (0 :gist)
+
   1 (0)
     2 *general-input* (0 :subtree)
   1 (0)
@@ -42,13 +56,17 @@
 
 (READRULES '*chemotherapy-question*
 '(
-  1 (0 did 4 tell 4 you 4 need chemotherapy 0)
+  1 (0 did 4 tell 4 you 4 need med-chemotherapy 0)
     2 ((Did your doctor mention chemotherapy ?) (chemotherapy)) (0 :gist)
-  1 (0 did 8 you 4 about chemotherapy 0)
+  1 (0 did 8 you 4 about med-chemotherapy 0)
     2 ((Did your doctor mention chemotherapy ?) (chemotherapy)) (0 :gist)
-  1 (0 mention 3 chemotherapy 0)
+  1 (0 mention 3 med-chemotherapy 0)
     2 ((Did your doctor mention chemotherapy ?) (chemotherapy)) (0 :gist)
-  1 (0 think 3 chemotherapy 0)
+  1 (0 think 3 med-chemotherapy 0)
+    2 ((What are your feelings about chemotherapy ?) (chemotherapy)) (0 :gist)
+  1 (0 thinking 3 med-chemotherapy)
+    2 ((What are your feelings about chemotherapy ?) (chemotherapy)) (0 :gist)
+  1 (0 wh_ 1 be-aux 3 thoughts 3 med-chemotherapy 0)
     2 ((What are your feelings about chemotherapy ?) (chemotherapy)) (0 :gist)
 ))
 
