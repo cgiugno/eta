@@ -82,6 +82,8 @@
       2 (*medicine-working-input*) (0 :subtrees)
    1 (What are the side effects of stronger pain medication ?)
       2 (*medicine-side-effects-input*) (0 :subtrees)
+   1 (How will I know if my pain medication is working ?)
+      2 (*medicine-working-input*) (0 :subtrees)
    1 (Can I get addicted to narcotics ?)
       2 (*medicine-side-effects-addiction-input*) (0 :subtrees)
    1 (I have a history of alcohol abuse \.)
