@@ -87,6 +87,9 @@
     2 (*have-subdialogue* ((My doctor mentioned something about chemotherapy\, but said that I should wait to see how things go
                             after the radiation is done\. Why? Do you think I need chemotherapy?)
                            ((Do I need chemotherapy ?)))) (0 :schema+args)
+  1 (What are your feelings about chemotherapy ?)
+   2 (*have-subdialogue* ((I\'ve heard it can help sometimes to treat cancers like mine \. But it also makes you very tired\, doesn\'t it ? And it can be painful \.)
+                          ((Do you think chemotherapy will help ?) (What are the side effects of chemotherapy ?)))) (0 :schema+args)
   ; Questions about sleep
   1 (Have you been sleeping okay ?)
     2 (*have-subdialogue* ((I\'ve been having a bit of trouble\. I keep waking up at night\. Most nights I have to take my pain medication
@@ -163,6 +166,11 @@
     2 (*have-subdialogue* ((I haven\'t thought about it\, but it sounds like what I really need\. A way to maintain quality of life
                             during the time I have left\. Can you tell me about it?)
                            ((How does comfort care work ?)))) (0 :schema+args)
+  1 (What are your priorities for your care ?)
+    2 (*have-subdialogue* ((Well\, I never really thought about it too much before\, but I think what I\'d like the most is just to go on with my life as it is now \. Keeping the
+                                   pain under control would be good \. And I\'d like to have enough energy to spend time with my grandson \.)
+                          ((My priority is to remain comfortable \.)))) (0 :schema+args)
+  
   ;Questions about medical history
   1 (What is your history with alcohol ?)
     2 (*have-subdialogue* ((There was a point in my life that I drank fairly often\. But I cut back on my own\, and I don\'t really drink a lot now\.
@@ -186,8 +194,16 @@
                                My mother died from complications with her diabetes\. She was a smoker\, something she passed onto me\.
                                My father\, though\, he died when his prostate cancer went into his bones\. Near the end of his life\, he was in a lot of pain\, which I guess is why I worry about my medications\.)
                            ((My mother died of complications from her diabetes \.) (My father died of prostate cancer\.)))) (0 :schema+args)
-  
-                           
+  ;Questions about telling family
+  1 (Does your family know that you have cancer ?)
+    2 (*have-subdialogue* ((I spoke to my son and daughter when I was first diagnosed \. You know\, at the time\, I was so worried about how they would take it \. I didn\'t want them to 
+                              lose sleep over something that none of us could change \. But I shouldn\'t have been worried \. They\'ve both been right there for me this whole time \. I\'m really quite blessed to have them \. 
+                              Oh \! But\, my grandson doesn\'t know yet though \. He\'s only just started middle school and that can be rough enough already \.)
+                           ((My son knows I have cancer \.) (My daughter knows I have cancer \.) (My grandson does not know I have cancer \.)))) (0 :schema+args)
+  1 (Is there someone you want here for this conversation ?)
+    2 (*have-subdialogue* ((I\'m fine like this for now \. But if it\'s alright with the office\, I would like to come back with my daughter some time and review all the information with her \.)
+                           ((I don\'t want someone here for this conversation \.) (I would like to make another appointment for my daughter and I \.)))) (0 :schema+args)
+                               
   1 (0)
     2 *reaction-to-question-minor* (0 :subtree)
 ))
