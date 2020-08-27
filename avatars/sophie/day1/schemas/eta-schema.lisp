@@ -7,8 +7,8 @@
 
 (defparameter *eta-schema*
 
-'(event-schema :header (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
-;`````````````````````````````````````````````````````````````````````
+'(Event-schema (((set-of me you) have-eta-dialog.v) ** ?e)
+;```````````````````````````````````````````````````````````
 ; An Eta dialogue focused around a patient-doctor interaction: after an introduction, the
 ; doctor may initiate conversation with a question. Otherwise, the patient has a list of
 ; questions on his agenda to ask the doctor (each one may spiral to various sub-dialogues
@@ -40,103 +40,78 @@
 ; "how long do you think I have?"
 ;
 ;
-; 1. Haven't slept well, have to take medication, keep waking up at night.
+; 1. I'm here because I heard you had an update on my condition. What is it?
 ;
-; 2. Just started on new pain medication recently, how long until I know if it's working?
+; 2. What exactly does this diagnosis mean for me?
 ;
-; 3. In a lot of pain, Lortab isn't working. Need something stronger.
+; 3. The pain has gotten stronger and spread to more areas than it was at first. Could I have a different pain medication?
 ;
-; 4. What do test results show, how do I interpret them?
+; 4. What are my treatment options at this point? I've already tried radiation, and my previous doctor mentioned chemotherapy.
 ;
-; 5. What are my choices at this point?
+; 5. What kind of time do you think we're looking at?
 ;
-; 6. What kind of time do you think we're looking at?
+; 6. Is it too early to consider comfort care?
 ;
-; 7. Previous doctor mentioned chemotherapy, mentioned to wait until after radiation. Do you think I need it?
+; 7. What is my next step? If the worst happens, how do I make sure I have my affairs in order?
 ;
-; 8. I prefer to be comfortable at this point. Is hospice an option?
+; 8. How is my life going to change?
 ;
 ; 9. Haven't told family everything yet. What should I say to them?
 ;
 ; 10. Follow up
 ;
 
-:episodes (
+:episodes 
 
-?e1 (^me say-to.v ^you '(Hi\, my name is Sophie\. I am a computer character\. I may sound choppy\, but I am still able to have
+?a1. (Me say-to.v you '(Hi\, my name is Sophie\. I am a computer character\. I may sound choppy\, but I am still able to have
                         a conversation with you\. I just moved back into the area from Florida about two weeks ago\. I was recently
-                        diagnosed with lung cancer\, and finished radiation about a month ago\. My pain seemed to be under
-                        control for a while\, but it seems to be getting worse now\. I\'m meeting with you today to help
-                        get some questions answered about my options and my future\.))
+                        diagnosed with lung cancer\, and finished radiation about a month ago\.))
 
 
-;; 1. (sleep-poorly)
-?e10 (^me say-to.v ^you '(One thing I\'ve noticed in the last few weeks is that I haven\'t been sleeping very well\. Most nights I
-                        have to take medication for my pain\. I\'m not sure if it\'s only the pain\, but I keep waking up at night\.
-                        Do you know why I keep waking up like this?))
-?e11 (^you reply-to.v ?e10)
-?e12 (^me react-to.v ?e11)
-
-
-;; 2. (^medicine-working)
-?e20 (^me say-to.v ^you '(I just started on my new pain medication recently\. How long will it be before I know if it\'s working?))
-?e21 (^you reply-to.v ?e20)
-?e22 (^me react-to.v ?e21)
-
-
-;; 3. (^medicine-request)
-;; NOTE: may be obviated by previous replies.
-?e30 (^me say-to.v ^you '(You know\, I\'m in a lot of pain\, and the Lortab just isn\'t working\. I think maybe I need something
-                     stronger for my pain\.))
-?e31 (^you reply-to.v ?e30)
-?e32 (^me react-to.v ?e31)
-
-
-;; 4. (test-results)
-?e35 (^me say-to.v ^you '(Can you explain to me what my test results mean?))
-?e36 (^you reply-to.v ?e35)
-?e37 (^me react-to.v ?e36)
-
+;; 1. (test-results)
+?a10. (Me say-to.v you '(I\'m meeting with you today because my CT scan results just came back\. And\, to be honest\, I barely know what a CT scan is\. Could you help me understand what my test and test results mean?))
+?a11. (You reply-to.v ?a10.)
+?a12. (Me react-to.v ?a11.)
 
 ;; 5. (prognosis)
 ;; NOTE: may be obviated by previous replies.
-?e40 (^me say-to.v ^you '(I want you to be honest with me\. How long do you think I have?))
-?e41 (^you reply-to.v ?e40)
-?e42 (^me react-to.v ?e41)
+?a20. (Me say-to.v you '(I want you to be honest with me\. With a diagnosis like this\, what do you think are my chances of survival?))
+?a21. (You reply-to.v ?a20.)
+?a22. (Me react-to.v ?a21.)
 
-
-;; 6. (treatment-option)
-?e50 (^me say-to.v ^you '(What are my choices at this point?))
-?e51 (^you reply-to.v ?e50)
-?e52 (^me react-to.v ?e51)
-
-
-;; 7. (chemotherapy)
+;; 5. (diagnosis-terminology)
 ;; NOTE: may be obviated by previous replies.
-?e60 (^me say-to.v ^you '(My previous doctor mentioned something about chemotherapy\, but he said to wait to see how
-       things go after the radiation\. Do you think I need chemotherapy?))
-?e61 (^you reply-to.v ?e60)
-?e62 (^me react-to.v ?e61)
+?a30. (Me say-to.v you '(When I read about cancer\, I see a lot of terms I don\'t understand like metastatic\, stage\, and palliative care\. To be honest\, it makes me feel a little clueless\. Could you explain to me what some of these things mean?))
+?a31. (You reply-to.v ?a30.)
+?a32. (Me react-to.v ?a31.)
 
-
-;; 8. (comfort-care)
+;; 3. (sleep-poorly)
 ;; NOTE: may be obviated by previous replies.
-?e70 (^me say-to.v ^you '(You know\, I really just prefer to be comfortable at this point\. Do you think I should
-                         start considering comfort care?))
-?e71 (^you reply-to.v ?e70)
-?e72 (^me react-to.v ?e71)
+?a35. (Me say-to.v you '(You know\, it might be related to my diagnosis\, but the last few weeks I haven\'t been sleeping very well\. I
+                        try to take my pain medication just before I go to sleep\, but most nights I end up awake anyway\. 
+			Do you know why I keep waking up like this?))
+?a36. (You reply-to.v ?a35.)
+?a37. (Me react-to.v ?a36.)
 
+;; 3. (medicine-request)
+;; NOTE: may be obviated by previous replies.
+?a40. (Me say-to.v you '(Even during the day\, I have a lot of difficulty getting my pain under control\. I\'ve been trying to take my medication regularly\, but it just hasn\'t been working like it\'s supposed to. Do you think I might need something stronger?))
+?a41. (You reply-to.v ?a40.)
+?a42. (Me react-to.v ?a41.)
+
+;; 3. (life-change), switch to after five
+;; NOTE: may be obviated by previous replies.
+?a50. (Me say-to.v you '(Since learning I have cancer\, everything\'s felt so uncertain\. Could you tell me how my life is going to change with this diagnosis?))
+?a51. (You reply-to.v ?a50.)
+?a52. (Me react-to.v ?a51.)
 
 ;; 9. (tell-family)
-?e80 (^me say-to.v ^you '(I haven\'t told my family everything yet\. I wanted to wait to talk to you first\. What should I say to them?))
-?e81 (^you reply-to.v ?e80)
-?e82 (^me react-to.v ?e81)
+?a60. (Me say-to.v you '(I haven\'t told my family everything yet\. I wanted to wait to talk to you first\. What should I say to them?))
+?a61. (You reply-to.v ?a60.)
+?a62. (Me react-to.v ?a61.)
 
 
-?e300 (^me say-to.v ^you '(Thank you for taking the time to meet with me today\. It was difficult to talk about my future\, but comforting to
-                          learn more about my options\. You\'ve given me a lot to think about and to discuss with my family\. Goodbye\.))
-
-)
+?a300. (Me say-to.v you '(Thank you for taking the time to meet with me today\. Learning about my diagnosis was difficult\, but I appreciate your being here to help me through it\. You\'ve given me a lot to think about and to discuss with my family\. Goodbye\.))
 
 )) ; END defparameter *eta-schema*
 
@@ -175,15 +150,13 @@
 (mapcar #'(lambda (x) 
       (store-output-gist-clauses (first x) (second x) '*eta-schema*))
   '(
-    (?e10 ((Why have I not been sleeping well ?)))
-    (?e20 ((How will I know if my pain medication is working ?)))
-    (?e30 ((Can I have a stronger pain medication ?)))
-    (?e35 ((What do my test results mean ?)))
-    (?e40 ((What is my prognosis ?)))
-    (?e50 ((What are my options for treatment ?)))
-    (?e60 ((Do I need chemotherapy ?)))
-    (?e70 ((Should I get comfort care ?)))
-    (?e80 ((What should I tell my family ?)))
+    (?e10. ((What do my test results mean ?)))
+    (?e20. ((What is my prognosis ?)))
+    (?e30. ((What does metastatic mean ?) (What do the stages mean?) (What does palliative care mean?)))
+    (?e35. ((Why have I not been sleeping well ?)))
+    (?e40. ((Can I have a stronger pain medication ?)))
+    (?e50. ((How will my life change ?)))
+    (?e60. ((What should I tell my family ?)))
   )
 ) ; END mapcar #'store-output-gist-clauses
 
@@ -195,14 +168,13 @@
 (mapcar #'(lambda (x) 
       (store-topic-keys (first x) (second x) '*eta-schema*))
   '(
-    (?e10 (sleep-poorly))
-    (?e20 (^medicine-working))
-    (?e30 (^medicine-request))
-    (?e35 (test-results))
-    (?e40 (prognosis))
-    (?e50 (treatment-option))
-    (?e60 (chemotherapy))
-    (?e70 (comfort-care))
-    (?e80 (tell-family))
+    (?e10. (test-results))
+    (?e20. (prognosis))
+    (?e30. (diagnosis-terminology))
+    (?e35. (sleep-poorly))
+    (?e40. (medicine-request))
+    (?e50. (life-change))
+    (?e60. (tell-family))
+
   )
 ) ; END mapcar #'store-topic-keys
