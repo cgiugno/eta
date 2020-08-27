@@ -2,6 +2,7 @@
   '(
     (thought think consider considered look looked)
     (comfort-care-word comfort palliative hospice care)
+    (med-chemotherapy chemotherapy chemo alkylating antitumor antimetabolites antimetabolite)
   ))
 
 
@@ -20,11 +21,9 @@
 
 (READRULES '*comfort-care-input*
 '(
-  1 (0 palliative care 0)
+  1 (0 comfort-care-word 0)
     2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
-  1 (0 hospice 0)
-    2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
-    
+  
   1 (0 POS 0)
     2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
   1 (0 I 1 think-gen so 0)
@@ -33,6 +32,9 @@
     2 ((I do not think you need comfort care \.) (comfort-care)) (0 :gist)
   1 (0 NEG 1 think-gen 0)
     2 ((I do not think you need comfort care \.) (comfort-care)) (0 :gist)
+
+  1 (0 med-chemotherapy 0)
+    2 ((I think you need chemotherapy \.) (chemotherapy)) (0 :gist)
 
   1 (0)
     2 *general-input* (0 :subtree)
