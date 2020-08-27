@@ -65,7 +65,7 @@
 
 ?a1. (Me say-to.v you '(Hi\, my name is Sophie\. I am a computer character\. I may sound choppy\, but I am still able to have
                         a conversation with you\. I just moved back into the area from Florida about two weeks ago\. I was recently
-                        diagnosed with lung cancer\, and finished radiation about a month ago\. However\, I just learned that my cancer has spread to other 				parts of my body\. I\'m meeting with you today to help get some questions answered about my options and my future\.))
+                        diagnosed with lung cancer\, and finished radiation about a month ago\. However\, I just learned that my cancer has spread to other parts of my body\. I\'m meeting with you today to help get some questions answered about my options and my future\.))
 
 
 ;; 1. (explain-diagnosis)
