@@ -31,13 +31,13 @@
     2 ((Maintaining good quality of life is a treatment option \.) (comfort-care)) (0 :gist)
 
   1 (0 wh_ 3 be-aux 3 pron 3 priorities 0) 
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
   1 (0 depend 4 priorities 0)
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
   1 (0 tell 5 priorities 0)
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
   1 (0 let 1 me 1 know 5 priorities 0)
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
 
 
   1 (0)
@@ -51,13 +51,13 @@
 '(
 
   1 (0 wh_ 3 be-aux 3 pron 3 priorities 0) 
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
   1 (0 depend 4 priorities 0)
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
   1 (0 tell 5 priorities 0)
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
   1 (0 let 1 me 1 know 5 priorities 0)
-    2 ((What are your priorities ?) (comfort-care)) (0 :gist)
+    2 ((What are your priorities for your care ?) (comfort-care)) (0 :gist)
 ))
 
 
