@@ -37,7 +37,7 @@
 ; to use iteration in interpreting the user's response until, say,
 ; an end of turn is recorded in context?
 ;
-  (if (and (symbolp x) (get x 'ulf)) `(quote ,(car (remove nil (get x 'ulf)))) nil)
+  (if (and (symbolp x) (get x 'semantics)) `(quote ,(car (remove nil (get x 'semantics)))) nil)
 ) ; END ulf-of.f
 
 
@@ -64,12 +64,18 @@
 
 
 
-(defun concept-name.f (x)
-; ````````````````````````
-; Maps a concept name to an English string.
+(defun concept-noun-phrase.f (x)
+; ````````````````````````````````
+; Maps a concept name to an English noun phrase.
 ;
-  (let ((name (generic-name-to-np (get-generic-name x))))
-    (when (null name)
-      (return-from concept-name.f '(an unnamed concept)))
-    name)
-) ; END concept-name.f
+  (concept-noun-phrase! x)
+) ; END concept-noun-phrase.f
+
+
+
+(defun concept-noun.f (x)
+; ``````````````````````````
+; Maps a concept name to an English noun.
+;
+  (concept-noun! x)
+) ; END concept-noun.f

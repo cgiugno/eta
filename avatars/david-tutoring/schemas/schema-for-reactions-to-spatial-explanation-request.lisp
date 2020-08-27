@@ -8,7 +8,7 @@
 
 (defparameter *reactions-to-spatial-explanation-request*
 
-  ;; '(Event-schema ((^me react-to-spatial-question ?var ?earlier-ques) ** ?e)
+  ;; '(event-schema :header ((^me react-to-spatial-question ?var ?earlier-ques) ** ?e)
   ; ?var would be the name of the (you say-to.v me '...) action
   ; that now has a ULF version of the question attached to it;
   ; the ?earlier-ques would be the previous question asked by the
@@ -16,7 +16,8 @@
   ; especially if it alse has an attached ULF; but maybe this
   ; wouldn't be an explicit argument, but rather attached
   ; somewhere, & reachable by searching backwards...
-  '(Event-schema ((^me react-to-spatial-explanation-request ?ulf ?earlier-ques) ** ?e)
+  '(event-schema :header ((^me react-to-spatial-explanation-request ?ulf ?earlier-ques) ** ?e)
+  ;`````````````````````````````````````````````````````````````````````````````````````````````
   ; NOTE: Currently using ?ulf rather than ?var, since there is no way to provide
   ; an action name as an argument when a schema is selected during pattern transduction
   ; TODO: Add this functionality and then add ?var back to header

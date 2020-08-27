@@ -7,8 +7,8 @@
 
 (defparameter *eta-schema*
 
-'(Event-schema (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
-;```````````````````````````````````````````````````````````
+'(event-schema :header (((set-of ^me ^you) have-eta-dialog.v) ** ?e)
+;`````````````````````````````````````````````````````````````````````
 ; An Eta dialogue focused around a patient-doctor interaction: after an introduction, the
 ; doctor may initiate conversation with a question. Otherwise, the patient has a list of
 ; questions on his agenda to ask the doctor (each one may spiral to various sub-dialogues
