@@ -7,6 +7,9 @@
   (elapsed-time year month elapsed-time-plur)
   (predict tell say know)
   (lose losing)
+  (chances likelihood probability)
+  (low unlikely difficult)
+  (online website internet web site computer)
 ))
 
 
@@ -37,6 +40,12 @@
   1 (0 fight 2 rest 4 life 0)
     2 ((The prognosis is that you cannot be cured \.) (prognosis)) (0 :gist)
   1 (0 lose 1 battle 0)
+    2 ((The prognosis is that you cannot be cured \.) (prognosis)) (0 :gist)
+  1 (0 chances 2 be-aux 5 low 0)
+    2 ((The prognosis is that you cannot be cured \.) (prognosis)) (0 :gist)
+  1 (0 chances 2 be-aux 5 NEG 1 good 0)
+    2 ((The prognosis is that you cannot be cured \.) (prognosis)) (0 :gist)
+  1 (0 chances 2 be-aux 5 NEG 1 high 0)
     2 ((The prognosis is that you cannot be cured \.) (prognosis)) (0 :gist)
 
   ; TODO: fix issue with extracting multiple time gist clauses from this:
@@ -70,6 +79,20 @@
   ; It's hard to predict
   1 (0 hard 2 to 2 predict 0)
     2 ((The prognosis is hard to predict \.) (prognosis)) (0 :gist)
+  1 (0 difficult 2 to 2 predict 0)
+    2 ((The prognosis is hard to predict \.) (prognosis)) (0 :gist)
+  1 (0 hard 2 to 2 know 0)
+    2 ((The prognosis is hard to predict \.) (prognosis)) (0 :gist)
+  1 (0 difficult 2 to 2 know 0)
+    2 ((The prognosis is hard to predict \.) (prognosis)) (0 :gist)
+
+  ; The internet is not a great place to look for information
+  1 (0 not 7 online)
+    2 ((You should not look online for information \.) (prognosis)) (0 :gist)
+  1 (0 bad 7 online)
+    2 ((You should not look online for information \.) (prognosis)) (0 :gist)
+  1 (0 pron 3 not 3 online)
+    2 ((You should not look online for information \.) (prognosis)) (0 :gist)
 
   1 (0)
     2 *general-input* (0 :subtree)
