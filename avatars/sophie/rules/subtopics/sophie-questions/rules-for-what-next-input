@@ -1,0 +1,31 @@
+(MAPC 'ATTACHFEAT
+  '(
+    (death passing dying end)
+  ))
+
+
+(READRULES '*what-next-input*
+'(
+  1 (0 POS 0)
+    2 ((I do not think you need comfort care \.) (comfort-care)) (0 :gist)
+  1 (0 I 1 think-gen so 0)
+    2 ((I do not think you need comfort care \.) (comfort-care)) (0 :gist)
+  1 (0 no 0)
+    2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
+  1 (0 NEG 1 think-gen 0)
+    2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
+))
+
+(READRULES '*what-next-question*
+'(
+))
+
+(READRULES '*what-next-reaction*
+'(
+  1 (I do not think you need comfort care \.)
+    2 (*have-subdialogue* ((Are you sure I don\'t need hospice? At this point I would really just prefer to be comfortable\.)
+                           ((Are you sure that I do not need comfort care ?)))) (100 :schema+args)
+    2 (Okay\, you see\. You will think about starting chemotherapy right away then\.) (0 :out)
+  1 (0)
+    2 (Okay\, hopefully you won\'t need it any time soon\. But you know you\'ve got a lot to think about for what you\'d like at the end of your life\.) (0 :out)
+))
