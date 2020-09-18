@@ -1,31 +1,98 @@
 (MAPC 'ATTACHFEAT
   '(
     (death passing dying end)
+    (must should ought got may)
+    (fill-out-words fill answer look)
+    (recommend think thought thinks recommended recommend suggest urge ask propose)
+    (choice-words decide choose deciding choosing choice decision determine think thinking consider)
+    (resuscitate resuscitation resuscitated brought bring return returned revive revived defibrillate defibrillated)
+    (question-words think decide ask answer contemplate ponder understand reflect)
+    (comfort-care-words comfort comfortable palliative)
+    (after-death-words funeral burial buried rest cremation cremated)
   ))
 
 
 (READRULES '*what-next-input*
 '(
-  1 (0 POS 0)
-    2 ((I do not think you need comfort care \.) (comfort-care)) (0 :gist)
-  1 (0 I 1 think-gen so 0)
-    2 ((I do not think you need comfort care \.) (comfort-care)) (0 :gist)
-  1 (0 no 0)
-    2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
-  1 (0 NEG 1 think-gen 0)
-    2 ((I think you need comfort care \.) (comfort-care)) (0 :gist)
+  ;Designating a healthcare proxy
+  1 (0 pron 2 must 5 proxy 0) 
+    2 ((You should designate a healthcare proxy \.) (end-of-life)) (0 :gist)
+  1 (0 recommend 8 proxy 0)
+     2 ((You should designate a healthcare proxy \.) (end-of-life)) (0 :gist)
+  1 (0 choice-words 5 proxy 0)
+    2 ((You should designate a healthcare proxy \.) (end-of-life)) (0 :gist)
+  
+  ;Designating power of attorney
+  1 (0 pron 2 must 5 power of attorney 0) 
+    2 ((You should designate power of attorney \.) (end-of-life)) (0 :gist)
+  1 (0 recommend 8 power of attorney 0)
+     2 ((You should designate power of attorney \.) (end-of-life)) (0 :gist)
+  1 (0 choice-words 5 power of attorney 0)
+     2 ((You should designate power of attorney \.) (end-of-life)) (0 :gist)
+  
+  ; MOLST form, living will and resuscitation
+  1 (0 pron 2 must 7 MOLST 0) 
+    2 ((You should decide whether you wish to be resuscitated if you stop breathing \.) (end-of-life)) (0 :gist)
+  1 (0 recommend 8 MOLST 0)
+     2 ((You should decide whether you wish to be resuscitated if you stop breathing \.) (end-of-life)) (0 :gist)
+  1 (0 fill-out-words 3 MOLST 0)
+     2 ((You should decide whether you wish to be resuscitated if you stop breathing \.) (end-of-life)) (0 :gist)
+  1 (0 pron 2 must 5 living will 0) 
+    2 ((You should decide whether you wish to be resuscitated if you stop breathing \.) (end-of-life)) (0 :gist)
+  1 (0 recommend 8 living will 0)
+     2 ((You should decide whether you wish to be resuscitated if you stop breathing \.) (end-of-life)) (0 :gist)
+  1 (0 pron 2 must 2 choice-words 12 resuscitate 0)
+     2 ((You should decide whether you wish to be resuscitated if you stop breathing \.) (end-of-life)) (0 :gist)
+  1 (0 pron 2 must 2 question-words 12 resuscitate 0)
+      2 ((You should decide whether you wish to be resuscitate if you stop breathing \.) (end-of-life)) (0 :gist)
+  
+  ;Funeral Arrangments
+  1 (0 pron 2 must 5 choice-words 8 after-death-words 0)
+    2 ((You should consider how you wish your funeral to be held \.) (end-of-life)) (0 :gist)
+   1 (0 pron 2 must 5 choice-words 8 after 3 death 0)
+    2 ((You should consider how you wish your funeral to be held \.) (end-of-life)) (0 :gist)
+  1 (0 recommend 10 after-death-words 0)
+    2 ((You should consider how you wish your funeral to be held \.) (end-of-life)) (0 :gist)
+  1 (0 recommend 10 after 3 death 0)
+    2 ((You should consider how you wish your funeral to be held \.) (end-of-life)) (0 :gist)
+    
 ))
 
 (READRULES '*what-next-question*
 '(
+  ;Healthcare proxy ?
+  1 (0 wh-pron 9 proxy 0) 
+    2 ((Who do you want as your healthcare proxy ?) (end-of-life)) (0 :gist)
+  1 (0 aux 6 proxy 0) 
+    2 ((Do you want a healthcare proxy ?) (end-of-life)) (0 :gist)
+   
+  ;Power of attorney?
+  1 (0 wh-pron 9 power of attorney 0) 
+    2 ((Who do you want as your power of attorney ?) (end-of-life)) (0 :gist)
+  1 (0 aux 6 power of attorney 0) 
+    2 ((Do you want someone to serve as your power of attorney ?) (end-of-life)) (0 :gist)
+  
+  ;Do you want to be resuscitated?
+   1 (0 aux 6 be 2 resuscitate 0) 
+    2 ((Do you want to be resuscitated in the event that you stop breathing ?) (end-of-life)) (0 :gist)
+   1 (0 aux 5 to 1 resuscitate 0) 
+    2 ((Do you want to be resucitated in the event that you stop breathing ?) (end-of-life)) (0 :gist)
 ))
 
 (READRULES '*what-next-reaction*
 '(
-  1 (I do not think you need comfort care \.)
-    2 (*have-subdialogue* ((Are you sure I don\'t need hospice? At this point I would really just prefer to be comfortable\.)
-                           ((Are you sure that I do not need comfort care ?)))) (100 :schema+args)
-    2 (Okay\, you see\. You will think about starting chemotherapy right away then\.) (0 :out)
+  1 (You should designate a healthcare proxy \.)
+    2 (*have-subdialogue* ((Well\, you think that your daughter would probably know best what you want for your medical care \. Is there anything you should discuss with her then ?)
+                           ((I want my daughter to be my healthcare proxy \.) (What should I discuss with my healthcare proxy ?)))) (100 :schema+args)
+    2 (Okay \, that should give you and your daughter a lot to talk about \.) (0 :out)
+  1 (You should designate power of attorney \.)
+    2 (*have-subdialogue* ((Okay \, you think if anything happens \, your daughter could probably act in your stead \. Is there any kind of documents that you need to sign to make it official ?)
+                          ((I want my daughter to have power of attorney \.) (How do I designate power of attorney ?)))) (100 :schema+args)
+    2 (Okay \, my daughter and you will look into giving her power of attorney \. She\'s a lot better than you are with legal things \, and you know the two of us will figure it out \.) (0 :out)
+  1 (You should fill out a MOLST form \.)
+    2 (*have-subdialogue* ((Okay \, you think you\'d be interested in checking out one of those forms \. Where might you be able to find one ?)
+                           ((I would like to fill out a MOLST form \.) (Where do I find a MOLST form ?)))) (100 :schema+args)
+    2 (You\'ll certainly look into filling out a MOLST form \. You defintely want people to know what to do if you aren\'t breathing \.) (0 :out)
   1 (0)
     2 (Okay\, hopefully you won\'t need it any time soon\. But you know you\'ve got a lot to think about for what you\'d like at the end of your life\.) (0 :out)
 ))
