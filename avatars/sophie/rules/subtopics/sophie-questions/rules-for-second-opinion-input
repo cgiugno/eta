@@ -1,0 +1,74 @@
+(MAPC 'ATTACHFEAT
+  '(
+    (second another other)
+    (refer-words refer recommend mention transfer entrust send)
+    (hospital medical clinic)
+    (specialist expert consultant oncologist doctor associate)
+    (know familiar acquainted)
+    (recommend think thought thinks recommended suggest urge ask propose)
+  ))
+
+
+(READRULES '*second-opinion-input*
+'(
+  ;You should get a second opinion
+  1 (0 POS 0)
+    2 ((I think you should get a second opinion \.) (second-opinion)) (0 :gist)
+  1 (0 I 1 think-gen 1 so 0)
+    2 ((I think you should get a second opinion \.) (second-opinion)) (0 :gist)
+  1 (0 I 1 think-gen 1 pron 1 modal 3 second opinion 0)
+    2 ((I think you should get a second opinion \.) (second-opinion)) (0 :gist)
+  1 (0 pron 1 MODAL 4 second opinion 0)
+    2 ((I think you should get a second opinion \.) (second-opinion)) (0 :gist)
+    
+  ;You should not get a second opinion
+  1 (0 no 0)
+    2 ((I think you should not get a second opinion \.) (second-opinion)) (0 :gist)
+  1 (0 NEG 0)
+    2 ((I think you should not get a second opinion \.) (second-opinion)) (0 :gist)
+  1 (0 I 1 think-gen 1 pron 1 modal 3 not 3 second opinion 0)
+    2 ((I think you should not get a second opinion \.) (second-opinion)) (0 :gist)
+  1 (0 pron 1 MODAL 1 not 4 second opinion 0)
+    2 ((I think you should get a second opinion \.) (second-opinion)) (0 :gist)
+ 
+ ;I can refer you to a second opinion
+ 1 (0 refer 1 pron 0)
+    2 ((I can refer you to a second opinion \.) (second-opinion)) (0 :gist)
+ 1 (0 I 1 know 0)
+    2 ((I can refer you to a second opinion \.) (second-opinion)) (0 :gist)
+ 
+ ;I recommend seeing a specialist for a second opinion
+ 1 (0 pron 1 MODAL 4 specialist 0)
+    2 ((I recommend seeing a specialist for a second opinion \.) (second-opinion)) (0 :gist)
+ 1 (0 I 1 recommend 3 pron 1 MODAL 4 specialist 0)
+    2 ((I recommend seeing a specialist for a second opinion \.) (second-opinion)) (0 :gist)
+ 1 (0 I 1 recommend 4 specialist 0)
+    2 ((I recommend seeing a specialist for a second opinion \.) (second-opinion)) (0 :gist)
+ 
+ 1 (0)
+    2 *general-input* (0 :subtree)
+  1 (0)
+    2 ((NIL Gist \: nothing found for second opinion \.)) (0 :gist)
+))
+
+
+(READRULES '*second-opinion-question*
+'(
+  1 (0 why 7 second 0)
+    2 ((Why do you want a second opinion ?) (second-opinion)) (0 :gist)
+))
+
+
+(READRULES '*second-opinion-reaction*
+'(
+  1 (You should get a second opinion \.)
+    2 (*have-subdialogue* ((I do think it would be a good idea\. I know this is big decision and I want to get as much advice as I can \. Where might I find a second opinion ?)
+                           ((I want a second opinion \.) (Where can I find a second opinion ?)))) (0 :schema+args)
+    2 (You know you\'ll certainly have to look into finding a second opinion \. This is a big choice for you \, after all\.) (0 :out)
+  1 (You should not get a second opinion \.)
+    2 (*have-subdialogue* ((Are you sure I shouldn\'t get a second opinion ? Treating this cancer is going to be a big part of the next few years of my life \.)
+                           ((Are you sure that I shouldn\'t get a second opinion ?)))) (0 :schema+args)
+    2 (Okay then\, you\'ll see about looking into treatment options then \.) (0 :out)
+  1 (0)
+    2 (You think for now I\'ll wait to see if the Lortab starts helping more\.) (0 :out)
+))
