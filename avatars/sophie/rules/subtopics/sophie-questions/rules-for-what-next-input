@@ -82,15 +82,15 @@
 (READRULES '*what-next-reaction*
 '(
   1 (You should designate a healthcare proxy \.)
-    2 (*have-subdialogue* ((Well\, you think that your daughter would probably know best what you want for your medical care \. Is there anything you should discuss with her then ?)
+    2 (*have-subdialogue* ((Well\, I think that my daughter would probably know best what I want for your medical care \. Is there anything I should discuss with her then ?)
                            ((I want my daughter to be my healthcare proxy \.) (What should I discuss with my healthcare proxy ?)))) (100 :schema+args)
     2 (Okay \, that should give you and your daughter a lot to talk about \.) (0 :out)
   1 (You should designate power of attorney \.)
-    2 (*have-subdialogue* ((Okay \, you think if anything happens \, your daughter could probably act in your stead \. Is there any kind of documents that you need to sign to make it official ?)
+    2 (*have-subdialogue* ((Okay \, I think if anything happens \, my daughter could probably act in my stead \. Is there any kind of documents that I need to sign to make it official ?)
                           ((I want my daughter to have power of attorney \.) (How do I designate power of attorney ?)))) (100 :schema+args)
     2 (Okay \, my daughter and you will look into giving her power of attorney \. She\'s a lot better than you are with legal things \, and you know the two of us will figure it out \.) (0 :out)
   1 (You should fill out a MOLST form \.)
-    2 (*have-subdialogue* ((Okay \, you think you\'d be interested in checking out one of those forms \. Where might you be able to find one ?)
+    2 (*have-subdialogue* ((Okay \, I think I\'d be interested in checking out one of those forms \. Where might I be able to find one ?)
                            ((I would like to fill out a MOLST form \.) (Where do I find a MOLST form ?)))) (100 :schema+args)
     2 (You\'ll certainly look into filling out a MOLST form \. You defintely want people to know what to do if you aren\'t breathing \.) (0 :out)
   1 (0)
